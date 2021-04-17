@@ -17,29 +17,23 @@ import java.net.URL;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
+import org.eclipse.birt.core.util.CommonUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class FontConfigReader
-{
+public class FontConfigReader {
 
-	public FontMappingConfig parseConfig( URL url ) throws IOException,
-			ParserConfigurationException, SAXException
-	{
-		InputStream input = url.openStream( );
-		try
-		{
-			FontMappingConfig config = new FontMappingConfig( );
-			InputSource source = new InputSource( url.openStream( ) );
-			SAXParser parser = SAXParserFactory.newInstance( ).newSAXParser( );
-			parser.parse( source, new FontConfigHandler( config ) );
+	public FontMappingConfig parseConfig(URL url) throws IOException, ParserConfigurationException, SAXException {
+		InputStream input = url.openStream();
+		try {
+			FontMappingConfig config = new FontMappingConfig();
+			InputSource source = new InputSource(url.openStream());
+			SAXParser parser = CommonUtil.createSAXParser();
+			parser.parse(source, new FontConfigHandler(config));
 			return config;
-		}
-		finally
-		{
-			input.close( );
+		} finally {
+			input.close();
 		}
 	}
 }

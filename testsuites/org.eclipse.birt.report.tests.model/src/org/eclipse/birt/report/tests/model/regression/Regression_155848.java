@@ -11,19 +11,10 @@
 
 package org.eclipse.birt.report.tests.model.regression;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.birt.report.model.api.ComputedColumnHandle;
-import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.DesignFileException;
 import org.eclipse.birt.report.model.api.ElementFactory;
 import org.eclipse.birt.report.model.api.JointDataSetHandle;
-import org.eclipse.birt.report.model.api.ResultSetColumnHandle;
-import org.eclipse.birt.report.model.api.TableHandle;
-import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.command.ExtendsException;
-import org.eclipse.birt.report.model.elements.JointDataSet;
 import org.eclipse.birt.report.tests.model.BaseTestCase;
 
 /**
@@ -49,30 +40,28 @@ public class Regression_155848 extends BaseTestCase
 {
 	private String filename = "Regression_155848.xml"; //$NON-NLS-1$
 
-	public void setUp( ) throws Exception
-	{
-		super.setUp( );
-		removeResource( );
-		copyResource_INPUT( filename , filename );
+	public void setUp() throws Exception {
+		super.setUp();
+		removeResource();
+		copyResource_INPUT(filename, filename);
 	}
-	
-	public void tearDown( )
-	{
-		removeResource( );
+
+	public void tearDown() {
+		removeResource();
 	}
+
 	/**
 	 * @throws DesignFileException
-	 * @throws ExtendsException 
+	 * @throws ExtendsException
 	 */
-	public void test_regression_155848( ) throws DesignFileException, ExtendsException
-	{
+	public void test_regression_155848() throws DesignFileException, ExtendsException {
 		openDesign(filename);
-	    libraryHandle = designHandle.getLibrary( "lib" ); //$NON-NLS-1$
-	    JointDataSetHandle jointds = libraryHandle.findJointDataSet( "jointds" ); //$NON-NLS-1$
-	   
-	    ElementFactory factory = designHandle.getElementFactory( );
-	    JointDataSetHandle dset = (JointDataSetHandle)factory.newElementFrom(jointds, "dset" ); //$NON-NLS-1$
-	 
+		libraryHandle = designHandle.getLibrary("lib"); //$NON-NLS-1$
+		JointDataSetHandle jointds = libraryHandle.findJointDataSet("jointds"); //$NON-NLS-1$
+
+		ElementFactory factory = designHandle.getElementFactory();
+		JointDataSetHandle dset = (JointDataSetHandle) factory.newElementFrom(jointds, "dset"); //$NON-NLS-1$
+
 	}
-	
+
 }

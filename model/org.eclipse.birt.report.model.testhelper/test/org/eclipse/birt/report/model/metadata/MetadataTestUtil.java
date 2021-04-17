@@ -14,15 +14,15 @@ package org.eclipse.birt.report.model.metadata;
 import java.io.InputStream;
 
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+
+import org.eclipse.birt.core.util.CommonUtil;
 
 /**
  * Wrapper class for all core tests to access some members and methods, which
  * are invisible to external projects.
  */
 
-public class MetadataTestUtil
-{
+public class MetadataTestUtil {
 
 	/**
 	 * Sets the name for the element definition.
@@ -31,10 +31,9 @@ public class MetadataTestUtil
 	 * @param name
 	 */
 
-	public static void setName( ObjectDefn defn, String name )
-	{
-		if ( defn != null )
-			defn.setName( name );
+	public static void setName(ObjectDefn defn, String name) {
+		if (defn != null)
+			defn.setName(name);
 	}
 
 	/**
@@ -44,10 +43,9 @@ public class MetadataTestUtil
 	 * @param name
 	 */
 
-	public static void setName( SlotDefn defn, String name )
-	{
-		if ( defn != null )
-			defn.setName( name );
+	public static void setName(SlotDefn defn, String name) {
+		if (defn != null)
+			defn.setName(name);
 	}
 
 	/**
@@ -56,11 +54,9 @@ public class MetadataTestUtil
 	 * @param defn
 	 * @throws MetaDataException
 	 */
-	public static void addElementDefn( MetaDataDictionary dict, ElementDefn defn )
-			throws MetaDataException
-	{
-		if ( dict != null )
-			dict.addElementDefn( defn );
+	public static void addElementDefn(MetaDataDictionary dict, ElementDefn defn) throws MetaDataException {
+		if (dict != null)
+			dict.addElementDefn(defn);
 	}
 
 	/**
@@ -68,11 +64,9 @@ public class MetadataTestUtil
 	 * @param style
 	 * @param name
 	 */
-	public static void setPredefinedStyleName( PredefinedStyle style,
-			String name )
-	{
-		if ( style != null )
-			style.setName( name );
+	public static void setPredefinedStyleName(PredefinedStyle style, String name) {
+		if (style != null)
+			style.setName(name);
 	}
 
 	/**
@@ -81,11 +75,9 @@ public class MetadataTestUtil
 	 * @param key
 	 */
 
-	public static void setPredefinedStyleDisplayNameKey( PredefinedStyle style,
-			String key )
-	{
-		if ( style != null )
-			style.setDisplayNameKey( key );
+	public static void setPredefinedStyleDisplayNameKey(PredefinedStyle style, String key) {
+		if (style != null)
+			style.setDisplayNameKey(key);
 	}
 
 	/**
@@ -94,11 +86,9 @@ public class MetadataTestUtil
 	 * @param style
 	 * @throws MetaDataException
 	 */
-	public static void addPredefinedStyle( MetaDataDictionary dict,
-			PredefinedStyle style ) throws MetaDataException
-	{
-		if ( dict != null )
-			dict.addPredefinedStyle( style );
+	public static void addPredefinedStyle(MetaDataDictionary dict, PredefinedStyle style) throws MetaDataException {
+		if (dict != null)
+			dict.addPredefinedStyle(style);
 	}
 
 	/**
@@ -106,11 +96,9 @@ public class MetadataTestUtil
 	 * @param defn
 	 * @throws MetaDataException
 	 */
-	public static void buildPropertyDefn( PropertyDefn defn )
-			throws MetaDataException
-	{
-		if ( defn != null )
-			defn.build( );
+	public static void buildPropertyDefn(PropertyDefn defn) throws MetaDataException {
+		if (defn != null)
+			defn.build();
 	}
 
 	/**
@@ -119,11 +107,9 @@ public class MetadataTestUtil
 	 * @param choices
 	 * @throws MetaDataException
 	 */
-	public static void addChoiceSet( MetaDataDictionary dict, ChoiceSet choices )
-			throws MetaDataException
-	{
-		if ( dict != null )
-			dict.addChoiceSet( choices );
+	public static void addChoiceSet(MetaDataDictionary dict, ChoiceSet choices) throws MetaDataException {
+		if (dict != null)
+			dict.addChoiceSet(choices);
 	}
 
 	/**
@@ -132,11 +118,9 @@ public class MetadataTestUtil
 	 * @param struct
 	 * @throws MetaDataException
 	 */
-	public static void addStructureDefn( MetaDataDictionary dict,
-			StructureDefn struct ) throws MetaDataException
-	{
-		if ( dict != null )
-			dict.addStructure( struct );
+	public static void addStructureDefn(MetaDataDictionary dict, StructureDefn struct) throws MetaDataException {
+		if (dict != null)
+			dict.addStructure(struct);
 	}
 
 	/**
@@ -144,20 +128,18 @@ public class MetadataTestUtil
 	 * @param defn
 	 * @param isList
 	 */
-	public static void setIsList( PropertyDefn defn, boolean isList )
-	{
-		if ( defn != null )
-			defn.setIsList( isList );
+	public static void setIsList(PropertyDefn defn, boolean isList) {
+		if (defn != null)
+			defn.setIsList(isList);
 	}
 
 	/**
 	 * @param defn
 	 * @param value
 	 */
-	public static void setPropertyDefnDefault( PropertyDefn defn, Object value )
-	{
-		if ( defn != null )
-			defn.setDefault( value );
+	public static void setPropertyDefnDefault(PropertyDefn defn, Object value) {
+		if (defn != null)
+			defn.setDefault(value);
 	}
 
 	/**
@@ -165,11 +147,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param useProperties
 	 */
-	public static void setAllowsUserProperties( ElementDefn element,
-			boolean useProperties )
-	{
-		if ( element != null )
-			element.setAllowsUserProperties( useProperties );
+	public static void setAllowsUserProperties(ElementDefn element, boolean useProperties) {
+		if (element != null)
+			element.setAllowsUserProperties(useProperties);
 	}
 
 	/**
@@ -177,10 +157,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param canExtends
 	 */
-	public static void setCanExtends( ElementDefn element, boolean canExtends )
-	{
-		if ( element != null )
-			element.setCanExtend( canExtends );
+	public static void setCanExtends(ElementDefn element, boolean canExtends) {
+		if (element != null)
+			element.setCanExtend(canExtends);
 	}
 
 	/**
@@ -188,10 +167,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param key
 	 */
-	public static void setDisplayNameKey( ObjectDefn element, String key )
-	{
-		if ( element != null )
-			element.setDisplayNameKey( key );
+	public static void setDisplayNameKey(ObjectDefn element, String key) {
+		if (element != null)
+			element.setDisplayNameKey(key);
 	}
 
 	/**
@@ -199,10 +177,9 @@ public class MetadataTestUtil
 	 * @param slot
 	 * @param key
 	 */
-	public static void setDisplayNameKey( SlotDefn slot, String key )
-	{
-		if ( slot != null )
-			slot.setDisplayNameID( key );
+	public static void setDisplayNameKey(SlotDefn slot, String key) {
+		if (slot != null)
+			slot.setDisplayNameID(key);
 	}
 
 	/**
@@ -210,10 +187,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param base
 	 */
-	public static void setExtends( ElementDefn element, String base )
-	{
-		if ( element != null )
-			element.setExtends( base );
+	public static void setExtends(ElementDefn element, String base) {
+		if (element != null)
+			element.setExtends(base);
 	}
 
 	/**
@@ -221,10 +197,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param hasStyle
 	 */
-	public static void setHasStyle( ElementDefn element, boolean hasStyle )
-	{
-		if ( element != null )
-			element.setHasStyle( hasStyle );
+	public static void setHasStyle(ElementDefn element, boolean hasStyle) {
+		if (element != null)
+			element.setHasStyle(hasStyle);
 	}
 
 	/**
@@ -232,10 +207,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param option
 	 */
-	public static void setNameOption( ElementDefn element, int option )
-	{
-		if ( element != null )
-			element.setNameOption( option );
+	public static void setNameOption(ElementDefn element, int option) {
+		if (element != null)
+			element.setNameOption(option);
 	}
 
 	/**
@@ -243,10 +217,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param id
 	 */
-	public static void setNameSpaceID( ElementDefn element, String id )
-	{
-		if ( element != null )
-			element.setNameSpaceID( id );
+	public static void setNameSpaceID(ElementDefn element, String id) {
+		if (element != null)
+			element.setNameSpaceID(id);
 	}
 
 	/**
@@ -254,10 +227,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param isAbstract
 	 */
-	public static void setAbstract( ElementDefn element, boolean isAbstract )
-	{
-		if ( element != null )
-			element.setAbstract( isAbstract );
+	public static void setAbstract(ElementDefn element, boolean isAbstract) {
+		if (element != null)
+			element.setAbstract(isAbstract);
 	}
 
 	/**
@@ -266,10 +238,9 @@ public class MetadataTestUtil
 	 * @throws MetaDataException
 	 */
 
-	public static void build( ElementDefn element ) throws MetaDataException
-	{
-		if ( element != null )
-			element.build( );
+	public static void build(ElementDefn element) throws MetaDataException {
+		if (element != null)
+			element.build();
 	}
 
 	/**
@@ -277,10 +248,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param propName
 	 */
-	public static void addStyleProp( ElementDefn element, String propName )
-	{
-		if ( element != null )
-			element.addStyleProperty( propName );
+	public static void addStyleProp(ElementDefn element, String propName) {
+		if (element != null)
+			element.addStyleProperty(propName);
 	}
 
 	/**
@@ -288,10 +258,9 @@ public class MetadataTestUtil
 	 * @param slot
 	 * @param flag
 	 */
-	public static void setMultipleCardinality( SlotDefn slot, boolean flag )
-	{
-		if ( slot != null )
-			slot.setMultipleCardinality( flag );
+	public static void setMultipleCardinality(SlotDefn slot, boolean flag) {
+		if (slot != null)
+			slot.setMultipleCardinality(flag);
 	}
 
 	/**
@@ -299,10 +268,9 @@ public class MetadataTestUtil
 	 * @param slot
 	 * @param type
 	 */
-	public static void addType( SlotDefn slot, String type )
-	{
-		if ( slot != null )
-			slot.addType( type );
+	public static void addType(SlotDefn slot, String type) {
+		if (slot != null)
+			slot.addType(type);
 	}
 
 	/**
@@ -310,10 +278,9 @@ public class MetadataTestUtil
 	 * @param element
 	 * @param slot
 	 */
-	public static void addSlot( ElementDefn element, SlotDefn slot )
-	{
-		if ( element != null )
-			element.addSlot( slot );
+	public static void addSlot(ElementDefn element, SlotDefn slot) {
+		if (element != null)
+			element.addSlot(slot);
 	}
 
 	/**
@@ -322,11 +289,9 @@ public class MetadataTestUtil
 	 * @param isStyle
 	 */
 
-	public static void setStyleProperty( SystemPropertyDefn prop,
-			boolean isStyle )
-	{
-		if ( prop != null )
-			prop.setStyleProperty( isStyle );
+	public static void setStyleProperty(SystemPropertyDefn prop, boolean isStyle) {
+		if (prop != null)
+			prop.setStyleProperty(isStyle);
 	}
 
 	/**
@@ -334,19 +299,17 @@ public class MetadataTestUtil
 	 * @param prop
 	 * @param flag
 	 */
-	public static void setIntrinsic( PropertyDefn prop, boolean flag )
-	{
-		if ( prop != null )
-			prop.setIntrinsic( flag );
+	public static void setIntrinsic(PropertyDefn prop, boolean flag) {
+		if (prop != null)
+			prop.setIntrinsic(flag);
 	}
 
 	/**
 	 * 
 	 * @param message
 	 */
-	public static void log( String message )
-	{
-		MetaLogManager.log( message );
+	public static void log(String message) {
+		MetaLogManager.log(message);
 	}
 
 	/**
@@ -354,10 +317,9 @@ public class MetadataTestUtil
 	 * @param slot
 	 * @param id
 	 */
-	public static void setID( SlotDefn slot, int id )
-	{
-		if ( slot != null )
-			slot.setSlotID( id );
+	public static void setID(SlotDefn slot, int id) {
+		if (slot != null)
+			slot.setSlotID(id);
 	}
 
 	/**
@@ -365,10 +327,9 @@ public class MetadataTestUtil
 	 * @param slot
 	 * @throws MetaDataException
 	 */
-	public static void build( SlotDefn slot ) throws MetaDataException
-	{
-		if ( slot != null )
-			slot.build( );
+	public static void build(SlotDefn slot) throws MetaDataException {
+		if (slot != null)
+			slot.build();
 	}
 
 	/**
@@ -377,38 +338,28 @@ public class MetadataTestUtil
 	 * @param prop
 	 * @throws MetaDataException
 	 */
-	public static void addPropertyDefn( ObjectDefn defn, PropertyDefn prop )
-			throws MetaDataException
-	{
-		if ( defn != null )
-			defn.addProperty( prop );
+	public static void addPropertyDefn(ObjectDefn defn, PropertyDefn prop) throws MetaDataException {
+		if (defn != null)
+			defn.addProperty(prop);
 	}
 
 	/**
 	 * Only reads the given metadata with the specified stream.
 	 * 
-	 * @param inputStream
-	 *            meta source file stream.
+	 * @param inputStream meta source file stream.
 	 * @throws MetaDataParserException
 	 */
 
-	public static void readRom( InputStream inputStream )
-			throws MetaDataParserException
-	{
+	public static void readRom(InputStream inputStream) throws MetaDataParserException {
 		InputStream internalStream = inputStream;
-		MetaDataHandlerImpl handler = new MetaDataHandlerImpl( );
+		MetaDataHandlerImpl handler = new MetaDataHandlerImpl();
 
-		try
-		{
-			SAXParserFactory saxParserFactory = SAXParserFactory.newInstance( );
-			SAXParser parser = saxParserFactory.newSAXParser( );
-			parser.parse( internalStream, handler );
-		}
-		catch ( Exception e )
-		{
-			MetaLogManager.log( "Metadata parsing error", e ); //$NON-NLS-1$
-			throw new MetaDataParserException( e,
-					MetaDataParserException.DESIGN_EXCEPTION_PARSER_ERROR );
+		try {
+			SAXParser parser = CommonUtil.createSAXParser();
+			parser.parse(internalStream, handler);
+		} catch (Exception e) {
+			MetaLogManager.log("Metadata parsing error", e); //$NON-NLS-1$
+			throw new MetaDataParserException(e, MetaDataParserException.DESIGN_EXCEPTION_PARSER_ERROR);
 		}
 	}
 }

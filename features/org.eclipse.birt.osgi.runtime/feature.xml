@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.birt.osgi.runtime"
       label="%featureName"
-      version="4.6.0.qualifier"
+      version="4.9.0.qualifier"
       provider-name="%providerName"
       image="eclipse_update_120.jpg">
 
@@ -19,8 +19,8 @@
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.4"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.4"/>
+      <update label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.9"/>
+      <discovery label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.9"/>
    </url>
 
    <requires>
@@ -260,7 +260,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.derby.core"
+         id="org.apache.derby"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -321,13 +321,6 @@
 
    <plugin
          id="org.apache.batik.parser"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.batik.pdf"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -651,6 +644,14 @@
          download-size="0"
          install-size="0"
          version="0.0.0"
+         unpack="false"/>
+         
+   <plugin
+         id="org.w3c.dom.svg.extension"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
          unpack="false"/>
          
 </feature>

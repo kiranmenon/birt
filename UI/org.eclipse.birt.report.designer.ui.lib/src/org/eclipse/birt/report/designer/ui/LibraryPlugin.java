@@ -11,30 +11,20 @@
 
 package org.eclipse.birt.report.designer.ui;
 
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * LibraryPlugin
  */
-public class LibraryPlugin extends AbstractUIPlugin
-{
+public class LibraryPlugin extends AbstractUIPlugin {
 
-	public LibraryPlugin( IPluginDescriptor descriptor )
-	{
-		super( descriptor );
+	public LibraryPlugin() {
+		super();
 	}
 
-	public LibraryPlugin( )
-	{
-		super( );
-	}
-
-	public void start( BundleContext context ) throws Exception
-	{
-		super.start( context );
-		ReportPlugin.getDefault( )
-				.addIgnoreViewID( "org.eclipse.birt.report.designer.ui.editors.LibraryEditor" ); //$NON-NLS-1$
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		ReportPlugin.getDefault().addIgnoreViewID("org.eclipse.birt.report.designer.ui.editors.LibraryEditor"); //$NON-NLS-1$
 	}
 }

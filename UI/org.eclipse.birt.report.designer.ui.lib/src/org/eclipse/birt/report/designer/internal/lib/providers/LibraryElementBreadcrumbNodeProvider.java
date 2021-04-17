@@ -11,31 +11,19 @@
 
 package org.eclipse.birt.report.designer.internal.lib.providers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.eclipse.birt.report.designer.internal.lib.editparts.EmptyEditPart;
 import org.eclipse.birt.report.designer.internal.ui.editors.breadcrumb.providers.DefaultBreadcrumbNodeProvider;
 import org.eclipse.birt.report.model.api.LibraryHandle;
-import org.eclipse.gef.EditPart;
 
 /**
  * 
  */
 
-public class LibraryElementBreadcrumbNodeProvider extends
-		DefaultBreadcrumbNodeProvider
-{
+public class LibraryElementBreadcrumbNodeProvider extends DefaultBreadcrumbNodeProvider {
 
-	public Object[] getChildren( Object element )
-	{
-		if ( getRealModel( element ) instanceof LibraryHandle )
-		{
-			return ( (LibraryHandle) getRealModel( element ) ).getComponents( )
-					.getContents( )
-					.toArray( );
+	public Object[] getChildren(Object element) {
+		if (getRealModel(element) instanceof LibraryHandle) {
+			return ((LibraryHandle) getRealModel(element)).getComponents().getContents().toArray();
 		}
-		return super.getChildren( element );
+		return super.getChildren(element);
 	}
 }

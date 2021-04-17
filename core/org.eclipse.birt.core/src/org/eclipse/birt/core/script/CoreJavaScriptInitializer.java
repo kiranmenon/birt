@@ -14,19 +14,13 @@ package org.eclipse.birt.core.script;
 import org.eclipse.birt.core.script.functionservice.impl.FunctionProvider;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
-public class CoreJavaScriptInitializer implements IJavascriptInitializer
-{
+public class CoreJavaScriptInitializer implements IJavascriptInitializer {
 
-	public void initialize( Context cx, Scriptable scope )
-	{
-		try
-		{
-			FunctionProvider.registerScriptFunction( cx, scope );
-		}	
-		catch ( Exception ex )
-		{
+	public void initialize(Context cx, Scriptable scope) {
+		try {
+			FunctionProvider.registerScriptFunction(cx, scope);
+		} catch (Exception ex) {
 			assert false;
 		}
 	}

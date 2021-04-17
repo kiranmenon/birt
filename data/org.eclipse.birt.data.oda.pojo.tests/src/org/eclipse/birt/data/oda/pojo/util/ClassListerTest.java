@@ -20,31 +20,27 @@ import org.eclipse.birt.data.oda.pojo.input.forclasslister.C1;
 import org.eclipse.birt.data.oda.pojo.util.ClassLister;
 import org.eclipse.core.runtime.FileLocator;
 
-
-
-import junit.framework.TestCase;
-
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * 
  */
 
-public class ClassListerTest extends TestCase
-{
+public class ClassListerTest {
 	@SuppressWarnings("nls")
-	public void testListPublicClasses( ) throws IOException
-	{
-		URL classFolderURL = C1.class.getResource( "." );
-		if ( !classFolderURL.getProtocol( ).equals( "file" ))
-		{
-			classFolderURL = FileLocator.resolve( classFolderURL );
+	@Test
+	public void testListPublicClasses() throws IOException {
+		URL classFolderURL = C1.class.getResource(".");
+		if (!classFolderURL.getProtocol().equals("file")) {
+			classFolderURL = FileLocator.resolve(classFolderURL);
 		}
-		String[] classes = ClassLister.listClasses( new URL[]{classFolderURL} );
-		Set<String> cs = new HashSet<String>( Arrays.asList( classes ) );
-		assertEquals( cs.size( ), 3 );
-		assertTrue( cs.contains( "C1" ));
-		assertTrue( cs.contains( "inner.C1" ));
-		assertTrue( cs.contains( "inner.C1.C2" ));
+		String[] classes = ClassLister.listClasses(new URL[] { classFolderURL });
+		Set<String> cs = new HashSet<String>(Arrays.asList(classes));
+		assertEquals(cs.size(), 3);
+		assertTrue(cs.contains("C1"));
+		assertTrue(cs.contains("inner.C1"));
+		assertTrue(cs.contains("inner.C1.C2"));
 
 	}
 

@@ -17,55 +17,41 @@ import java.util.Date;
 import org.eclipse.birt.data.engine.olap.data.impl.dimension.DimensionKey;
 import org.eclipse.birt.data.engine.olap.data.util.BufferedStructureArray;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * 
  */
 
-public class DimensionKeyTest extends TestCase
-{
+public class DimensionKeyTest {
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
-	protected void setUp( ) throws Exception
-	{
-		super.setUp( );
-	}
-
 	/*
 	 * @see TestCase#tearDown()
 	 */
-	protected void tearDown( ) throws Exception
-	{
-		super.tearDown( );
-	}
-	
-	public void testSaveAndLoad() throws IOException
-	{
+	@Test
+	public void testSaveAndLoad() throws IOException {
 		int keyCount = 10000;
-		BufferedStructureArray bufferedStructureArray = new BufferedStructureArray( DimensionKey.getCreator( ), 2000 );
-		for( int i=0; i<keyCount;i++)
-		{
-			bufferedStructureArray.add( create(i) );
+		BufferedStructureArray bufferedStructureArray = new BufferedStructureArray(DimensionKey.getCreator(), 2000);
+		for (int i = 0; i < keyCount; i++) {
+			bufferedStructureArray.add(create(i));
 		}
-		for( int i=0; i<keyCount;i++)
-		{
-			assertEquals( bufferedStructureArray.get( i ), create(i) );
+		for (int i = 0; i < keyCount; i++) {
+			assertEquals(bufferedStructureArray.get(i), create(i));
 		}
-		bufferedStructureArray.clear( );
-		bufferedStructureArray.close( );
+		bufferedStructureArray.clear();
+		bufferedStructureArray.close();
 	}
-	
-	private DimensionKey create( int i )
-	{
-		DimensionKey key = new DimensionKey( 3 );
-		key.getKeyValues()[0] = new Integer( i ) ;
-		key.getKeyValues()[1] = String.valueOf( i + 1 );
-		key.getKeyValues()[2] = new Date( i + 2 );
+
+	private DimensionKey create(int i) {
+		DimensionKey key = new DimensionKey(3);
+		key.getKeyValues()[0] = new Integer(i);
+		key.getKeyValues()[1] = String.valueOf(i + 1);
+		key.getKeyValues()[2] = new Date(i + 2);
 		return key;
 	}
 }

@@ -11,208 +11,146 @@ import org.eclipse.birt.data.engine.api.timefunction.TimeMember;
 
 import testutil.BaseTestCase;
 
-public class YearToDateFunctionTest extends BaseTestCase
-{
+import org.junit.Test;
 
-	protected void setUp( ) throws Exception
-	{
-		super.setUp( );
-	}
-
+public class YearToDateFunctionTest extends BaseTestCase {
 	/*
 	 * @see TestCase#tearDown()
 	 */
-	protected void tearDown( ) throws Exception
-	{
-		super.tearDown( );
-	}
-
-	private void printResult( List<TimeMember> resultMember )
-			throws IOException
-	{
-		for ( int i = 0; i < resultMember.size( ); i++ )
-		{
-			int[] resultValues = resultMember.get( i ).getMemberValue( );
-			for ( int j = 0; j < resultValues.length; j++ )
-			{
-				testPrint( String.valueOf( resultValues[j]) );
-				testPrint( " " );
+	private void printResult(List<TimeMember> resultMember) throws IOException {
+		for (int i = 0; i < resultMember.size(); i++) {
+			int[] resultValues = resultMember.get(i).getMemberValue();
+			for (int j = 0; j < resultValues.length; j++) {
+				testPrint(String.valueOf(resultValues[j]));
+				testPrint(" ");
 			}
-			testPrint( "\n" );
+			testPrint("\n");
 		}
 	}
 
-	public void testFunctions( ) throws IOException
-	{
-		int[] values = new int[]{
-			2002
-		};
-		String[] levels = new String[]{
-			TimeMember.TIME_LEVEL_TYPE_YEAR,
-		};
-		TimeMember member = new TimeMember( values, levels );
+	@Test
+	public void testFunctions() throws IOException {
+		int[] values = new int[] { 2002 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, };
+		TimeMember member = new TimeMember(values, levels);
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, false )
-				.getResult( member );
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, false).getResult(member);
 
-		printResult( resultMember );
-		this.checkOutputFile( );
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
 
-	public void testFunctions1( ) throws IOException
-	{
-		int[] values = new int[]{
-				2002, 8
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_MONTH
-		};
-		TimeMember member = new TimeMember( values, levels );
+	@Test
+	public void testFunctions1() throws IOException {
+		int[] values = new int[] { 2002, 8 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_MONTH };
+		TimeMember member = new TimeMember(values, levels);
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, false )
-				.getResult( member );
-		printResult( resultMember );
-		this.checkOutputFile( );
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, false).getResult(member);
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
 
-	public void testFunctions2( ) throws IOException
-	{
-		int[] values = new int[]{
-				2002, 3, 9
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_QUARTER,
-				TimeMember.TIME_LEVEL_TYPE_MONTH
-		};
-		TimeMember member = new TimeMember( values, levels );
+	@Test
+	public void testFunctions2() throws IOException {
+		int[] values = new int[] { 2002, 3, 9 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_QUARTER,
+				TimeMember.TIME_LEVEL_TYPE_MONTH };
+		TimeMember member = new TimeMember(values, levels);
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, false )
-				.getResult( member );
-		printResult( resultMember );
-		this.checkOutputFile( );
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, false).getResult(member);
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
 
-	public void testFunctions3( ) throws IOException
-	{
-		int[] values = new int[]{
-				2004, 3, 8, 18
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_QUARTER,
-				TimeMember.TIME_LEVEL_TYPE_MONTH,
-				TimeMember.TIME_LEVEL_TYPE_DAY_OF_MONTH
-		};
-		TimeMember member = new TimeMember( values, levels );
+	@Test
+	public void testFunctions3() throws IOException {
+		int[] values = new int[] { 2004, 3, 8, 18 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_QUARTER,
+				TimeMember.TIME_LEVEL_TYPE_MONTH, TimeMember.TIME_LEVEL_TYPE_DAY_OF_MONTH };
+		TimeMember member = new TimeMember(values, levels);
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, false )
-				.getResult( member );
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, false).getResult(member);
 
-		printResult( resultMember );
-		this.checkOutputFile( );
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
 
-	public void testFunctions4( ) throws IOException
-	{
-		int[] values = new int[]{
-				2004, 3, 8, 4
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_QUARTER,
-				TimeMember.TIME_LEVEL_TYPE_MONTH,
-				TimeMember.TIME_LEVEL_TYPE_WEEK_OF_MONTH
-		};
+	@Test
+	public void testFunctions4() throws IOException {
+		int[] values = new int[] { 2004, 3, 8, 4 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_QUARTER,
+				TimeMember.TIME_LEVEL_TYPE_MONTH, TimeMember.TIME_LEVEL_TYPE_WEEK_OF_MONTH };
 
-		ReferenceDate referenceDate = new ReferenceDate( new Date( 2004, 7, 26 ) );
-		IPeriodsFunction periodsFunction = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR,
-				false );
-		( (AbstractMDX) periodsFunction ).setReferenceDate( referenceDate );
+		ReferenceDate referenceDate = new ReferenceDate(new Date(2004, 7, 26));
+		IPeriodsFunction periodsFunction = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, false);
+		((AbstractMDX) periodsFunction).setReferenceDate(referenceDate);
 
-		TimeMember member = new TimeMember( values, levels );
+		TimeMember member = new TimeMember(values, levels);
 
-		List<TimeMember> resultMember = periodsFunction.getResult( member );
-		printResult( resultMember );
-		this.checkOutputFile( );
+		List<TimeMember> resultMember = periodsFunction.getResult(member);
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
-	
-	public void testFunctions5( ) throws IOException
-	{
-		int[] values = new int[]{
-				2004, 3, 8, 4
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_QUARTER,
-				TimeMember.TIME_LEVEL_TYPE_MONTH,
-				TimeMember.TIME_LEVEL_TYPE_WEEK_OF_MONTH
-		};
 
-		ReferenceDate referenceDate = new ReferenceDate( new Date( 2004, 7, 26 ) );
-		IPeriodsFunction periodsFunction = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR,
-				true );
-		( (AbstractMDX) periodsFunction ).setReferenceDate( referenceDate );
+	@Test
+	public void testFunctions5() throws IOException {
+		int[] values = new int[] { 2004, 3, 8, 4 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_QUARTER,
+				TimeMember.TIME_LEVEL_TYPE_MONTH, TimeMember.TIME_LEVEL_TYPE_WEEK_OF_MONTH };
 
-		TimeMember member = new TimeMember( values, levels );
+		ReferenceDate referenceDate = new ReferenceDate(new Date(2004, 7, 26));
+		IPeriodsFunction periodsFunction = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, true);
+		((AbstractMDX) periodsFunction).setReferenceDate(referenceDate);
 
-		List<TimeMember> resultMember = periodsFunction.getResult( member );
-		printResult( resultMember );
-		this.checkOutputFile( );
+		TimeMember member = new TimeMember(values, levels);
+
+		List<TimeMember> resultMember = periodsFunction.getResult(member);
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
-	
-	public void testFunctions6( ) throws IOException
-	{
-		int[] values = new int[]{
-				2004, 3, 8, 18
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_QUARTER,
-				TimeMember.TIME_LEVEL_TYPE_MONTH,
-				TimeMember.TIME_LEVEL_TYPE_DAY_OF_MONTH
-		};
-		TimeMember member = new TimeMember( values, levels );
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, true )
-				.getResult( member );
+	@Test
+	public void testFunctions6() throws IOException {
+		int[] values = new int[] { 2004, 3, 8, 18 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_QUARTER,
+				TimeMember.TIME_LEVEL_TYPE_MONTH, TimeMember.TIME_LEVEL_TYPE_DAY_OF_MONTH };
+		TimeMember member = new TimeMember(values, levels);
 
-		printResult( resultMember );
-		this.checkOutputFile( );
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, true).getResult(member);
+
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
-	
-	public void testFunctions7( ) throws IOException
-	{
-		int[] values = new int[]{
-				2002, 8
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_MONTH
-		};
-		TimeMember member = new TimeMember( values, levels );
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, true )
-				.getResult( member );
-		printResult( resultMember );
-		this.checkOutputFile( );
+	@Test
+	public void testFunctions7() throws IOException {
+		int[] values = new int[] { 2002, 8 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_MONTH };
+		TimeMember member = new TimeMember(values, levels);
+
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, true).getResult(member);
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
-	
-	public void testFunctions8( ) throws IOException
-	{
-		int[] values = new int[]{
-				2002, 2
-		};
-		String[] levels = new String[]{
-				TimeMember.TIME_LEVEL_TYPE_YEAR,
-				TimeMember.TIME_LEVEL_TYPE_QUARTER
-		};
-		TimeMember member = new TimeMember( values, levels );
 
-		List<TimeMember> resultMember = TimeFunctionFactory.createPeriodsToDateFunction( TimeMember.TIME_LEVEL_TYPE_YEAR, true )
-				.getResult( member );
-		printResult( resultMember );
-		this.checkOutputFile( );
+	@Test
+	public void testFunctions8() throws IOException {
+		int[] values = new int[] { 2002, 2 };
+		String[] levels = new String[] { TimeMember.TIME_LEVEL_TYPE_YEAR, TimeMember.TIME_LEVEL_TYPE_QUARTER };
+		TimeMember member = new TimeMember(values, levels);
+
+		List<TimeMember> resultMember = TimeFunctionFactory
+				.createPeriodsToDateFunction(TimeMember.TIME_LEVEL_TYPE_YEAR, true).getResult(member);
+		printResult(resultMember);
+		this.checkOutputFile();
 	}
 }

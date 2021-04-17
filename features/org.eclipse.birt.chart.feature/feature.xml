@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.birt.chart"
       label="%featureName"
-      version="4.6.0.qualifier"
+      version="4.9.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.birt.chart"
       image="eclipse_update_120.jpg">
@@ -20,8 +20,8 @@
    </license>
 
    <url>
-      <update label="Business Intelligence and Reporting Tools (BIRT) Updates" url="http://download.eclipse.org/birt/update-site/4.4"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.4"/>
+      <update label="Business Intelligence and Reporting Tools (BIRT) Updates" url="http://download.eclipse.org/birt/update-site/4.9"/>
+      <discovery label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.9"/>
    </url>
 
    <requires>
@@ -206,13 +206,6 @@
 
    <plugin
          id="org.w3c.dom.svg"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.batik.pdf"
          download-size="0"
          install-size="0"
          version="0.0.0"

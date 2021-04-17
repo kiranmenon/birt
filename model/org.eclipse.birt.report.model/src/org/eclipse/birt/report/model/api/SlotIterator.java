@@ -7,7 +7,7 @@
 *
 * Contributors:
 *  Actuate Corporation  - initial API and implementation
-*******************************************************************************/ 
+*******************************************************************************/
 
 package org.eclipse.birt.report.model.api;
 
@@ -20,31 +20,24 @@ import org.eclipse.birt.report.model.api.activity.SemanticException;
  * returns a handle of type {@link DesignElementHandle}.
  * 
  */
-
-public class SlotIterator implements Iterator
-{
+public class SlotIterator implements Iterator<DesignElementHandle> {
 
 	/**
 	 * Handle to the slot over which to iterate.
 	 */
-
 	protected final SlotHandle slotHandle;
 
 	/**
 	 * Current iteration position.
 	 */
-
 	protected int posn;
 
 	/**
 	 * Constructs an iterator for the given slot.
 	 * 
-	 * @param handle
-	 *            handle to the slot over which to iterate
+	 * @param handle handle to the slot over which to iterate
 	 */
-
-	public SlotIterator( SlotHandle handle )
-	{
+	public SlotIterator(SlotHandle handle) {
 		slotHandle = handle;
 		posn = 0;
 	}
@@ -52,18 +45,13 @@ public class SlotIterator implements Iterator
 	/**
 	 * Removes the element at the current iterator position.
 	 */
-	// Implementation of iterator.remove( )
-	
-	public void remove( )
-	{
-		if ( !hasNext( ) )
+	@Override
+	public void remove() {
+		if (!hasNext())
 			return;
-		try
-		{
-			slotHandle.dropAndClear( posn );
-		}
-		catch ( SemanticException e )
-		{
+		try {
+			slotHandle.dropAndClear(posn);
+		} catch (SemanticException e) {
 			// Should not fail. But, if it does, ignore
 			// the error.
 
@@ -71,11 +59,9 @@ public class SlotIterator implements Iterator
 		}
 	}
 
-	// Implementation of iterator.hasNext( )
-
-	public boolean hasNext( )
-	{
-		return posn < slotHandle.getCount( );
+	@Override
+	public boolean hasNext() {
+		return posn < slotHandle.getCount();
 	}
 
 	/**
@@ -84,11 +70,9 @@ public class SlotIterator implements Iterator
 	 * 
 	 * @return a handle to the next content element.
 	 */
-	// Implementation of iterator.next( )
-	
-	public Object next( )
-	{
-		return slotHandle.get( posn++ );
+	@Override
+	public DesignElementHandle next() {
+		return slotHandle.get(posn++);
 	}
 
 }

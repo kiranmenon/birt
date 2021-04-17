@@ -13,28 +13,24 @@ package org.eclipse.birt.core.archive;
 
 import java.io.File;
 
-import org.junit.Assert;
 import org.junit.Ignore;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
-import static org.junit.Assert.*;
 
-public class DocArchiveLockManagerTest
-{
+import junit.framework.TestCase;
 
-    static final String LOCK_FILE_NAME = "./utest/lock.lck";
+public class DocArchiveLockManagerTest extends TestCase {
+
+    static final String LOCK_FILE_NAME = "lock.lck";
     static final int THREAD_COUNT = 20;
 
-    @Ignore("ignore multple thread test")
 	@Test
     public void testThread( )
     {
         TestTask task = new TestTask( );
         task.doTest( );
         assertTrue( task.errorThreads == 0 );
+		// FIXME: AF: I'm not sure that we can count on this since the result of
+		// File.delete was not checked in the DocArchiveLockManager
         assertTrue( !new File( LOCK_FILE_NAME ).exists( ) );
     }
 

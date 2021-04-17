@@ -11,20 +11,21 @@
  *******************************************************************************/
 package org.eclipse.birt.core.script.functionservice;
 
+import java.io.Serializable;
+
 import org.eclipse.birt.core.exception.BirtException;
 
 /**
  * Execute the function using given arguments.
  */
 
-public interface IScriptFunctionExecutor
-{
+public interface IScriptFunctionExecutor extends Serializable {
 	/**
 	 * Execute the Script Function with an array of arguments.
 	 * 
 	 * @param arguments
 	 * @return
 	 */
-	public Object execute( Object[] arguments, IScriptFunctionContext context ) throws BirtException;
-	
+	public Object execute(Object[] arguments, IScriptFunctionContext context) throws BirtException;
+
 }

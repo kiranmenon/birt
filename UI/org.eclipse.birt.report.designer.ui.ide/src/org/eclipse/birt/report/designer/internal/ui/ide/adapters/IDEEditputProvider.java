@@ -12,8 +12,6 @@
 package org.eclipse.birt.report.designer.internal.ui.ide.adapters;
 
 import java.io.File;
-import java.net.URL;
-
 import org.eclipse.birt.report.designer.internal.ui.extension.IEditputProvider;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
@@ -31,42 +29,36 @@ import org.eclipse.ui.part.FileEditorInput;
  * 
  */
 
-public class IDEEditputProvider implements IEditputProvider
-{
+public class IDEEditputProvider implements IEditputProvider {
 
-	/* (non-Javadoc)
-	 * @see com.actuate.birt.report.designer.ui.datamart.wizards.IEditputProvider#createEditorInput(java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.actuate.birt.report.designer.ui.datamart.wizards.IEditputProvider#
+	 * createEditorInput(java.lang.Object)
 	 */
-	public IEditorInput createEditorInput( Object file )
-	{
-		if (file instanceof File)
-		{
-			File handle = (File)file;
-			String fileName = handle.getAbsolutePath( );
-			
-			IWorkspace space = ResourcesPlugin.getWorkspace( );
-			IWorkspaceRoot root = space.getRoot( );
-			try
-			{
-				//IFile[] resources = root.findFilesForLocationURI( new URL("file:///" + fileName ).toURI( ) ); //$NON-NLS-1$
-				IFile[] resources = root.findFilesForLocationURI(new File( fileName ).toURI( ) ); //$NON-NLS-1$
-				if (resources != null && resources.length > 0)
-				{
+	public IEditorInput createEditorInput(Object file) {
+		if (file instanceof File) {
+			File handle = (File) file;
+			String fileName = handle.getAbsolutePath();
+
+			IWorkspace space = ResourcesPlugin.getWorkspace();
+			IWorkspaceRoot root = space.getRoot();
+			try {
+				// IFile[] resources = root.findFilesForLocationURI( new URL("file:///" +
+				// fileName ).toURI( ) ); //$NON-NLS-1$
+				IFile[] resources = root.findFilesForLocationURI(new File(fileName).toURI()); // $NON-NLS-1$
+				if (resources != null && resources.length > 0) {
 					IEditorInput input = new FileEditorInput(resources[0]);
 					return input;
-				}
-				else
-				{
-					IFileStore fileStore =  EFS.getLocalFileSystem().getStore(new Path(fileName));
+				} else {
+					IFileStore fileStore = EFS.getLocalFileSystem().getStore(new Path(fileName));
 					IFileInfo fetchInfo = fileStore.fetchInfo();
-					if (!fetchInfo.isDirectory() && fetchInfo.exists())
-					{
+					if (!fetchInfo.isDirectory() && fetchInfo.exists()) {
 						return new FileStoreEditorInput(fileStore);
 					}
 				}
-			}
-			catch(Exception e)
-			{
+			} catch (Exception e) {
 				return null;
 			}
 		}

@@ -12,6 +12,7 @@
 package org.eclipse.birt.report.engine.emitter.config.docx;
 
 import static org.eclipse.birt.report.engine.api.DocxRenderOption.OPTION_EMBED_HTML;
+import static org.eclipse.birt.report.engine.api.DocxRenderOption.OPTION_WORD_VERSION;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.emitter.config.AbstractConfigurableOptionObserver;
@@ -20,6 +21,7 @@ import org.eclipse.birt.report.engine.emitter.config.ConfigurableOption;
 import org.eclipse.birt.report.engine.emitter.config.IConfigurableOption;
 import org.eclipse.birt.report.engine.emitter.config.IConfigurableOptionObserver;
 import org.eclipse.birt.report.engine.emitter.config.IOptionValue;
+import org.eclipse.birt.report.engine.emitter.config.OptionValue;
 import org.eclipse.birt.report.engine.emitter.config.docx.i18n.Messages;
 
 
@@ -30,6 +32,7 @@ public class DocxEmitterDescriptor extends AbstractEmitterDescriptor
 {
 	protected static final String CHART_DPI = "ChartDpi";
 	protected static final String EMBED_HTML = "EmbedHtml";
+	protected static final String WORD_VERSION = "WordVersion";
 
 	protected void initOptions( )
 	{
@@ -50,8 +53,18 @@ public class DocxEmitterDescriptor extends AbstractEmitterDescriptor
 		embedHtml.setDefaultValue( new Boolean(Boolean.TRUE) );
 		embedHtml.setToolTip( getMessage( "Tooltip.EmbedHtml" ) );
 		embedHtml.setDescription( getMessage( "OptionDescription.EmbedHtml" ) ); //$NON-NLS-1$
-		
-		options = new IConfigurableOption[]{chartDpi, embedHtml};
+
+		ConfigurableOption wordVersion = new ConfigurableOption( WORD_VERSION );
+		wordVersion.setDisplayName( getMessage( "OptionDisplayValue.WordVersion" ) ); //$NON-NLS-1$
+		wordVersion.setDataType( IConfigurableOption.DataType.INTEGER );
+		wordVersion.setDisplayType( IConfigurableOption.DisplayType.TEXT );
+		wordVersion.setDefaultValue( new Integer( 2016 ) );
+		IOptionValue[] choices = { new OptionValue(2010), new OptionValue(2016) };
+		wordVersion.setChoices(choices);
+		wordVersion.setToolTip( getMessage( "Tooltip.WordVersion" ) );
+		wordVersion.setDescription( getMessage( "OptionDescription.WordVersion" ) ); //$NON-NLS-1$
+
+		options = new IConfigurableOption[]{chartDpi, embedHtml, wordVersion};
 		applyDefaultValues( );
 	}
 	@Override
@@ -60,9 +73,8 @@ public class DocxEmitterDescriptor extends AbstractEmitterDescriptor
 		return new DocxOptionObserver( );
 	}
 
-	private String getMessage( String key )
-	{
-		return Messages.getString( key, locale );
+	private String getMessage(String key) {
+		return Messages.getString(key, locale);
 	}
 
 	/*
@@ -71,9 +83,8 @@ public class DocxEmitterDescriptor extends AbstractEmitterDescriptor
 	 * @seeorg.eclipse.birt.report.engine.emitter.config.IEmitterDescriptor#
 	 * getDescription()
 	 */
-	public String getDescription( )
-	{
-		return getMessage( "DocxEmitter.Description" ); //$NON-NLS-1$
+	public String getDescription() {
+		return getMessage("DocxEmitter.Description"); //$NON-NLS-1$
 	}
 
 	/*
@@ -82,33 +93,33 @@ public class DocxEmitterDescriptor extends AbstractEmitterDescriptor
 	 * @seeorg.eclipse.birt.report.engine.emitter.config.IEmitterDescriptor#
 	 * getDisplayName()
 	 */
-	public String getDisplayName( )
-	{
-		return getMessage( "DocxEmitter.DisplayName" ); //$NON-NLS-1$
+	public String getDisplayName() {
+		return getMessage("DocxEmitter.DisplayName"); //$NON-NLS-1$
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.birt.report.engine.emitter.config.IEmitterDescriptor#getID()
+	 * @see org.eclipse.birt.report.engine.emitter.config.IEmitterDescriptor#getID()
 	 */
-	public String getID( )
-	{
+	public String getID() {
 		return "org.eclipse.birt.report.engine.emitter.docx"; //$NON-NLS-1$
 	}
-	
-	public String getRenderOptionName( String name )
-	{
+
+	public String getRenderOptionName(String name) {
 		assert name != null;
-		if ( CHART_DPI.equals( name ) )
-		{
+		if (CHART_DPI.equals(name)) {
 			return IRenderOption.CHART_DPI;
 		}
 		
 		if ( EMBED_HTML.equals( name ) )
 		{
 			return OPTION_EMBED_HTML;
+		}
+
+		if ( WORD_VERSION.equals( name ) )
+		{
+			return OPTION_WORD_VERSION;
 		}
 		return name;
 	}
@@ -117,28 +128,21 @@ public class DocxEmitterDescriptor extends AbstractEmitterDescriptor
 	{
 
 		@Override
-		public IConfigurableOption[] getOptions( )
-		{
+		public IConfigurableOption[] getOptions() {
 			return options;
 		}
 
 		@Override
-		public IRenderOption getPreferredRenderOption( )
-		{
-			RenderOption renderOption = new RenderOption( );
+		public IRenderOption getPreferredRenderOption() {
+			RenderOption renderOption = new RenderOption();
 
-			renderOption.setEmitterID( getID( ) );
-			renderOption.setOutputFormat( "docx" ); //$NON-NLS-1$
+			renderOption.setEmitterID(getID());
+			renderOption.setOutputFormat("docx"); //$NON-NLS-1$
 
-			if ( values != null && values.length > 0 )
-			{
-				for ( IOptionValue optionValue : values )
-				{
-					if ( optionValue != null )
-					{
-						renderOption.setOption(
-								getRenderOptionName( optionValue.getName( ) ),
-								optionValue.getValue( ) );
+			if (values != null && values.length > 0) {
+				for (IOptionValue optionValue : values) {
+					if (optionValue != null) {
+						renderOption.setOption(getRenderOptionName(optionValue.getName()), optionValue.getValue());
 					}
 				}
 			}

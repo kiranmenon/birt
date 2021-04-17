@@ -17,69 +17,61 @@ import org.eclipse.birt.data.engine.api.querydefn.ScriptExpression;
 
 import testutil.ConfigText;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 /**
  * 
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * TODO To change the template for this generated type comment go to Window -
+ * Preferences - Java - Code Generation - Code and Comments
  */
-public class ConnectionTest extends APITestCase
-{
-	
+abstract public class ConnectionTest extends APITestCase {
+
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
-	protected void setUp( ) throws Exception
-	{
-		System.setProperty( "DTETest.otherDB", "true" );
-		super.setUp( );
+	@Before
+	public void connectionSetUp() throws Exception {
+		System.setProperty("DTETest.otherDB", "true");
 	}
-	
+
 	/*
-	 *  (non-Javadoc)
+	 * (non-Javadoc)
+	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
-	protected void tearDown( ) throws Exception
-	{
-		super.tearDown( );		
-		System.setProperty( "DTETest.otherDB","false");
+	@After
+	public void connectionTearDown() throws Exception {
+		System.setProperty("DTETest.otherDB", "false");
 	}
-	
+
 	/*
 	 * @see org.eclipse.birt.data.engine.api.APITestCase#getDataSourceInfo()
 	 */
-	protected DataSourceInfo getDataSourceInfo( )
-	{
-		return new DataSourceInfo( ConfigText.getString( "Regre.ConnectTest.TableName" ),
-				null,
-				null );
+	protected DataSourceInfo getDataSourceInfo() {
+		return new DataSourceInfo(ConfigText.getString("Regre.ConnectTest.TableName"), null, null);
 	}
-	
+
 	/*
 	 * An Empyt ReportQueryDefn
 	 */
-	public void testConnection( ) throws Exception
-	{
-		IBaseExpression[] expressions = new IBaseExpression[]{
-				new ScriptExpression( "dataSetRow.CLIENTID", 0 ),
-				new ScriptExpression( "dataSetRow.CITY", 0 ),
-				new ScriptExpression( "dataSetRow.COUNTRY", 0 ),
-				new ScriptExpression( "dataSetRow.EMAIL", 0 )
-		};
-		createAndRunQuery( expressions );
+	@Test
+	public void testConnection() throws Exception {
+		IBaseExpression[] expressions = new IBaseExpression[] { new ScriptExpression("dataSetRow.CLIENTID", 0),
+				new ScriptExpression("dataSetRow.CITY", 0), new ScriptExpression("dataSetRow.COUNTRY", 0),
+				new ScriptExpression("dataSetRow.EMAIL", 0) };
+		createAndRunQuery(expressions);
 	}
-	
-	private void createAndRunQuery( IBaseExpression[] expressions )
-			throws Exception
-	{
-		String[] names = new String[]{
-				"_CLIENTID", "_CITY", "_COUNTRY", "_EMAIL"
-		};
 
-		QueryDefinition queryDefn = newReportQuery( );
-		if ( expressions != null )
-			for ( int i = 0; i < expressions.length; i++ )
-				queryDefn.addResultSetExpression( names[i], expressions[i] );
+	private void createAndRunQuery(IBaseExpression[] expressions) throws Exception {
+		String[] names = new String[] { "_CLIENTID", "_CITY", "_COUNTRY", "_EMAIL" };
 
-		outputQueryResult( executeQuery( queryDefn ), names );
+		QueryDefinition queryDefn = newReportQuery();
+		if (expressions != null)
+			for (int i = 0; i < expressions.length; i++)
+				queryDefn.addResultSetExpression(names[i], expressions[i]);
+
+		outputQueryResult(executeQuery(queryDefn), names);
 	}
 }

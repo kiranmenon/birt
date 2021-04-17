@@ -9,15 +9,7 @@
 
 package org.eclipse.birt.report.tests.model.regression;
 
-import java.io.File;
-import java.io.InputStream;
-
-import org.eclipse.birt.report.model.api.DesignConfig;
-import org.eclipse.birt.report.model.api.DesignEngine;
-import org.eclipse.birt.report.model.api.simpleapi.IReportDesign;
-import org.eclipse.birt.report.model.api.simpleapi.ITable;
 import org.eclipse.birt.report.tests.model.BaseTestCase;
-
 
 /**
  * Regression description:
@@ -28,50 +20,40 @@ import org.eclipse.birt.report.tests.model.BaseTestCase;
  * <p>
  * </p>
  */
-public class Regression_225252 extends BaseTestCase
-{
+public class Regression_225252 extends BaseTestCase {
 	private final static String REPORT = "regression_225252.xml";
 
-	protected void setUp( ) throws Exception
-	{
+	protected void setUp() throws Exception {
 //		super.setUp( );
-		removeResource( );
-		copyInputToFile(INPUT_FOLDER + "/"+ REPORT);
-		copyGoldenToFile(GOLDEN_FOLDER+ "/"+ REPORT);
+		removeResource();
+		copyInputToFile(INPUT_FOLDER + "/" + REPORT);
+		copyGoldenToFile(GOLDEN_FOLDER + "/" + REPORT);
 	}
-	
-	public void tearDown( )
-	{
-		removeResource( );
+
+	public void tearDown() {
+		removeResource();
 	}
-	
 
 	/**
-	 * @throws Exception 
+	 * @throws Exception
 	 * 
 	 */
-	
-	public void test_regression_225252( ) throws Exception
-	{
-		//TODO:fix error
+
+	public void test_regression_225252() throws Exception {
+		// TODO:fix error
 		/*
-		DesignEngine engine=new DesignEngine(new DesignConfig());
-		InputStream is=getResource( INPUT_FOLDER + "/"+ REPORT ).openStream( );
-		IReportDesign report=engine.openDesign(INPUT_FOLDER + "/" +REPORT, is, null );
-		
-		ITable table=report.getTable( "mytable" );
-		try{
-			table.setCurrentView( report.getReportElement( "NewChart" ) );
-		}catch(Exception e){
-			fail();
-		}
-		File f=new File(getTempFolder( )+"/"+OUTPUT_FOLDER );
-		if(!f.exists( )) f.mkdirs( );
-		report.saveAs( getTempFolder( )+"/"+OUTPUT_FOLDER + "/"+ REPORT);
-		is.close( );
-		
-		assertTrue(compareFile( REPORT, REPORT ));
-		*/
-		
+		 * DesignEngine engine=new DesignEngine(new DesignConfig()); InputStream
+		 * is=getResource( INPUT_FOLDER + "/"+ REPORT ).openStream( ); IReportDesign
+		 * report=engine.openDesign(INPUT_FOLDER + "/" +REPORT, is, null );
+		 * 
+		 * ITable table=report.getTable( "mytable" ); try{ table.setCurrentView(
+		 * report.getReportElement( "NewChart" ) ); }catch(Exception e){ fail(); } File
+		 * f=new File(getTempFolder( )+"/"+OUTPUT_FOLDER ); if(!f.exists( )) f.mkdirs(
+		 * ); report.saveAs( getTempFolder( )+"/"+OUTPUT_FOLDER + "/"+ REPORT);
+		 * is.close( );
+		 * 
+		 * assertTrue(compareFile( REPORT, REPORT ));
+		 */
+
 	}
 }

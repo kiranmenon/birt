@@ -16,34 +16,29 @@ import java.io.IOException;
 import org.eclipse.birt.data.engine.olap.data.document.DocumentObjectCache;
 import org.eclipse.birt.data.engine.olap.data.document.IDocumentObject;
 
+import org.junit.After;
+import org.junit.Before;
+
 /**
  * 
  */
 
-public class CachedDocumentObjectManagerTest extends FileDocumentManagerTest
-{
+public class CachedDocumentObjectManagerTest extends FileDocumentManagerTest {
 
 	private DocumentObjectCache cachedManager;
 
-	protected void setUp( ) throws Exception
-	{
-		super.setUp( );
-
-		cachedManager = new DocumentObjectCache( documentManager,
-				generateRandomInt( 1024 ) );
+	@Before
+	public void cachedDocumentObjectManagerSetUp() throws Exception {
+		cachedManager = new DocumentObjectCache(documentManager, generateRandomInt(1024));
 	}
 
-	protected void tearDown( ) throws Exception
-	{
-		cachedManager.closeAll( );
-
-		super.tearDown( );
+	@After
+	public void cachedDocumentObjectManagerTearDown() throws Exception {
+		cachedManager.closeAll();
 	}
 
-	protected IDocumentObject openIDocumentObject( String documentObjectName )
-			throws IOException
-	{
-		return cachedManager.getIDocumentObject( documentObjectName );
+	protected IDocumentObject openIDocumentObject(String documentObjectName) throws IOException {
+		return cachedManager.getIDocumentObject(documentObjectName);
 	}
 
 }

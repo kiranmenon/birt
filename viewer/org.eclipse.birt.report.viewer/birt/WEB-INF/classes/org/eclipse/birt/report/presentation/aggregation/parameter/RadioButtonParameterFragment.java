@@ -12,7 +12,6 @@
 package org.eclipse.birt.report.presentation.aggregation.parameter;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -24,9 +23,7 @@ import org.eclipse.birt.report.context.ViewerAttributeBean;
 import org.eclipse.birt.report.service.api.IViewerReportService;
 import org.eclipse.birt.report.service.api.InputOptions;
 import org.eclipse.birt.report.service.api.ParameterDefinition;
-import org.eclipse.birt.report.service.api.ParameterSelectionChoice;
 import org.eclipse.birt.report.service.api.ReportServiceException;
-import org.eclipse.birt.report.utility.DataUtil;
 import org.eclipse.birt.report.utility.ParameterUtility;
 
 /**
@@ -35,37 +32,30 @@ import org.eclipse.birt.report.utility.ParameterUtility;
  * 
  * @see org.eclipse.birt.report.presentation.aggregation.BaseFragment
  */
-public class RadioButtonParameterFragment extends ScalarParameterFragment
-{
+public class RadioButtonParameterFragment extends ScalarParameterFragment {
 
 	/**
 	 * Protected constructor.
 	 * 
-	 * @param parameter
-	 *            parameter definition reference.
+	 * @param parameter parameter definition reference.
 	 */
-	public RadioButtonParameterFragment( ParameterDefinition parameter )
-	{
-		super( parameter );
+	public RadioButtonParameterFragment(ParameterDefinition parameter) {
+		super(parameter);
 	}
 
-	protected void prepareParameterBean( HttpServletRequest request,
-			IViewerReportService service, ScalarParameterBean parameterBean,
-			Locale locale, TimeZone timeZone ) throws ReportServiceException
-	{
-		ViewerAttributeBean attrBean = (ViewerAttributeBean) request
-				.getAttribute( IBirtConstants.ATTRIBUTE_BEAN );
+	protected void prepareParameterBean(HttpServletRequest request, IViewerReportService service,
+			ScalarParameterBean parameterBean, Locale locale, TimeZone timeZone) throws ReportServiceException {
+		ViewerAttributeBean attrBean = (ViewerAttributeBean) request.getAttribute(IBirtConstants.ATTRIBUTE_BEAN);
 		assert attrBean != null;
 
-		InputOptions options = new InputOptions( );
-		options.setOption( InputOptions.OPT_REQUEST, request );
-		options.setOption( InputOptions.OPT_LOCALE, attrBean.getLocale( ) );
-		options.setOption( InputOptions.OPT_TIMEZONE, attrBean.getTimeZone( ) );
+		InputOptions options = new InputOptions();
+		options.setOption(InputOptions.OPT_REQUEST, request);
+		options.setOption(InputOptions.OPT_LOCALE, attrBean.getLocale());
+		options.setOption(InputOptions.OPT_TIMEZONE, attrBean.getTimeZone());
 
-		Collection selectionList = service.getParameterSelectionList( attrBean
-				.getReportDesignHandle( request ), options, parameterBean
-				.getName( ) );
+		Collection selectionList = service.getParameterSelectionList(attrBean.getReportDesignHandle(request), options,
+				parameterBean.getName());
 
-		ParameterUtility.makeSelectionList( selectionList, parameterBean, locale, timeZone, true );
+		ParameterUtility.makeSelectionList(selectionList, parameterBean, locale, timeZone, true);
 	}
 }

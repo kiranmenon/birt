@@ -85,11 +85,6 @@ public class Regression_160144 extends ChartTestCase {
 	private static String OUTPUT = "Regression_160144.jpg"; //$NON-NLS-1$
 
 	/**
-	 * Comment for <code>serialVersionUID</code>
-	 */
-	private static final long serialVersionUID = 1L;
-
-	/**
 	 * A chart model instance
 	 */
 	private Chart cm = null;
@@ -122,15 +117,12 @@ public class Regression_160144 extends ChartTestCase {
 			ex.printStackTrace();
 		}
 		cm = createScatter();
-		BufferedImage img = new BufferedImage(500, 500,
-				BufferedImage.TYPE_INT_ARGB);
+		BufferedImage img = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = img.getGraphics();
 
 		Graphics2D g2d = (Graphics2D) g;
 		dRenderer.setProperty(IDeviceRenderer.GRAPHICS_CONTEXT, g2d);
-		dRenderer.setProperty(IDeviceRenderer.FILE_IDENTIFIER, this
-				.genOutputFile( OUTPUT )
-				 );
+		dRenderer.setProperty(IDeviceRenderer.FILE_IDENTIFIER, this.genOutputFile(OUTPUT));
 
 		Bounds bo = BoundsImpl.create(0, 0, 500, 500);
 		bo.scale(72d / dRenderer.getDisplayServer().getDpiResolution());
@@ -138,8 +130,7 @@ public class Regression_160144 extends ChartTestCase {
 		Generator gr = Generator.instance();
 
 		try {
-			gcs = gr.build(dRenderer.getDisplayServer(), cm, bo, null, null,
-					null);
+			gcs = gr.build(dRenderer.getDisplayServer(), cm, bo, null, null, null);
 			gr.render(dRenderer, gcs);
 		} catch (ChartException e) {
 			e.printStackTrace();
@@ -148,7 +139,7 @@ public class Regression_160144 extends ChartTestCase {
 
 	public void test_regression_160144() throws Exception {
 		Regression_160144 st = new Regression_160144();
-		assertTrue(st.compareBytes(GOLDEN, OUTPUT));
+		assertTrue(st.compareImages(GOLDEN, OUTPUT));
 	}
 
 	public static final Chart createScatter() {
@@ -157,8 +148,7 @@ public class Regression_160144 extends ChartTestCase {
 		// Plot
 		cwaScatter.getBlock().setBackground(ColorDefinitionImpl.WHITE());
 		cwaScatter.getPlot().getClientArea().getOutline().setVisible(false);
-		cwaScatter.getPlot().getClientArea().setBackground(
-				ColorDefinitionImpl.create(255, 255, 225));
+		cwaScatter.getPlot().getClientArea().setBackground(ColorDefinitionImpl.create(255, 255, 225));
 
 		// Title
 		cwaScatter.getTitle().getLabel().getCaption().setValue("Scatter Chart");//$NON-NLS-1$
@@ -167,41 +157,33 @@ public class Regression_160144 extends ChartTestCase {
 		cwaScatter.getLegend().setVisible(false);
 
 		// X-Axis
-		Axis xAxisPrimary = ((ChartWithAxesImpl) cwaScatter)
-				.getPrimaryBaseAxes()[0];
+		Axis xAxisPrimary = ((ChartWithAxesImpl) cwaScatter).getPrimaryBaseAxes()[0];
 		xAxisPrimary.setType(AxisType.LINEAR_LITERAL);
-		xAxisPrimary.getLabel().getCaption().setColor(
-				ColorDefinitionImpl.GREEN().darker());
+		xAxisPrimary.getLabel().getCaption().setColor(ColorDefinitionImpl.GREEN().darker());
 
 		xAxisPrimary.getMajorGrid().setTickStyle(TickStyle.BELOW_LITERAL);
-		xAxisPrimary.getMajorGrid().getLineAttributes().setStyle(
-				LineStyle.DOTTED_LITERAL);
-		xAxisPrimary.getMajorGrid().getLineAttributes().setColor(
-				ColorDefinitionImpl.GREY());
+		xAxisPrimary.getMajorGrid().getLineAttributes().setStyle(LineStyle.DOTTED_LITERAL);
+		xAxisPrimary.getMajorGrid().getLineAttributes().setColor(ColorDefinitionImpl.GREY());
 		xAxisPrimary.getMajorGrid().getLineAttributes().setVisible(true);
 		xAxisPrimary.getOrigin().setType(IntersectionType.VALUE_LITERAL);
 
 		// Y-Axis
-		Axis yAxisPrimary = ((ChartWithAxesImpl) cwaScatter)
-				.getPrimaryOrthogonalAxis(xAxisPrimary);
-		yAxisPrimary.getLabel().getCaption().setColor(
-				ColorDefinitionImpl.BLUE());
+		Axis yAxisPrimary = ((ChartWithAxesImpl) cwaScatter).getPrimaryOrthogonalAxis(xAxisPrimary);
+		yAxisPrimary.getLabel().getCaption().setColor(ColorDefinitionImpl.BLUE());
 		yAxisPrimary.setType(AxisType.LINEAR_LITERAL);
 
 		yAxisPrimary.getMajorGrid().setTickStyle(TickStyle.LEFT_LITERAL);
-		yAxisPrimary.getMajorGrid().getLineAttributes().setStyle(
-				LineStyle.DOTTED_LITERAL);
-		yAxisPrimary.getMajorGrid().getLineAttributes().setColor(
-				ColorDefinitionImpl.GREY());
+		yAxisPrimary.getMajorGrid().getLineAttributes().setStyle(LineStyle.DOTTED_LITERAL);
+		yAxisPrimary.getMajorGrid().getLineAttributes().setColor(ColorDefinitionImpl.GREY());
 		yAxisPrimary.getMajorGrid().getLineAttributes().setVisible(true);
 
 		yAxisPrimary.getOrigin().setType(IntersectionType.VALUE_LITERAL);
 
 		// Data Set
-		NumberDataSet dsNumericValues1 = NumberDataSetImpl.create(new double[] {
-				25.32, -84.46, 125.95, 38.65, -54.32, -30 });
-		NumberDataSet dsNumericValues2 = NumberDataSetImpl.create(new double[] {
-				352.95, -201.95, 299.95, -95.95, -65.95, 58.95 });
+		NumberDataSet dsNumericValues1 = NumberDataSetImpl
+				.create(new double[] { 25.32, -84.46, 125.95, 38.65, -54.32, -30 });
+		NumberDataSet dsNumericValues2 = NumberDataSetImpl
+				.create(new double[] { 352.95, -201.95, 299.95, -95.95, -65.95, 58.95 });
 
 		// X-Series
 		Series seBase = SeriesImpl.create();
@@ -214,21 +196,16 @@ public class Regression_160144 extends ChartTestCase {
 		// Y-Series
 		ScatterSeries ss = (ScatterSeries) ScatterSeriesImpl.create();
 		for (int i = 0; i < ss.getMarkers().size(); i++) {
-			((Marker) ss.getMarkers().get(i))
-					.setType(MarkerType.CROSSHAIR_LITERAL);
+			((Marker) ss.getMarkers().get(i)).setType(MarkerType.CROSSHAIR_LITERAL);
 		}
 		DataPoint dp = ss.getDataPoint();
 		dp.getComponents().clear();
 		dp.setPrefix("(");//$NON-NLS-1$
 		dp.setSuffix(")");//$NON-NLS-1$
-		dp.getComponents().add(
-				DataPointComponentImpl.create(
-						DataPointComponentType.BASE_VALUE_LITERAL,
-						JavaNumberFormatSpecifierImpl.create("0.00")));//$NON-NLS-1$
-		dp.getComponents().add(
-				DataPointComponentImpl.create(
-						DataPointComponentType.ORTHOGONAL_VALUE_LITERAL,
-						JavaNumberFormatSpecifierImpl.create("0.00")));//$NON-NLS-1$
+		dp.getComponents().add(DataPointComponentImpl.create(DataPointComponentType.BASE_VALUE_LITERAL,
+				JavaNumberFormatSpecifierImpl.create("0.00")));//$NON-NLS-1$
+		dp.getComponents().add(DataPointComponentImpl.create(DataPointComponentType.ORTHOGONAL_VALUE_LITERAL,
+				JavaNumberFormatSpecifierImpl.create("0.00")));//$NON-NLS-1$
 		ss.getLabel().getCaption().setColor(ColorDefinitionImpl.RED());
 		ss.getLabel().setBackground(ColorDefinitionImpl.CYAN());
 		ss.getLabel().setVisible(true);

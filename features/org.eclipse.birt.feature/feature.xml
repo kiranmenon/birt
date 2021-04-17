@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.birt"
       label="%featureName"
-      version="4.6.0.qualifier"
+      version="4.9.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.birt"
       image="eclipse_update_120.jpg">
@@ -20,8 +20,8 @@
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.4"/>
-      <discovery label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.4"/>
+      <update label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.9"/>
+      <discovery label="%updateSiteName" url="http://download.eclipse.org/birt/update-site/4.9"/>
    </url>
 
    <includes
@@ -42,7 +42,7 @@
       <import plugin="org.eclipse.core.expressions" version="3.2.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources" version="3.2.0" match="compatible"/>
       <import feature="org.eclipse.datatools.doc.user" version="1.5.0" match="compatible"/>
-      <import feature="org.eclipse.gef" version="3.2.0" match="greaterOrEqual"/>
+      <import feature="org.eclipse.gef" version="3.10.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jdt.core" version="3.2.0" match="compatible"/>
       <import plugin="org.eclipse.jdt.launching" version="3.2.0" match="compatible"/>
       <import plugin="org.eclipse.jdt.ui" version="3.2.0" match="compatible"/>
@@ -72,19 +72,12 @@
       <import feature="org.eclipse.draw2d" version="3.5.0" match="greaterOrEqual"/>
    </requires>
 
-   <!-- those two plugins are not owned by any feature, so included it into BIRT directly,
-        see https://bugs.eclipse.org/bugs/show_bug.cgi?id=483950
-   -->
-   <plugin id="javax.xml.stream"
-        download-size="0"
-        install-size="0"
-        version="0.0.0"
-        unpack="false"/>
-   <plugin id="org.eclipse.jetty.osgi.boot"
-        download-size="0"
-        install-size="0"
-        version="0.0.0"
-        unpack="false"/>
+   <plugin
+         id="javax.xml.stream"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="org.eclipse.birt"
@@ -188,77 +181,77 @@
          id="org.apache.batik.bridge"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.css"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.dom"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.dom.svg"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.ext.awt"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.parser"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.svggen"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.transcoder"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.util"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.util.gui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.apache.batik.xml"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.9.1.qualifier"
          unpack="false"/>
 
    <plugin
@@ -277,13 +270,6 @@
 
    <plugin
          id="org.w3c.dom.svg"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.batik.pdf"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -608,6 +594,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.apache.felix.scr"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="javax.xml.rpc"
          download-size="0"
          install-size="0"
@@ -674,7 +667,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.apache.derby.core"
+         id="org.apache.derby"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
@@ -857,4 +850,20 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.w3c.dom.svg.extension"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.w3c.dom.events"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

@@ -13,6 +13,7 @@ package org.eclipse.birt.report.model.api;
 
 import java.util.List;
 
+import org.eclipse.birt.core.format.NumberFormatter;
 import org.eclipse.birt.report.model.elements.SimpleMasterPage;
 import org.eclipse.birt.report.model.util.BaseTestCase;
 
@@ -64,8 +65,7 @@ import org.eclipse.birt.report.model.util.BaseTestCase;
  * </table>
  * 
  */
-public class SimpleMasterPageHandleTest extends BaseTestCase
-{
+public class SimpleMasterPageHandleTest extends BaseTestCase {
 
 	private final String INPUT_FILE_NAME = "SimpleMasterPageHandleTest.xml"; //$NON-NLS-1$
 	private final String GOLDEN_FILE_NAME = "SimpleMasterPageHandleTest_golden.xml"; //$NON-NLS-1$
@@ -74,108 +74,86 @@ public class SimpleMasterPageHandleTest extends BaseTestCase
 	SimpleMasterPageHandle mHandle = null;
 	SimpleMasterPage page = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	protected void setUp( ) throws Exception
-	{
-		super.setUp( );
-		openDesign( INPUT_FILE_NAME );
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		openDesign(INPUT_FILE_NAME);
 	}
 
 	/**
 	 * Test all the properties of a simple master page.
 	 * 
-	 * @throws Exception
-	 *             if the test fails.
+	 * @throws Exception if the test fails.
 	 */
-	public void testProperties( ) throws Exception
-	{
-		mHandle = (SimpleMasterPageHandle) designHandle
-				.findMasterPage( "Page1" ); //$NON-NLS-1$
-		assertNotNull( mHandle );
-		assertTrue( mHandle.showHeaderOnFirst( ) );
-		assertFalse( mHandle.showFooterOnLast( ) );
-		assertTrue( mHandle.isFloatingFooter( ) );
+	public void testProperties() throws Exception {
+		mHandle = (SimpleMasterPageHandle) designHandle.findMasterPage("Page1"); //$NON-NLS-1$
+		assertNotNull(mHandle);
+		assertTrue(mHandle.showHeaderOnFirst());
+		assertFalse(mHandle.showFooterOnLast());
+		assertTrue(mHandle.isFloatingFooter());
 
-		mHandle.setShowHeaderOnFirst( false );
-		mHandle.setShowFooterOnLast( true );
-		mHandle.setFloatingFooter( true );
-		assertFalse( mHandle.showHeaderOnFirst( ) );
-		assertTrue( mHandle.showFooterOnLast( ) );
-		assertTrue( mHandle.isFloatingFooter( ) );
-		
-		assertEquals( "0.5in" , mHandle.getHeaderHeight( ).getDisplayValue( ));
-		assertEquals( "in" , mHandle.getHeaderHeight( ).getDefaultUnit( ) );
-		assertEquals( "0.5in" , mHandle.getFooterHeight( ).getDisplayValue( ) );
-		assertEquals( "in" , mHandle.getFooterHeight( ).getDefaultUnit( ) );
+		mHandle.setShowHeaderOnFirst(false);
+		mHandle.setShowFooterOnLast(true);
+		mHandle.setFloatingFooter(true);
+		assertFalse(mHandle.showHeaderOnFirst());
+		assertTrue(mHandle.showFooterOnLast());
+		assertTrue(mHandle.isFloatingFooter());
+
+		String expectedDisplayValue = new NumberFormatter(mHandle.getModule().getLocale()).format(0.5) + "in";
+		assertEquals(expectedDisplayValue, mHandle.getHeaderHeight().getDisplayValue());
+		assertEquals("in", mHandle.getHeaderHeight().getDefaultUnit());
+		assertEquals(expectedDisplayValue, mHandle.getFooterHeight().getDisplayValue());
+		assertEquals("in", mHandle.getFooterHeight().getDefaultUnit());
 	}
 
 	/**
 	 * Test all the page header and footer slot in a simple master page.
 	 * 
-	 * @throws Exception
-	 *             if the test fails.
+	 * @throws Exception if the test fails.
 	 */
-	public void testSlots( ) throws Exception
-	{
-		mHandle = (SimpleMasterPageHandle) designHandle
-				.findMasterPage( "Page1" ); //$NON-NLS-1$
-		SlotHandle slot = mHandle.getPageHeader( );
-		assertEquals( 1, slot.getCount( ) );
-		assertEquals( "text1", slot.get( 0 ).getName( ) ); //$NON-NLS-1$
-		slot = mHandle.getPageFooter( );
-		assertEquals( 1, slot.getCount( ) );
-		assertEquals( "free-form1", slot.get( 0 ).getName( ) ); //$NON-NLS-1$
+	public void testSlots() throws Exception {
+		mHandle = (SimpleMasterPageHandle) designHandle.findMasterPage("Page1"); //$NON-NLS-1$
+		SlotHandle slot = mHandle.getPageHeader();
+		assertEquals(1, slot.getCount());
+		assertEquals("text1", slot.get(0).getName()); //$NON-NLS-1$
+		slot = mHandle.getPageFooter();
+		assertEquals(1, slot.getCount());
+		assertEquals("free-form1", slot.get(0).getName()); //$NON-NLS-1$
 
 	}
 
 	/**
-	 * Parse an input xml file with some error on simple master page to see if
-	 * these semantic errors are reported correctly.
+	 * Parse an input xml file with some error on simple master page to see if these
+	 * semantic errors are reported correctly.
 	 * 
-	 * @throws Exception
-	 *             if test fails.
+	 * @throws Exception if test fails.
 	 */
-	public void testSemanticErrors( ) throws Exception
-	{
-		try
-		{
-			openDesign( ERROR_INPUT_FILE_NAME );
-		}
-		catch ( DesignFileException ex )
-		{
-			List list = ex.getErrorList( );
-			assertEquals( 2, list.size( ) );
-			ErrorDetail e = (ErrorDetail) list.get( 0 );
-			assertEquals(
-					"Error.ContentException.SLOT_IS_FULL", e.getErrorCode( ) ); //$NON-NLS-1$
-			e = (ErrorDetail) list.get( 1 );
-			assertEquals(
-					"Error.ContentException.SLOT_IS_FULL", e.getErrorCode( ) ); //$NON-NLS-1$
+	public void testSemanticErrors() throws Exception {
+		try {
+			openDesign(ERROR_INPUT_FILE_NAME);
+		} catch (DesignFileException ex) {
+			List<ErrorDetail> list = ex.getErrorList();
+			assertEquals(2, list.size());
+			assertEquals("Error.ContentException.SLOT_IS_FULL", list.get(0).getErrorCode()); //$NON-NLS-1$
+			assertEquals("Error.ContentException.SLOT_IS_FULL", list.get(1).getErrorCode()); //$NON-NLS-1$
 		}
 	}
 
 	/**
-	 * Open a design file which contains one or more simple master pages, make
-	 * some modifications, then save it and compare it with another golden file.
+	 * Open a design file which contains one or more simple master pages, make some
+	 * modifications, then save it and compare it with another golden file.
 	 * 
-	 * @throws Exception
-	 *             if test fails.
+	 * @throws Exception if test fails.
 	 */
-	public void testWriterSimpleMasterPage( ) throws Exception
-	{
-		mHandle = (SimpleMasterPageHandle) designHandle
-				.findMasterPage( "Page1" ); //$NON-NLS-1$
-		mHandle.setShowFooterOnLast( true );
-		mHandle.setShowHeaderOnFirst( true );
-		mHandle.setFloatingFooter( false );
+	public void testWriterSimpleMasterPage() throws Exception {
+		mHandle = (SimpleMasterPageHandle) designHandle.findMasterPage("Page1"); //$NON-NLS-1$
+		mHandle.setShowFooterOnLast(true);
+		mHandle.setShowHeaderOnFirst(true);
+		mHandle.setFloatingFooter(false);
 
-		mHandle.getPageFooter( ).drop( 0 );
+		mHandle.getPageFooter().drop(0);
 
-		save( );
-		assertTrue( compareFile( GOLDEN_FILE_NAME ) );
+		save();
+		assertTrue(compareFile(GOLDEN_FILE_NAME));
 	}
 }

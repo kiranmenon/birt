@@ -13,8 +13,6 @@ package org.eclipse.birt.report.item.crosstab.core.re;
 
 import java.util.HashMap;
 
-import junit.framework.TestCase;
-
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.api.EngineConfig;
 import org.eclipse.birt.report.engine.api.EngineException;
@@ -28,17 +26,18 @@ import org.eclipse.birt.report.item.crosstab.core.ICrosstabConstants;
 import org.eclipse.birt.report.model.api.DesignConfig;
 import org.eclipse.birt.report.model.api.DesignEngine;
 import org.eclipse.birt.report.model.api.IDesignEngine;
-import org.eclipse.birt.report.model.api.ReportDesignHandle;
-import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.birt.report.model.i18n.ThreadResources;
+import org.junit.Ignore;
 
 import com.ibm.icu.util.ULocale;
+
+import junit.framework.TestCase;
 
 /**
  * TestPerformance
  */
-public class TestPerformance extends TestCase implements ICrosstabConstants
-{
+@Ignore("performance testing shouldn't be define in utest level")
+public class TestPerformance extends TestCase implements ICrosstabConstants {
 
 	public static final String PDF_FORMAT = HTMLRenderOption.OUTPUT_FORMAT_PDF;
 	public static final String HTML_FORMAT = HTMLRenderOption.OUTPUT_FORMAT_HTML;
@@ -48,77 +47,64 @@ public class TestPerformance extends TestCase implements ICrosstabConstants
 
 	private String format = HTML_FORMAT;
 
-	public void testReport( )
-	{
-		ThreadResources.setLocale( ULocale.ENGLISH );
+	public void testReport() {
+		ThreadResources.setLocale(ULocale.ENGLISH);
 
-		long span = System.currentTimeMillis( );
+		long span = System.currentTimeMillis();
 
-		if ( designEngine == null )
-		{
-			designEngine = new DesignEngine( new DesignConfig( ) );
+		if (designEngine == null) {
+			designEngine = new DesignEngine(new DesignConfig());
 		}
 
-		if ( engine == null )
-		{
-			engine = new ReportEngine( new EngineConfig( ) );
+		if (engine == null) {
+			engine = new ReportEngine(new EngineConfig());
 		}
 
-		System.out.println( "Engine initialization: "
-				+ ( System.currentTimeMillis( ) - span ) );
+		System.out.println("Engine initialization: " + (System.currentTimeMillis() - span));
 
-		span = System.currentTimeMillis( );
+		span = System.currentTimeMillis();
 
 		IReportRunnable report = null;
-		try
-		{
-			report = engine.openReportDesign( "xtab.rptdesign",
-					TestPerformance.class.getResourceAsStream( "input/xtab.rptdesign" ) );
-		}
-		catch ( BirtException e )
-		{
-			e.printStackTrace( );
+		try {
+			report = engine.openReportDesign("xtab.rptdesign",
+					TestPerformance.class.getResourceAsStream("input/xtab.rptdesign"));
+		} catch (BirtException e) {
+			e.printStackTrace();
 			return;
 		}
 
-		System.out.println( "Open design: "
-				+ ( System.currentTimeMillis( ) - span ) );
+		System.out.println("Open design: " + (System.currentTimeMillis() - span));
 
-		span = System.currentTimeMillis( );
+		span = System.currentTimeMillis();
 		// format = PDF_FORMAT;
 
-		IRunAndRenderTask task = engine.createRunAndRenderTask( report );
+		IRunAndRenderTask task = engine.createRunAndRenderTask(report);
 
-		HTMLRenderOption options = new HTMLRenderOption( );
-		options.setOutputFormat( format );
-		options.setOutputFileName( "c:\\test." + format ); //$NON-NLS-1$
-		options.setHtmlPagination( true );
-		options.setImageHandler( new HTMLCompleteImageHandler( ) );
-		options.setImageDirectory( "./images" ); //$NON-NLS-1$
-		task.setRenderOption( options );
+		HTMLRenderOption options = new HTMLRenderOption();
+		options.setOutputFormat(format);
+		options.setOutputFileName("./target/utest." + format); //$NON-NLS-1$
+		options.setHtmlPagination(true);
+		options.setImageHandler(new HTMLCompleteImageHandler());
+		options.setImageDirectory("./target/images"); //$NON-NLS-1$
+		task.setRenderOption(options);
 
-		HashMap params = new HashMap( );
-		task.setParameterValues( params );
-		task.validateParameters( );
+		HashMap params = new HashMap();
+		task.setParameterValues(params);
+		task.validateParameters();
 
-		System.out.println( "Set engine options: "
-				+ ( System.currentTimeMillis( ) - span ) );
+		System.out.println("Set engine options: " + (System.currentTimeMillis() - span));
 
-		span = System.currentTimeMillis( );
-		try
-		{
-			task.run( );
+		span = System.currentTimeMillis();
+		try {
+			task.run();
 
-			System.out.println( "Task finined successfully." ); //$NON-NLS-1$
-		}
-		catch ( EngineException e )
-		{
-			e.printStackTrace( );
+			System.out.println("Task finined successfully."); //$NON-NLS-1$
+		} catch (EngineException e) {
+			e.printStackTrace();
 		}
 
-		System.out.println( "Engine run: "
-				+ ( System.currentTimeMillis( ) - span ) );
+		System.out.println("Engine run: " + (System.currentTimeMillis() - span));
 
-		span = System.currentTimeMillis( );
+		span = System.currentTimeMillis();
 	}
 }

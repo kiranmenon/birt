@@ -3,12 +3,6 @@
 	<name>org.eclipse.birt.chart.viewer</name>
 	<comment></comment>
 	<projects>
-		<project>org.eclipse.birt.chart.engine.extension</project>
-		<project>org.eclipse.birt.chart.device.extension</project>
-		<project>org.eclipse.birt.chart.device.pdf</project>
-		<project>org.eclipse.birt.chart.device.svg</project>
-		<project>org.eclipse.birt.chart.engine</project>
-		<project>org.eclipse.birt.core</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -31,8 +25,14 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.m2e.core.maven2Builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>

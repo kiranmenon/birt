@@ -12,22 +12,20 @@
 package org.eclipse.birt.report.designer.internal.ui.dialogs.expression;
 
 import org.eclipse.birt.report.designer.internal.ui.expressions.IExpressionSupport;
-import org.eclipse.swt.graphics.Image;
 
 /**
  * IExpressionButtonProvider
  */
-public interface IExpressionCellEditorProvider
-{
-	public void setInput( ExpressionCellEditor input );
+public interface IExpressionCellEditorProvider {
+	public void setInput(ExpressionCellEditor input);
 
-	public String[] getExpressionTypes( );
+	public String[] getExpressionTypes();
 
-	public void handleSelectionEvent( String exprType );
-	
+	public void handleSelectionEvent(String exprType);
+
 	public IExpressionSupport getExpressionSupport(String exprType);
 
-	public String getText( String exprType );
+	public String getText(String exprType);
 
-	public String getTooltipText( String exprType );
+	public String getTooltipText(String exprType);
 }

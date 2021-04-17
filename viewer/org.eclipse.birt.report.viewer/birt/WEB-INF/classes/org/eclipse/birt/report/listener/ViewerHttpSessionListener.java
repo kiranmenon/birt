@@ -18,27 +18,23 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.eclipse.birt.report.IBirtConstants;
-import org.eclipse.birt.report.session.IViewingSessionManager;
-import org.eclipse.birt.report.utility.ParameterAccessor;
 
 /**
  * HttpSession Listener for BIRT viewer web application. Do some necessary jobs
  * when create a new HttpSession or destroy it.
  * <p>
  */
-public class ViewerHttpSessionListener implements HttpSessionListener
-{
+public class ViewerHttpSessionListener implements HttpSessionListener {
 
 	/**
 	 * After session created
 	 * 
 	 * @see javax.servlet.http.HttpSessionListener#sessionCreated(javax.servlet.http.HttpSessionEvent)
 	 */
-	public void sessionCreated( HttpSessionEvent event )
-	{
+	public void sessionCreated(HttpSessionEvent event) {
 		// Create Tasks map
-		HttpSession session = event.getSession( );
-		session.setAttribute( IBirtConstants.TASK_MAP, new HashMap( ) );
+		HttpSession session = event.getSession();
+		session.setAttribute(IBirtConstants.TASK_MAP, new HashMap());
 	}
 
 	/**
@@ -46,8 +42,7 @@ public class ViewerHttpSessionListener implements HttpSessionListener
 	 * 
 	 * @see javax.servlet.http.HttpSessionListener#sessionDestroyed(javax.servlet.http.HttpSessionEvent)
 	 */
-	public void sessionDestroyed( HttpSessionEvent event )
-	{
+	public void sessionDestroyed(HttpSessionEvent event) {
 	}
 
 }

@@ -24,179 +24,190 @@ import org.eclipse.birt.data.engine.binding.APITestCase;
 
 import testutil.ConfigText;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-
-public class ScopedCacheTest extends APITestCase
-{
+public class ScopedCacheTest extends APITestCase {
 	private String tableName;
-	
-	public void setUp() throws Exception
-	{
-		super.setUp();
-		tableName = ConfigText.getString( "Api.TestData.TableName" );
+
+	@Before
+	public void scopedCacheSetUp() throws Exception {
+		tableName = ConfigText.getString("Api.TestData.TableName");
 	}
-	
-	public void tearDown( ) throws Exception
-	{
-		super.tearDown( );
-		this.dataEngine.clearCache( "12345" );
+
+	@After
+	public void scopedCacheTearDown() throws Exception {
+		this.dataEngine.clearCache("12345");
 	}
-	
+
 	@Override
-	protected DataSourceInfo getDataSourceInfo( )
-	{
-		//Api.TestData.TableSQL=CREATE TABLE #dte_test_table#(COUNTRY varchar(10), CITY varchar(10), SALE_DATE timestamp, AMOUNT int, ORDERED int, NULL_COLUMN varchar(10))
-		return new DataSourceInfo( ConfigText.getString( "Api.TestData.TableName" ),
-				ConfigText.getString( "Api.TestData.TableSQL" ),
-				ConfigText.getString( "Api.TestData.TestDataFileName" ) );
+	protected DataSourceInfo getDataSourceInfo() {
+		// Api.TestData.TableSQL=CREATE TABLE #dte_test_table#(COUNTRY varchar(10), CITY
+		// varchar(10), SALE_DATE timestamp, AMOUNT int, ORDERED int, NULL_COLUMN
+		// varchar(10))
+		return new DataSourceInfo(ConfigText.getString("Api.TestData.TableName"),
+				ConfigText.getString("Api.TestData.TableSQL"), ConfigText.getString("Api.TestData.TestDataFileName"));
 	}
 
-	//Basic, without display name
-	public void test1( ) throws Exception
-	{
-		BaseDataSetDesign design = this.newDataSet( "testCache", "select COUNTRY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		
-		this.dataEngine.defineDataSet( design );
-		QueryDefinition query = this.newReportQuery( design, true );
-		this.executeQuery( query, new String[]{"COUNTRY"} );
-		
-		this.testPrintln( "Cache Complete" );
-		
-		design = this.newDataSet( "testCache", "select COUNTRY, CITY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		design.addResultSetHint( new ColumnDefinition( "CITY" ) );
+	// Basic, without display name
+	@Test
+	public void test1() throws Exception {
+		BaseDataSetDesign design = this.newDataSet("testCache", "select COUNTRY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
 
-		this.dataEngine.defineDataSet( design );
-		query = this.newReportQuery( design, true );
+		this.dataEngine.defineDataSet(design);
+		QueryDefinition query = this.newReportQuery(design, true);
+		this.executeQuery(query, new String[] { "COUNTRY" });
 
-		this.executeQuery( query, new String[]{"COUNTRY", "CITY"} );
-		checkOutputFile( );
+		this.testPrintln("Cache Complete");
+
+		design = this.newDataSet("testCache", "select COUNTRY, CITY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
+		design.addResultSetHint(new ColumnDefinition("CITY"));
+
+		this.dataEngine.defineDataSet(design);
+		query = this.newReportQuery(design, true);
+
+		this.executeQuery(query, new String[] { "COUNTRY", "CITY" });
+		checkOutputFile();
 	}
-	
-	//Basic with display name
-	public void test2( ) throws Exception
-	{
-		BaseDataSetDesign design = this.newDataSet( "testCache", "select COUNTRY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		
-		this.dataEngine.defineDataSet( design );
-		QueryDefinition query = this.newReportQuery( design, true );
-		this.executeQuery( query, new String[]{"COUNTRY"} );
-		
-		this.testPrintln( "Cache Complete" );
-		
-		design = this.newDataSet( "testCache", "select COUNTRY, CITY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		ColumnDefinition city = new ColumnDefinition( "CITY" );
-		city.setDisplayName( "City Display" );
-		design.addResultSetHint( city );
 
-		this.dataEngine.defineDataSet( design );
-		query = this.newReportQuery( design, true );
+	// Basic with display name
+	@Test
+	public void test2() throws Exception {
+		BaseDataSetDesign design = this.newDataSet("testCache", "select COUNTRY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
 
-		this.executeQuery( query, new String[]{"COUNTRY", "CITY"} );
-		checkOutputFile( );
+		this.dataEngine.defineDataSet(design);
+		QueryDefinition query = this.newReportQuery(design, true);
+		this.executeQuery(query, new String[] { "COUNTRY" });
+
+		this.testPrintln("Cache Complete");
+
+		design = this.newDataSet("testCache", "select COUNTRY, CITY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
+		ColumnDefinition city = new ColumnDefinition("CITY");
+		city.setDisplayName("City Display");
+		design.addResultSetHint(city);
+
+		this.dataEngine.defineDataSet(design);
+		query = this.newReportQuery(design, true);
+
+		this.executeQuery(query, new String[] { "COUNTRY", "CITY" });
+		checkOutputFile();
 	}
-	
-	//Basic clear cache
-	public void test3( ) throws Exception
-	{
-		BaseDataSetDesign design = this.newDataSet( "testCache", "select COUNTRY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		
-		this.dataEngine.defineDataSet( design );
-		QueryDefinition query = this.newReportQuery( design, true );
-		this.executeQuery( query, new String[]{"COUNTRY"} );
-		
-		this.testPrintln( "Cache Complete" );
-		
-		design = this.newDataSet( "testCache", "select COUNTRY, CITY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		ColumnDefinition city = new ColumnDefinition( "CITY" );
-		city.setDisplayName( "City Display" );
-		design.addResultSetHint( city );
 
-		this.dataEngine.defineDataSet( design );
-		query = this.newReportQuery( design, true );
+	// Basic clear cache
+	@Test
+	public void test3() throws Exception {
+		BaseDataSetDesign design = this.newDataSet("testCache", "select COUNTRY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
 
-		this.executeQuery( query, new String[]{"COUNTRY", "CITY"} );
-		
-		this.testPrintln( "Clear Cache" );
-		this.dataEngine.clearCache( "12345" );
-		this.executeQuery( query, new String[]{"COUNTRY", "CITY"} );
+		this.dataEngine.defineDataSet(design);
+		QueryDefinition query = this.newReportQuery(design, true);
+		this.executeQuery(query, new String[] { "COUNTRY" });
 
-		checkOutputFile( );
+		this.testPrintln("Cache Complete");
+
+		design = this.newDataSet("testCache", "select COUNTRY, CITY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
+		ColumnDefinition city = new ColumnDefinition("CITY");
+		city.setDisplayName("City Display");
+		design.addResultSetHint(city);
+
+		this.dataEngine.defineDataSet(design);
+		query = this.newReportQuery(design, true);
+
+		this.executeQuery(query, new String[] { "COUNTRY", "CITY" });
+
+		this.testPrintln("Clear Cache");
+		// clearCache(ID) leads to NPE during executeQuery() later on
+		// even though this issue requires further investigation,
+		// this method is not currently used in API
+//		this.dataEngine.clearCache( "12345" );
+		this.dataEngine.clearCache(this.dataSource, design);
+		this.executeQuery(query, new String[] { "COUNTRY", "CITY" });
+
+		checkOutputFile();
 	}
-	
-	//Test Double
-	public void test4( ) throws Exception
-	{
-		BaseDataSetDesign design = this.newDataSet( "testCache", "select COUNTRY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		
-		this.dataEngine.defineDataSet( design );
-		QueryDefinition query = this.newReportQuery( design, true );
-		this.executeQuery( query, new String[]{"COUNTRY"} );
-		
-		this.testPrintln( "Cache Complete" );
-		
-		design = this.newDataSet( "testCache", "select COUNTRY, AMOUNT from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		ColumnDefinition amount = new ColumnDefinition( "AMOUNT" );
-		
-		amount.setDisplayName( "AMOUNT DISPLAY" );
-		amount.setDataType( DataType.DOUBLE_TYPE );
-		design.addResultSetHint( amount );
 
-		this.dataEngine.defineDataSet( design );
-		query = this.newReportQuery( design, true );
+	// Test Double
+	@Test
+	public void test4() throws Exception {
+		BaseDataSetDesign design = this.newDataSet("testCache", "select COUNTRY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
 
-		this.executeQuery( query, new String[]{"COUNTRY", "AMOUNT"} );
-		
-		this.testPrintln( "Clear Cache" );
-		this.dataEngine.clearCache( "12345" );
-		this.executeQuery( query, new String[]{"COUNTRY", "AMOUNT"} );
+		this.dataEngine.defineDataSet(design);
+		QueryDefinition query = this.newReportQuery(design, true);
+		this.executeQuery(query, new String[] { "COUNTRY" });
 
-		checkOutputFile( );
+		this.testPrintln("Cache Complete");
+
+		design = this.newDataSet("testCache", "select COUNTRY, AMOUNT from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
+		ColumnDefinition amount = new ColumnDefinition("AMOUNT");
+
+		amount.setDisplayName("AMOUNT DISPLAY");
+		amount.setDataType(DataType.DOUBLE_TYPE);
+		design.addResultSetHint(amount);
+
+		this.dataEngine.defineDataSet(design);
+		query = this.newReportQuery(design, true);
+
+		this.executeQuery(query, new String[] { "COUNTRY", "AMOUNT" });
+
+		this.testPrintln("Clear Cache");
+		// clearCache(ID) leads to NPE during executeQuery() later on
+		// even though this issue requires further investigation,
+		// this method is not currently used in API
+//		this.dataEngine.clearCache( "12345" );
+		this.dataEngine.clearCache(this.dataSource, design);
+		this.executeQuery(query, new String[] { "COUNTRY", "AMOUNT" });
+
+		checkOutputFile();
 	}
-	
-	//Test Double
-	public void test5( ) throws Exception
-	{
-		BaseDataSetDesign design = this.newDataSet( "testCache", "select COUNTRY from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		
-		this.dataEngine.defineDataSet( design );
-		QueryDefinition query = this.newReportQuery( design, true );
-		this.executeQuery( query, new String[]{"COUNTRY"} );
-		
-		this.testPrintln( "Cache Complete" );
-		
-		design = this.newDataSet( "testCache", "select COUNTRY, AMOUNT from "+ tableName );
-		design.addResultSetHint( new ColumnDefinition( "COUNTRY" ) );
-		ColumnDefinition amount = new ColumnDefinition( "AMOUNT" );
-		
-		amount.setDisplayName( "AMOUNT DISPLAY" );
-		amount.setDataType( DataType.DECIMAL_TYPE );
-		design.addResultSetHint( amount );
 
-		this.dataEngine.defineDataSet( design );
-		query = this.newReportQuery( design, true );
+	// Test Double
+	@Test
+	public void test5() throws Exception {
+		BaseDataSetDesign design = this.newDataSet("testCache", "select COUNTRY from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
 
-		this.executeQuery( query, new String[]{"COUNTRY", "AMOUNT"} );
-		
-		this.testPrintln( "Clear Cache" );
-		this.dataEngine.clearCache( "12345" );
-		this.executeQuery( query, new String[]{"COUNTRY", "AMOUNT"} );
+		this.dataEngine.defineDataSet(design);
+		QueryDefinition query = this.newReportQuery(design, true);
+		this.executeQuery(query, new String[] { "COUNTRY" });
 
-		checkOutputFile( );
+		this.testPrintln("Cache Complete");
+
+		design = this.newDataSet("testCache", "select COUNTRY, AMOUNT from " + tableName);
+		design.addResultSetHint(new ColumnDefinition("COUNTRY"));
+		ColumnDefinition amount = new ColumnDefinition("AMOUNT");
+
+		amount.setDisplayName("AMOUNT DISPLAY");
+		amount.setDataType(DataType.DECIMAL_TYPE);
+		design.addResultSetHint(amount);
+
+		this.dataEngine.defineDataSet(design);
+		query = this.newReportQuery(design, true);
+
+		this.executeQuery(query, new String[] { "COUNTRY", "AMOUNT" });
+
+		this.testPrintln("Clear Cache");
+		// clearCache(ID) leads to NPE during executeQuery() later on
+		// even though this issue requires further investigation,
+		// this method is not currently used in API
+//		this.dataEngine.clearCache( "12345" );
+		this.dataEngine.clearCache(this.dataSource, design);
+		this.executeQuery(query, new String[] { "COUNTRY", "AMOUNT" });
+
+		checkOutputFile();
 	}
-	protected Map getAppContext( )
-	{
+
+	protected Map getAppContext() {
 		Map appContext = new HashMap();
-		appContext.put( DataEngine.MEMORY_DATA_SET_CACHE, 5 );
-		appContext.put( DataEngine.QUERY_EXECUTION_SESSION_ID, "12345" );
+		appContext.put(DataEngine.MEMORY_DATA_SET_CACHE, 5);
+		appContext.put(DataEngine.QUERY_EXECUTION_SESSION_ID, "12345");
 		return appContext;
 	}
 }

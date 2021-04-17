@@ -11,12 +11,8 @@
 
 package org.eclipse.birt.report.model.api;
 
-
-import org.eclipse.birt.report.model.api.elements.IReportItemMethodContext;
 import org.eclipse.birt.report.model.core.DesignElement;
 import org.eclipse.birt.report.model.core.Module;
-import org.eclipse.birt.report.model.elements.interfaces.IReportItemModel;
-import org.eclipse.birt.report.model.elements.interfaces.IStyledElementModel;
 
 /**
  * Represents a report item: any element that can appear within a section of the
@@ -32,24 +28,19 @@ import org.eclipse.birt.report.model.elements.interfaces.IStyledElementModel;
  * @see org.eclipse.birt.report.model.elements.ReportItem
  */
 
-public abstract class ReportItemHandle extends ReportItemHandleImpl
-{
+public abstract class ReportItemHandle extends ReportItemHandleImpl {
 
 	/**
-	 * Constructs the handle for a report item with the given design and
-	 * element. The application generally does not create handles directly.
-	 * Instead, it uses one of the navigation methods available on other element
-	 * handles.
+	 * Constructs the handle for a report item with the given design and element.
+	 * The application generally does not create handles directly. Instead, it uses
+	 * one of the navigation methods available on other element handles.
 	 * 
-	 * @param module
-	 *            the module
-	 * @param element
-	 *            the model representation of the element
+	 * @param module  the module
+	 * @param element the model representation of the element
 	 */
 
-	public ReportItemHandle( Module module, DesignElement element )
-	{
-		super( module, element );
+	public ReportItemHandle(Module module, DesignElement element) {
+		super(module, element);
 	}
 
 	/**
@@ -69,8 +60,7 @@ public abstract class ReportItemHandle extends ReportItemHandleImpl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.eclipse.birt.report.model.api.ModuleHandle#setTheme(org.eclipse.birt
+	 * @see org.eclipse.birt.report.model.api.ModuleHandle#setTheme(org.eclipse.birt
 	 * .report.model.api.ThemeHandle)
 	 */
 }

@@ -4,13 +4,12 @@
 	<parent>
 		<groupId>org.eclipse.birt.build.package</groupId>
 		<artifactId>org.eclipse.birt.build.package-parent</artifactId>
-		<version>4.6.0-SNAPSHOT</version>
+		<version>4.9.0-SNAPSHOT</version>
 		<relativePath>../..</relativePath>
 	</parent>
 
 	<groupId>org.eclipse.birt.birt-packages.birt-charts</groupId>
 	<artifactId>ChartSDK</artifactId>
-	<version>4.6.0-SNAPSHOT</version>
 	<packaging>eclipse-repository</packaging>
 
 	<!-- http://codeandme.blogspot.com/2012/12/tycho-build-5-building-p2-update-sites.html -->
@@ -31,28 +30,28 @@
 					<includeAllDependencies>false</includeAllDependencies>
 				</configuration>
 			</plugin>
-            
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>${antrun.version}</version>
-                <executions>
-                    <execution>
-                        <id>re-package</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <tasks>
-                                <copy todir="target/eclipse">
-                                    <fileset dir="target/repository" includes="*/*" />
-                                    <fileset dir="../../../org.eclipse.birt.releng.birtbuilder/extras/root/rootfiles" includes="*.html" />
-                                </copy>
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution> 
-                </executions>
-            </plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>${antrun.version}</version>
+				<executions>
+					<execution>
+						<id>re-package</id>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy todir="target/eclipse">
+									<fileset dir="target/repository" includes="*/*" />
+									<fileset dir="../../../org.eclipse.birt.releng.birtbuilder/extras/root/rootfiles" includes="*.html" />
+								</copy>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

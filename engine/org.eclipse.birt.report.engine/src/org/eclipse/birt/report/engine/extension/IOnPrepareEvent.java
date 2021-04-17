@@ -11,9 +11,6 @@
 
 package org.eclipse.birt.report.engine.extension;
 
-import org.eclipse.birt.report.model.api.DesignElementHandle;
-
-public interface IOnPrepareEvent extends IReportEvent
-{
+public interface IOnPrepareEvent extends IReportEvent {
 
 }

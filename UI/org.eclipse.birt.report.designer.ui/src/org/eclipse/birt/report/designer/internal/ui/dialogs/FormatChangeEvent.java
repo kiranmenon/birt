@@ -13,14 +13,15 @@ package org.eclipse.birt.report.designer.internal.ui.dialogs;
 
 import java.util.EventObject;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
 
 /**
  * An event object describing a change to a format property.
  */
 
-public class FormatChangeEvent extends EventObject
-{
+public class FormatChangeEvent extends EventObject {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * The name of the changed format.
@@ -42,28 +43,22 @@ public class FormatChangeEvent extends EventObject
 	/**
 	 * Creates a new format change event.
 	 * 
-	 * @param source
-	 *            the object whose format has changed
-	 * @param name
-	 *            the format that has changed (must not be <code>null</code>)
-	 * @param newCategory
-	 *            the new category of the format
-	 * @param newPattern
-	 *            the new pattern of the format
+	 * @param source      the object whose format has changed
+	 * @param name        the format that has changed (must not be
+	 *                    <code>null</code>)
+	 * @param newCategory the new category of the format
+	 * @param newPattern  the new pattern of the format
 	 */
-	public FormatChangeEvent( Object source, String name, String newCategory,
-			String newPattern, String newLocale )
-	{
-		super( source );
-		Assert.isNotNull( name );
+	public FormatChangeEvent(Object source, String name, String newCategory, String newPattern, String newLocale) {
+		super(source);
+		Assert.isNotNull(name);
 		this.formatName = name;
 		this.category = newCategory;
 		this.pattern = newPattern;
 		this.locale = newLocale;
 	}
 
-	public String getLocale( )
-	{
+	public String getLocale() {
 		return locale;
 	}
 
@@ -72,8 +67,7 @@ public class FormatChangeEvent extends EventObject
 	 * 
 	 * @return Returns the formatName.
 	 */
-	public String getName( )
-	{
+	public String getName() {
 		return formatName;
 	}
 
@@ -82,8 +76,7 @@ public class FormatChangeEvent extends EventObject
 	 * 
 	 * @return Returns the category.
 	 */
-	public String getCategory( )
-	{
+	public String getCategory() {
 		return category;
 	}
 
@@ -92,8 +85,7 @@ public class FormatChangeEvent extends EventObject
 	 * 
 	 * @return Returns the pattern.
 	 */
-	public String getPattern( )
-	{
+	public String getPattern() {
 		return pattern;
 	}
 }

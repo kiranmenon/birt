@@ -15,15 +15,9 @@ import java.util.List;
 import org.eclipse.birt.report.model.activity.ActivityStack;
 import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.IncludedCssStyleSheetHandle;
-import org.eclipse.birt.report.model.api.LabelHandle;
-import org.eclipse.birt.report.model.api.SharedStyleHandle;
-import org.eclipse.birt.report.model.api.activity.IActivityRecord;
 import org.eclipse.birt.report.model.api.activity.NotificationEvent;
-import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.core.Listener;
-import org.eclipse.birt.report.model.api.css.CssStyleSheetHandle;
 import org.eclipse.birt.report.tests.model.BaseTestCase;
-import org.eclipse.birt.report.tests.model.api.ExternalCssStyleSheet1Test;
 
 /**
  * Regression description:
@@ -37,80 +31,74 @@ import org.eclipse.birt.report.tests.model.api.ExternalCssStyleSheet1Test;
  * Check undo renameCss will return detail events.
  * </p>
  */
-public class Regression_241931 extends BaseTestCase
-{
+public class Regression_241931 extends BaseTestCase {
 
 	private final static String REPORT = "regression_241931.xml";
 	private final static String CSS1 = "regression_241931_1.css";
 	private final static String CSS2 = "regression_241931_2.css";
-	
-	protected void setUp( ) throws Exception
-	{
-		super.setUp( );
-		removeResource( );
-		
-		copyInputToFile ( INPUT_FOLDER + "/" + REPORT );
-		copyInputToFile ( INPUT_FOLDER + "/" + CSS1 );
-		copyInputToFile(INPUT_FOLDER+ "/" + CSS2);
+
+	protected void setUp() throws Exception {
+		super.setUp();
+		removeResource();
+
+		copyInputToFile(INPUT_FOLDER + "/" + REPORT);
+		copyInputToFile(INPUT_FOLDER + "/" + CSS1);
+		copyInputToFile(INPUT_FOLDER + "/" + CSS2);
 	}
+
 	/**
-	 * @throws Exception 
+	 * @throws Exception
 	 * 
 	 */
-	public void test_regression_241931( ) throws Exception
-	{
-		openDesign( REPORT );
-		ActivityStack actStack=(ActivityStack)designHandle.getCommandStack();
-		IncludedCssStyleSheetHandle cssHandle=designHandle.findIncludedCssStyleSheetHandleByFileName(CSS1);
+	public void test_regression_241931() throws Exception {
+		openDesign(REPORT);
+		ActivityStack actStack = (ActivityStack) designHandle.getCommandStack();
+		IncludedCssStyleSheetHandle cssHandle = designHandle.findIncludedCssStyleSheetHandleByFileName(CSS1);
 
-		CssListener listener1=new CssListener();
+		CssListener listener1 = new CssListener();
 		designHandle.addListener(listener1);
-		
+
 		designHandle.renameCss(cssHandle, CSS2);
-		List notification1=listener1.getNotifications();
-		int count=notification1.size();
+		List notification1 = listener1.getNotifications();
+		int count = notification1.size();
 		listener1.restart();
 
 		actStack.undo();
 //		notification1=listener1.getNotifications();
-		assertEquals(count,notification1.size());
+		assertEquals(count, notification1.size());
 	}
-	
+
 	/**
-	 * Listener for element change notification 
+	 * Listener for element change notification
 	 *
 	 */
-	private static class CssListener implements Listener{
-		List notifications = new ArrayList( );
+	private static class CssListener implements Listener {
+		List notifications = new ArrayList();
 
-		public static class Notification
-		{
+		public static class Notification {
 
 			DesignElementHandle target = null;
 			NotificationEvent event = null;
 
-			Notification( DesignElementHandle element, NotificationEvent event )
-			{
+			Notification(DesignElementHandle element, NotificationEvent event) {
 				this.target = element;
 				this.event = event;
 			}
-			
-			public NotificationEvent getEvent(){
+
+			public NotificationEvent getEvent() {
 				return this.event;
 			}
 		}
-	
-		public void elementChanged(DesignElementHandle focus,
-				NotificationEvent ev ){
-			this.notifications.add(new Notification(focus,ev));
+
+		public void elementChanged(DesignElementHandle focus, NotificationEvent ev) {
+			this.notifications.add(new Notification(focus, ev));
 		}
 
-		public void restart( )
-		{
-			this.notifications.clear( );
+		public void restart() {
+			this.notifications.clear();
 		}
-		
-		public List getNotifications(){
+
+		public List getNotifications() {
 			return this.notifications;
 		}
 	}

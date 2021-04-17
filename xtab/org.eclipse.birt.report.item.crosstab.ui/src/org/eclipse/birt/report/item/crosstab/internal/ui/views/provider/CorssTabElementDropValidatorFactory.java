@@ -11,7 +11,7 @@
 
 package org.eclipse.birt.report.item.crosstab.internal.ui.views.provider;
 
-import org.eclipse.birt.report.designer.core.commands.DeleteCommand;
+import org.eclipse.birt.report.designer.core.model.IDropValidator;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.core.runtime.IAdapterFactory;
 
@@ -19,27 +19,20 @@ import org.eclipse.core.runtime.IAdapterFactory;
  * 
  */
 
-public class CorssTabElementDropValidatorFactory implements IAdapterFactory
-{
+public class CorssTabElementDropValidatorFactory implements IAdapterFactory {
 
-	public Object getAdapter( Object adaptableObject, Class adapterType )
-	{
-		if ( adapterType == DeleteCommand.class )
-		{
-			if ( adaptableObject instanceof ExtendedItemHandle )
-			{
+	public Object getAdapter(Object adaptableObject, Class adapterType) {
+		if (adapterType == IDropValidator.class) {
+			if (adaptableObject instanceof ExtendedItemHandle) {
 				ExtendedItemHandle item = (ExtendedItemHandle) adaptableObject;
-				return new CrossTabElementDropValidator( item );
+				return new CrossTabElementDropValidator(item);
 			}
 		}
 		return null;
 	}
 
-	public Class[] getAdapterList( )
-	{
-		return new Class[]{
-			DeleteCommand.class
-		};
+	public Class[] getAdapterList() {
+		return new Class[] { IDropValidator.class };
 	}
 
 }

@@ -11,10 +11,7 @@
 
 package org.eclipse.birt.report.model.elements.olap;
 
-import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
-import org.eclipse.birt.report.model.api.olap.MeasureHandle;
-import org.eclipse.birt.report.model.core.Module;
 import org.eclipse.birt.report.model.core.ReferenceableElement;
 import org.eclipse.birt.report.model.elements.ElementVisitor;
 import org.eclipse.birt.report.model.elements.interfaces.IMeasureModel;
@@ -27,40 +24,34 @@ import org.eclipse.birt.report.model.elements.interfaces.IMeasureModel;
  * 
  */
 
-public abstract class Measure extends ReferenceableElement
-		implements
-			IMeasureModel
-{
+public abstract class Measure extends ReferenceableElement implements IMeasureModel {
 
 	/**
 	 * Default constructor.
 	 */
 
-	public Measure( )
-	{
+	public Measure() {
 
 	}
 
 	/**
 	 * Constructs the measure element with a given name.
 	 * 
-	 * @param name
-	 *            the optional name of the measure element
+	 * @param name the optional name of the measure element
 	 */
 
-	public Measure( String name )
-	{
-		super( name );
+	public Measure(String name) {
+		super(name);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.birt.report.model.core.DesignElement#apply(org.eclipse.birt.report.model.elements.ElementVisitor)
+	 * @see org.eclipse.birt.report.model.core.DesignElement#apply(org.eclipse.birt.
+	 * report.model.elements.ElementVisitor)
 	 */
-	public void apply( ElementVisitor visitor )
-	{
-		visitor.visitMeasure( this );
+	public void apply(ElementVisitor visitor) {
+		visitor.visitMeasure(this);
 	}
 
 	/*
@@ -68,8 +59,7 @@ public abstract class Measure extends ReferenceableElement
 	 * 
 	 * @see org.eclipse.birt.report.model.core.DesignElement#getElementName()
 	 */
-	public String getElementName( )
-	{
+	public String getElementName() {
 		return ReportDesignConstants.MEASURE_ELEMENT;
 	}
 }

@@ -15,8 +15,7 @@ package org.eclipse.birt.data.aggregation.api;
  * 
  */
 
-public interface IBuildInAggregation
-{
+public interface IBuildInAggregation {
 
 	public static final String TOTAL_COUNT_FUNC = "COUNT";//$NON-NLS-1$
 	public static final String TOTAL_SUM_FUNC = "SUM";//$NON-NLS-1$
@@ -48,5 +47,6 @@ public interface IBuildInAggregation
 	public static final String TOTAL_PERCENTSUM_FUNC = "PERCENTSUM";//$NON-NLS-1$
 	public static final String TOTAL_RUNNINGCOUNT_FUNC = "RUNNINGCOUNT";//$NON-NLS-1$
 	public static final String TOTAL_CONCATENATE_FUNC = "CONCATENATE";//$NON-NLS-1$
+	public static final String TOTAL_RANGE_FUNC = "RANGE";//$NON-NLS-1$
 
 }

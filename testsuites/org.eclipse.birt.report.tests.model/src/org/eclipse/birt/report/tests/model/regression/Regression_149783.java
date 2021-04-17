@@ -8,19 +8,10 @@
 
 package org.eclipse.birt.report.tests.model.regression;
 
-import org.eclipse.birt.report.model.api.DesignConfig;
-import org.eclipse.birt.report.model.api.DesignEngine;
 import org.eclipse.birt.report.model.api.DesignFileException;
-import org.eclipse.birt.report.model.api.ElementFactory;
-import org.eclipse.birt.report.model.api.LabelHandle;
-import org.eclipse.birt.report.model.api.ReportDesignHandle;
-import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.birt.report.model.api.SimpleMasterPageHandle;
 import org.eclipse.birt.report.model.api.TextItemHandle;
-import org.eclipse.birt.report.model.elements.SimpleMasterPage;
 import org.eclipse.birt.report.tests.model.BaseTestCase;
-
-import com.ibm.icu.util.ULocale;
 
 /**
  * Regression description:
@@ -53,35 +44,29 @@ import com.ibm.icu.util.ULocale;
  * text from message file.
  * <p>
  */
-public class Regression_149783 extends BaseTestCase
-{
+public class Regression_149783 extends BaseTestCase {
 
 	private final static String REPORT = "regression_149783.xml"; //$NON-NLS-1$
 
-	public void setUp( ) throws Exception
-	{
-		super.setUp( );
-		removeResource( );
-		//copyResource_INPUT( REPORT , REPORT );
-		copyInputToFile ( INPUT_FOLDER + "/" + REPORT );
+	public void setUp() throws Exception {
+		super.setUp();
+		removeResource();
+		// copyResource_INPUT( REPORT , REPORT );
+		copyInputToFile(INPUT_FOLDER + "/" + REPORT);
 	}
-	
-	public void tearDown( )
-	{
-		removeResource( );
+
+	public void tearDown() {
+		removeResource();
 	}
-	
+
 	/**
 	 * @throws DesignFileException
 	 */
-	public void test_regression_149783( ) throws DesignFileException
-	{
-		openDesign( REPORT );
-		SimpleMasterPageHandle extendMasterPage = (SimpleMasterPageHandle) designHandle
-				.getMasterPages( ).get( 0 );
-		TextItemHandle text = (TextItemHandle) extendMasterPage.getPageHeader( )
-				.get( 0 );
+	public void test_regression_149783() throws DesignFileException {
+		openDesign(REPORT);
+		SimpleMasterPageHandle extendMasterPage = (SimpleMasterPageHandle) designHandle.getMasterPages().get(0);
+		TextItemHandle text = (TextItemHandle) extendMasterPage.getPageHeader().get(0);
 
-		assertEquals( "actuate", text.getDisplayContent( ) ); //$NON-NLS-1$
+		assertEquals("actuate", text.getDisplayContent()); //$NON-NLS-1$
 	}
 }

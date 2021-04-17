@@ -14,15 +14,13 @@ package org.eclipse.birt.report.engine.internal.document;
 import java.util.List;
 
 import org.eclipse.birt.core.exception.BirtException;
-import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.emitter.IContentEmitter;
 
 /**
  * used to load the contents from the report document.
  *
  */
-public interface IReportContentLoader
-{
+public interface IReportContentLoader {
 
 	/**
 	 * HTML multi pages. This flag is set when output format is "html" and
@@ -46,8 +44,7 @@ public interface IReportContentLoader
 	 * @param paginationType
 	 * @param emitter
 	 */
-	public void loadPage( long pageNumber, int paginationType,
-			IContentEmitter emitter ) throws BirtException;
+	public void loadPage(long pageNumber, int paginationType, IContentEmitter emitter) throws BirtException;
 
 	/**
 	 * load the page from the content stream and output it to the emitter
@@ -55,17 +52,16 @@ public interface IReportContentLoader
 	 * @param pageNumber
 	 * @param paginationType
 	 * @param emitter
-	 * @throws BirtException 
+	 * @throws BirtException
 	 */
-	public void loadPageRange( List pageList, int paginationType,
-			IContentEmitter emitter ) throws BirtException;
-	
+	public void loadPageRange(List pageList, int paginationType, IContentEmitter emitter) throws BirtException;
+
 	/**
 	 * the the content at position offset.
+	 * 
 	 * @param offset
 	 * @param emitter
 	 */
-	public void loadReportlet( long offset, IContentEmitter emitter )
-			throws BirtException;
+	public void loadReportlet(long offset, IContentEmitter emitter) throws BirtException;
 
 }

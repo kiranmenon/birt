@@ -26,110 +26,100 @@ import testutil.ConfigText;
 import testutil.JDBCDataSource;
 import testutil.JDBCOdaDataSource;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.Ignore;
+import static org.junit.Assert.*;
+
 /**
  * to test stored procedure in derby database
  */
-public class StoredProcedureTest extends APITestCase
-{
+@Ignore("Ignore tests that require manual setup")
+public class StoredProcedureTest extends APITestCase {
 
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
-	protected void setUp( ) throws Exception
-	{
-		super.setUp( );
-
-		createTestProcedure( );
+	@Before
+	public void storedProcedureSetUp() throws Exception {
+		createTestProcedure();
 	}
 
 	/*
 	 * @see org.eclipse.birt.data.engine.api.APITestCase#getDataSourceInfo()
 	 */
-	protected DataSourceInfo getDataSourceInfo( )
-	{
-		return new DataSourceInfo( ConfigText.getString( "Api.TestBlobAndClob.TableName" ),
-				ConfigText.getString( "Api.TestBlobAndClob.TableSQL" ),
-				ConfigText.getString( "Api.TestBlobAndClob.TestDataFileName" ) );
+	protected DataSourceInfo getDataSourceInfo() {
+		return new DataSourceInfo(ConfigText.getString("Api.TestBlobAndClob.TableName"),
+				ConfigText.getString("Api.TestBlobAndClob.TableSQL"),
+				ConfigText.getString("Api.TestBlobAndClob.TestDataFileName"));
 	}
 
 	/**
 	 * Creates a test procedure
 	 */
-	protected void createTestProcedure( ) throws Exception
-	{
-		if ( dataSourceInstance == null )
-			dataSourceInstance = JDBCDataSource.newInstance( );
+	protected void createTestProcedure() throws Exception {
+		if (dataSourceInstance == null)
+			dataSourceInstance = JDBCDataSource.newInstance();
 
-		this.dataSourceInstance.createStoredProcedure( ConfigText.getString( "Api.TestProcedure.ProcedureName" ),
-				ConfigText.getString( "Api.TestProcedure.ProcedureSQL" ),
-				true );
+		this.dataSourceInstance.createStoredProcedure(ConfigText.getString("Api.TestProcedure.ProcedureName"),
+				ConfigText.getString("Api.TestProcedure.ProcedureSQL"), true);
 	}
 
 	/**
 	 * execute the procedure with inputparameter
 	 *
 	 */
-	public void test1( )
-	{
-		try
-		{
-			IBaseDataSetDesign baseDataset = newDataSet( "newDataSet",
-					getCallableSQL( ) );
-			( (OdaDataSetDesign) baseDataset ).setQueryText( getCallableSQL( ) );
-			Collection inputParamDefns = new ArrayList( );
-			ParameterDefinition inputParamDefn = new ParameterDefinition( "param1",
-					DataType.INTEGER_TYPE );
-			inputParamDefn.setInputMode( true );
-			inputParamDefn.setPosition( 1 );
-			inputParamDefn.setDefaultInputValue( "0" );
-			inputParamDefns.add( inputParamDefn );
+	@Test
+	public void test1() {
+		try {
+			IBaseDataSetDesign baseDataset = newDataSet("newDataSet", getCallableSQL());
+			((OdaDataSetDesign) baseDataset).setQueryText(getCallableSQL());
+			Collection inputParamDefns = new ArrayList();
+			ParameterDefinition inputParamDefn = new ParameterDefinition("param1", DataType.INTEGER_TYPE);
+			inputParamDefn.setInputMode(true);
+			inputParamDefn.setPosition(1);
+			inputParamDefn.setDefaultInputValue("0");
+			inputParamDefns.add(inputParamDefn);
 
-			InputParameterBinding paramBinding = new InputParameterBinding( "param1",
-					new ScriptExpression( "100" ) );
+			InputParameterBinding paramBinding = new InputParameterBinding("param1", new ScriptExpression("100"));
 
 			// important notice:
 			// derby does not support returning parameter metadata, so
 			// output parameter feature can not be supported.
-			if ( inputParamDefns != null )
-			{
-				Iterator iterator = inputParamDefns.iterator( );
-				while ( iterator.hasNext( ) )
-				{
-					ParameterDefinition paramDefn = (ParameterDefinition) iterator.next( );
-					if ( paramDefn.isInputMode( ) )
-						( (OdaDataSetDesign) baseDataset ).addParameter( paramDefn );
+			if (inputParamDefns != null) {
+				Iterator iterator = inputParamDefns.iterator();
+				while (iterator.hasNext()) {
+					ParameterDefinition paramDefn = (ParameterDefinition) iterator.next();
+					if (paramDefn.isInputMode())
+						((OdaDataSetDesign) baseDataset).addParameter(paramDefn);
 				}
 			}
-			QueryDefinition queryDefn = new QueryDefinition( );
-			queryDefn.setDataSetName( baseDataset.getName( ) );
-			queryDefn.addInputParamBinding( paramBinding );
+			QueryDefinition queryDefn = new QueryDefinition();
+			queryDefn.setDataSetName(baseDataset.getName());
+			queryDefn.addInputParamBinding(paramBinding);
 
-			IPreparedQuery preparedQuery = dataEngine.prepare( queryDefn );
-			IQueryResults queryResults = preparedQuery.execute( null );
-			queryResults.getResultIterator( );
-		}
-		catch ( Exception e )
-		{
-			fail( e.getMessage( ) );
+			IPreparedQuery preparedQuery = dataEngine.prepare(queryDefn);
+			IQueryResults queryResults = preparedQuery.execute(null);
+			queryResults.getResultIterator();
+		} catch (Exception e) {
+			fail(e.getMessage());
 		}
 	}
 
 	/**
-	 * new a JDBC dataset with specified datasetname and querytext 
+	 * new a JDBC dataset with specified datasetname and querytext
 	 * 
 	 * @param datasetName
 	 * @param queryText
 	 * @return dataset
 	 * @throws Exception
 	 */
-	protected OdaDataSetDesign newDataSet( String datasetName, String queryText )
-			throws Exception
-	{
-		OdaDataSetDesign dset = new OdaDataSetDesign( datasetName );
-		dset.setDataSource( this.dataSource.getName( ) );
-		dset.setQueryText( queryText );
-		dset.setExtensionID( JDBCOdaDataSource.SP_DATA_SET_TYPE );
-		dataEngine.defineDataSet( dset );
+	protected OdaDataSetDesign newDataSet(String datasetName, String queryText) throws Exception {
+		OdaDataSetDesign dset = new OdaDataSetDesign(datasetName);
+		dset.setDataSource(this.dataSource.getName());
+		dset.setQueryText(queryText);
+		dset.setExtensionID(JDBCOdaDataSource.SP_DATA_SET_TYPE);
+		dataEngine.defineDataSet(dset);
 		return dset;
 	}
 
@@ -138,18 +128,17 @@ public class StoredProcedureTest extends APITestCase
 	 * 
 	 * @return query text of data set
 	 */
-	protected String getCallableSQL( )
-	{
+	protected String getCallableSQL() {
 		// Default SQL: call procedureName(?)
 		return "call App.testProc(?) ";
 	}
 
 	/**
 	 * the procedure "testProc"
+	 * 
 	 * @param inputParam
 	 */
-	public static void selectData( int inputParam )
-	{
+	public static void selectData(int inputParam) {
 		assert inputParam == 100;
 	}
 
