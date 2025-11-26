@@ -1,12 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: BIRT Data Engine
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.eclipse.birt.data; singleton:=true
-Bundle-Version: 4.9.0.qualifier
-Bundle-ClassPath: library.jar,
- .
+Bundle-Version: 4.22.0.qualifier
+Bundle-ClassPath: .
 Bundle-Activator: org.eclipse.birt.data.engine.plugin.DataEnginePlugin
-Bundle-Vendor: Eclipse BIRT Project
+Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
 Eclipse-ExtensibleAPI: true
 Export-Package: javax.olap,
@@ -56,9 +55,10 @@ Export-Package: javax.olap,
  org.eclipse.birt.data.engine.olap.util.filter,
  org.eclipse.birt.data.engine.plugin,
  org.eclipse.birt.data.engine.script
-Require-Bundle: org.eclipse.birt.core;bundle-version="[2.1.0,5.0.0)";visibility:=reexport,
+Import-Package: org.apache.commons.io.input,
+ org.apache.commons.io.output
+Require-Bundle: org.eclipse.birt.core;bundle-version="[4.22.0,5.0.0)";visibility:=reexport,
  org.eclipse.datatools.connectivity.oda.consumer;bundle-version="[3.2.5,4.0.0)";visibility:=reexport,
- org.mozilla.javascript;bundle-version="[1.6.0,2.0.0)";visibility:=reexport,
  org.eclipse.datatools.connectivity.oda.profile;bundle-version="[3.2.7,4.0.0)"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-21

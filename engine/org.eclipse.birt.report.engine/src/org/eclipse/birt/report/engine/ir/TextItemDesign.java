@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -21,13 +24,23 @@ import org.eclipse.birt.core.template.TextTemplate.ValueNode;
 
 /**
  * Text element captures a long string with internal formatting.
- * 
+ *
  */
 public class TextItemDesign extends ReportItemDesign {
 
+	/**
+	 * property: text item type "auto", automatically type recognition of plain or
+	 * HTML
+	 */
 	public static final String AUTO_TEXT = "auto"; //$NON-NLS-1$
+
+	/** property: text item type "plain", content is plain text */
 	public static final String PLAIN_TEXT = "plain"; //$NON-NLS-1$
+
+	/** property: text item type "plain", content is HTML text */
 	public static final String HTML_TEXT = "html"; //$NON-NLS-1$
+
+	/** property: text item type "plain", content is RTF text */
 	public static final String RTF_TEXT = "rtf"; //$NON-NLS-1$
 
 	/**
@@ -50,11 +63,13 @@ public class TextItemDesign extends ReportItemDesign {
 
 	protected HashMap<String, Expression> exprs = null;
 
+	/**
+	 * Get the list of expressions
+	 *
+	 * @return Return the list of expressions
+	 */
 	public HashMap<String, Expression> getExpressions() {
-		if (!hasExpression()) {
-			return null;
-		}
-		if (text == null) {
+		if (!hasExpression() || (text == null)) {
 			return null;
 		}
 		if (exprs != null) {
@@ -64,8 +79,15 @@ public class TextItemDesign extends ReportItemDesign {
 		return exprs;
 	}
 
+	/**
+	 * Extraction of an expression from given string
+	 *
+	 * @param textContent string which will be checked
+	 * @param textType    text type, e.g. plain, html
+	 * @return Return the extracted expression
+	 */
 	public static HashMap<String, Expression> extractExpression(String textContent, String textType) {
-		HashMap<String, Expression> expressions = new HashMap<String, Expression>();
+		HashMap<String, Expression> expressions = new HashMap<>();
 		if (HTML_TEXT.equals(textType) || (AUTO_TEXT.equals(textType) && startsWithIgnoreCase(textContent, "<html>"))) {
 			TextTemplate template = null;
 			try {
@@ -76,7 +98,7 @@ public class TextItemDesign extends ReportItemDesign {
 				// and stop the whole task.
 			}
 			if (template != null && template.getNodes() != null) {
-				Iterator itor = template.getNodes().iterator();
+				Iterator<?> itor = template.getNodes().iterator();
 				Object obj;
 				while (itor.hasNext()) {
 					obj = itor.next();
@@ -103,6 +125,14 @@ public class TextItemDesign extends ReportItemDesign {
 		}
 	}
 
+	/**
+	 * Check case insensitive whether the string starts by the given pattern
+	 *
+	 * @param original string which will be checked
+	 * @param pattern  pattern to be find
+	 * @return Return "true" if the strung starts with the given pattern checked
+	 *         case insensitive
+	 */
 	public static boolean startsWithIgnoreCase(String original, String pattern) {
 		int length = pattern.length();
 		if (original == null || original.length() < length) {
@@ -136,10 +166,11 @@ public class TextItemDesign extends ReportItemDesign {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.ir.ReportItemDesign#accept(org.eclipse
 	 * .birt.report.engine.ir.IReportItemVisitor)
 	 */
+	@Override
 	public Object accept(IReportItemVisitor visitor, Object value) {
 		return visitor.visitTextItem(this, value);
 	}
@@ -152,24 +183,46 @@ public class TextItemDesign extends ReportItemDesign {
 	}
 
 	/**
-	 * @param encoding The encoding to set.
+	 * Set the text type
+	 *
+	 * @param textType text type, e.g. plain, html
 	 */
 	public void setTextType(String textType) {
 		this.textType = textType;
 	}
 
+	/**
+	 * Check if expression exists
+	 *
+	 * @return Return "true" if expression exists
+	 */
 	public boolean hasExpression() {
 		return hasExpression;
 	}
 
+	/**
+	 * Set the expression occurring flag
+	 *
+	 * @param hasExpression has expression
+	 */
 	public void setHasExpression(boolean hasExpression) {
 		this.hasExpression = hasExpression;
 	}
 
+	/**
+	 * Check if jTidy parser is used
+	 *
+	 * @return Return the check result of used jTidy parser
+	 */
 	public boolean isJTidy() {
 		return jTidy;
 	}
 
+	/**
+	 * Set the usage of jTidy parser
+	 *
+	 * @param jTidy usage of jTidy parser
+	 */
 	public void setJTidy(boolean jTidy) {
 		this.jTidy = jTidy;
 	}

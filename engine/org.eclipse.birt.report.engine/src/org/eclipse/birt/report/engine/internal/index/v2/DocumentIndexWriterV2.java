@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -30,6 +33,7 @@ public class DocumentIndexWriterV2 implements IDocumentIndexWriter, DocumentInde
 		this.archive = archive;
 	}
 
+	@Override
 	public void close() throws IOException {
 		if (bookmarks != null) {
 			bookmarks.close();
@@ -44,6 +48,7 @@ public class DocumentIndexWriterV2 implements IDocumentIndexWriter, DocumentInde
 		}
 	}
 
+	@Override
 	public void setOffsetOfBookmark(String bookmark, long offset) throws IOException {
 		if (bookmarks == null) {
 			bookmarks = createIndexWriter(archive, REPORTLET_BOOKMARK_INDEX_STREAM);
@@ -53,6 +58,7 @@ public class DocumentIndexWriterV2 implements IDocumentIndexWriter, DocumentInde
 		}
 	}
 
+	@Override
 	public void setOffsetOfInstance(String instanceId, long offset) throws IOException {
 		if (reportlets == null) {
 			reportlets = createIndexWriter(archive, REPORTLET_ID_INDEX_STREAM);
@@ -62,6 +68,7 @@ public class DocumentIndexWriterV2 implements IDocumentIndexWriter, DocumentInde
 		}
 	}
 
+	@Override
 	public void setBookmark(String bookmark, BookmarkContent content) throws IOException {
 		if (pageNumbers == null) {
 			pageNumbers = createIndexWriter(archive, BOOKMARK_STREAM);

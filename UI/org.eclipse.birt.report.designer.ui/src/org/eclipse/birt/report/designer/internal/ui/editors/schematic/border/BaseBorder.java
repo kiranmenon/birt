@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -26,25 +29,47 @@ import org.eclipse.swt.SWT;
 public abstract class BaseBorder extends AbstractBorder {
 
 	// Defines keys for line style.
+
+	/** style property: no style */
 	public static final String STYLE_NONO = DesignChoiceConstants.LINE_STYLE_NONE;
+	/** style property: solid style */
 	public static final String STYLE_SOLID = DesignChoiceConstants.LINE_STYLE_SOLID;
+	/** style property: dotted style */
 	public static final String STYLE_DOTTED = DesignChoiceConstants.LINE_STYLE_DOTTED;
+	/** style property: dashed style */
 	public static final String STYLE_DASHED = DesignChoiceConstants.LINE_STYLE_DASHED;
+	/** style property: double style */
 	public static final String STYLE_DOUBLE = DesignChoiceConstants.LINE_STYLE_DOUBLE;
+	/** style property: ridge style */
 	public static final String STYLE_RIDGE = DesignChoiceConstants.LINE_STYLE_RIDGE;
+	/** style property: groove style */
 	public static final String STYLE_GROOVE = DesignChoiceConstants.LINE_STYLE_GROOVE;
+	/** style property: inset style */
 	public static final String STYLE_INSET = DesignChoiceConstants.LINE_STYLE_INSET;
+	/** style property: outset style */
 	public static final String STYLE_OUTSET = DesignChoiceConstants.LINE_STYLE_OUTSET;
 
+
 	// Defines line styles for painting.
+
+	/** style property: line style solid */
 	public static final int LINE_STYLE_SOLID = SWT.LINE_SOLID;
+	/** style property: line style doted */
 	public static final int LINE_STYLE_DOTTED = SWT.LINE_DOT;
+	/** style property: line style dashed */
 	public static final int LINE_STYLE_DASHED = SWT.LINE_DASH;
+
+	/** style property: line style no */
 	public static final int LINE_STYLE_NONE = 0;
+	/** style property: line style double */
 	public static final int LINE_STYLE_DOUBLE = -2;
+	/** style property: line style ridge */
 	public static final int LINE_STYLE_RIDGE = -3;
+	/** style property: line style groove */
 	public static final int LINE_STYLE_GROOVE = -4;
+	/** style property: line style inset */
 	public static final int LINE_STYLE_INSET = -5;
+	/** style property: line style outset */
 	public static final int LINE_STYLE_OUTSET = -6;
 
 	/**
@@ -95,14 +120,48 @@ public abstract class BaseBorder extends AbstractBorder {
 	 * Right border color.
 	 */
 	public int rightColor;
+	/**
+	 * Diagonal number.
+	 */
+	public int diagonalNumber;
+	/**
+	 * Diagonal width.
+	 */
+	public String diagonalWidth;
+	/**
+	 * Diagonal style.
+	 */
+	public String diagonalStyle;
+	/**
+	 * Diagonal color.
+	 */
+	public int diagonalColor;
+	/**
+	 * Antidiagonal number.
+	 */
+	public int antidiagonalNumber;
+	/**
+	 * Antidiagonal width.
+	 */
+	public String antidiagonalWidth;
+	/**
+	 * Antidiagonal style.
+	 */
+	public String antidiagonalStyle;
+	/**
+	 * Antidiagonal color.
+	 */
+	public int antidiagonalColor;
 
 	protected int i_bottom_style, i_bottom_width = 1;
 	protected int i_top_style, i_top_width = 1;
 	protected int i_left_style, i_left_width = 1;
 	protected int i_right_style, i_right_width = 1;
+	protected int i_diagonal_style, i_diagonal_width = 1;
+	protected int i_antidiagonal_style, i_antidiagonal_width = 1;
 
-	private static final HashMap<String, Integer> styleMap = new HashMap<String, Integer>();
-	private static final HashMap<String, Integer> widthMap = new HashMap<String, Integer>();
+	private static final HashMap<String, Integer> styleMap = new HashMap<>();
+	private static final HashMap<String, Integer> widthMap = new HashMap<>();
 
 	private static final double EPS = 1.0E-10;
 
@@ -124,7 +183,7 @@ public abstract class BaseBorder extends AbstractBorder {
 		widthMap.put(DesignChoiceConstants.LINE_WIDTH_THICK, Integer.valueOf(3));
 	}
 
-	private static final HashMap<String, Integer> commonCacheWidthMap = new HashMap<String, Integer>();
+	private static final HashMap<String, Integer> commonCacheWidthMap = new HashMap<>();
 
 	/**
 	 * Clean up the width cache.
@@ -136,7 +195,7 @@ public abstract class BaseBorder extends AbstractBorder {
 	/**
 	 * Since the insets now include border and padding, use this to get the true and
 	 * non-revised border insets.
-	 * 
+	 *
 	 * @return border insets.
 	 */
 	public abstract Insets getTrueBorderInsets();
@@ -144,28 +203,28 @@ public abstract class BaseBorder extends AbstractBorder {
 	/**
 	 * Since the insets now include border and padding, use this to get the border
 	 * insets. This value may be revised according to specified element.
-	 * 
+	 *
 	 * @return border insets.
 	 */
 	public abstract Insets getBorderInsets();
 
 	/**
 	 * Sets the insets for padding.
-	 * 
+	 *
 	 * @param in
 	 */
 	public abstract void setPaddingInsets(Insets in);
 
 	/**
 	 * Returns the border style.
-	 * 
+	 *
 	 * @param obj
-	 * @return
+	 * @return Returns the border style
 	 */
 	protected int getBorderStyle(Object obj) {
 		Integer retValue = styleMap.get(obj);
 		if (retValue == null) {
-			// fix bug 168627.the default style is silid.
+			// fix bug 168627.the default style is solid.
 			return SWT.LINE_SOLID;
 			// return SWT.LINE_DASH;
 		}
@@ -175,9 +234,9 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Returns the border width as pixel.
-	 * 
+	 *
 	 * @param obj
-	 * @return
+	 * @return Return the border width as pixel
 	 */
 	protected int getBorderWidth(Object obj) {
 		// handle predefined values.
@@ -223,8 +282,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border style directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border style directly.
 	 */
 	public int getLeftBorderStyle() {
 		return getBorderStyle(leftStyle);
@@ -232,8 +291,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border style directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border style directly.
 	 */
 	public int getRightBorderStyle() {
 		return getBorderStyle(rightStyle);
@@ -241,8 +300,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border style directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border style directly.
 	 */
 	public int getTopBorderStyle() {
 		return getBorderStyle(topStyle);
@@ -250,8 +309,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border style directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border style directly.
 	 */
 	public int getBottomBorderStyle() {
 		return getBorderStyle(bottomStyle);
@@ -259,8 +318,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border width directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border width directly.
 	 */
 	public int getLeftBorderWidth() {
 		return getBorderWidth(leftWidth);
@@ -268,8 +327,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border width directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border width directly.
 	 */
 	public int getRightBorderWidth() {
 		return getBorderWidth(rightWidth);
@@ -277,8 +336,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border width directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border width directly.
 	 */
 	public int getTopBorderWidth() {
 		return getBorderWidth(topWidth);
@@ -286,8 +345,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border width directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border width directly.
 	 */
 	public int getBottomBorderWidth() {
 		return getBorderWidth(bottomWidth);
@@ -295,8 +354,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border color directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border color directly.
 	 */
 	public int getLeftBorderColor() {
 		// return ColorUtil.parseColor( leftColor );
@@ -305,8 +364,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border color directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border color directly.
 	 */
 	public int getRightBorderColor() {
 		// return ColorUtil.parseColor( rightColor );
@@ -315,8 +374,8 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border color directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border color directly.
 	 */
 	public int getTopBorderColor() {
 		// return ColorUtil.parseColor( topColor );
@@ -325,12 +384,84 @@ public abstract class BaseBorder extends AbstractBorder {
 
 	/**
 	 * Convenient method to return the specified border color directly.
-	 * 
-	 * @return
+	 *
+	 * @return Return the specified border color directly.
 	 */
 	public int getBottomBorderColor() {
 		// return ColorUtil.parseColor( bottomColor );
 		return bottomColor;
+	}
+
+	/**
+	 * Convenient method to return the specified border style directly.
+	 *
+	 * @return Return the specified border style directly.
+	 */
+	public int getDiagonalNumber() {
+		return diagonalNumber;
+	}
+
+	/**
+	 * Convenient method to return the specified border style directly.
+	 *
+	 * @return Return the specified border style directly.
+	 */
+	public int getDiagonalStyle() {
+		return getBorderStyle(diagonalStyle);
+	}
+
+	/**
+	 * Convenient method to return the specified border width directly.
+	 *
+	 * @return Return the specified border width directly.
+	 */
+	public int getDiagonalWidth() {
+		return getBorderWidth(diagonalWidth);
+	}
+
+	/**
+	 * Convenient method to return the specified border color directly.
+	 *
+	 * @return Return the specified border color directly.
+	 */
+	public int getDiagonalColor() {
+		return diagonalColor;
+	}
+
+	/**
+	 * Convenient method to return the specified border style directly.
+	 *
+	 * @return Return the specified border style directly.
+	 */
+	public int getAntidiagonalNumber() {
+		return antidiagonalNumber;
+	}
+
+	/**
+	 * Convenient method to return the specified border style directly.
+	 *
+	 * @return Return the specified border style directly.
+	 */
+	public int getAntidiagonalStyle() {
+		return getBorderStyle(antidiagonalStyle);
+	}
+
+	/**
+	 * Convenient method to return the specified border width directly.
+	 *
+	 * @return Return the specified border width directly.
+	 */
+	public int getAntidiagonalWidth() {
+		return getBorderWidth(antidiagonalWidth);
+	}
+
+	/**
+	 * Convenient method to return the specified border color directly.
+	 *
+	 * @return Return the specified border color directly.
+	 */
+	public int getAntidiagonalColor() {
+		return antidiagonalColor;
 	}
 
 }

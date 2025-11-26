@@ -1,9 +1,9 @@
 /******************************************************************************
- *	Copyright (c) 2004-2008 Actuate Corporation and others.
+ *	Copyright (c) 2004-2008, 2025 Actuate Corporation and others.
  *	All rights reserved. This program and the accompanying materials 
- *	are made available under the terms of the Eclipse Public License v1.0
+ *	are made available under the terms of the Eclipse Public License v2.0
  *	which accompanies this distribution, and is available at
- *		http://www.eclipse.org/legal/epl-v10.html
+ *		http://www.eclipse.org/legal/epl-2.0.html
  *	
  *	Contributors:
  *		Actuate Corporation - Initial implementation.
@@ -752,6 +752,80 @@ BirtUtility.prototype = {
 		this.getHeadElement().appendChild(element);
 	},
 
+	/**
+	 * extended dialog closing handling based on escape key
+	 * 
+	 * @param e
+	 *            event object of key down
+	 * @returns void
+	 */
+	closeDialogsKeyBased : function(e) {
+		var keyCode = e.keyCode;
+		var evtobj = window.event ? window.event : e;
+
+		/* preview zoom: handle the ctrl-key & function code */
+		if (evtobj.ctrlKey && birtZoomer) {
+			if (evtobj.keyCode == 37) {
+				// document zoom: enlarge - key code left
+				birtZoomer.zoomIn();
+			} else if (evtobj.keyCode == 39) {
+				// document zoom: shrink - key code right
+				birtZoomer.zoomOut();
+			} else if (evtobj.keyCode == 96) {
+				// document zoom: reset to default - key code 0
+				birtZoomer.resetZoom();
+			}
+		}
+
+		/* preview dialog: handle the escape key code */
+		if (keyCode === 27) {
+			if (birtMessageDialog && birtMessageDialog.visible) {
+				// birtUtility.displayDialog('message', false);
+				birtMessageDialog.__neh_cancel();
+
+			} else if (birtParameterDialog && birtParameterDialog.visible) {
+				birtParameterDialog.__neh_cancel();
+				
+			} else if (birtSimpleExportDataDialog && birtSimpleExportDataDialog.visible) {
+				birtSimpleExportDataDialog.__neh_cancel();
+				
+			} else if (birtExportReportDialog.visible) {
+				birtExportReportDialog.__neh_cancel();;
+				
+			} else if (birtPrintReportDialog.visible) {
+				birtPrintReportDialog.__neh_cancel();
+				
+			} else if (birtPrintReportServerDialog.visible) {
+				birtPrintReportServerDialog.__neh_cancel();
+				
+			} else if (birtExceptionDialog.visible) {
+				birtExceptionDialog.__neh_cancel();
+				
+			} else if (birtConfirmationDialog.visible) {
+				birtConfirmationDialog.__neh_cancel();
+				
+			} else if (birtProgressBar.visible) {
+				birtProgressBar.__neh_click();
+				
+			} else if (infoDialog && infoDialog.style.display != "none") {
+				infoDialog.style.display = "none";
+				
+			}
+		}
+	},
+	
+	// Dialog handling, show and hide the info dialog 
+	displayInfoDialog : function(show) {
+		var objDialog = infoDialog;
+		var displayDialog = ((show) ? "block" : "none");
+		if (objDialog) {
+			objDialog.style.display = displayDialog;
+			if (displayDialog === "none") {
+				birtMessageDialog = null;
+			}
+		}
+	},
+	
 	noComma : "" // just to avoid javascript syntax errors
 }
 
@@ -788,4 +862,9 @@ if (BrowserUtility.isIE && !BrowserUtility.isIE8) {
 			Event.stop(e);
 		}
 	});
+}
+
+// Move the key handling of dialog closing to the document
+if (birtUtility) {
+	document.onkeydown = birtUtility.closeDialogsKeyBased;
 }

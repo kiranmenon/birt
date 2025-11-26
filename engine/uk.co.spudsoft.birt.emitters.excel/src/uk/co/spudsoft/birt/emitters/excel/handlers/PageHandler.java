@@ -1,12 +1,15 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -17,11 +20,14 @@ import java.util.Collection;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.HeaderFooter;
 import org.apache.poi.ss.usermodel.PrintSetup;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IAutoTextContent;
 import org.eclipse.birt.report.engine.content.IContent;
@@ -35,8 +41,11 @@ import org.eclipse.birt.report.engine.content.IRowContent;
 import org.eclipse.birt.report.engine.content.ITableContent;
 import org.eclipse.birt.report.engine.content.ITextContent;
 import org.eclipse.birt.report.engine.content.impl.CellContent;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.engine.presentation.ContentEmitterVisitor;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetView;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STSheetViewType;
 
 import uk.co.spudsoft.birt.emitters.excel.CellImage;
 import uk.co.spudsoft.birt.emitters.excel.ClientAnchorConversions;
@@ -47,8 +56,20 @@ import uk.co.spudsoft.birt.emitters.excel.HandlerState;
 import uk.co.spudsoft.birt.emitters.excel.StyleManagerUtils;
 import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
 
+/**
+ * Representation of the excel page
+ *
+ * @since 3.3
+ *
+ */
 public class PageHandler extends AbstractHandler {
 
+	/**
+	 * Constructor
+	 *
+	 * @param log  logger object
+	 * @param page page content
+	 */
 	public PageHandler(Logger log, IPageContent page) {
 		super(log, null, page);
 	}
@@ -157,6 +178,36 @@ public class PageHandler extends AbstractHandler {
 		if (!EmitterServices.booleanOption(state.getRenderOptions(), page, ExcelEmitter.DISPLAYZEROS_PROP, true)) {
 			state.currentSheet.setDisplayZeros(false);
 		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), page, ExcelEmitter.PRINTGRIDLINES_PROP, false)) {
+			state.currentSheet.setPrintGridlines(true);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), page, ExcelEmitter.PRINTROWCOLHEADINGS_PROP,
+				false)) {
+			state.currentSheet.setPrintRowAndColumnHeadings(true);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), page, ExcelEmitter.PRINTFITTOPAGE_PROP, false)) {
+			state.currentSheet.setFitToPage(true);
+		}
+		int displayZoom = EmitterServices.integerOption(state.getRenderOptions(), page,
+				ExcelEmitter.DISPLAY_SHEET_ZOOM, -1);
+		if ((displayZoom >= ExcelEmitter.poiExcelDisplaySheetZoomScaleMin)
+				&& (displayZoom <= ExcelEmitter.poiExcelDisplaySheetZoomScaleMax)) {
+			state.currentSheet.setZoom(displayZoom);
+		}
+		String pagePreview = EmitterServices.stringOption(state.getRenderOptions(), page, ExcelEmitter.PAGE_PREVIEW,
+				null);
+		if (pagePreview != null) {
+			if (pagePreview.equalsIgnoreCase(ExcelEmitter.poiExcelPreviewPageLayout)) {
+				CTSheetView view = ((XSSFSheet) state.currentSheet).getCTWorksheet().getSheetViews()
+						.getSheetViewArray(0);
+				view.setView(STSheetViewType.PAGE_LAYOUT);
+
+			} else if (pagePreview.equalsIgnoreCase(ExcelEmitter.poiExcelPreviewPageBreak)) {
+				CTSheetView view = ((XSSFSheet) state.currentSheet).getCTWorksheet().getSheetViews()
+						.getSheetViewArray(0);
+				view.setView(STSheetViewType.PAGE_BREAK_PREVIEW);
+			}
+		}
 		int pagesHigh = EmitterServices.integerOption(state.getRenderOptions(), page, ExcelEmitter.PRINT_PAGES_HIGH,
 				-1);
 		if ((pagesHigh > 0) && (pagesHigh < Short.MAX_VALUE)) {
@@ -170,7 +221,7 @@ public class PageHandler extends AbstractHandler {
 			state.currentSheet.setAutobreaks(true);
 		}
 		int printScale = EmitterServices.integerOption(state.getRenderOptions(), page, ExcelEmitter.PRINT_SCALE, -1);
-		if ((printScale > 0) && (printScale < Short.MAX_VALUE)) {
+		if ((printScale >= ExcelEmitter.poiExcelPrintScaleMin) && (printScale <= ExcelEmitter.poiExcelPrintScaleMax)) {
 			state.currentSheet.getPrintSetup().setScale((short) printScale);
 		}
 
@@ -182,22 +233,6 @@ public class PageHandler extends AbstractHandler {
 		}
 
 		state.getSmu().prepareMarginDimensions(state.currentSheet, page);
-	}
-
-	private String prepareSheetName(HandlerState state) {
-		if (state.sheetName != null) {
-			String preparedName = state.sheetName;
-			Integer nameCount = state.sheetNames.get(preparedName);
-			if (nameCount != null) {
-				++nameCount;
-				state.sheetNames.put(preparedName, nameCount);
-				preparedName = preparedName + " " + nameCount;
-			} else {
-				state.sheetNames.put(preparedName, 1);
-			}
-			return preparedName;
-		}
-		return null;
 	}
 
 	@Override
@@ -212,7 +247,7 @@ public class PageHandler extends AbstractHandler {
 			outputStructuredHeaderFooter(state, page.getFooter());
 		}
 
-		String sheetName = prepareSheetName(state);
+		String sheetName = state.prepareSheetName();
 		if (sheetName != null) {
 			log.debug("Attempting to name sheet ", (state.getWb().getNumberOfSheets() - 1), " \"", sheetName, "\" ");
 			int existingSheetIndex = -1;
@@ -240,12 +275,21 @@ public class PageHandler extends AbstractHandler {
 			state.sheetPassword = null;
 		}
 
-		Drawing drawing = null;
+		Drawing<?> drawing = null;
 		if (!state.images.isEmpty()) {
 			drawing = state.currentSheet.createDrawingPatriarch();
 		}
+
+		boolean scaleSmallImage = EmitterServices.booleanOption(state.getRenderOptions(), page,
+				ExcelEmitter.IMAGE_SCALING_CELL_DIMENSION, false);
+
+		// pre-processing to calculate the row height based on the images
 		for (CellImage cellImage : state.images) {
-			processCellImage(state, drawing, cellImage);
+			processCellImage(state, drawing, cellImage, scaleSmallImage, false);
+		}
+		// draw-processing of the images
+		for (CellImage cellImage : state.images) {
+			processCellImage(state, drawing, cellImage, scaleSmallImage, true);
 		}
 		state.images.clear();
 		state.rowNum = 0;
@@ -274,10 +318,11 @@ public class PageHandler extends AbstractHandler {
 	 * This involves changing the row height as necesssary and determining the
 	 * column spread of the image.
 	 * </p>
-	 * 
+	 *
 	 * @param cellImage The image to be placed on the sheet.
 	 */
-	private void processCellImage(HandlerState state, Drawing drawing, CellImage cellImage) {
+	private void processCellImage(HandlerState state, Drawing<?> drawing, CellImage cellImage,
+			boolean scaleSmallImage, boolean drawImage) {
 		Coordinate location = cellImage.location;
 
 		Cell cell = state.currentSheet.getRow(location.getRow()).getCell(location.getCol());
@@ -293,7 +338,7 @@ public class PageHandler extends AbstractHandler {
 		// Get image width
 		int endCol = cell.getColumnIndex();
 		double lastColWidth = ClientAnchorConversions
-				.widthUnits2Millimetres((short) state.currentSheet.getColumnWidth(endCol)) + 2.0;
+				.widthUnits2Millimetres(state.currentSheet.getColumnWidth(endCol)) + 2.0;
 		int dx = smu.anchorDxFromMM(lastColWidth, lastColWidth);
 		double mmWidth = 0.0;
 		if (smu.isAbsolute(image.getWidth())) {
@@ -301,6 +346,7 @@ public class PageHandler extends AbstractHandler {
 		} else if (smu.isPixels(image.getWidth())) {
 			mmWidth = ClientAnchorConversions.pixels2Millimetres(image.getWidth().getMeasure());
 		}
+
 		// Allow image to span multiple columns
 		CellRangeAddress mergedRegion = getMergedRegionBegunBy(state.currentSheet, location.getRow(),
 				location.getCol());
@@ -311,7 +357,7 @@ public class PageHandler extends AbstractHandler {
 				int endColLimit = cellImage.spanColumns ? 256 : mergedRegion.getLastColumn();
 				for (endCol = cell.getColumnIndex(); mmAccumulatedWidth < mmWidth && endCol < endColLimit; ++endCol) {
 					lastColWidth = ClientAnchorConversions
-							.widthUnits2Millimetres((short) state.currentSheet.getColumnWidth(endCol)) + 2.0;
+							.widthUnits2Millimetres(state.currentSheet.getColumnWidth(endCol)) + 2.0;
 					mmAccumulatedWidth += lastColWidth;
 					log.debug("lastColWidth = ", lastColWidth, "; mmAccumulatedWidth = ", mmAccumulatedWidth);
 				}
@@ -324,7 +370,18 @@ public class PageHandler extends AbstractHandler {
 			}
 		} else {
 			float widthRatio = (float) (mmWidth / lastColWidth);
-			ptHeight = ptHeight / widthRatio;
+
+			// scale the image to cell if the image dimension are larger like cell dimension
+			if (scaleSmallImage) {
+				ptHeight = ptHeight / widthRatio;
+			} else {
+				// avoid scaling for small images only resize of large images
+				if (widthRatio > 1.0) {
+					ptHeight = ptHeight / widthRatio;
+				} else {
+					dx = smu.anchorDxFromMM(mmWidth, lastColWidth);
+				}
+			}
 		}
 
 		int rowsSpanned = state.findRowsSpanned(cell.getRowIndex(), cell.getColumnIndex());
@@ -332,23 +389,72 @@ public class PageHandler extends AbstractHandler {
 
 		for (int i = 0; i < rowsSpanned; ++i) {
 			int rowIndex = cell.getRowIndex() + 1 + i;
-			neededRowHeightPoints -= state.currentSheet.getRow(rowIndex).getHeightInPoints();
+			Row tableRow = state.currentSheet.getRow(rowIndex);
+			if (tableRow != null)
+				neededRowHeightPoints -= tableRow.getHeightInPoints();
 		}
 
 		if (neededRowHeightPoints > cell.getRow().getHeightInPoints()) {
 			cell.getRow().setHeightInPoints(neededRowHeightPoints);
 		}
 
-		// ClientAnchor anchor = wb.getCreationHelper().createClientAnchor();
-		ClientAnchor anchor = state.getWb().getCreationHelper().createClientAnchor();
-		anchor.setCol1(cell.getColumnIndex());
-		anchor.setRow1(cell.getRowIndex());
-		anchor.setCol2(endCol);
-		anchor.setRow2(cell.getRowIndex() + rowsSpanned);
-		anchor.setDx2(dx);
-		anchor.setDy2(smu.anchorDyFromPoints(ptHeight, cell.getRow().getHeightInPoints()));
-		anchor.setAnchorType(ClientAnchor.MOVE_DONT_RESIZE);
-		drawing.createPicture(anchor, cellImage.imageIdx);
+		if (drawImage) {
+			int rowHeight = smu.anchorDyFromPoints(cell.getRow().getHeightInPoints(),
+					cell.getRow().getHeightInPoints());
+			int imageHeight = smu.anchorDyFromPoints(ptHeight, cell.getRow().getHeightInPoints());
+
+			// vertical alignment, top - default
+			int dy1 = 0;
+			int dy2 = smu.anchorDyFromPoints(ptHeight, cell.getRow().getHeightInPoints());
+
+			if (cellImage.verticalAlignment != null) {
+				int moveY = (rowHeight - imageHeight);
+				if (cellImage.verticalAlignment.equals(CSSConstants.CSS_MIDDLE_VALUE)) {
+					// vertical alignment, middle - half of empty area added at the top
+					moveY = moveY / 2;
+					dy1 += moveY;
+					dy2 += moveY;
+				} else if (cellImage.verticalAlignment.equals(CSSConstants.CSS_BOTTOM_VALUE)) {
+					// vertical alignment, bottom - full empty area added at the top
+					dy1 += moveY;
+					dy2 += moveY;
+				}
+			}
+			int imageWidth = smu.anchorDxFromMM(mmWidth, mmWidth);
+			int colWidth = smu.anchorDxFromMM(lastColWidth, lastColWidth);
+
+			// horizontal alignment, left - default
+			int dx1 = 0;
+			int dx2 = dx;
+
+			if (cellImage.horizontalAlignment != null) {
+				int moveX = (colWidth - imageWidth);
+				if (cellImage.horizontalAlignment.equals(CSSConstants.CSS_CENTER_VALUE)) {
+					// horizontal alignment, center - half of empty area added at left hand side
+					moveX = moveX / 2;
+					dx1 += moveX;
+					dx2 += moveX;
+				} else if (cellImage.horizontalAlignment.equals(CSSConstants.CSS_RIGHT_VALUE)) {
+					// horizontal alignment, right - full empty area added at left hand side
+					dx1 += moveX;
+					dx2 += moveX;
+				}
+			}
+
+			// ClientAnchor anchor = wb.getCreationHelper().createClientAnchor();
+			ClientAnchor anchor = state.getWb().getCreationHelper().createClientAnchor();
+			anchor.setCol1(cell.getColumnIndex());
+			anchor.setRow1(cell.getRowIndex());
+			anchor.setCol2(endCol);
+			anchor.setRow2(cell.getRowIndex() + rowsSpanned);
+			anchor.setDx1(dx1);
+			anchor.setDx2(dx2);
+			anchor.setDy1(dy1);
+			anchor.setDy2(dy2);
+			anchor.setAnchorType(AnchorType.MOVE_DONT_RESIZE /* ClientAnchor.MOVE_DONT_RESIZE */);
+			drawing.createPicture(anchor, cellImage.imageIdx);
+		}
+
 	}
 
 	@Override

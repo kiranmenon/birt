@@ -1,12 +1,14 @@
 /*************************************************************************************
- * Copyright (c) 2011, 2012, 2013 James Talbut.
+ * Copyright (c) 2011, 2012, 2013, 2024, 2025 James Talbut and others
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -41,12 +43,26 @@ import uk.co.spudsoft.birt.emitters.excel.ExcelEmitter;
 import uk.co.spudsoft.birt.emitters.excel.HandlerState;
 import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
 
+/**
+ * Abstract real table cell handler
+ *
+ * @since 3.3
+ *
+ */
 public class AbstractRealTableCellHandler extends CellContentHandler {
 
 	protected int column;
 	private AbstractRealTableRowHandler parentRow;
 	private boolean containsTable;
 
+	/**
+	 * Constructor
+	 *
+	 * @param emitter content emitter
+	 * @param log     log object
+	 * @param parent  parent handler
+	 * @param cell    cell content
+	 */
 	public AbstractRealTableCellHandler(IContentEmitter emitter, Logger log, IHandler parent, ICellContent cell) {
 		super(emitter, log, parent, cell);
 		column = cell.getColumn();
@@ -79,9 +95,21 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 		interruptCell(state, !containsTable);
 	}
 
+	/**
+	 * Resume cell
+	 *
+	 * @param state handler state
+	 */
 	public void resumeCell(HandlerState state) {
 	}
 
+	/**
+	 * Interrupt cell
+	 *
+	 * @param state             handler state
+	 * @param includeFormatOnly include format only
+	 * @throws BirtException
+	 */
 	public void interruptCell(HandlerState state, boolean includeFormatOnly) throws BirtException {
 
 		if (state == null) {
@@ -118,11 +146,33 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 						"]");
 				log.debug("Should be merging ? [", state.rowNum, ",", column, "] to [", endRow, ",",
 						column + cell.getColSpan() - 1, "]");
-				// CellRangeAddress newMergedRegion = new CellRangeAddress( state.rowNum,
-				// endRow, state.colNum + offset, endCol + offset );
 				CellRangeAddress newMergedRegion = new CellRangeAddress(state.rowNum, endRow, column,
 						column + cell.getColSpan() - 1);
-				state.currentSheet.addMergedRegion(newMergedRegion);
+
+				// excel merge region, avoid registration of overlapped merge regions
+				Boolean newAddressRange = true;
+				for (CellRangeAddress registeredMergedRegion : state.currentSheet.getMergedRegions()) {
+					if (newMergedRegion.getFirstColumn() >= registeredMergedRegion.getFirstColumn()
+							&& newMergedRegion.getFirstColumn() <= registeredMergedRegion.getLastColumn()
+							&& newMergedRegion.getFirstRow() >= registeredMergedRegion.getFirstRow()
+							&& newMergedRegion.getFirstRow() <= registeredMergedRegion.getLastRow()
+							|| registeredMergedRegion.getFirstRow() == newMergedRegion.getFirstRow()
+									&& registeredMergedRegion.getFirstColumn() == newMergedRegion.getFirstColumn()
+									&& registeredMergedRegion.getLastRow() == newMergedRegion.getLastRow()
+									&& registeredMergedRegion.getLastColumn() == newMergedRegion.getLastColumn()) {
+						newAddressRange = false;
+						break;
+					}
+				}
+				if (newAddressRange) {
+					try {
+						state.currentSheet.addMergedRegion(newMergedRegion);
+					} catch (IllegalStateException ise) {
+						log.error(0,
+								"Error of merged regions: " + ise.getLocalizedMessage(),
+								ise);
+					}
+				}
 
 				colSpan = cell.getColSpan();
 			}
@@ -183,6 +233,7 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 		TableContent myTableContent = cellDesignsTableContent();
 
 		if ((tableHandler != null) && (tableHandler.getColumnCount() == colSpan)
+				&& table.getParent() instanceof CellContent
 				&& (1 == ((CellDesign) ((CellContent) table.getParent()).getGenerateBy()).getContentCount())) {
 			// Parent row contains only one item
 
@@ -215,14 +266,13 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 			containsTable = true;
 			parentRow = getAncestor(AbstractRealTableRowHandler.class);
 			interruptCell(state, false);
-
 			removeMergedCell(state, state.rowNum, state.colNum);
 
 			NestedTableHandler nestedTableHandler = new NestedTableHandler(log, this, table, rowSpan);
 			nestedTableHandler.setInserted(true);
 			state.setHandler(nestedTableHandler);
-			state.getHandler().startTable(state, table);
 
+			state.getHandler().startTable(state, table);
 		} else {
 			state.setHandler(new FlattenedTableHandler(this, log, this, table));
 			state.getHandler().startTable(state, table);
@@ -234,6 +284,7 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 		int colSpan = ((ICellContent) element).getColSpan();
 		ITableHandler tableHandler = getAncestor(ITableHandler.class);
 		if ((tableHandler != null) && (tableHandler.getColumnCount() == colSpan)
+				&& list.getParent() instanceof CellContent
 				&& (1 == ((CellDesign) ((CellContent) list.getParent()).getGenerateBy()).getContentCount())) {
 
 			containsTable = true;
@@ -266,8 +317,6 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 
 	@Override
 	public void emitLabel(HandlerState state, ILabelContent label) throws BirtException {
-		// String labelText = ( label.getLabelText() != null ) ? label.getLabelText() :
-		// label.getText();
 		String labelText = (label.getText() != null) ? label.getText() : label.getLabelText();
 		log.debug("labelText:", labelText);
 		emitContent(state, label, labelText,
@@ -297,6 +346,7 @@ public class AbstractRealTableCellHandler extends CellContentHandler {
 		int colSpan = ((ICellContent) element).getColSpan();
 		ITableHandler tableHandler = getAncestor(ITableHandler.class);
 		if ((tableHandler != null) && (tableHandler.getColumnCount() == colSpan)
+				&& image.getParent() instanceof CellContent
 				&& (1 == ((CellDesign) ((CellContent) image.getParent()).getGenerateBy()).getContentCount())) {
 			imageCanSpan = true;
 		}

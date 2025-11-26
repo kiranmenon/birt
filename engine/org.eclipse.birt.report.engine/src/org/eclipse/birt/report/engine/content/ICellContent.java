@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,92 +18,253 @@ import org.eclipse.birt.report.engine.ir.DimensionType;
 
 /**
  * Provides the interfaces for Cell Content
- * 
+ *
  */
 public interface ICellContent extends IContainerContent {
 
 	/**
-	 * 
+	 * Get the column span
+	 *
 	 * @return the column span
 	 */
-	public int getColSpan();
+	int getColSpan();
 
 	/**
-	 * @return Returns the rowSpan.
+	 * Get the row span
+	 *
+	 * @return the row span
 	 */
-	public int getRowSpan();
+	int getRowSpan();
 
 	/**
-	 * 
+	 * Get the column number
+	 *
 	 * @return the column number
 	 */
-	public int getColumn();
+	int getColumn();
 
 	/**
-	 * @return the column content.
+	 * Get the column content
+	 *
+	 * @return the column content
 	 */
-	public IColumn getColumnInstance();
+	IColumn getColumnInstance();
 
 	/**
-	 * 
-	 * @return
+	 * Get the row
+	 *
+	 * @return the row
 	 */
-	public int getRow();
+	int getRow();
 
-	public void setColumn(int column);
+	/**
+	 * Set the column
+	 *
+	 * @param column
+	 */
+	void setColumn(int column);
 
-	public void setRowSpan(int rowSpan);
+	/**
+	 * Set the row span
+	 *
+	 * @param rowSpan row span
+	 */
+	void setRowSpan(int rowSpan);
 
-	public void setColSpan(int colSpan);
+	/**
+	 * Set the column span
+	 *
+	 * @param colSpan column span
+	 */
+	void setColSpan(int colSpan);
 
-	public void setDisplayGroupIcon(boolean displayGroupIcon);
+	/**
+	 * Set display group icon
+	 *
+	 * @param displayGroupIcon display the group icon
+	 */
+	void setDisplayGroupIcon(boolean displayGroupIcon);
 
-	public boolean getDisplayGroupIcon();
+	/**
+	 * Get the display group icon
+	 *
+	 * @return the display group icon
+	 */
+	boolean getDisplayGroupIcon();
 
-	public boolean hasDiagonalLine();
+	/**
+	 * Has diagonal line
+	 *
+	 * @return check of diagonal line
+	 */
+	boolean hasDiagonalLine();
 
-	public int getDiagonalNumber();
+	/**
+	 * Get diagonal number
+	 *
+	 * @return the diagonal number
+	 */
+	int getDiagonalNumber();
 
-	public void setDiagonalNumber(int diagonalNumber);
+	/**
+	 * Set diagonal number
+	 *
+	 * @param diagonalNumber diagonal number
+	 */
+	void setDiagonalNumber(int diagonalNumber);
 
-	public String getDiagonalStyle();
+	/**
+	 * Get diagonal style
+	 *
+	 * @return the diagonal style
+	 */
+	String getDiagonalStyle();
 
-	public void setDiagonalStyle(String diagonalStyle);
+	/**
+	 * Set diagonal style
+	 *
+	 * @param diagonalStyle diagonal style
+	 */
+	void setDiagonalStyle(String diagonalStyle);
 
-	public DimensionType getDiagonalWidth();
+	/**
+	 * Get the diagonal width
+	 *
+	 * @return the diagonal width
+	 */
+	DimensionType getDiagonalWidth();
 
-	public void setDiagonalWidth(DimensionType diagonalWidth);
+	/**
+	 * Set the diagonal width
+	 *
+	 * @param diagonalWidth diagonal width
+	 */
+	void setDiagonalWidth(DimensionType diagonalWidth);
 
-	public String getDiagonalColor();
+	/**
+	 * Get the diagonal color
+	 *
+	 * @return the diagonal color
+	 */
+	String getDiagonalColor();
 
-	public void setDiagonalColor(String diagonalColor);
+	/**
+	 * Set the diagonal color
+	 *
+	 * @param diagonalColor diagonal color
+	 */
+	void setDiagonalColor(String diagonalColor);
 
-	public int getAntidiagonalNumber();
+	/**
+	 * Get the anti-diagonal number
+	 *
+	 * @return the anti-diagonal number
+	 */
+	int getAntidiagonalNumber();
 
-	public void setAntidiagonalNumber(int antidiagonalNumber);
+	/**
+	 * Set the anti-diagonal number
+	 *
+	 * @param antidiagonalNumber anti-diagonal number
+	 */
+	void setAntidiagonalNumber(int antidiagonalNumber);
 
-	public String getAntidiagonalStyle();
+	/**
+	 * Get the anti-diagonal style
+	 *
+	 * @return the anti-diagonal style
+	 */
+	String getAntidiagonalStyle();
 
-	public void setAntidiagonalStyle(String antidiagonalStyle);
+	/**
+	 * Set the anti-diagonal style
+	 *
+	 * @param antidiagonalStyle anti-diagonal style
+	 */
+	void setAntidiagonalStyle(String antidiagonalStyle);
 
-	public DimensionType getAntidiagonalWidth();
+	/**
+	 * Get the anti-diagonal width
+	 *
+	 * @return the anti-diagonal width
+	 */
+	DimensionType getAntidiagonalWidth();
 
-	public void setAntidiagonalWidth(DimensionType antidiagonalWidth);
+	/**
+	 * Set the anti-diagonal width
+	 *
+	 * @param antidiagonalWidth anti-diagonal width
+	 */
+	void setAntidiagonalWidth(DimensionType antidiagonalWidth);
 
-	public String getAntidiagonalColor();
+	/**
+	 * Get the anti-diagonal color
+	 *
+	 * @return the anti-diagonal color
+	 */
+	String getAntidiagonalColor();
 
-	public void setAntidiagonalColor(String antidiagonalColor);
+	/**
+	 * Set the anti-diagonal color
+	 *
+	 * @param antidiagonalColor anti-diagonal color
+	 */
+	void setAntidiagonalColor(String antidiagonalColor);
 
-	public String getHeaders();
+	/**
+	 * Get the headers (which TH cells belong to this TH/TD cell?). This is for
+	 * TH/TD cells when creating tagged PDF / accessible PDF / PDF/UA.
+	 *
+	 * @return the headers
+	 */
+	String getHeaders();
 
-	public void setHeaders(String headers);
+	/**
+	 * Set the headers (which TH cells belong to this TH/TD cell?). This is for
+	 * TH/TD cells when creating tagged PDF / accessible PDF / PDF/UA.
+	 *
+	 * @param headers
+	 */
+	void setHeaders(String headers);
 
-	public String getScope();
+	/**
+	 * Get the scope. This is for TH cells when creating tagged PDF / accessible PDF
+	 * / PDF/UA.
+	 *
+	 * @return the scope
+	 */
+	String getScope();
 
-	public void setScope(String scope);
+	/**
+	 * Set the scope. This is for TH cells when creating tagged PDF / accessible PDF
+	 * / PDF/UA.
+	 *
+	 * @param scope scope
+	 */
+	void setScope(String scope);
 
-	public boolean repeatContent();
+	/**
+	 * Check if the content is repeatable
+	 *
+	 * @return the check result if content repeatable
+	 */
+	boolean repeatContent();
 
-	public void setRepeatContent(boolean repeatContent);
+	/**
+	 * Set the repeat content
+	 *
+	 * @param repeatContent repeat content
+	 */
+	void setRepeatContent(boolean repeatContent);
+
+	/**
+	 * @return Returns the tagType.
+	 */
+	public String getTagType();
+
+	/**
+	 * @param tagType The tagType to set.
+	 */
+	public void setTagType(String tagType);
 
 }

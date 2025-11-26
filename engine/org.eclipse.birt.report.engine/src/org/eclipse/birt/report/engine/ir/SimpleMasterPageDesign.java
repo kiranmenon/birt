@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,10 +18,10 @@ import java.util.ArrayList;
 
 /**
  * Simple master page object.
- * 
+ *
  * a simple master page contains a header, and a footer.
- * 
- * 
+ *
+ *
  */
 public class SimpleMasterPageDesign extends MasterPageDesign {
 
@@ -106,7 +109,7 @@ public class SimpleMasterPageDesign extends MasterPageDesign {
 
 	/**
 	 * get the total item in the footer
-	 * 
+	 *
 	 * @return total items in the footer
 	 */
 	public int getFooterCount() {
@@ -115,7 +118,7 @@ public class SimpleMasterPageDesign extends MasterPageDesign {
 
 	/**
 	 * get the index item in the footer
-	 * 
+	 *
 	 * @param index index of the item
 	 * @return item at the index
 	 */
@@ -126,7 +129,7 @@ public class SimpleMasterPageDesign extends MasterPageDesign {
 
 	/**
 	 * add an item into the footer
-	 * 
+	 *
 	 * @param item item to be added
 	 */
 
@@ -143,7 +146,7 @@ public class SimpleMasterPageDesign extends MasterPageDesign {
 
 	/**
 	 * get the item count in the header band.
-	 * 
+	 *
 	 * @return total items in the header band
 	 */
 	public int getHeaderCount() {
@@ -152,7 +155,7 @@ public class SimpleMasterPageDesign extends MasterPageDesign {
 
 	/**
 	 * get the index item in the header
-	 * 
+	 *
 	 * @param index index of the item
 	 * @return item at index.
 	 */
@@ -163,7 +166,7 @@ public class SimpleMasterPageDesign extends MasterPageDesign {
 
 	/**
 	 * add an item into the header band.
-	 * 
+	 *
 	 * @param item item to be added
 	 */
 	public void addHeader(ReportItemDesign item) {

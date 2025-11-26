@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004,2009 Actuate Corporation. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse
- * Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html Contributors: Actuate Corporation -
- * initial API and implementation
+ * Copyright (c) 2004,2009 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  ******************************************************************************/
 
 package org.eclipse.birt.report.engine.api.impl;
@@ -32,7 +35,7 @@ public class ReportRunnable extends DesignRunnable implements IReportRunnable {
 
 	protected boolean prepared = false;
 
-	protected Hashtable<String, Map<String, ICompiledScript>> cachedScripts = new Hashtable<String, Map<String, ICompiledScript>>();
+	protected Hashtable<String, Map<String, ICompiledScript>> cachedScripts = new Hashtable<>();
 
 	public void setPrepared(boolean prepared) {
 		this.prepared = prepared;
@@ -57,7 +60,7 @@ public class ReportRunnable extends DesignRunnable implements IReportRunnable {
 	public void putScript(String scriptName, String source, ICompiledScript script) {
 		Map<String, ICompiledScript> cachedScript = cachedScripts.get(scriptName);
 		if (cachedScript == null) {
-			cachedScript = new Hashtable<String, ICompiledScript>();
+			cachedScript = new Hashtable<>();
 			cachedScripts.put(scriptName, cachedScript);
 		}
 		cachedScript.put(source, script);
@@ -65,7 +68,7 @@ public class ReportRunnable extends DesignRunnable implements IReportRunnable {
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param report reference to report
 	 */
 	public ReportRunnable(IReportEngine engine, ModuleHandle designHandle) {
@@ -81,9 +84,10 @@ public class ReportRunnable extends DesignRunnable implements IReportRunnable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportRunnable#getReportName()
 	 */
+	@Override
 	public String getReportName() {
 		return this.reportName;
 	}
@@ -95,6 +99,7 @@ public class ReportRunnable extends DesignRunnable implements IReportRunnable {
 		return (ReportDesignHandle) designHandle;
 	}
 
+	@Override
 	public void setDesignHandle(DesignElementHandle handle) {
 		if (!(handle instanceof ReportDesignHandle)) {
 			throw new IllegalArgumentException("the argument must be a instanceof ReportDesignHandle");
@@ -104,10 +109,11 @@ public class ReportRunnable extends DesignRunnable implements IReportRunnable {
 
 	/**
 	 * Returns the report design
-	 * 
+	 *
 	 * @return the report design
 	 */
 
+	@Override
 	public IReportDesign getDesignInstance() {
 		ReportDesign design = new ReportDesign((ReportDesignHandle) designHandle);
 		return design;

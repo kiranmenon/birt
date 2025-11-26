@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -32,17 +35,20 @@ public class ReportExtensionExecutor extends WrappedReportExecutor {
 		this.processors = processors;
 	}
 
+	@Override
 	public IReportContent execute() throws BirtException {
 		reportContent = reportExecutor.execute();
 		startReportProcess(reportContent);
 		return reportContent;
 	}
 
+	@Override
 	public void close() throws BirtException {
 		endReportProcess(reportContent);
 		super.close();
 	}
 
+	@Override
 	protected IReportItemExecutor createWrappedExecutor(IReportItemExecutor executor) {
 		return new ReportExtensionItemExecutor(executor);
 	}
@@ -55,12 +61,14 @@ public class ReportExtensionExecutor extends WrappedReportExecutor {
 			super(ReportExtensionExecutor.this, executor);
 		}
 
+		@Override
 		public IContent execute() throws BirtException {
 			content = super.execute();
 			startItemProcess(content);
 			return content;
 		}
 
+		@Override
 		public void close() throws BirtException {
 			endItemProcess(content);
 			super.close();

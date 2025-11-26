@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse
- * Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html Contributors: Actuate Corporation -
- * initial API and implementation
+ * Copyright (c) 2004 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  ******************************************************************************/
 
 package org.eclipse.birt.report.tests.chart.regression;
@@ -28,16 +31,18 @@ import org.eclipse.birt.chart.model.attribute.impl.LineAttributesImpl;
 import org.eclipse.birt.chart.model.component.Series;
 import org.eclipse.birt.chart.model.component.impl.SeriesImpl;
 import org.eclipse.birt.chart.model.data.NumberDataSet;
-import org.eclipse.birt.chart.model.data.TextDataSet;
 import org.eclipse.birt.chart.model.data.SeriesDefinition;
+import org.eclipse.birt.chart.model.data.TextDataSet;
 import org.eclipse.birt.chart.model.data.impl.NumberDataSetImpl;
-import org.eclipse.birt.chart.model.data.impl.TextDataSetImpl;
 import org.eclipse.birt.chart.model.data.impl.SeriesDefinitionImpl;
+import org.eclipse.birt.chart.model.data.impl.TextDataSetImpl;
 import org.eclipse.birt.chart.model.impl.ChartWithoutAxesImpl;
 import org.eclipse.birt.chart.model.type.PieSeries;
 import org.eclipse.birt.chart.model.type.impl.PieSeriesImpl;
 import org.eclipse.birt.chart.util.PluginSettings;
 import org.eclipse.birt.report.tests.chart.ChartTestCase;
+
+import utility.ImageUtil;
 
 /**
  * Regression description:
@@ -70,7 +75,7 @@ public class Regression_134885 extends ChartTestCase {
 
 	/**
 	 * execute application
-	 * 
+	 *
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -110,13 +115,18 @@ public class Regression_134885 extends ChartTestCase {
 	}
 
 	public void test_regression_134885() throws Exception {
-		Regression_134885 st = new Regression_134885();
-		assertTrue(st.compareImages(GOLDEN, OUTPUT));
+		if (!"true".equals(System.getProperty("testOnCentos"))) {
+			if (!ImageUtil.isRenderingTestApplicable()) {
+				return;
+			}
+			Regression_134885 st = new Regression_134885();
+			assertTrue(st.compareImages(GOLDEN, OUTPUT));
+		}
 	}
 
 	/**
 	 * Creates a scatter chart model as a reference implementation
-	 * 
+	 *
 	 * @return An instance of the simulated runtime chart model (containing filled
 	 *         datasets)
 	 */

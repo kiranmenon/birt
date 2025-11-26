@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,9 +22,15 @@ import org.eclipse.birt.report.engine.api.TOCNode;
 import org.eclipse.birt.report.engine.api.script.instance.IScriptStyle;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
 
-import com.lowagie.text.pdf.PdfAction;
-import com.lowagie.text.pdf.PdfOutline;
+import org.openpdf.text.pdf.PdfAction;
+import org.openpdf.text.pdf.PdfOutline;
 
+/**
+ * Class of PDF TOC handler
+ *
+ * @since 3.3
+ *
+ */
 public class TOCHandler {
 
 	/**
@@ -48,7 +57,9 @@ public class TOCHandler {
 	/**
 	 * The constructor.
 	 *
-	 * @param root The TOC node in which need to build PDF outline
+	 * @param root      The TOC node in which need to build PDF outline
+	 * @param outline   pdf outline
+	 * @param bookmarks bookmarks of the pdf
 	 */
 	public TOCHandler(TOCNode root, PdfOutline outline, Set<String> bookmarks) {
 		this.root = root;
@@ -60,10 +71,14 @@ public class TOCHandler {
 	 * @deprecated get the root of the TOC tree.
 	 * @return The TOC root node
 	 */
+	@Deprecated
 	public TOCNode getTOCRoot() {
 		return this.root;
 	}
 
+	/**
+	 * Create the TOC of the PDF
+	 */
 	public void createTOC() {
 		createTOC(root, outline, bookmarks);
 	}
@@ -71,16 +86,15 @@ public class TOCHandler {
 	/**
 	 * create a PDF outline for tocNode, using the pol as the parent PDF outline.
 	 *
-	 * @param tocNode   The tocNode whose kids need to build a PDF outline tree
-	 * @param pol       The parent PDF outline for these kids
+	 * @param tocNode   The tocNode whose children need to build a PDF outline tree
+	 * @param pol       The parent PDF outline for these children
 	 * @param bookmarks All bookMarks created during rendering
 	 */
 	protected void createTOC(TOCNode tocNode, PdfOutline pol, Set<String> bookmarks) {
-		if (isOutlineSizeOverflow())
+		if (isOutlineSizeOverflow() || null == tocNode || null == tocNode.getChildren()) {
 			return;
-		if (null == tocNode || null == tocNode.getChildren())
-			return;
-		for (Iterator i = tocNode.getChildren().iterator(); i.hasNext();) {
+		}
+		for (Iterator<?> i = tocNode.getChildren().iterator(); i.hasNext();) {
 			TOCNode node = (TOCNode) i.next();
 			if (!bookmarks.contains(node.getBookmark())) {
 				createTOC(node, outline, bookmarks);
@@ -88,7 +102,7 @@ public class TOCHandler {
 			}
 			PdfOutline outline = new PdfOutline(pol, PdfAction.gotoLocalPage(node.getBookmark(), false),
 					node.getDisplayString());
-			countOutlineSize(node.getBookmark().length());
+			countOutlineSize();
 			IScriptStyle style = node.getTOCStyle();
 			String color = style.getColor();
 			if (color != null) {
@@ -110,7 +124,7 @@ public class TOCHandler {
 		return counter > MAX_COUNT;
 	}
 
-	protected void countOutlineSize(long size) {
+	protected void countOutlineSize() {
 		counter++;
 	}
 }

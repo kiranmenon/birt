@@ -1,13 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2004,2008 Actuate Corporation. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse
- * Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html Contributors: Actuate Corporation -
- * initial API and implementation
+ * Copyright (c) 2004,2008 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  ******************************************************************************/
 
 package org.eclipse.birt.report.engine.api.impl;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -18,10 +22,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.imageio.ImageIO;
 
 import org.eclipse.birt.report.engine.api.IImage;
 import org.eclipse.birt.report.engine.api.ImageSize;
@@ -62,9 +67,11 @@ public class Image extends ReportPart implements IImage {
 
 	protected ImageSize imageSize;
 
+	protected ImageSize imageRawSize;
+
 	/**
 	 * Constructor with an image uri
-	 * 
+	 *
 	 * @param uri
 	 */
 	public Image(String uri) {
@@ -82,7 +89,7 @@ public class Image extends ReportPart implements IImage {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param data
 	 * @param name
 	 */
@@ -97,7 +104,7 @@ public class Image extends ReportPart implements IImage {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param data
 	 * @param name
 	 * @param postfix
@@ -114,6 +121,11 @@ public class Image extends ReportPart implements IImage {
 		mimeType = FileUtil.getTypeFromExt(extension);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param content content environment of the image
+	 */
 	public Image(IImageContent content) {
 		String imgUri = content.getURI();
 		byte[] imgData = content.getData();
@@ -161,50 +173,59 @@ public class Image extends ReportPart implements IImage {
 			assert (false);
 		}
 
-	} /*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.birt.report.engine.api2.IImage#getID()
-		 */
+	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.birt.report.engine.api2.IImage#getID()
+	 */
+	@Override
 	public String getID() {
 		return id;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IImage#getSource()
 	 */
+	@Override
 	public int getSource() {
 		return source;
 	}
 
+	/**
+	 * Set the image source
+	 *
+	 * @param source image source
+	 */
 	public void setSource(int source) {
 		this.source = source;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IImage#getImageData()
 	 */
+	@Override
 	public byte[] getImageData() throws OutOfMemoryError {
 		return data;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IImage#getImageStream()
 	 */
+	@Override
 	public InputStream getImageStream() {
 		switch (this.source) {
 		case IImage.FILE_IMAGE:
 			try {
 				URL url = new URL(this.id);
 				return new BufferedInputStream(url.openStream());
-			} catch (MalformedURLException e) {
 			} catch (IOException e1) {
 			}
 
@@ -225,7 +246,6 @@ public class Image extends ReportPart implements IImage {
 			try {
 				URL url = new URL(this.id);
 				return new BufferedInputStream(url.openStream());
-			} catch (MalformedURLException e) {
 			} catch (IOException e1) {
 			}
 			return null;
@@ -238,28 +258,41 @@ public class Image extends ReportPart implements IImage {
 		}
 	}
 
+	@Override
 	public String getMimeType() {
 		return mimeType;
 	}
 
+	/**
+	 * Set mime type
+	 *
+	 * @param mimeType mime type of the image
+	 */
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
 	}
 
+	@Override
 	public String getImageMap() {
 		return imageMap;
 	}
 
+	/**
+	 * Set the image mape
+	 *
+	 * @param imageMap image map
+	 */
 	public void setImageMap(String imageMap) {
 		this.imageMap = imageMap;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IImage#writeImage(java.io.File)
 	 */
-	public void writeImage(File dest) throws IOException {
+	@Override
+	public void writeImage(File dest) {
 		if (source == IImage.INVALID_IMAGE) {
 			logger.log(Level.SEVERE, "image source {0} is not valid!", id); //$NON-NLS-1$
 			return;
@@ -270,13 +303,12 @@ public class Image extends ReportPart implements IImage {
 			logger.log(Level.SEVERE, "image source {0} is not found!", id); //$NON-NLS-1$
 			return;
 		}
-		// if(!dest.exists())
-		// {
 
 		String parent = new File(dest.getAbsolutePath()).getParent();
 		File parentDir = new File(parent);
-		if (!parentDir.exists())
+		if (!parentDir.exists()) {
 			parentDir.mkdirs();
+		}
 		OutputStream output = null;
 		try {
 			output = new BufferedOutputStream(new FileOutputStream(dest));
@@ -298,14 +330,18 @@ public class Image extends ReportPart implements IImage {
 					logger.log(Level.SEVERE, e.getMessage(), e);
 				}
 			}
+			try {
+				BufferedImage bImg = ImageIO.read(dest);
+				this.imageRawSize = new ImageSize("px", bImg.getWidth(), bImg.getHeight());
+			} catch (Exception ex) {
+				this.imageRawSize = new ImageSize("px", 0, 0);
+			}
 		}
-		// }
-
 	}
 
 	/**
 	 * Copies the stream from the source to the target
-	 * 
+	 *
 	 * @param src the source stream
 	 * @param tgt the target stream
 	 * @throws IOException
@@ -324,18 +360,43 @@ public class Image extends ReportPart implements IImage {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IImage#getExtension()
 	 */
+	@Override
 	public String getExtension() {
 		return extension;
 	}
 
+	/**
+	 * Set image size
+	 *
+	 * @param size image size
+	 */
 	public void setImageSize(ImageSize size) {
 		imageSize = size;
 	}
 
+	@Override
 	public ImageSize getImageSize() {
 		return imageSize;
+	}
+
+	/**
+	 * Set the raw size of the image
+	 *
+	 * @param rawSize The raw image size
+	 */
+	public void setImageRawSize(ImageSize rawSize) {
+		this.imageRawSize = rawSize;
+	}
+
+	/**
+	 * Get the raw size of the image
+	 *
+	 * @return Return the raw size of the image
+	 */
+	public ImageSize getImageRawSize() {
+		return this.imageRawSize;
 	}
 }

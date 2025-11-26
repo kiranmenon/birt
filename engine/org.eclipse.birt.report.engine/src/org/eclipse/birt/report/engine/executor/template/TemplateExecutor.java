@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,8 +18,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class TemplateExecutor implements TextTemplate.Visitor {
 	protected HashMap<String, Object> values;
 	protected ExecutionContext context;
 	protected File imageFolder;
-	protected HashMap imageCaches = new HashMap();
+	protected HashMap<String, String> imageCaches = new HashMap();
 
 	public TemplateExecutor(ExecutionContext context) {
 		this.context = context;
@@ -94,11 +95,13 @@ public class TemplateExecutor implements TextTemplate.Visitor {
 		return value;
 	}
 
+	@Override
 	public Object visitText(TextTemplate.TextNode node, Object value) {
 		buffer.append(node.getContent());
 		return value;
 	}
 
+	@Override
 	public Object visitValue(TextTemplate.ValueNode node, Object value) {
 		String expression = node.getValue();
 		if (expression != null) {
@@ -125,6 +128,7 @@ public class TemplateExecutor implements TextTemplate.Visitor {
 		return value;
 	}
 
+	@Override
 	public Object visitExpressionValue(ExpressionValueNode node, Object value) {
 		String expression = node.getValue();
 		if (expression != null) {
@@ -175,9 +179,10 @@ public class TemplateExecutor implements TextTemplate.Visitor {
 	}
 
 	protected String encodeHtmlText(String text) {
-		return text.replaceAll("<", "&lt;");
+		return text.replace("<", "&lt;");
 	}
 
+	@Override
 	public Object visitImage(TextTemplate.ImageNode node, Object value) {
 		String imageName = null;
 		String imageExt = null;
@@ -224,28 +229,24 @@ public class TemplateExecutor implements TextTemplate.Visitor {
 
 	protected String saveToFile(final String name, final String ext, final byte[] content) {
 		if (name != null) {
-			String file = (String) imageCaches.get(name);
+			String file = imageCaches.get(name);
 			if (file != null) {
 				return file;
 			}
 		}
-		return AccessController.doPrivileged(new PrivilegedAction<String>() {
 
-			public String run() {
-				try {
-					File imageFile = File.createTempFile("img", ext, imageFolder);
-					OutputStream out = new FileOutputStream(imageFile);
-					out.write(content);
-					out.close();
-					String fileName = imageFile.toURL().toExternalForm();
-					imageCaches.put(name, fileName);
-					return fileName;
-				} catch (IOException ex) {
-					logger.log(Level.WARNING, ex.getMessage(), ex);
-					context.addException(new EngineException(ex.getLocalizedMessage()));
-				}
-				return null;
-			}
-		});
+		try {
+			File imageFile = File.createTempFile("img", ext, imageFolder);
+			OutputStream out = new FileOutputStream(imageFile);
+			out.write(content);
+			out.close();
+			String fileName = imageFile.toURI().toURL().toExternalForm();
+			imageCaches.put(name, fileName);
+			return fileName;
+		} catch (IOException ex) {
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			context.addException(new EngineException(ex.getLocalizedMessage()));
+		}
+		return null;
 	}
 }

@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -18,9 +21,12 @@ import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.content.ITextContent;
 import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.DataFormatValue;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
 import org.eclipse.birt.report.engine.nLayout.LayoutContext;
 import org.eclipse.birt.report.engine.nLayout.area.IArea;
+import org.eclipse.birt.report.engine.nLayout.area.ITagType;
 import org.eclipse.birt.report.engine.nLayout.area.style.BoxStyle;
 import org.eclipse.birt.report.engine.nLayout.area.style.TextStyle;
 import org.eclipse.birt.report.engine.util.BidiAlignmentResolver;
@@ -28,18 +34,35 @@ import org.w3c.dom.css.CSSValue;
 
 import com.ibm.icu.text.Bidi;
 
-public class LineArea extends InlineStackingArea {
+/**
+ * Definition of line area
+ *
+ * @since 3.3
+ *
+ */
+public class LineArea extends InlineStackingArea implements ITagType {
 
 	protected byte baseLevel = Bidi.DIRECTION_LEFT_TO_RIGHT;
 
 	protected boolean setIndent = false;
 
+	/**
+	 * Constructor container absed
+	 *
+	 * @param parent
+	 * @param context
+	 */
 	public LineArea(ContainerArea parent, LayoutContext context) {
 		super(parent, context, null);
 		assert (parent != null);
 		isInInlineStacking = parent.isInInlineStacking;
 	}
 
+	/**
+	 * Constructor area based
+	 *
+	 * @param area
+	 */
 	public LineArea(LineArea area) {
 		super(area);
 		this.baseLevel = area.baseLevel;
@@ -47,12 +70,17 @@ public class LineArea extends InlineStackingArea {
 		this.isInInlineStacking = area.isInInlineStacking;
 	}
 
+	/**
+	 * Set base level
+	 *
+	 * @param baseLevel
+	 */
 	public void setBaseLevel(byte baseLevel) {
 		this.baseLevel = baseLevel;
 	}
 
+	@Override
 	public void addChild(IArea area) {
-		// FIXME ?
 		int childHorizontalSpan = area.getX() + area.getWidth();
 		int childVerticalSpan = area.getY() + area.getHeight();
 
@@ -66,6 +94,7 @@ public class LineArea extends InlineStackingArea {
 		children.add(area);
 	}
 
+	@Override
 	public void setTextIndent(ITextContent content) {
 		if (currentIP == 0 && !setIndent && content != null) {
 			IStyle contentStyle = content.getComputedStyle();
@@ -75,6 +104,12 @@ public class LineArea extends InlineStackingArea {
 		}
 	}
 
+	/**
+	 * Generate alignment of context
+	 *
+	 * @param endParagraph
+	 * @param context
+	 */
 	public void align(boolean endParagraph, LayoutContext context) {
 		assert (parent instanceof BlockContainerArea);
 		CSSValue align = ((BlockContainerArea) parent).getTextAlign();
@@ -82,53 +117,99 @@ public class LineArea extends InlineStackingArea {
 		// bidi_hcg: handle empty and justify align in RTL direction as right
 		// alignment
 		boolean isRightAligned = BidiAlignmentResolver.isRightAligned(parent.content, align, endParagraph);
+		boolean isCentered = CSSValueConstants.CENTER_VALUE.equals(align);
+		boolean isJustified = CSSValueConstants.JUSTIFY_VALUE.equals(align) && !endParagraph;
 
 		// single line
-		if ((isRightAligned || IStyle.CENTER_VALUE.equals(align))) {
-			int spacing = width - currentIP;
-			Iterator iter = getChildren();
+		int spaceRemaining = width - currentIP;
+		spaceRemaining -= adjustSpacingForSoftHyphen();
+		int adjustLeftWhiteSpace = ignoreLeftMostWhiteSpace();
+		int adjustRightWhiteSpace = ignoreRightMostWhiteSpace();
+		if ((isRightAligned)) {
+			Iterator<IArea> iter = getChildren();
 			while (iter.hasNext()) {
 				AbstractArea area = (AbstractArea) iter.next();
-
-				if (isRightAligned) {
-					if (parent.content.isDirectionRTL()) {
-						area.setPosition(spacing + area.getX(), area.getY());
-					} else {
-						area.setPosition(spacing + area.getX() + ignoreRightMostWhiteSpace(), area.getY());
-					}
-				} else if (IStyle.CENTER_VALUE.equals(align)) {
-					area.setPosition(spacing / 2 + area.getX(), area.getY());
+				if (parent.content.isDirectionRTL()) {
+					area.setPosition(spaceRemaining + area.getX(), area.getY());
+				} else {
+					area.setPosition(spaceRemaining + area.getX() + adjustRightWhiteSpace, area.getY());
 				}
-
 			}
-		} else if (IStyle.JUSTIFY_VALUE.equals(align) && !endParagraph) {
-			justify();
+		} else if (isCentered) {
+			Iterator<IArea> iter = getChildren();
+			while (iter.hasNext()) {
+				AbstractArea area = (AbstractArea) iter.next();
+				area.setPosition(spaceRemaining / 2 + area.getX() - adjustLeftWhiteSpace + adjustRightWhiteSpace, area.getY());
+			}
+		} else if (isJustified) {
+			justify(spaceRemaining, adjustLeftWhiteSpace, adjustRightWhiteSpace);
+		} else {
+			// is left aligned
+			if (parent.content != null && !parent.content.isDirectionRTL()) {
+				if (adjustLeftWhiteSpace != 0) {
+					String sp = null;
+					DataFormatValue dfv = parent.content.getComputedStyle().getDataFormat();
+					if (dfv != null) {
+						sp = dfv.getStringPattern();
+					}
+					if (sp == null || !sp.startsWith("^")) {
+						Iterator<IArea> iter = getChildren();
+						while (iter.hasNext()) {
+							AbstractArea area = (AbstractArea) iter.next();
+							area.setPosition(area.getX() - adjustLeftWhiteSpace, area.getY());
+						}
+					} else {
+						// Do not adjust (see https://github.com/eclipse-birt/birt/discussions/1536)
+					}
+				}
+			}
 		}
-		if (context.getBidiProcessing())
+		if (context.getBidiProcessing()) {
 			reorderVisually(this);
+		}
 		verticalAlign();
 	}
 
+	private int adjustSpacingForSoftHyphen() {
+		if (lastTextArea != null) {
+			int softHyphenWidth = lastTextArea.getSoftHyphenWidth();
+			return softHyphenWidth;
+		}
+		return 0;
+	}
+
 	private int ignoreRightMostWhiteSpace() {
-		AbstractArea area = this;
-		while (area instanceof ContainerArea) {
-			ArrayList children = ((ContainerArea) area).children;
-			if (children != null && children.size() > 0) {
-				area = (AbstractArea) children.get(children.size() - 1);
-			} else {
-				return 0;
+		if (lastTextArea != null) {
+			String text = lastTextArea.getText();
+			int letterSpacing = lastTextArea.getTextStyle().getLetterSpacing();
+			if (null != text) {
+				char[] charArray = text.toCharArray();
+				int len = charArray.length;
+				while (len > 0 && (charArray[len - 1] <= ' ')) {
+					len--;
+				}
+				if (len != charArray.length) {
+					return (1 + charArray.length - len) * letterSpacing
+							+ lastTextArea.getTextWidth(text.substring(len));
+				}
 			}
-			if (area instanceof TextArea) {
-				String text = ((TextArea) area).getText();
-				if (null != text) {
-					char[] charArray = text.toCharArray();
-					int len = charArray.length;
-					while (len > 0 && (charArray[len - 1] <= ' ')) {
-						len--;
-					}
-					if (len != charArray.length) {
-						return ((TextArea) area).getTextWidth(text.substring(len));
-					}
+		}
+		return 0;
+	}
+
+	private int ignoreLeftMostWhiteSpace() {
+		TextArea firstTextArea = findFirstNonEmptyTextArea(this);
+		if (firstTextArea != null) {
+			String text = firstTextArea.getText();
+			int letterSpacing = lastTextArea.getTextStyle().getLetterSpacing();
+			if (null != text) {
+				char[] charArray = text.toCharArray();
+				int len = 0;
+				while (len < charArray.length && (charArray[len] <= ' ')) {
+					len++;
+				}
+				if (len > 0) {
+					return len * letterSpacing + firstTextArea.getTextWidth(text.substring(0, len));
 				}
 			}
 		}
@@ -136,22 +217,40 @@ public class LineArea extends InlineStackingArea {
 	}
 
 	private int adjustWordSpacing(int wordSpacing, ContainerArea area) {
-		if (wordSpacing == 0)
+		if (wordSpacing == 0) {
 			return 0;
-		Iterator iter = area.getChildren();
+		}
+		Iterator<IArea> iter = area.getChildren();
 		int delta = 0;
 		while (iter.hasNext()) {
 			AbstractArea child = (AbstractArea) iter.next();
 			if (child instanceof TextArea) {
 				TextArea textArea = (TextArea) child;
-				int whiteSpaceNumber = textArea.getWhiteSpaceNumber();
-				if (whiteSpaceNumber > 0) {
+				int whiteSpaceCount = textArea.getWhiteSpaceCount();
+				if (whiteSpaceCount > 0) {
 					TextStyle style = new TextStyle(textArea.getStyle());
 					int original = style.getWordSpacing();
 					style.setWordSpacing(original + wordSpacing);
 					textArea.setStyle(style);
-					int spacing = wordSpacing * whiteSpaceNumber;
+					int spacing = wordSpacing * whiteSpaceCount;
 					child.setWidth(child.getWidth() + spacing);
+					// If the text area is the first in the line,
+					// and it starts with white space, then we must
+					// remove that white space because otherwise this
+					// results in the text starting to far right due
+					// to a wordSpacing to the left.
+					if (textArea.isFirstInLine()) {
+						String text = textArea.getText();
+						if (text != null && text.length() > 0) {
+							for (int i = 0; i < text.length(); i++) {
+								if (text.charAt(i) <= 32) {
+									delta -= spacing;
+								} else {
+									break;
+								}
+							}
+						}
+					}
 					child.setPosition(child.getX() + delta, child.getY());
 					delta += spacing;
 				}
@@ -168,7 +267,7 @@ public class LineArea extends InlineStackingArea {
 	}
 
 	private int adjustLetterSpacing(int letterSpacing, ContainerArea area) {
-		Iterator iter = area.getChildren();
+		Iterator<IArea> iter = area.getChildren();
 		int delta = 0;
 		while (iter.hasNext()) {
 			AbstractArea child = (AbstractArea) iter.next();
@@ -198,97 +297,82 @@ public class LineArea extends InlineStackingArea {
 	}
 
 	/**
-	 * The last text area in a line. This field is only used for text alignment
-	 * "justify".
+	 * The first text area in a line.
 	 */
-	private TextArea lastTextAreaForJustify = null;
+	private TextArea firstTextArea = null;
 
 	/**
-	 * Gets the white space number, and the right most white spaces are ignored.
-	 * 
-	 * @param line
-	 * @return
+	 * The last text area in a line.
 	 */
-	private int getWhiteSpaceNumber(LineArea line) {
-		int count = getWhiteSpaceRawNumber(line);
-		if (lastTextAreaForJustify != null) {
-			String text = lastTextAreaForJustify.getText();
-			if (null != text) {
-				char[] charArray = text.toCharArray();
-				int len = charArray.length;
-				while (len > 0 && (charArray[len - 1] <= ' ')) {
-					len--;
-				}
-				if (len != charArray.length) {
-					count = count - (charArray.length - len);
-					lastTextAreaForJustify.setWhiteSpaceNumber(
-							lastTextAreaForJustify.getWhiteSpaceNumber() - (charArray.length - len));
-					lastTextAreaForJustify.setText(text.substring(0, len));
-					lastTextAreaForJustify = null;
-				}
-			}
+	private TextArea lastTextArea = null;
+
+	private static class IntTupleCounter {
+		public int first;
+		public int second;
+
+		public IntTupleCounter() {
+			first = 0;
+			second = 0;
 		}
-		return count;
+
+		public void add(IntTupleCounter other) {
+			first += other.first;
+			second += other.second;
+		}
+
 	}
 
 	/**
-	 * Gets the white space number.
-	 * 
+	 * Count the characters and white spaces.
+	 *
+	 * This is a recursive function.
+	 *
 	 * @param area
 	 * @return
 	 */
-	private int getWhiteSpaceRawNumber(ContainerArea area) {
-		int count = 0;
-		Iterator iter = area.getChildren();
+	private IntTupleCounter countCharactersAndWhiteSpace(ContainerArea area) {
+		IntTupleCounter count = new IntTupleCounter();
+		Iterator<IArea> iter = area.getChildren();
 		while (iter.hasNext()) {
 			AbstractArea child = (AbstractArea) iter.next();
 			if (child instanceof TextArea) {
-				int innerCount = 0;
-				String text = ((TextArea) child).getText();
-				for (int i = 0; i < text.length(); i++) {
-					if (text.charAt(i) <= ' ') {
-						innerCount++;
-					}
-				}
-				count += innerCount;
-				((TextArea) child).setWhiteSpaceNumber(innerCount);
-				lastTextAreaForJustify = (TextArea) child;
+				TextArea taChild = (TextArea) child;
+				taChild.countCharactersAndWhiteSpace();
+				count.first += taChild.getCharacterCount();
+				count.second += taChild.getWhiteSpaceCount();
 			} else if (child instanceof ContainerArea) {
-				count += getWhiteSpaceRawNumber((ContainerArea) child);
+				count.add(countCharactersAndWhiteSpace((ContainerArea) child));
 			}
 		}
 		return count;
 	}
 
-	private int getLetterNumber(ContainerArea area) {
-		int count = 0;
-		Iterator iter = area.getChildren();
-		while (iter.hasNext()) {
-			AbstractArea child = (AbstractArea) iter.next();
-			if (child instanceof TextArea) {
-				String text = ((TextArea) child).getText();
-				count = text.length();
-			} else if (child instanceof ContainerArea) {
-				count += getLetterNumber((ContainerArea) child);
-			}
-		}
-		return count;
-	}
-
-	protected void justify() {
+	protected void justify(int spacing, int adjustLeftWhiteSpace, int adjustRightWhiteSpace) {
 		// 1. Gets the white space number. The last white space of a line should not be
 		// counted.
 		// 2. adjust the position for every text area in the line and ignore the right
 		// most white space by modifying the text.
-		int spacing = width - currentIP;
-		int whiteSpaceNumber = getWhiteSpaceNumber(this);
-		if (whiteSpaceNumber > 0) {
-			int wordSpacing = spacing / whiteSpaceNumber;
+		spacing = spacing + adjustLeftWhiteSpace + adjustRightWhiteSpace;
+		if (adjustLeftWhiteSpace > 0) {
+			if (!parent.content.isDirectionRTL()) {
+				if (adjustLeftWhiteSpace != 0) {
+					Iterator<IArea> iter = getChildren();
+					while (iter.hasNext()) {
+						AbstractArea area = (AbstractArea) iter.next();
+						area.setPosition(area.getX() - adjustLeftWhiteSpace, area.getY());
+					}
+				}
+			}
+		}
+		IntTupleCounter count = countCharactersAndWhiteSpace(this);
+		int charactersCount = count.first;
+		int whiteSpaceCount = count.second;
+		if (whiteSpaceCount > 0) {
+			int wordSpacing = spacing / whiteSpaceCount;
 			adjustWordSpacing(wordSpacing, this);
 		} else {
-			int letterNumber = getLetterNumber(this);
-			if (letterNumber > 1) {
-				int letterSpacing = spacing / (letterNumber - 1);
+			if (charactersCount > 1) {
+				int letterSpacing = spacing / (charactersCount - 1);
 				adjustLetterSpacing(letterSpacing, this);
 			}
 		}
@@ -298,13 +382,14 @@ public class LineArea extends InlineStackingArea {
 	/**
 	 * Puts container's child areas into the visual (display) order and repositions
 	 * them following that order horizontally.
-	 * 
+	 *
 	 * @author Lina Kemmel
 	 */
 	private void reorderVisually(ContainerArea parent) {
 		int n = parent.getChildrenCount();
-		if (n == 0)
+		if (n == 0) {
 			return;
+		}
 
 		int i = 0;
 		AbstractArea[] areas = new AbstractArea[n];
@@ -315,9 +400,9 @@ public class LineArea extends InlineStackingArea {
 			AbstractArea area = (AbstractArea) iter.next();
 			areas[i] = area;
 
-			if (area instanceof TextArea)
+			if (area instanceof TextArea) {
 				levels[i] = (byte) ((TextArea) area).getRunLevel();
-			else {
+			} else {
 				levels[i] = baseLevel;
 				if (area instanceof InlineStackingArea) {
 					// We assume that each inline container area should be
@@ -341,7 +426,9 @@ public class LineArea extends InlineStackingArea {
 		}
 	}
 
+	@Override
 	public void endLine(boolean endParagraph) throws BirtException {
+
 		close(false, endParagraph);
 		// initialize( );
 		currentIP = 0;
@@ -350,14 +437,17 @@ public class LineArea extends InlineStackingArea {
 		}
 	}
 
+	@Override
 	public int getMaxLineWidth() {
 		return maxAvaWidth;
 	}
 
+	@Override
 	public boolean isEmptyLine() {
 		return getChildrenCount() == 0;
 	}
 
+	@Override
 	public void update(AbstractArea area) throws BirtException {
 		int aWidth = area.getAllocatedWidth();
 		if (aWidth + currentIP > maxAvaWidth) {
@@ -377,8 +467,24 @@ public class LineArea extends InlineStackingArea {
 		if (children.size() == 0) {
 			return;
 		}
+
+		// Mark the first TextArea as "firstInLine".
+		firstTextArea = findFirstNonEmptyTextArea(this);
+		if (firstTextArea != null) {
+			firstTextArea.markAsFirstInLine();
+		}
+
+		// Handle Soft Hyphen:
+		// Mark the last TextArea as "lastInLine".
+		lastTextArea = findLastNonEmptyTextArea(this);
+		if (lastTextArea != null) {
+			lastTextArea.markAsLastInLine();
+		}
+
 		int lineHeight = ((BlockContainerArea) parent).getLineHeight();
-		height = Math.max(height, lineHeight);
+		if (lineHeight != 0) {
+			height = lineHeight;
+		}
 		width = Math.max(currentIP, maxAvaWidth);
 		align(endParagraph, context);
 		checkDisplayNone();
@@ -392,12 +498,12 @@ public class LineArea extends InlineStackingArea {
 			area.children = children;
 			area.context = context;
 			area.setParent(parent);
-			Iterator iter = area.getChildren();
+			Iterator<IArea> iter = area.getChildren();
 			while (iter.hasNext()) {
 				AbstractArea child = (AbstractArea) iter.next();
 				child.setParent(area);
 			}
-			children = new ArrayList();
+			children = new ArrayList<IArea>();
 			parent.add(area);
 			area.checkPageBreak();
 			parent.update(area);
@@ -409,11 +515,13 @@ public class LineArea extends InlineStackingArea {
 		}
 	}
 
+	@Override
 	public void close() throws BirtException {
 		close(true, true);
 		finished = true;
 	}
 
+	@Override
 	public void initialize() throws BirtException {
 		hasStyle = false;
 		boxStyle = BoxStyle.DEFAULT;
@@ -423,16 +531,18 @@ public class LineArea extends InlineStackingArea {
 		// Derive the baseLevel from the parent content direction.
 		if (parent.content != null) {
 			// IContent#isDirectionRTL already looks at computed style
-			if (parent.content.isDirectionRTL())
+			if (parent.content.isDirectionRTL()) {
 				baseLevel = Bidi.DIRECTION_RIGHT_TO_LEFT;
+			}
 		}
 		// parent.add( this );
 	}
 
+	@Override
 	public SplitResult split(int height, boolean force) throws BirtException {
 		assert (height < this.height);
 		LineArea result = null;
-		Iterator iter = children.iterator();
+		Iterator<IArea> iter = children.iterator();
 		while (iter.hasNext()) {
 			ContainerArea child = (ContainerArea) iter.next();
 
@@ -453,6 +563,13 @@ public class LineArea extends InlineStackingArea {
 					result.addChild(splitChildArea);
 					splitChildArea.setParent(result);
 				} else {
+					// reset the line height due to negative height caused by page break.
+					// Otherwise the first line could be rendered too far down.
+					// See (old) BIRT bug 562873 and
+					// https://github.com/eclipse-birt/birt/issues/1443.
+					if (height < 0) {
+						height = 0;
+					}
 					child.setY(Math.max(0, child.getY() - height));
 				}
 			}
@@ -480,28 +597,84 @@ public class LineArea extends InlineStackingArea {
 		}
 		if (result != null) {
 			return new SplitResult(result, SplitResult.SPLIT_SUCCEED_WITH_PART);
-		} else {
-			return SplitResult.SUCCEED_WITH_NULL;
 		}
+		return SplitResult.SUCCEED_WITH_NULL;
 	}
 
+	@Override
 	public LineArea cloneArea() {
 		return new LineArea(this);
 	}
 
-	public SplitResult splitLines(int lineCount) throws BirtException {
+	@Override
+	public SplitResult splitLines(int lineCount) {
 		return SplitResult.SUCCEED_WITH_NULL;
 	}
 
+	@Override
 	public boolean isPageBreakAfterAvoid() {
 		return false;
 	}
 
+	@Override
 	public boolean isPageBreakBeforeAvoid() {
 		return false;
 	}
 
+	@Override
 	public boolean isPageBreakInsideAvoid() {
 		return false;
 	}
+
+	/**
+	 * Gets the last TextArea actually containing some text.
+	 *
+	 * This is a recursive function. It is first called with this LineArea itself.
+	 *
+	 */
+	private TextArea findLastNonEmptyTextArea(ContainerArea area) {
+		TextArea last = null;
+		TextArea candidate;
+		Iterator<IArea> iter = area.getChildren();
+		while (iter.hasNext()) {
+			AbstractArea child = (AbstractArea) iter.next();
+			if (child instanceof TextArea) {
+				candidate = (TextArea) child;
+				if (candidate.textLength > 0) {
+					last = candidate;
+				}
+			} else if (child instanceof ContainerArea) {
+				candidate = findLastNonEmptyTextArea((ContainerArea) child);
+				if (candidate != null) {
+					last = candidate;
+				}
+			}
+		}
+		return last;
+	}
+
+	/**
+	 * Gets the first TextArea actually containing some text.
+	 *
+	 * This is a recursive function. It is first called with this LineArea itself.
+	 *
+	 */
+	private TextArea findFirstNonEmptyTextArea(ContainerArea area) {
+		Iterator<IArea> iter = area.getChildren();
+		while (iter.hasNext()) {
+			AbstractArea child = (AbstractArea) iter.next();
+			if (child instanceof TextArea) {
+				if (((TextArea) child).textLength > 0) {
+					return (TextArea) child;
+				}
+			} else if (child instanceof ContainerArea) {
+				TextArea candidate = findFirstNonEmptyTextArea((ContainerArea) child);
+				if (candidate != null) {
+					return candidate;
+				}
+			}
+		}
+		return null;
+	}
+
 }

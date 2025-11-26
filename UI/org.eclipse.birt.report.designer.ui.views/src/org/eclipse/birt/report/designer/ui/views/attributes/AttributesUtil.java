@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -120,8 +123,8 @@ public class AttributesUtil {
 	 */
 	public static final String EVENTHANDLER = "EventHandler"; //$NON-NLS-1$
 
-	private static Map<String, String> categoryMap = new HashMap<String, String>();
-	private static Map<String, Class<?>> paneClassMap = new HashMap<String, Class<?>>();
+	private static Map<String, String> categoryMap = new HashMap<>();
+	private static Map<String, Class<?>> paneClassMap = new HashMap<>();
 
 	static {
 		addCategory(FONT, Messages.getString("GridPageGenerator.List.Font"), FontPage.class);//$NON-NLS-1$
@@ -149,12 +152,12 @@ public class AttributesUtil {
 
 	/**
 	 * Add default category for Attribute Page
-	 * 
+	 *
 	 * @param id
 	 * @param displayLabelKey
 	 * @param pageClass
 	 */
-	public static void addCategory(String id, String displayLabelKey, Class pageClass) {
+	public static void addCategory(String id, String displayLabelKey, Class<?> pageClass) {
 		assert id != null;
 		assert pageClass != null;
 
@@ -164,22 +167,24 @@ public class AttributesUtil {
 
 	/**
 	 * Creates the standard categoried property page.
-	 * 
+	 *
 	 * @param parent
 	 * @param categories         A standard category id array, the contained value
 	 *                           must be the category name constants defined within
 	 *                           the AttributeUtil class, such as
 	 *                           AttributesUtil.FONT, AttributesUtil.MARGIN. A null
 	 *                           value means reserve this position for custom pages.
+	 * @param customKeys         A custom key
 	 * @param customCategories   A custom categories name array.
 	 * @param customPageWrappers A custom page wrapper array.
+	 * @param input
 	 * @return Page object.
 	 */
 	public static IPropertyTabUI buildGeneralPage(Composite parent, String[] categories, String[] customKeys,
 			String[] customCategories, PageWrapper[] customPageWrappers, Object input) {
 		BaseAttributePage basicPage = new BaseAttributePage();
-		LinkedHashMap<String, String> categorys = new LinkedHashMap<String, String>();
-		List<Object> paneClassList = new ArrayList<Object>();
+		LinkedHashMap<String, String> categorys = new LinkedHashMap<>();
+		List<Object> paneClassList = new ArrayList<>();
 
 		if (categories == null) {
 			if (customCategories != null && customPageWrappers != null) {
@@ -230,6 +235,8 @@ public class AttributesUtil {
 
 	/**
 	 * Returns standard category page display name.
+	 *
+	 * @return Returns standard category page display name.
 	 */
 	public static String getGeneralPageDisplayName() {
 		return Messages.getString("CategoryPageGenerator.TabItem.Attributes"); //$NON-NLS-1$
@@ -237,8 +244,9 @@ public class AttributesUtil {
 
 	/**
 	 * Creates the standard data binding page.
-	 * 
+	 *
 	 * @param parent Parent composite.
+	 * @param input  page input
 	 * @return Page object.
 	 */
 	public static IPropertyTabUI buildBindingPage(Composite parent, Object input) {
@@ -252,6 +260,8 @@ public class AttributesUtil {
 
 	/**
 	 * Returns standard data binding page display name.
+	 *
+	 * @return Returns standard data binding page display name.
 	 */
 	public static String getBindingPageDisplayName() {
 		return Messages.getString("TablePageGenerator.TabItem.Binding"); //$NON-NLS-1$
@@ -259,8 +269,9 @@ public class AttributesUtil {
 
 	/**
 	 * Creates standard data filter page.
-	 * 
+	 *
 	 * @param parent Parent composite.
+	 * @param input  page input
 	 * @return Page object.
 	 */
 	public static IPropertyTabUI buildFilterPage(Composite parent, Object input) {
@@ -275,6 +286,8 @@ public class AttributesUtil {
 
 	/**
 	 * Returns standard data filter page display name.
+	 *
+	 * @return Returns standard data filter page display name.
 	 */
 	public static String getFilterPageDisplayName() {
 		return Messages.getString("TablePageGenerator.TabItem.Filters"); //$NON-NLS-1$
@@ -282,8 +295,9 @@ public class AttributesUtil {
 
 	/**
 	 * Creates standard data filter page.
-	 * 
+	 *
 	 * @param parent Parent composite.
+	 * @param input  Page input
 	 * @return Page object.
 	 */
 	public static IPropertyTabUI buildHighlightPage(Composite parent, Object input) {
@@ -300,6 +314,8 @@ public class AttributesUtil {
 
 	/**
 	 * Returns standard data filter page display name.
+	 *
+	 * @return Returns standard data filter page display name.
 	 */
 	public static String getHighlightPageDisplayName() {
 		return Messages.getString("TablePageGenerator.TabItem.Highlights"); //$NON-NLS-1$
@@ -307,13 +323,14 @@ public class AttributesUtil {
 
 	/**
 	 * Sets input to the page.
-	 * 
+	 *
 	 * @param page  This must be the result object returned by
 	 *              AttributesUtil.buildXXXPage().
 	 * @param input input objects.
-	 * 
+	 *
 	 * @deprecated should not be used anymore
 	 */
+	@Deprecated
 	public static void setPageInput(IPropertyTabUI page, Object input) {
 		page.setInput(input);
 		if (page instanceof TabPage && page.getControl() != null) {
@@ -323,9 +340,12 @@ public class AttributesUtil {
 
 	/**
 	 * Convenient method to handle property page exceptions.
-	 * 
+	 *
+	 * @param e
+	 *
 	 * @deprecated see {@link ExceptionUtil}
 	 */
+	@Deprecated
 	public static void handleError(Throwable e) {
 		ExceptionUtil.handle(e);
 	}
@@ -359,8 +379,9 @@ public class AttributesUtil {
 			this.paneObjects = paneObjects;
 		}
 
+		@Override
 		public ICategoryPage[] getCategories() {
-			List<ICategoryPage> pageList = new ArrayList<ICategoryPage>(paneObjects.length);
+			List<ICategoryPage> pageList = new ArrayList<>(paneObjects.length);
 
 			int i = 0;
 			for (Iterator<Entry<String, String>> itr = categorieLabels.entrySet().iterator(); itr.hasNext(); i++) {
@@ -374,7 +395,7 @@ public class AttributesUtil {
 
 				Object pane = paneObjects[i];
 
-				if (pane instanceof Class && PageWrapper.class.isAssignableFrom((Class) pane)) {
+				if (pane instanceof Class && PageWrapper.class.isAssignableFrom((Class<?>) pane)) {
 					try {
 						pane = ((Class) pane).getConstructor((Class[]) null).newInstance((Object[]) null);
 					} catch (Exception e) {
@@ -383,20 +404,23 @@ public class AttributesUtil {
 				}
 
 				if (pane instanceof Class) {
-					pageList.add(new CategoryPage(categoryKey, displayLabel, displayTitle, (Class) pane));
+					pageList.add(new CategoryPage(categoryKey, displayLabel, displayTitle, (Class<?>) pane));
 				} else if (pane instanceof PageWrapper) {
 					final PageWrapper wrapper = (PageWrapper) pane;
 
 					pageList.add(new ICategoryPage() {
 
+						@Override
 						public String getDisplayLabel() {
 							return displayLabel;
 						}
 
+						@Override
 						public TabPage createPage() {
 							return wrapper.getPage();
 						}
 
+						@Override
 						public String getCategoryKey() {
 							return categoryKey;
 						}
@@ -418,90 +442,101 @@ public class AttributesUtil {
 
 		/**
 		 * Internal used to return the wrapped page.
-		 * 
-		 * @param parent
-		 * @return
+		 *
+		 * @return Return the wrapped page.
 		 */
 		public TabPage getPage() {
-			if (page == null)
+			if (page == null) {
 				page = new AttributePage() {
 
+					@Override
 					public void buildUI(Composite parent) {
 						super.buildUI(parent);
 						PageWrapper.this.buildUI(parent);
 					}
 
+					@Override
 					public void addElementEvent(DesignElementHandle focus, NotificationEvent ev) {
 						PageWrapper.this.addElementEvent(focus, ev);
 					}
 
+					@Override
 					public void clear() {
 						PageWrapper.this.clear();
 					}
 
+					@Override
 					public void postElementEvent() {
 						PageWrapper.this.postElementEvent();
 					}
 
+					@Override
 					public Object getAdapter(Class adapter) {
 						return PageWrapper.this.getAdapter(adapter);
 					}
 
+					@Override
 					public void refresh() {
 						PageWrapper.this.refresh();
 						super.refresh();
 					}
 
+					@Override
 					public void setInput(Object elements) {
 						super.setInput(elements);
 						PageWrapper.this.setInput(elements);
 					}
 
+					@Override
 					public void dispose() {
 						PageWrapper.this.dispose();
 						super.dispose();
 					}
 
 				};
+			}
 			return page;
 		}
 
+		@Override
 		public void addElementEvent(DesignElementHandle focus, NotificationEvent ev) {
 
 		}
 
+		@Override
 		public void clear() {
 
 		}
 
+		@Override
 		public void postElementEvent() {
 
 		}
 
+		@Override
 		public Object getAdapter(Class adapter) {
 			return null;
 		}
 
 		/**
 		 * Creates property page user content.
-		 * 
+		 *
 		 * @param parent      property UI parent.
-		 * @param propertyMap build-in property map. User can put their own
-		 *                    PropertyDescriptor in to integrate with build-in property
-		 *                    framework. Usage: propertyMap.put(propertyName,
-		 *                    propertyDescriptor).
 		 */
 		public abstract void buildUI(Composite parent);
 
 		/**
 		 * Sets page input.
-		 * 
-		 * @param elements
+		 *
+		 * @param input input object
 		 */
 		public void setInput(Object input) {
 			// default doing nothing;
 		}
 
+		/**
+		 * Refresh
+		 */
 		public void refresh() {
 			// default doing nothing;
 		}
@@ -517,7 +552,7 @@ public class AttributesUtil {
 
 	/**
 	 * Creates the category provider for attribute page.
-	 * 
+	 *
 	 * @param categories        An array of category keys, the contained value must
 	 *                          be the category key constants defined within the
 	 *                          AttributeUtil class, such as AttributesUtil.FONT,
@@ -532,7 +567,7 @@ public class AttributesUtil {
 	 *                          <code>{@link PageWrapper}</code> class and have a
 	 *                          public non-argument constructor.
 	 * @return Returns a new category provider instance
-	 * 
+	 *
 	 * @since 2.5
 	 */
 	public static ICategoryProvider createCategoryProvider(String[] categories, String[] customKeys,
@@ -540,11 +575,30 @@ public class AttributesUtil {
 		return createCategoryProvider(categories, customKeys, customLabels, null, customPageClasses);
 	}
 
+	/**
+	 * Creates the category provider for attribute page.
+	 *
+	 * @param categories        An array of category keys, the contained value must
+	 *                          be the category key constants defined within the
+	 *                          AttributeUtil class, such as AttributesUtil.FONT,
+	 *                          AttributesUtil.MARGIN. The array elememt can be
+	 *                          null, which means this position is reserved for
+	 *                          custom category pages.
+	 * @param customKeys        An array of custom category page key name.
+	 * @param customLabels      An array of custom category page display labels.
+	 * @param customTitles
+	 * @param customPageClasses An array of custom category page class, each class
+	 *                          should extend from either
+	 *                          <code>{@link TabPage}</code> class or
+	 *                          <code>{@link PageWrapper}</code> class and have a
+	 *                          public non-argument constructor.
+	 * @return Returns a new category provider instance
+	 */
 	public static ICategoryProvider createCategoryProvider(String[] categories, String[] customKeys,
 			String[] customLabels, String[] customTitles, Class<?>[] customPageClasses) {
-		LinkedHashMap<String, String> categoryLabels = new LinkedHashMap<String, String>();
-		LinkedHashMap<String, String> categoryTitles = new LinkedHashMap<String, String>();
-		List<Class<?>> paneClassList = new ArrayList<Class<?>>();
+		LinkedHashMap<String, String> categoryLabels = new LinkedHashMap<>();
+		LinkedHashMap<String, String> categoryTitles = new LinkedHashMap<>();
+		List<Class<?>> paneClassList = new ArrayList<>();
 
 		if (categories == null) {
 			// use only custom categories
@@ -604,9 +658,10 @@ public class AttributesUtil {
 
 	/**
 	 * Checks if specified category already exists by default
-	 * 
+	 *
 	 * @param categoryId
-	 * @return
+	 * @return Return the check result if specified category already exists by
+	 *         default
 	 */
 	public static boolean containCategory(String categoryId) {
 		return categoryMap.containsKey(categoryId);
@@ -614,9 +669,9 @@ public class AttributesUtil {
 
 	/**
 	 * Returns a new instance of specified category page.
-	 * 
+	 *
 	 * @param categoryId
-	 * @return
+	 * @return Return the category page.
 	 */
 	public static ICategoryPage getCategory(String categoryId) {
 		if (containCategory(categoryId)) {
@@ -625,6 +680,12 @@ public class AttributesUtil {
 		return null;
 	}
 
+	/**
+	 * Get the category display name
+	 *
+	 * @param categoryId category id
+	 * @return Return the category display name
+	 */
 	public static String getCategoryDisplayName(String categoryId) {
 		if (containCategory(categoryId)) {
 			return categoryMap.get(categoryId);

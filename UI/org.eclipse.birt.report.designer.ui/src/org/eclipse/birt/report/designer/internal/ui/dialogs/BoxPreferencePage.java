@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,6 +22,7 @@ import org.eclipse.birt.report.model.api.StyleHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
 import org.eclipse.birt.report.model.api.metadata.IChoice;
 import org.eclipse.birt.report.model.api.metadata.IChoiceSet;
+import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Group;
@@ -26,7 +30,6 @@ import org.eclipse.swt.widgets.Group;
 /**
  * Preference page for Box Style.
  */
-
 public class BoxPreferencePage extends BaseStylePreferencePage {
 
 	private Object model;
@@ -39,7 +42,7 @@ public class BoxPreferencePage extends BaseStylePreferencePage {
 
 	/**
 	 * Default constructor.
-	 * 
+	 *
 	 * @param model the model of preference page.
 	 */
 	public BoxPreferencePage(Object model) {
@@ -50,10 +53,11 @@ public class BoxPreferencePage extends BaseStylePreferencePage {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.jface.preference.FieldEditorPreferencePage#adjustGridLayout()
 	 */
+	@Override
 	protected void adjustGridLayout() {
 		((GridData) paddingSep1.getLabelControl().getLayoutData()).heightHint = 3;
 		((GridData) paddingSep1.getLabelControl().getLayoutData()).horizontalSpan = 3;
@@ -84,10 +88,11 @@ public class BoxPreferencePage extends BaseStylePreferencePage {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.designer.internal.ui.dialogs.BaseStylePreferencePage#
 	 * createFieldEditors()
 	 */
+	@Override
 	protected void createFieldEditors() {
 		// super.createFieldEditors( );
 
@@ -102,32 +107,32 @@ public class BoxPreferencePage extends BaseStylePreferencePage {
 		paddingSep1 = new SeparatorFieldEditor(gpPadding, false);
 
 		paddingTop = new ComboBoxMeasureFieldEditor(
-				StyleHandle.PADDING_TOP_PROP, Messages.getString(((StyleHandle) model)
-						.getPropertyHandle(StyleHandle.PADDING_TOP_PROP).getDefn().getDisplayNameID()),
-				getMeasureChoiceArray(StyleHandle.PADDING_TOP_PROP), gpPadding);
+				IStyleModel.PADDING_TOP_PROP, Messages.getString(((StyleHandle) model)
+						.getPropertyHandle(IStyleModel.PADDING_TOP_PROP).getDefn().getDisplayNameID()),
+				getMeasureChoiceArray(IStyleModel.PADDING_TOP_PROP), gpPadding);
 		paddingTop
-				.setDefaultUnit(((StyleHandle) model).getPropertyHandle(StyleHandle.PADDING_TOP_PROP).getDefaultUnit());
+				.setDefaultUnit(((StyleHandle) model).getPropertyHandle(IStyleModel.PADDING_TOP_PROP).getDefaultUnit());
 
 		paddingBottom = new ComboBoxMeasureFieldEditor(
-				StyleHandle.PADDING_BOTTOM_PROP, Messages.getString(((StyleHandle) model)
-						.getPropertyHandle(StyleHandle.PADDING_BOTTOM_PROP).getDefn().getDisplayNameID()),
-				getMeasureChoiceArray(StyleHandle.PADDING_BOTTOM_PROP), gpPadding);
+				IStyleModel.PADDING_BOTTOM_PROP, Messages.getString(((StyleHandle) model)
+						.getPropertyHandle(IStyleModel.PADDING_BOTTOM_PROP).getDefn().getDisplayNameID()),
+				getMeasureChoiceArray(IStyleModel.PADDING_BOTTOM_PROP), gpPadding);
 		paddingBottom.setDefaultUnit(
-				((StyleHandle) model).getPropertyHandle(StyleHandle.PADDING_BOTTOM_PROP).getDefaultUnit());
+				((StyleHandle) model).getPropertyHandle(IStyleModel.PADDING_BOTTOM_PROP).getDefaultUnit());
 
 		paddingLeft = new ComboBoxMeasureFieldEditor(
-				StyleHandle.PADDING_LEFT_PROP, Messages.getString(((StyleHandle) model)
-						.getPropertyHandle(StyleHandle.PADDING_LEFT_PROP).getDefn().getDisplayNameID()),
-				getMeasureChoiceArray(StyleHandle.PADDING_LEFT_PROP), gpPadding);
+				IStyleModel.PADDING_LEFT_PROP, Messages.getString(((StyleHandle) model)
+						.getPropertyHandle(IStyleModel.PADDING_LEFT_PROP).getDefn().getDisplayNameID()),
+				getMeasureChoiceArray(IStyleModel.PADDING_LEFT_PROP), gpPadding);
 		paddingLeft.setDefaultUnit(
-				((StyleHandle) model).getPropertyHandle(StyleHandle.PADDING_LEFT_PROP).getDefaultUnit());
+				((StyleHandle) model).getPropertyHandle(IStyleModel.PADDING_LEFT_PROP).getDefaultUnit());
 
 		paddingRight = new ComboBoxMeasureFieldEditor(
-				StyleHandle.PADDING_RIGHT_PROP, Messages.getString(((StyleHandle) model)
-						.getPropertyHandle(StyleHandle.PADDING_RIGHT_PROP).getDefn().getDisplayNameID()),
-				getMeasureChoiceArray(StyleHandle.PADDING_RIGHT_PROP), gpPadding);
+				IStyleModel.PADDING_RIGHT_PROP, Messages.getString(((StyleHandle) model)
+						.getPropertyHandle(IStyleModel.PADDING_RIGHT_PROP).getDefn().getDisplayNameID()),
+				getMeasureChoiceArray(IStyleModel.PADDING_RIGHT_PROP), gpPadding);
 		paddingRight.setDefaultUnit(
-				((StyleHandle) model).getPropertyHandle(StyleHandle.PADDING_RIGHT_PROP).getDefaultUnit());
+				((StyleHandle) model).getPropertyHandle(IStyleModel.PADDING_RIGHT_PROP).getDefaultUnit());
 
 		gpMargin = new Group(getFieldEditorParent(), 0);
 		gpMargin.setText(Messages.getString("BoxPreferencePage.text.Margin")); //$NON-NLS-1$
@@ -137,36 +142,36 @@ public class BoxPreferencePage extends BaseStylePreferencePage {
 
 		marginSep1 = new SeparatorFieldEditor(gpMargin, false);
 
-		marginTop = new ComboBoxMeasureFieldEditor(StyleHandle.MARGIN_TOP_PROP,
-				Messages.getString(((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_TOP_PROP).getDefn()
+		marginTop = new ComboBoxMeasureFieldEditor(IStyleModel.MARGIN_TOP_PROP,
+				Messages.getString(((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_TOP_PROP).getDefn()
 						.getDisplayNameID()),
-				getChoiceArray(StyleHandle.MARGIN_TOP_PROP), getMeasureChoiceArray(StyleHandle.MARGIN_TOP_PROP),
+				getChoiceArray(IStyleModel.MARGIN_TOP_PROP), getMeasureChoiceArray(IStyleModel.MARGIN_TOP_PROP),
 				gpMargin);
-		marginTop.setDefaultUnit(((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_TOP_PROP).getDefaultUnit());
+		marginTop.setDefaultUnit(((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_TOP_PROP).getDefaultUnit());
 
-		marginBottom = new ComboBoxMeasureFieldEditor(StyleHandle.MARGIN_BOTTOM_PROP,
-				Messages.getString(((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_BOTTOM_PROP).getDefn()
+		marginBottom = new ComboBoxMeasureFieldEditor(IStyleModel.MARGIN_BOTTOM_PROP,
+				Messages.getString(((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_BOTTOM_PROP).getDefn()
 						.getDisplayNameID()),
-				getChoiceArray(StyleHandle.MARGIN_BOTTOM_PROP), getMeasureChoiceArray(StyleHandle.MARGIN_BOTTOM_PROP),
+				getChoiceArray(IStyleModel.MARGIN_BOTTOM_PROP), getMeasureChoiceArray(IStyleModel.MARGIN_BOTTOM_PROP),
 				gpMargin);
 		marginBottom.setDefaultUnit(
-				((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_BOTTOM_PROP).getDefaultUnit());
+				((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_BOTTOM_PROP).getDefaultUnit());
 
-		marginLeft = new ComboBoxMeasureFieldEditor(StyleHandle.MARGIN_LEFT_PROP,
-				Messages.getString(((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_LEFT_PROP).getDefn()
+		marginLeft = new ComboBoxMeasureFieldEditor(IStyleModel.MARGIN_LEFT_PROP,
+				Messages.getString(((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_LEFT_PROP).getDefn()
 						.getDisplayNameID()),
-				getChoiceArray(StyleHandle.MARGIN_LEFT_PROP), getMeasureChoiceArray(StyleHandle.MARGIN_LEFT_PROP),
+				getChoiceArray(IStyleModel.MARGIN_LEFT_PROP), getMeasureChoiceArray(IStyleModel.MARGIN_LEFT_PROP),
 				gpMargin);
 		marginLeft
-				.setDefaultUnit(((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_LEFT_PROP).getDefaultUnit());
+				.setDefaultUnit(((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_LEFT_PROP).getDefaultUnit());
 
-		marginRight = new ComboBoxMeasureFieldEditor(StyleHandle.MARGIN_RIGHT_PROP,
-				Messages.getString(((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_RIGHT_PROP).getDefn()
+		marginRight = new ComboBoxMeasureFieldEditor(IStyleModel.MARGIN_RIGHT_PROP,
+				Messages.getString(((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_RIGHT_PROP).getDefn()
 						.getDisplayNameID()),
-				getChoiceArray(StyleHandle.MARGIN_RIGHT_PROP), getMeasureChoiceArray(StyleHandle.MARGIN_RIGHT_PROP),
+				getChoiceArray(IStyleModel.MARGIN_RIGHT_PROP), getMeasureChoiceArray(IStyleModel.MARGIN_RIGHT_PROP),
 				gpMargin);
 		marginRight.setDefaultUnit(
-				((StyleHandle) model).getPropertyHandle(StyleHandle.MARGIN_RIGHT_PROP).getDefaultUnit());
+				((StyleHandle) model).getPropertyHandle(IStyleModel.MARGIN_RIGHT_PROP).getDefaultUnit());
 
 		addField(paddingTop);
 		addField(paddingBottom);
@@ -220,9 +225,10 @@ public class BoxPreferencePage extends BaseStylePreferencePage {
 		return new String[0][2];
 	}
 
+	@Override
 	protected String[] getPreferenceNames() {
-		return new String[] { StyleHandle.PADDING_TOP_PROP, StyleHandle.PADDING_BOTTOM_PROP,
-				StyleHandle.PADDING_LEFT_PROP, StyleHandle.PADDING_RIGHT_PROP, StyleHandle.MARGIN_TOP_PROP,
-				StyleHandle.MARGIN_BOTTOM_PROP, StyleHandle.MARGIN_LEFT_PROP, StyleHandle.MARGIN_RIGHT_PROP, };
+		return new String[] { IStyleModel.PADDING_TOP_PROP, IStyleModel.PADDING_BOTTOM_PROP,
+				IStyleModel.PADDING_LEFT_PROP, IStyleModel.PADDING_RIGHT_PROP, IStyleModel.MARGIN_TOP_PROP,
+				IStyleModel.MARGIN_BOTTOM_PROP, IStyleModel.MARGIN_LEFT_PROP, IStyleModel.MARGIN_RIGHT_PROP, };
 	}
 }

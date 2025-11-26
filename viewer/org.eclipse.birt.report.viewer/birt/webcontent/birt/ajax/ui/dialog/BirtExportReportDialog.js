@@ -1,9 +1,9 @@
 /******************************************************************************
- *	Copyright (c) 2004 Actuate Corporation and others.
+ *	Copyright (c) 2004, 2025 Actuate Corporation and others.
  *	All rights reserved. This program and the accompanying materials 
- *	are made available under the terms of the Eclipse Public License v1.0
+ *	are made available under the terms of the Eclipse Public License v2.0
  *	which accompanies this distribution, and is available at
- *		http://www.eclipse.org/legal/epl-v10.html
+ *		http://www.eclipse.org/legal/epl-2.0.html
  *	
  *	Contributors:
  *		Actuate Corporation - Initial implementation.
@@ -85,7 +85,7 @@ BirtExportReportDialog.prototype = Object.extend( new AbstractBaseDialog( ),
 		var docObj = document.getElementById( "Document" );
 		if ( !docObj || birtUtility.trim( docObj.innerHTML ).length <= 0)
 		{
-			alert ( Constants.error.generateReportFirst );	
+			birtMessageDialog.showMessage(Constants.error.generateReportFirst);	
 			return false;
 		}	
 		else
@@ -127,12 +127,21 @@ BirtExportReportDialog.prototype = Object.extend( new AbstractBaseDialog( ),
 				var pageRange = birtUtility.trim( $( 'exportPageRange_input' ).value );
 				if ( !birtUtility.checkPageRange( pageRange ) )
 				{
-					alert( Constants.error.invalidPageRange );
+					birtMessageDialog.showMessage(Constants.error.invalidPageRange);
 					return false;
 				}
 				action = action + "&" + Constants.PARAM_PAGERANGE + "=" + pageRange;
 			}			
-			
+
+			// If output format is pdf/ppt/postscript, set some options
+			if( this.__isExcelLayout( format ) )
+			{
+				if( $( 'exportExcelSingleSheetCheckbox' ).checked )
+				{
+					action = action + "&__ExcelEmitter.SingleSheet=true";
+				}
+			}
+
 			// If output format is pdf/ppt/postscript, set some options
 			if( this.__isPDFLayout( format ) )
 			{
@@ -237,8 +246,17 @@ BirtExportReportDialog.prototype = Object.extend( new AbstractBaseDialog( ),
 	 * Enable the extended setting controls according to current selected output format.
 	 */
 	__enableExtSection : function( )
-	{		
+	{
 		var format = $( 'exportFormat' ).value.toLowerCase( );
+
+		if( this.__isExcelLayout( format ) )
+		{
+			this.__setDisplay( 'exportExcelSingleSheet', true);
+		} else
+		{
+			this.__setDisplay( 'exportExcelSingleSheet', false);			
+		}
+		
 		if( this.__isPDFLayout( format ) )
 		{
 			this.__setDisabled( 'exportFitSetting', false );
@@ -268,6 +286,26 @@ BirtExportReportDialog.prototype = Object.extend( new AbstractBaseDialog( ),
 	},
 	
 	/**
+	 * Set the display the control
+	 * 
+	 * @param id, html element
+	 * @param flag, true or false
+	 * @return, void
+	 */
+	__setDisplay: function( id, flag )
+	{
+		var element = $( id );
+		if( element )
+		{
+			if (flag) {
+				element.style.display = "";
+			} else {
+				element.style.display = "none";				
+			}
+		}
+	},
+	
+	/**
 	 * Check whether this format uses the PDF layout
 	 *
 	 * @param format, the output format 
@@ -281,6 +319,27 @@ BirtExportReportDialog.prototype = Object.extend( new AbstractBaseDialog( ),
 		if( format == Constants.FORMAT_PDF 
 		    || format == Constants.FORMAT_POSTSCRIPT
 		    || format == Constants.FORMAT_PPT )
+		{
+			return true;
+		}    
+		
+		return false;
+	},
+
+	/**
+	 * Check whether this format uses the Spudsoft excel layout
+	 *
+	 * @param format, the output format 
+	 * @return true or false
+	 */	 
+	__isExcelLayout : function( format )
+	{
+		if( !format )
+			return false;
+		
+		if( format == Constants.FORMAT_SPUDSOFT_XLS
+		    || format == Constants.FORMAT_SPUDSOFT_XLSX
+		)
 		{
 			return true;
 		}    

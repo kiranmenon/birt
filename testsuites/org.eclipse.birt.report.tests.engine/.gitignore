@@ -1,8 +1,9 @@
 report
-.settings
 bin
 utest
 target
 /test-engine.jar
 derby.log
 report.html
+/custom*
+

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,9 +18,10 @@ package org.eclipse.birt.report.engine.api;
  * Defines the context for rendering report in PDF emitter. Objects stored in
  * the context object is mainly used for font, image, action handling, but can
  * be used for other purposes too.
- * 
+ *
  * @deprecated set the option to RenderOption directly.
  */
+@Deprecated
 public class PDFRenderContext {
 
 	/**
@@ -45,7 +49,7 @@ public class PDFRenderContext {
 
 	/**
 	 * Returns the base URL for creating an Action URL
-	 * 
+	 *
 	 * @return the baseURL.
 	 */
 	public String getBaseURL() {
@@ -54,7 +58,7 @@ public class PDFRenderContext {
 
 	/**
 	 * sets the base URL for action handling
-	 * 
+	 *
 	 * @param baseURL sets the base URL used for action handling
 	 */
 	public void setBaseURL(String baseURL) {
@@ -77,7 +81,7 @@ public class PDFRenderContext {
 
 	/**
 	 * Set flag indicates if the font needs to be embedded.
-	 * 
+	 *
 	 * @param isEmbededFont
 	 */
 	public void setEmbededFont(boolean isEmbededFont) {
@@ -85,7 +89,7 @@ public class PDFRenderContext {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true if font is embedded
 	 */
 	public boolean isEmbededFont() {
@@ -93,7 +97,7 @@ public class PDFRenderContext {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the user-defined font directory
 	 */
 	public String getFontDirectory() {
@@ -101,7 +105,7 @@ public class PDFRenderContext {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param fontDirectory the user-defined font directory
 	 */
 	public void setFontDirectory(String fontDirectory) {

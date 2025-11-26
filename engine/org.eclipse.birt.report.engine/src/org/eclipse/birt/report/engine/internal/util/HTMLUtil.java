@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -20,7 +23,7 @@ import org.eclipse.birt.report.model.api.FilterConditionHandle;
 public class HTMLUtil {
 	/**
 	 * Generates descrition text for a filter condition.
-	 * 
+	 *
 	 * @param filterCondition the filter condition.
 	 * @return description text.
 	 */
@@ -29,7 +32,7 @@ public class HTMLUtil {
 			return null;
 		}
 		char space = ' ';
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		result.append(filterCondition.getExpr());
 		result.append(space);
 		result.append(filterCondition.getOperator());
@@ -51,7 +54,7 @@ public class HTMLUtil {
 
 	/**
 	 * Gets group level of a cell content.
-	 * 
+	 *
 	 * @param cellContent the cell content.
 	 * @return group level of the cell content.
 	 */
@@ -62,7 +65,7 @@ public class HTMLUtil {
 
 	/**
 	 * Gets group level of a row content.
-	 * 
+	 *
 	 * @param rowContent the row content
 	 * @return group level of the row contnet.
 	 */

@@ -1,11 +1,13 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
  *     James Talbut - Initial implementation.
@@ -47,7 +49,7 @@ public class TopLevelListHandler extends AbstractRealListHandler {
 	public void startList(HandlerState state, IListContent list) throws BirtException {
 		log.debug("Call startList on ", this);
 		super.startList(state, list);
-		String name = list.getName();
+		String name = state.correctSheetName(list.getName());
 		if ((name != null) && !name.isEmpty()) {
 			state.sheetName = name;
 		}
@@ -72,7 +74,7 @@ public class TopLevelListHandler extends AbstractRealListHandler {
 	@Override
 	public void startListGroup(HandlerState state, IListGroupContent group) throws BirtException {
 		if (groupStarts == null) {
-			groupStarts = new Stack<Integer>();
+			groupStarts = new Stack<>();
 		}
 		groupStarts.push(state.rowNum);
 
@@ -86,7 +88,7 @@ public class TopLevelListHandler extends AbstractRealListHandler {
 					|| DesignChoiceConstants.PAGE_BREAK_AFTER_ALWAYS_EXCLUDING_LAST
 							.equals(groupDesign.getPageBreakAfter())) {
 				if (group.getTOC() != null) {
-					state.sheetName = group.getTOC().toString();
+					state.sheetName = state.correctSheetName(group.getTOC().toString());
 				}
 			}
 		}

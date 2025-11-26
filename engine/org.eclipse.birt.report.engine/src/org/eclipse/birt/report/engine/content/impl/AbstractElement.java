@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,28 +18,41 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.birt.report.engine.content.IContent;
 import org.eclipse.birt.report.engine.content.IElement;
 
+/**
+ * Abstract class of element
+ *
+ * @since 3.3
+ *
+ */
 public class AbstractElement implements IElement {
 
-	final static List EMPTY_CHILDREN_LIST = new ArrayList();
+	final static List<?> EMPTY_CHILDREN_LIST = new ArrayList<Object>();
 	transient protected IElement parent;
-	transient protected Collection children;
+	transient protected Collection<IContent> children;
 
+	/**
+	 * Constructor
+	 */
 	public AbstractElement() {
 	}
 
+	@Override
 	public IElement getParent() {
 		return parent;
 	}
 
+	@Override
 	public void setParent(IElement parent) {
 		this.parent = parent;
 	}
 
-	public Collection getChildren() {
+	@Override
+	public Collection<IContent> getChildren() {
 		if (children == null) {
-			children = new ArrayList();
+			children = new ArrayList<IContent>();
 		}
 		return children;
 	}

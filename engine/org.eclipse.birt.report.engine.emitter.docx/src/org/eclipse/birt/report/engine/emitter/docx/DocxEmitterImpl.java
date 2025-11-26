@@ -1,12 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2013 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2013, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
+ *  Thomas Gutmann - optimized handling option of docx output
  *******************************************************************************/
 
 package org.eclipse.birt.report.engine.emitter.docx;
@@ -30,42 +34,49 @@ import org.eclipse.birt.report.engine.emitter.wpml.WordUtil;
 import org.eclipse.birt.report.engine.layout.pdf.util.HTML2Content;
 import org.eclipse.birt.report.engine.presentation.ContentEmitterVisitor;
 
+/**
+ * Docx emitter implementation
+ *
+ * @since 3.3
+ *
+ */
 public class DocxEmitterImpl extends AbstractEmitterImpl {
 
 	private static final String OUTPUT_FORMAT = "docx";
 
 	private boolean embedHtml = true;
 
+	/**
+	 * Constructor
+	 *
+	 * @param contentVisitor content visitor
+	 */
 	public DocxEmitterImpl(ContentEmitterVisitor contentVisitor) {
 		this.contentVisitor = contentVisitor;
 	}
 
-	public void initialize( IEmitterServices service ) throws EngineException
-	{
-		super.initialize( service );
-		String tempFileDir = service.getReportEngine( ).getConfig( )
-				.getTempDir( );
+	@Override
+	public void initialize(IEmitterServices service) throws EngineException {
+		super.initialize(service);
+		String tempFileDir = service.getReportEngine().getConfig().getTempDir();
 
-		IRenderOption renderOption = service.getRenderOption( );
-		Object value = renderOption.getOption( DocxRenderOption.OPTION_WORD_VERSION );
+		IRenderOption renderOption = service.getRenderOption();
+		Object value = renderOption.getOption(DocxRenderOption.OPTION_WORD_VERSION);
 		if (value instanceof Integer) {
-			setWordVersion((Integer)value);
+			setWordVersion((Integer) value);
 		} else {
 			setWordVersion(2016);
 		}
-		value = renderOption.getOption( DocxRenderOption.OPTION_EMBED_HTML );
-		if ( value instanceof Boolean )
-		{
+		value = renderOption.getOption(DocxRenderOption.OPTION_EMBED_HTML);
+		if (value instanceof Boolean) {
 			this.embedHtml = (Boolean) value;
 		}
 
-		wordWriter = new DocxWriter( out, tempFileDir, getCompressionMode( service )
-				.getValue( ), getWordVersion() );
+		wordWriter = new DocxWriter(out, tempFileDir, getCompressionMode(service).getValue(), getWordVersion());
 	}
 
-	private CompressionMode getCompressionMode( IEmitterServices service )
-	{
-		RenderOption renderOption = (RenderOption) service.getRenderOption( );
+	private CompressionMode getCompressionMode(IEmitterServices service) {
+		RenderOption renderOption = (RenderOption) service.getRenderOption();
 		CompressionMode compressionMode = CompressionMode.BEST_COMPRESSION;
 		Object mode = renderOption.getOption(DocxRenderOption.OPTION_COMPRESSION_MODE);
 		if (mode instanceof CompressionMode) {
@@ -74,30 +85,40 @@ public class DocxEmitterImpl extends AbstractEmitterImpl {
 		return compressionMode;
 	}
 
+	@Override
 	public String getOutputFormat() {
 		return OUTPUT_FORMAT;
 	}
 
+	@Override
 	public void endTable(ITableContent table) {
 		endTable();
 		decreaseTOCLevel(table);
 	}
 
+	@Override
 	public void startForeign(IForeignContent foreign) throws BirtException {
 		if (IForeignContent.HTML_TYPE.equalsIgnoreCase(foreign.getRawType())) {
 			if (context.isAfterTable()) {
 				wordWriter.insertHiddenParagraph();
 				context.setIsAfterTable(false);
 			}
-			if (embedHtml) {
+			if (embedHtml && !wrappedTableForMarginPadding) {
+				writeBookmark(foreign);
+				writeToc(foreign);
+				wordWriter.writeForeign(foreign, false, combineMarginPadding);
+				adjustInline();
+				context.setIsAfterTable(false);
+				context.addContainer(true);
+			} else if (embedHtml) {
 				writeBookmark(foreign);
 				int width = WordUtil.convertTo(foreign.getWidth(), context.getCurrentWidth(), reportDpi);
 				width = Math.min(width, context.getCurrentWidth());
 				wordWriter.startTable(foreign.getComputedStyle(), width, true);
 				wordWriter.startTableRow(-1);
-				wordWriter.startTableCell(width, foreign.getComputedStyle(), null);
-				// TODO:need text paser for foreign raw value
-				wordWriter.writeForeign(foreign);
+				wordWriter.startTableCell(width, foreign.getComputedStyle(), null, null);
+				// TODO:need text parser for foreign raw value
+				wordWriter.writeForeign(foreign, true);
 				if (isInSpannedCell(foreign)) {
 					// insert empty line after embed html
 					wordWriter.endTableCell(true, true);
@@ -129,13 +150,15 @@ public class DocxEmitterImpl extends AbstractEmitterImpl {
 		if (content instanceof ICellContent) {
 			ICellContent cell = (ICellContent) content;
 			if (cell != null) {
-				if (cell.getColSpan() > 1)
+				if (cell.getColSpan() > 1) {
 					return true;
+				}
 			}
 		}
 		return false;
 	}
 
+	@Override
 	protected void writeContent(int type, String txt, IContent content) {
 		context.addContainer(false);
 		IStyle computedStyle = content.getComputedStyle();
@@ -147,11 +170,13 @@ public class DocxEmitterImpl extends AbstractEmitterImpl {
 				context.startInline();
 				inlineFlag = InlineFlag.FIRST_INLINE;
 				computedStyle = computeStyle(computedStyle);
-			} else
+			} else {
 				inlineFlag = InlineFlag.MIDDLE_INLINE;
+			}
 			IContent parent = (IContent) content.getParent();
-			if (parent != null && parent.getComputedStyle() != null)
+			if (parent != null && parent.getComputedStyle() != null) {
 				textAlign = parent.getComputedStyle().getTextAlign();
+			}
 		} else {
 			adjustInline();
 		}

@@ -1,25 +1,25 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation and others. All rights reserved. This
- * program and the accompanying materials are made available under the terms of
- * the Eclipse Public License v1.0 which accompanies this distribution, and is
- * available at http://www.eclipse.org/legal/epl-v10.html
- * 
+ * Copyright (c) 2004 Actuate Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ *
  * Contributors: Actuate Corporation - Initial implementation.
  ******************************************************************************/
 
 package org.eclipse.birt.report.viewer.utilities;
 
-import java.io.IOException;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
+import org.eclipse.birt.core.internal.util.EclipseUtil;
 import org.eclipse.birt.report.designer.internal.ui.util.UIUtil;
 import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.viewer.ViewerPlugin;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.equinox.http.jetty.JettyConfigurator;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
@@ -52,11 +52,11 @@ public class AppServerWrapper {
 	/**
 	 * port for web application
 	 */
-	private Map<String, Integer> ports = new HashMap<String, Integer>();
+	private Map<String, Integer> ports = new HashMap<>();
 
 	/**
 	 * Get wrapper instance.
-	 * 
+	 *
 	 * @return wrapper instance
 	 */
 	public synchronized static AppServerWrapper getInstance() {
@@ -78,15 +78,17 @@ public class AppServerWrapper {
 		// apply host and port overrides passed as command line arguments
 		try {
 			String hostCommandLineOverride = System.getProperty("server_host"); //$NON-NLS-1$
-			if (hostCommandLineOverride != null && hostCommandLineOverride.trim().length() > 0)
+			if (hostCommandLineOverride != null && hostCommandLineOverride.trim().length() > 0) {
 				host = hostCommandLineOverride;
+			}
 		} catch (Exception e) {
 		}
 
 		try {
 			String portCommandLineOverride = System.getProperty("server_port"); //$NON-NLS-1$
-			if (portCommandLineOverride != null && portCommandLineOverride.trim().length() > 0)
+			if (portCommandLineOverride != null && portCommandLineOverride.trim().length() > 0) {
 				port = Integer.parseInt(portCommandLineOverride);
+			}
 		} catch (Exception e) {
 		}
 
@@ -111,79 +113,47 @@ public class AppServerWrapper {
 
 	/**
 	 * Start web appserver based on Jetty Http Service
-	 * 
+	 *
 	 * @param webappName
 	 * @throws Exception
-	 * 
+	 *
 	 * @deprecated use {@link #start(String, String)}
 	 */
+	@Deprecated
 	public void start(String webappName) throws Exception {
 		start(webappName, ViewerPlugin.PLUGIN_ID);
 	}
 
-	private boolean useWebApp = true;
-
 	/**
-	 * Start web appserver based on Jetty Http Service
-	 * 
+	 * Start Jetty web appserver
+	 *
 	 * @param webappName
 	 * @throws Exception
 	 */
 	public void start(String webappName, String pluginID) throws Exception {
 		configureServer(webappName);
-		if (useWebApp) {
-			startJettyServer(webappName);
-		} else {
-			startHttpService(webappName, pluginID);
-		}
-	}
-
-	private void startHttpService(String webappName, String pluginID) throws Exception {
-		// configure web server
-		Dictionary dict = new Hashtable();
-
-		// configure the port
-		dict.put("http.port", ports.get(webappName)); //$NON-NLS-1$
-
-		// configure the host
-		dict.put("http.host", host == null ? "0.0.0.0" : host); //$NON-NLS-1$ //$NON-NLS-2$
-
-		// set the base URL
-		dict.put("context.path", "/" + webappName); //$NON-NLS-1$ //$NON-NLS-2$
-
-		dict.put("other.info", pluginID); //$NON-NLS-1$
-
-		JettyConfigurator.startServer(webappName, dict);
-
-		ensureBundleStarted("org.eclipse.equinox.http.registry"); //$NON-NLS-1$
+		startJettyServer(webappName);
 	}
 
 	/**
 	 * Stop http server by webapp name
-	 * 
+	 *
 	 * @param webappName
 	 * @throws Exception
 	 */
 	public void stop(String webappName) throws Exception {
-		if (useWebApp) {
-			stopJettyServer(webappName);
-		} else {
-			stopHttpService(webappName);
-		}
+		stopJettyServer(webappName);
 	}
 
-	private void stopHttpService(String webappName) throws Exception {
-		JettyConfigurator.stopServer(webappName);
-	}
 
 	/**
 	 * Ensures that the bundle with the specified name and the highest available
 	 * version is started.
-	 * 
+	 *
 	 * @param symbolicName
 	 */
 	private void ensureBundleStarted(String symbolicName) throws BundleException {
-		Bundle bundle = Platform.getBundle(symbolicName);
+		Bundle bundle = EclipseUtil.getBundle(symbolicName);
 		if (bundle != null) {
 			if (bundle.getState() == Bundle.RESOLVED) {
 				bundle.start(Bundle.START_TRANSIENT);
@@ -208,26 +178,25 @@ public class AppServerWrapper {
 	private ViewerWebServer viewerServer;
 	private ViewerWebApp viewerApp;
 
-	private void startJettyServer(String webAppName) throws IOException, BundleException {
+	private void startJettyServer(String webAppName) throws Exception {
 
 		// must setup logging configuration before jetty loaded
-		System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.JavaUtilLog");
-		System.setProperty("org.eclipse.jetty.LEVEL", "INFO");
-		System.setProperty("org.eclipse.jetty.websocket.LEVEL", "INFO");
-
-		ensureBundleStarted("org.eclipse.jetty.osgi.boot"); //$NON-NLS-1$
+//		System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.JavaUtilLog");
+		System.setProperty("org.eclipse.jetty.util.log.class", "org.eclipse.jetty.util.log.StdErrLog");
+		System.setProperty("org.eclipse.jetty.LEVEL", "DEBUG");
+		System.setProperty("org.eclipse.jetty.websocket.LEVEL", "DEBUG");
 
 		viewerServer = new ViewerWebServer(getHost(), getPort(webAppName));
 		viewerServer.start();
 
 		IWebAppInfo webAppInfo = WebViewer.getCurrentWebApp();
-		Bundle webAppBundle = Platform.getBundle(webAppInfo.getID());
-		viewerApp = new ViewerWebApp(webAppBundle, webAppInfo.getWebAppPath(), webAppInfo.getWebAppContextPath(),
-				webAppInfo.getURIEncoding());
+		Bundle webAppBundle = EclipseUtil.getBundle(webAppInfo.getID());
+		viewerApp = new ViewerWebApp(this.viewerServer.getServer(), webAppBundle, webAppInfo.getWebAppPath(),
+				webAppInfo.getWebAppContextPath(), webAppInfo.getURIEncoding());
 		viewerApp.start();
 	}
 
-	private void stopJettyServer(String webAppName) {
+	private void stopJettyServer(String webAppName) throws Exception {
 		viewerApp.stop();
 		viewerServer.stop();
 	}

@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004,2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2008, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -22,8 +25,9 @@ import org.eclipse.birt.report.engine.layout.PDFConstants;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
 import org.w3c.dom.css.CSSValueList;
 
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
+import org.openpdf.text.Font;
+import org.openpdf.text.pdf.BaseFont;
+import org.openpdf.text.pdf.LayoutProcessor;
 
 /**
  * the font handler, which maps fontFamily, fontStyle, fontWeight properties to
@@ -54,7 +58,7 @@ public class FontHandler {
 
 	private FontMappingManager fontManager = null;
 
-	private Map fonts = new HashMap();
+	private Map<String, BaseFont> fonts = new HashMap<String, BaseFont>();
 
 	/**
 	 * the characters which prefer to use the font of their previous character.
@@ -63,11 +67,12 @@ public class FontHandler {
 
 	/**
 	 * The constructor
-	 * 
+	 *
+	 * @param fontManager
+	 *
 	 * @param textContent      the textContent whose font need to be handled
 	 * @param fontSubstitution If it set to false, we needn't check if the character
 	 *                         exists in the selected font.
-	 * @param format           the output format type
 	 */
 	public FontHandler(FontMappingManager fontManager, ITextContent textContent, boolean fontSubstitution) {
 		this.fontManager = fontManager;
@@ -95,16 +100,26 @@ public class FontHandler {
 				textContent) / PDFConstants.LAYOUT_TO_PDF_RATIO;
 
 		if (!fontSubstitution) {
+			enableKerningAndLigatures();
 			for (int i = 0; i < fontFamilies.length; i++) {
 				String fontName = fontManager.getAliasedFont(fontFamilies[i]);
 				bf = fontManager.createFont(fontName, fontStyle);
-				if (bf != null)
+				if (bf != null) {
 					return;
+				}
 			}
 			bf = fontManager.createFont(FontMappingManager.DEFAULT_FONT, fontStyle);
 		}
 	}
 
+	/**
+	 * The constructor
+	 *
+	 * @param fontManager      font manager
+	 * @param fontFamilies     font families
+	 * @param fontStyle        font style
+	 * @param fontSubstitution font substitution
+	 */
 	public FontHandler(FontMappingManager fontManager, String fontFamilies[], int fontStyle, boolean fontSubstitution) {
 		this.fontManager = fontManager;
 
@@ -115,11 +130,13 @@ public class FontHandler {
 		this.fontSize = fontSize / PDFConstants.LAYOUT_TO_PDF_RATIO;
 
 		if (!fontSubstitution) {
+			enableKerningAndLigatures();
 			for (int i = 0; i < fontFamilies.length; i++) {
 				String fontName = fontManager.getAliasedFont(fontFamilies[i]);
 				bf = fontManager.createFont(fontName, fontStyle);
-				if (bf != null)
+				if (bf != null) {
 					return;
+				}
 			}
 			bf = fontManager.createFont(FontMappingManager.DEFAULT_FONT, fontStyle);
 		}
@@ -127,18 +144,27 @@ public class FontHandler {
 
 	/**
 	 * Gets the FontInfo Object.
+	 *
+	 * @return Return the font object
 	 */
 	public FontInfo getFontInfo() {
 		return new FontInfo(bf, fontSize, fontStyle, fontWeight, simulation);
 	}
 
+	/**
+	 * Check is font changed
+	 *
+	 * @return Return the check of changed font
+	 */
 	public boolean isFontChanged() {
 		return isFontChanged;
 	}
 
 	/**
 	 * Selects a proper font for a character.
-	 * 
+	 *
+	 * @param character character to validate the font
+	 *
 	 * @return true: we find a font which can be used to display the character.
 	 *         false: no font can display the character.
 	 */
@@ -153,20 +179,20 @@ public class FontHandler {
 		} else {
 			isFontChanged = true;
 			bf = candidateFont;
-			simulation = needSimulate(bf);
+			simulation = needSimulate();
 		}
 		return candidateFont.charExists(character);
 	}
 
 	/**
 	 * Gets the BaseFont object to display the given character.
-	 * 
+	 *
 	 * The search sequence is:
 	 * <li>try the font family defined in the families to see if one can be used to
 	 * display the character.</li>
 	 * <li>try to use the default font to display the character.</li>
 	 * <li>if none of the above success, return NULL for the character.</li>
-	 * 
+	 *
 	 * @param c the given character.
 	 * @return the BaseFont. it always return a font.
 	 */
@@ -177,6 +203,7 @@ public class FontHandler {
 			}
 		}
 		// search in the font family to find one to display the character
+		enableKerningAndLigatures();
 		for (int i = 0; i < fontFamilies.length; i++) {
 			// Translate the font alias to font family
 			String fontFamily = fontManager.getAliasedFont(fontFamilies[i]);
@@ -223,9 +250,9 @@ public class FontHandler {
 	}
 
 	private BaseFont createBaseFont(String physicalFont) {
-		BaseFont font = (BaseFont) fonts.get(physicalFont);
+		BaseFont font = fonts.get(physicalFont);
 		if (font == null) {
-			if (fonts.keySet().contains(physicalFont)) {
+			if (fonts.containsKey(physicalFont)) {
 				return null;
 			}
 			font = fontManager.createFont(physicalFont, fontStyle);
@@ -239,7 +266,7 @@ public class FontHandler {
 	 * the proper style for the font. The "simulate" flag will be set if we need to
 	 * simulate it.
 	 */
-	private boolean needSimulate(BaseFont font) {
+	private boolean needSimulate() {
 		if (fontStyle == Font.NORMAL) {
 			return false;
 		}
@@ -259,16 +286,15 @@ public class FontHandler {
 			if (fontWeight > 400 && fontWeight != 700) {
 				// not a regular bold font.
 				return true;
-			} else {
-				return false;
 			}
+			return false;
 		}
 		return true;
 	}
 
 	/**
 	 * Gets the English font name or font family name from the given naming array
-	 * 
+	 *
 	 * @param names the naming array
 	 * @return the English name
 	 */
@@ -291,5 +317,22 @@ public class FontHandler {
 		}
 
 		return tmp;
+	}
+
+	/**
+	 * Enable the font mode to handle advanced kerning and ligatures. The formatting
+	 * option has priority instead disabled behavior. The configuration controls the
+	 * LayouProcessor of OpenPDF.
+	 */
+	private void enableKerningAndLigatures() {
+		if (!LayoutProcessor.isEnabled()) {
+			if (fontManager.useFontKerningAndLigatures()) {
+				if (!LayoutProcessor.isEnabled()) {
+					LayoutProcessor.enableKernLiga();
+				}
+			} else {
+				LayoutProcessor.enable(0);
+			}
+		}
 	}
 }

@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2007, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -12,8 +15,13 @@
 package org.eclipse.birt.report.engine.emitter.html;
 
 import org.eclipse.birt.report.engine.content.IStyle;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.emitter.HTMLTags;
 import org.eclipse.birt.report.engine.ir.DimensionType;
+import org.eclipse.birt.report.engine.nLayout.area.style.BackgroundImageInfo;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.w3c.dom.css.CSSValue;
 
 //FIXME: code review: We should list all the properties according the CSS.
@@ -21,12 +29,18 @@ import org.w3c.dom.css.CSSValue;
 /**
  * <code>AttributeBuilder</code> is a concrete class that HTML Emitters use to
  * build the Style strings.
- * 
+ *
  */
 public class AttributeBuilder {
 
 	/**
 	 * Build the relative position of a component. This method is obsolete.
+	 *
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return Return the content string
 	 */
 	public static String buildPos(DimensionType x, DimensionType y, DimensionType width, DimensionType height) {
 		StringBuffer content = new StringBuffer();
@@ -45,7 +59,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Builds the Visual style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
@@ -62,14 +76,14 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the PagedMedia style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
 	 */
 //	private static void buildPagedMedia( StringBuffer styleBuffer, IStyle style )
 //	{
-//		We should not write the extra pagination information in style classes. 
+//		We should not write the extra pagination information in style classes.
 //		buildProperty( styleBuffer, HTMLTags.ATTR_ORPHANS, style.getOrphans( ) );
 //		buildProperty( styleBuffer, HTMLTags.ATTR_WIDOWS, style.getWidows( ) );
 //		buildProperty( styleBuffer, HTMLTags.ATTR_PAGE_BREAK_BEFORE, style
@@ -82,27 +96,79 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the background style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
 	 * @param emitter     The <code>HTMLReportEmitter</code> object which provides
 	 *                    resource manager and hyperlink builder objects.
+	 * @param parentSize  The size of the parent container
 	 */
-	public static void buildBackground(StringBuffer styleBuffer, IStyle style, HTMLReportEmitter emitter) {
+	public static void buildBackground(StringBuffer styleBuffer, IStyle style, HTMLReportEmitter emitter,
+			DimensionType[] parentSize) {
 		buildProperty(styleBuffer, HTMLTags.ATTR_BACKGROUND_COLOR, style.getBackgroundColor());
 
 		String image = style.getBackgroundImage();
 		if (image == null || "none".equalsIgnoreCase(image)) //$NON-NLS-1$
 		{
+			if (style.getBackgroundHeight() != null || style.getBackgroundWidth() != null) {
+				addPropName(styleBuffer, HTMLTags.ATTR_BACKGROUND_SIZE);
+
+				if (style.getBackgroundWidth() != null && style.getBackgroundHeight() != null) {
+					addPropValue(styleBuffer, style.getBackgroundWidth());
+					addPropValue(styleBuffer, style.getBackgroundHeight());
+				} else {
+					if (style.getBackgroundWidth() != null) {
+						addPropValue(styleBuffer, style.getBackgroundWidth());
+					} else {
+						addPropValue(styleBuffer, "auto");
+					}
+					if (style.getBackgroundHeight() != null) {
+						addPropValue(styleBuffer, style.getBackgroundHeight());
+					} else {
+						addPropValue(styleBuffer, "auto");
+					}
+				}
+				styleBuffer.append(';');
+			}
 			return;
 		}
+		BackgroundImageInfo backgroundImage = emitter.handleStyleImage(image, true, style);
 
-		image = emitter.handleStyleImage(image, true);
+		image = backgroundImage.getUri();
 		if (image != null && image.length() > 0) {
 			buildURLProperty(styleBuffer, HTMLTags.ATTR_BACKGROUND_IMAGE, image);
 			buildProperty(styleBuffer, HTMLTags.ATTR_BACKGROUND_REPEAT, style.getBackgroundRepeat());
 			buildProperty(styleBuffer, HTMLTags.ATTR_BACKGROUND_ATTACHEMNT, style.getBackgroundAttachment());
+
+			DimensionType height = null;
+			DimensionType width = null;
+			if (parentSize != null && parentSize.length == 2) {
+				height = parentSize[0];
+				width = parentSize[1];
+			}
+			addPropName(styleBuffer, HTMLTags.ATTR_BACKGROUND_SIZE);
+
+			String h = backgroundImage.getHeight() + "px";
+			String w = backgroundImage.getWidth() + "px";
+			String propertyValue = style.getPropertyValue(CSSConstants.CSS_BACKGROUND_HEIGHT_PROPERTY);
+			if (propertyValue != null && (DesignChoiceConstants.BACKGROUND_SIZE_COVER.equals(propertyValue)
+					|| DesignChoiceConstants.BACKGROUND_SIZE_CONTAIN.equals(propertyValue))) {
+				if (DesignChoiceConstants.BACKGROUND_SIZE_CONTAIN.equals(propertyValue)) {
+					h = "auto";
+					if (width != null) {
+						w = width.toString();
+					}
+				} else if (DesignChoiceConstants.BACKGROUND_SIZE_COVER.equals(propertyValue)) {
+					if (height != null) {
+						h = height.toString();
+					}
+					w = "auto";
+				}
+			}
+			addPropValue(styleBuffer, w);
+			addPropValue(styleBuffer, h);
+			styleBuffer.append(';');
 
 			String x = style.getBackgroundPositionX();
 			String y = style.getBackgroundPositionY();
@@ -121,13 +187,20 @@ public class AttributeBuilder {
 		}
 	}
 
+	/**
+	 * Build the background color
+	 *
+	 * @param styleBuffer
+	 * @param style
+	 * @param emitter
+	 */
 	public static void buildBackgroundColor(StringBuffer styleBuffer, IStyle style, HTMLReportEmitter emitter) {
 		buildProperty(styleBuffer, HTMLTags.ATTR_BACKGROUND_COLOR, style.getBackgroundColor());
 	}
 
 	/**
 	 * Build the Box style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
@@ -140,7 +213,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the margins.
-	 * 
+	 *
 	 * @param styleBuffer
 	 * @param style
 	 */
@@ -193,7 +266,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the paddings.
-	 * 
+	 *
 	 * @param styleBuffer
 	 * @param style
 	 */
@@ -245,7 +318,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the borders.
-	 * 
+	 *
 	 * @param styleBuffer
 	 * @param style
 	 */
@@ -295,11 +368,10 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the Text style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
-	 * @param bContainer  true: shouldn't output the text-decoration.
 	 */
 	public static void buildText(StringBuffer styleBuffer, IStyle style) {
 		buildProperty(styleBuffer, HTMLTags.ATTR_TEXT_INDENT, style.getTextIndent());
@@ -322,7 +394,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build Font style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
@@ -343,28 +415,26 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the Text-Decoration style string.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
-	 * @param linethrough The line-through value.
-	 * @param underline   The underline value.
-	 * @param overline    The overline value.
+	 * @param style       The style of the text decoration.
 	 */
 	public static void buildTextDecoration(StringBuffer styleBuffer, IStyle style) {
-		CSSValue linethrough = style.getProperty(IStyle.STYLE_TEXT_LINETHROUGH);
-		CSSValue underline = style.getProperty(IStyle.STYLE_TEXT_UNDERLINE);
-		CSSValue overline = style.getProperty(IStyle.STYLE_TEXT_OVERLINE);
+		CSSValue linethrough = style.getProperty(StyleConstants.STYLE_TEXT_LINETHROUGH);
+		CSSValue underline = style.getProperty(StyleConstants.STYLE_TEXT_UNDERLINE);
+		CSSValue overline = style.getProperty(StyleConstants.STYLE_TEXT_OVERLINE);
 
-		if (linethrough == IStyle.LINE_THROUGH_VALUE || underline == IStyle.UNDERLINE_VALUE
-				|| overline == IStyle.OVERLINE_VALUE) {
+		if (linethrough == CSSValueConstants.LINE_THROUGH_VALUE || underline == CSSValueConstants.UNDERLINE_VALUE
+				|| overline == CSSValueConstants.OVERLINE_VALUE) {
 			styleBuffer.append(" text-decoration:"); //$NON-NLS-1$
-			if (IStyle.LINE_THROUGH_VALUE == linethrough) {
+			if (CSSValueConstants.LINE_THROUGH_VALUE == linethrough) {
 				addPropValue(styleBuffer, "line-through");
 			}
-			if (IStyle.UNDERLINE_VALUE == underline) {
+			if (CSSValueConstants.UNDERLINE_VALUE == underline) {
 				addPropValue(styleBuffer, "underline");
 			}
-			if (IStyle.OVERLINE_VALUE == overline) {
+			if (CSSValueConstants.OVERLINE_VALUE == overline) {
 				addPropValue(styleBuffer, "overline");
 			}
 			styleBuffer.append(';');
@@ -376,7 +446,7 @@ public class AttributeBuilder {
 	 * <li>ignore all the border styles is style is null
 	 * <li>CSS default border-color is the font-color, while BIRT is black
 	 * <li>border-color is not inheritable.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param name        The proerty name.
@@ -397,7 +467,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build size style string say, "width: 10.0mm;".
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param name        The property name
@@ -427,7 +497,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build size style, set height and width
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
@@ -439,7 +509,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Build the style property.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param name        The name of the property
@@ -463,7 +533,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Add property name to the Style string.
-	 * 
+	 *
 	 * @param styleBuffer The StringBuffer to which the result should be output.
 	 * @param name        The property name.
 	 */
@@ -475,7 +545,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Add property value to the Style styleBuffer.
-	 * 
+	 *
 	 * @param styleBuffer - specifies the StringBuffer to which the result should be
 	 *                    output
 	 * @param value       - specifies the values of the property
@@ -489,7 +559,7 @@ public class AttributeBuilder {
 
 	/**
 	 * Add URL property name to the Style styleBuffer.
-	 * 
+	 *
 	 * @param styleBuffer - specifies the StringBuffer to which the result should be
 	 *                    output
 	 * @param url         - specifies the values of the property
@@ -508,11 +578,11 @@ public class AttributeBuilder {
 		 * '%' ) { replacement = "%25"; //$NON-NLS-1$ } else if ( c == '\'' ) {
 		 * replacement = "%27"; //$NON-NLS-1$ } else if ( c >= 0x80 ) { replacement =
 		 * '%' + Integer.toHexString( c ); }
-		 * 
+		 *
 		 * if ( replacement != null ) { if ( escapedUrl == null ) { escapedUrl = new
 		 * StringBuffer( url ); } escapedUrl.replace( i + delta, i + delta + 1,
 		 * replacement ); delta += ( replacement.length( ) - 1 ); } }
-		 * 
+		 *
 		 * if ( escapedUrl != null ) { url = escapedUrl.toString( ); }
 		 */
 		if (url.length() > 0) {
@@ -524,18 +594,18 @@ public class AttributeBuilder {
 
 	/**
 	 * Builds the direction style.
-	 * 
+	 *
 	 * @param styleBuffer The <code>StringBuffer</code> to which the result is
 	 *                    output.
 	 * @param style       The style object.
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	public static void buildBidiDirection(StringBuffer styleBuffer, IStyle style) {
 		if (style != null) {
 			String direction = style.getDirection();
 			if (direction != null) {
-				buildProperty(styleBuffer, IStyle.CSS_DIRECTION_PROPERTY, direction);
+				buildProperty(styleBuffer, CSSConstants.CSS_DIRECTION_PROPERTY, direction);
 			}
 		}
 	}

@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -21,6 +24,7 @@ public class HTMLGroupLM extends HTMLRepeatHeaderLM {
 		super(factory);
 	}
 
+	@Override
 	public int getType() {
 		return LAYOUT_MANAGER_GROUP;
 	}
@@ -35,10 +39,12 @@ public class HTMLGroupLM extends HTMLRepeatHeaderLM {
 		return false;
 	}
 
+	@Override
 	protected boolean shouldRepeatHeader() {
 		return ((IGroupContent) content).isHeaderRepeat() && getHeader() != null && !isHeaderBand();
 	}
 
+	@Override
 	protected IBandContent getHeader() {
 		return ((IGroupContent) content).getHeader();
 	}

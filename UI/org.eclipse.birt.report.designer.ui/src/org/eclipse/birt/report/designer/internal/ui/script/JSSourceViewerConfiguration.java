@@ -1,10 +1,12 @@
 /*************************************************************************************
  * Copyright (c) 2004 Actuate Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     Actuate Corporation - Initial implementation.
  ************************************************************************************/
@@ -30,24 +32,32 @@ import org.eclipse.swt.graphics.Color;
 
 /**
  * Sets JS configuration the editor needs
- * 
+ *
  */
 public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 
 	private RuleBasedScanner scanner;
 	protected JSSyntaxContext context;
 
+	/**
+	 * Constructor
+	 */
 	public JSSourceViewerConfiguration() {
 		this(new JSSyntaxContext());
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param context JavaScript context
+	 */
 	public JSSourceViewerConfiguration(JSSyntaxContext context) {
 		this.context = context;
 	}
 
 	/**
 	 * gets color for a given category
-	 * 
+	 *
 	 * @param categoryColor
 	 * @return Color
 	 */
@@ -58,14 +68,16 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 	/**
 	 * @see SourceViewerConfiguration#getConfiguredContentTypes(ISourceViewer)
 	 */
+	@Override
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] { IDocument.DEFAULT_CONTENT_TYPE, JSPartitionScanner.JS_COMMENT,
-				JSPartitionScanner.JS_KEYWORD, JSPartitionScanner.JS_STRING };
+				JSPartitionScanner.JS_KEYWORD, JSPartitionScanner.JS_STRING, JSPartitionScanner.JS_METHOD,
+				JSPartitionScanner.JS_OBJECT };
 	}
 
 	/**
 	 * Gets default scanner
-	 * 
+	 *
 	 * @return scanner
 	 */
 	protected RuleBasedScanner getDefaultScanner() {
@@ -80,6 +92,7 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 	/**
 	 * @see SourceViewerConfiguration#getPresentationReconciler(ISourceViewer)
 	 */
+	@Override
 	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();
 
@@ -102,6 +115,16 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 		reconciler.setDamager(keywordRepairer, JSPartitionScanner.JS_KEYWORD);
 		reconciler.setRepairer(keywordRepairer, JSPartitionScanner.JS_KEYWORD);
 
+		NonRuleBasedDamagerRepairer methodRepairer = new NonRuleBasedDamagerRepairer(
+				UIUtil.getAttributeFor(ReportPlugin.EXPRESSION_METHOD_COLOR_PREFERENCE));
+		reconciler.setDamager(methodRepairer, JSPartitionScanner.JS_METHOD);
+		reconciler.setRepairer(methodRepairer, JSPartitionScanner.JS_METHOD);
+
+		NonRuleBasedDamagerRepairer objectRepairer = new NonRuleBasedDamagerRepairer(
+				UIUtil.getAttributeFor(ReportPlugin.EXPRESSION_OBJECT_COLOR_PREFERENCE));
+		reconciler.setDamager(objectRepairer, JSPartitionScanner.JS_OBJECT);
+		reconciler.setRepairer(objectRepairer, JSPartitionScanner.JS_OBJECT);
+
 		return reconciler;
 	}
 
@@ -115,6 +138,12 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 		} else if (PreferenceNames.P_KEYWORD_COLOR.equals(name)) {
 			// rgbStr = "127,0,85"; //$NON-NLS-1$
 			return ReportColorConstants.JSKEYWORDCOLOR;
+		} else if (PreferenceNames.P_METHOD_COLOR.equals(name)) {
+			// rgbStr = "81,97,122"; //$NON-NLS-1$
+			return ReportColorConstants.JSMETHODCOLOR;
+		} else if (PreferenceNames.P_OBJECT_COLOR.equals(name)) {
+			// rgbStr = "181,87,50"; //$NON-NLS-1$
+			return ReportColorConstants.JSOBJECTCOLOR;
 		} else if (PreferenceNames.P_LINENUMBER_COLOR.equals(name)) {
 			// rgbStr = "127,127,127"; //$NON-NLS-1$
 			return ReportColorConstants.JSLINENUMBERCOLOR;
@@ -122,6 +151,7 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 		return ReportColorConstants.ReportForeground;
 	}
 
+	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
 		assistant.setContentAssistProcessor(new JSCompletionProcessor(context), IDocument.DEFAULT_CONTENT_TYPE);
@@ -131,6 +161,9 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 		return assistant;
 	}
 
+	/**
+	 * Reset scanner color
+	 */
 	public void resetScannerColor() {
 		if (scanner != null) {
 			scanner.setDefaultReturnToken(
@@ -138,6 +171,11 @@ public class JSSourceViewerConfiguration extends SourceViewerConfiguration {
 		}
 	}
 
+	/**
+	 * Update source font of the viewer
+	 *
+	 * @param sourceViewer source viewer component
+	 */
 	public static void updateSourceFont(SourceViewer sourceViewer) {
 		// Always set default text font to source viewer
 		sourceViewer.getTextWidget().setFont(JFaceResources.getTextFont());

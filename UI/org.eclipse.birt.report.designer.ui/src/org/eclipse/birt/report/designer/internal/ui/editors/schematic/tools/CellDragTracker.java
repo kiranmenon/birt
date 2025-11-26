@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -29,12 +32,11 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
-import org.eclipse.gef.GraphicalEditPart;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.KeyHandler;
-import org.eclipse.gef.Request;
 import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.SharedCursors;
+import org.eclipse.gef.requests.ChangeBoundsRequest;
 import org.eclipse.gef.tools.AbstractTool;
 import org.eclipse.gef.tools.DragEditPartsTracker;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -45,14 +47,14 @@ import org.eclipse.swt.widgets.Display;
  * <p>
  * Table Cell drag track
  * </p>
- * 
- * 
+ *
+ *
  */
 public class CellDragTracker extends DragEditPartsTracker implements IDelaySelectionDragTracker {
 
 	/**
 	 * Creates a new CellTracker, with the CROSS cursor
-	 * 
+	 *
 	 * @param sourceEditPart
 	 */
 	public CellDragTracker(EditPart sourceEditPart) {
@@ -63,9 +65,10 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 
 	/*
 	 * Overrides the method, do nothing (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.tools.AbstractTool#handleFinished()
 	 */
+	@Override
 	protected void handleFinished() {
 	}
 
@@ -80,9 +83,9 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	// private List allChildren = new ArrayList( );
 	private List selectedEditParts;
 
-	private Request targetRequest;
+	private ChangeBoundsRequest targetRequest;
 
-	public static final Request MARQUEE_REQUEST = new Request(RequestConstants.REQ_SELECTION);
+	public static final ChangeBoundsRequest MARQUEE_REQUEST = new ChangeBoundsRequest(RequestConstants.REQ_SELECTION);
 
 	private List calculateNewSelection() {
 
@@ -99,13 +102,15 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 		return newSelections;
 	}
 
-	protected Request createTargetRequest() {
+	@Override
+	protected ChangeBoundsRequest createTargetRequest() {
 		return MARQUEE_REQUEST;
 	}
 
 	/**
 	 * Erases feedback if necessary and puts the tool into the terminal state.
 	 */
+	@Override
 	public void deactivate() {
 		if (isInState(STATE_DRAG_IN_PROGRESS)) {
 			eraseMarqueeFeedback();
@@ -123,9 +128,11 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 		}
 	}
 
+	@Override
 	protected void eraseTargetFeedback() {
-		if (selectedEditParts == null)
+		if (selectedEditParts == null) {
 			return;
+		}
 		ListIterator oldEditParts = selectedEditParts.listIterator();
 		while (oldEditParts.hasNext()) {
 			EditPart editPart = (EditPart) oldEditParts.next();
@@ -143,6 +150,7 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	/**
 	 * @see org.eclipse.gef.tools.AbstractTool#getCommandName()
 	 */
+	@Override
 	protected String getCommandName() {
 		return REQ_SELECTION;
 	}
@@ -165,18 +173,21 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.tools.TargetingTool#getTargetRequest()
 	 */
-	protected Request getTargetRequest() {
-		if (targetRequest == null)
+	@Override
+	protected ChangeBoundsRequest getTargetRequest() {
+		if (targetRequest == null) {
 			targetRequest = createTargetRequest();
+		}
 		return targetRequest;
 	}
 
 	/**
 	 * @see org.eclipse.gef.tools.AbstractTool#handleButtonDown(int)
 	 */
+	@Override
 	protected boolean handleButtonDown(int button) {
 		boolean rlt = super.handleButtonDown(button);
 
@@ -192,6 +203,7 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	/**
 	 * @see org.eclipse.gef.tools.AbstractTool#handleButtonUp(int)
 	 */
+	@Override
 	protected boolean handleButtonUp(int button) {
 		if (stateTransition(STATE_DRAG_IN_PROGRESS, STATE_TERMINAL)) {
 			eraseTargetFeedback();
@@ -251,31 +263,20 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 			return;
 		}
 
-		boolean first = true;
-
-		for (Iterator itr = lst.iterator(); itr.hasNext();) {
-			GraphicalEditPart part = (GraphicalEditPart) itr.next();
-
-			if (first) {
-				getCurrentViewer().select(part);
-				first = false;
-			} else {
-				getCurrentViewer().appendSelection(part);
-			}
-
-			getCurrentViewer().reveal(part);
-		}
+		getCurrentViewer().setSelection(new StructuredSelection(lst));
 
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.tools.SelectEditPartTracker#performSelection()
 	 */
+	@Override
 	protected void performSelection() {
-		if (hasSelectionOccurred())
+		if (hasSelectionOccurred()) {
 			return;
+		}
 
 		/**
 		 * Hacks the old selection algorithm, checks the consistency of parents of
@@ -324,6 +325,7 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	/**
 	 * @see org.eclipse.gef.tools.AbstractTool#handleDragInProgress()
 	 */
+	@Override
 	public boolean handleDragInProgress() {
 		if (isInState(STATE_DRAG | STATE_DRAG_IN_PROGRESS)) {
 			showMarqueeFeedback();
@@ -337,6 +339,7 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	/**
 	 * @see org.eclipse.gef.tools.AbstractTool#handleFocusLost()
 	 */
+	@Override
 	protected boolean handleFocusLost() {
 		if (isInState(STATE_DRAG | STATE_DRAG_IN_PROGRESS)) {
 			handleFinished();
@@ -348,9 +351,10 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	/**
 	 * This method is called when mouse or keyboard input is invalid and erases the
 	 * feedback.
-	 * 
+	 *
 	 * @return <code>true</code>
 	 */
+	@Override
 	protected boolean handleInvalidInput() {
 		eraseTargetFeedback();
 		eraseMarqueeFeedback();
@@ -361,14 +365,14 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	 * Handles high-level processing of a key down event. KeyEvents are forwarded to
 	 * the current viewer's {@link KeyHandler}, via
 	 * {@link KeyHandler#keyPressed(KeyEvent)}.
-	 * 
+	 *
 	 * @see AbstractTool#handleKeyDown(KeyEvent)
 	 */
+	@Override
 	protected boolean handleKeyDown(KeyEvent e) {
-		if (super.handleKeyDown(e))
+		if (super.handleKeyDown(e) || (getCurrentViewer().getKeyHandler() != null && getCurrentViewer().getKeyHandler().keyPressed(e))) {
 			return true;
-		if (getCurrentViewer().getKeyHandler() != null && getCurrentViewer().getKeyHandler().keyPressed(e))
-			return true;
+		}
 		return false;
 	}
 
@@ -390,10 +394,11 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 			List selected = new ArrayList(viewer.getSelectedEditParts());
 			for (int i = 0; i < newSelections.size(); i++) {
 				EditPart editPart = (EditPart) newSelections.get(i);
-				if (editPart.getSelected() != EditPart.SELECTED_NONE)
+				if (editPart.getSelected() != EditPart.SELECTED_NONE) {
 					selected.remove(editPart);
-				else
+				} else {
 					selected.add(editPart);
+				}
 			}
 			viewer.setSelection(new StructuredSelection(selected));
 		} else {
@@ -404,14 +409,17 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 	/**
 	 * @see org.eclipse.gef.Tool#setViewer(org.eclipse.gef.EditPartViewer)
 	 */
+	@Override
 	public void setViewer(EditPartViewer viewer) {
-		if (viewer == getCurrentViewer())
+		if (viewer == getCurrentViewer()) {
 			return;
+		}
 		super.setViewer(viewer);
-		if (viewer instanceof GraphicalViewer)
+		if (viewer instanceof GraphicalViewer) {
 			setDefaultCursor(SharedCursors.CROSS);
-		else
+		} else {
 			setDefaultCursor(SharedCursors.NO);
+		}
 	}
 
 	private void showMarqueeFeedback() {
@@ -422,9 +430,10 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.tools.TargetingTool#showTargetFeedback()
 	 */
+	@Override
 	protected void showTargetFeedback() {
 		for (int i = 0; i < selectedEditParts.size(); i++) {
 			EditPart editPart = (EditPart) selectedEditParts.get(i);
@@ -443,6 +452,7 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 		/**
 		 * @see org.eclipse.draw2d.Figure#paintFigure(org.eclipse.draw2d.Graphics)
 		 */
+		@Override
 		protected void paintFigure(Graphics graphics) {
 			Rectangle bounds = getBounds().getCopy();
 			graphics.translate(getLocation());
@@ -478,10 +488,12 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 			if (schedulePaint) {
 				Display.getCurrent().timerExec(DELAY, new Runnable() {
 
+					@Override
 					public void run() {
 						offset++;
-						if (offset > 5)
+						if (offset > 5) {
 							offset = 0;
+						}
 
 						schedulePaint = true;
 						repaint();
@@ -506,11 +518,12 @@ public class CellDragTracker extends DragEditPartsTracker implements IDelaySelec
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.designer.internal.ui.editors.schematic.editparts.
 	 * IDelaySelectionDragTracker#setLocation(org.eclipse.draw2d.geometry.Point)
 	 */
+	@Override
 	public void setLocation(Point p) {
 		getCurrentInput().setMouseLocation(p.x, p.y);
 	}

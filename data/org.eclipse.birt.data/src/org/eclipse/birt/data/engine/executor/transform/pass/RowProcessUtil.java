@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -14,6 +17,7 @@ package org.eclipse.birt.data.engine.executor.transform.pass;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.birt.data.engine.api.IComputedColumn;
 import org.eclipse.birt.data.engine.api.querydefn.ComputedColumn;
 import org.eclipse.birt.data.engine.core.DataException;
 import org.eclipse.birt.data.engine.executor.transform.ResultSetPopulator;
@@ -29,7 +33,7 @@ import org.eclipse.birt.data.engine.impl.FilterByRow;
  */
 abstract class RowProcessUtil {
 	/**
-	 * 
+	 *
 	 */
 	protected ComputedColumnsState iccState;
 	protected ComputedColumnHelper computedColumnHelper;
@@ -39,7 +43,7 @@ abstract class RowProcessUtil {
 	protected DataEngineSession session;
 
 	/**
-	 * 
+	 *
 	 * @param populator
 	 * @param iccState
 	 * @param computedColumnHelper
@@ -57,19 +61,19 @@ abstract class RowProcessUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param model
 	 * @return
 	 * @throws DataException
 	 */
-	protected List prepareComputedColumns(int model) throws DataException {
+	protected List<IComputedColumn> prepareComputedColumns(int model) throws DataException {
 		initializeICCState(model);
 
-		List aggCCList = new ArrayList();
-		List simpleCCList = new ArrayList();
+		List<IComputedColumn> aggCCList = new ArrayList<>();
+		List<IComputedColumn> simpleCCList = new ArrayList<>();
 		if (computedColumnHelper != null) {
 			computedColumnHelper.setModel(model);
-			List l = computedColumnHelper.getComputedColumnList();
+			List<IComputedColumn> l = computedColumnHelper.getComputedColumnList();
 			for (int i = 0; i < l.size(); i++) {
 				if (this.populator.getExpressionProcessor().hasAggregation(((ComputedColumn) l.get(i)).getExpression())
 						|| ((ComputedColumn) l.get(i)).getAggregateFunction() != null) {
@@ -87,29 +91,27 @@ abstract class RowProcessUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param computedColumns
 	 * @param isNew
 	 * @return
 	 */
-	protected List getAggrComputedColumns(List computedColumns, boolean isNew) {
-		List result = new ArrayList();
+	protected List<IComputedColumn> getAggrComputedColumns(List<IComputedColumn> computedColumns, boolean isNew) {
+		List<IComputedColumn> result = new ArrayList<>();
 		for (int i = 0; i < computedColumns.size(); i++) {
 			if (isNew) {
 				if (((ComputedColumn) computedColumns.get(i)).getAggregateFunction() != null) {
 					result.add(computedColumns.get(i));
 				}
-			} else {
-				if (((ComputedColumn) computedColumns.get(i)).getAggregateFunction() == null) {
-					result.add(computedColumns.get(i));
-				}
+			} else if (((ComputedColumn) computedColumns.get(i)).getAggregateFunction() == null) {
+				result.add(computedColumns.get(i));
 			}
 		}
 		return result;
 	}
 
 	/**
-	 * 
+	 *
 	 * @param model
 	 * @throws DataException
 	 */
@@ -130,7 +132,7 @@ abstract class RowProcessUtil {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param filterType
 	 * @param changeMaxRows
 	 * @param stopSign

@@ -1,12 +1,24 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 /*
  * Copyright 2001-2004 The Apache Software Foundation.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,7 +40,7 @@ import org.apache.axis.i18n.Messages;
  * <br>
  * <b>This is a mod version over original axis implementation to handle the
  * Unicode Extension-B cases. May need update when Axis changes.</b>
- * 
+ *
  * @author <a href="mailto:jens@void.fm">Jens Schumann</a>
  * @see <a href="http://encoding.org">encoding.org</a>
  * @see <a href="http://czyborra.com/utf/#UTF-8">UTF 8 explained</a>
@@ -36,20 +48,22 @@ import org.apache.axis.i18n.Messages;
 public class UTF8Encoder extends AbstractXMLEncoder {
 
 	/**
-	 * gets the encoding supported by this encoder
-	 * 
-	 * @return string
+	 * Gets the encoding supported by this encoder
+	 *
+	 * @return Return the encoding of this encoder
 	 */
+	@Override
 	public String getEncoding() {
 		return XMLEncoderFactory.ENCODING_UTF_8;
 	}
 
 	/**
 	 * write the encoded version of a given string
-	 * 
+	 *
 	 * @param writer    writer to write this string to
 	 * @param xmlString string to be encoded
 	 */
+	@Override
 	public void writeEncoded(Writer writer, String xmlString) throws IOException {
 		if (xmlString == null) {
 			return;

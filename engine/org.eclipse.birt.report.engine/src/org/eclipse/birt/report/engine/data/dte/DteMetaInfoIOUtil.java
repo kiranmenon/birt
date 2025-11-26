@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -37,7 +40,7 @@ public class DteMetaInfoIOUtil {
 
 	/**
 	 * save the metadata into the streams.
-	 * 
+	 *
 	 * @param key
 	 */
 	static public void storeMetaInfo(DataOutputStream dos, String pRsetId, String rawId, String queryId, String rsetId,
@@ -58,19 +61,15 @@ public class DteMetaInfoIOUtil {
 
 		if (archive.exists(ReportDocumentConstants.DATA_META_STREAM)) {
 			InputStream in = archive.getStream(ReportDocumentConstants.DATA_META_STREAM);
-			try {
+			try (in) {
 				loadDteMetaInfo(result, new DataInputStream(in));
-			} finally {
-				in.close();
 			}
 		}
 
 		if (archive.exists(ReportDocumentConstants.DATA_SNAP_META_STREAM)) {
 			InputStream in = archive.getStream(ReportDocumentConstants.DATA_SNAP_META_STREAM);
-			try {
+			try (in) {
 				loadDteMetaInfo(result, new DataInputStream(in));
-			} finally {
-				in.close();
 			}
 		}
 
@@ -82,17 +81,13 @@ public class DteMetaInfoIOUtil {
 
 		if (archive.exists(ReportDocumentConstants.DATA_SNAP_META_STREAM)) {
 			InputStream in = archive.getStream(ReportDocumentConstants.DATA_SNAP_META_STREAM);
-			try {
+			try (in) {
 				loadDteMetaInfo(result, new DataInputStream(in));
-			} finally {
-				in.close();
 			}
 		} else if (archive.exists(ReportDocumentConstants.DATA_META_STREAM)) {
 			InputStream in = archive.getStream(ReportDocumentConstants.DATA_META_STREAM);
-			try {
+			try (in) {
 				loadDteMetaInfo(result, new DataInputStream(in));
-			} finally {
-				in.close();
 			}
 		}
 		return result;

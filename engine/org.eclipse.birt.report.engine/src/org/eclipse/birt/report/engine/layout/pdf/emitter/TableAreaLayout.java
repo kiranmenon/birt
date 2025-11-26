@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -61,8 +64,9 @@ public class TableAreaLayout {
 		this.layoutInfo = layoutInfo;
 		this.startCol = startCol;
 		this.endCol = endCol;
-		if (tableContent != null)
+		if (tableContent != null) {
 			bcr.setRTL(tableContent.isRTL());
+		}
 	}
 
 	public void setUnresolvedRow(Row row) {
@@ -169,7 +173,7 @@ public class TableAreaLayout {
 
 	/**
 	 * resolve cell border conflict
-	 * 
+	 *
 	 * @param cellArea
 	 */
 	public void resolveBorderConflict(CellArea cellArea, boolean isFirst) {
@@ -184,7 +188,7 @@ public class TableAreaLayout {
 		IStyle columnStyle = getColumnStyle(columnID);
 		IStyle preRowStyle = null;
 		IStyle preColumnStyle = getColumnStyle(columnID - 1);
-		IStyle leftCellContentStyle = null;
+		IStyle leftCellContentStyle;
 		IStyle topCellStyle = null;
 
 		Row lastRow = null;
@@ -254,7 +258,7 @@ public class TableAreaLayout {
 
 	/**
 	 * get column style
-	 * 
+	 *
 	 * @param columnID
 	 * @return
 	 */
@@ -340,7 +344,7 @@ public class TableAreaLayout {
 	/**
 	 * When pagination happens, if drop cells should be finished by force, we need
 	 * to end these cells and vertical align for them.
-	 * 
+	 *
 	 */
 	public int resolveAll() {
 		if (rows.size() == 0) {
@@ -391,11 +395,9 @@ public class TableAreaLayout {
 					}
 					verticalAlign(refCell);
 				}
-			} else {
-				if (dValue != 0) {
-					cell.setHeight(height);
-					verticalAlign(cell);
-				}
+			} else if (dValue != 0) {
+				cell.setHeight(height);
+				verticalAlign(cell);
 			}
 			i = i + cell.getColSpan() - 1;
 		}
@@ -422,8 +424,9 @@ public class TableAreaLayout {
 				width = resolveBottomBorder(cell);
 			}
 
-			if (width > result)
+			if (width > result) {
 				result = width;
+			}
 			i = i + cell.getColSpan() - 1;
 		}
 
@@ -466,7 +469,7 @@ public class TableAreaLayout {
 	 * 1) Creates row wrapper. 2) For the null cell in the row wrapper, fills the
 	 * relevant position with dummy cell or empty cell. 3) Updates the height of the
 	 * row and the cells in the row.
-	 * 
+	 *
 	 * @param rowArea current rowArea.
 	 */
 	private Row updateRow(RowArea rowArea, int specifiedHeight) {
@@ -518,7 +521,7 @@ public class TableAreaLayout {
 
 	/**
 	 * Creates dummy cell and updates its delta value.
-	 * 
+	 *
 	 * @param upperCell the upper cell.
 	 * @return the created dummy cell.
 	 */
@@ -601,13 +604,14 @@ public class TableAreaLayout {
 
 	/**
 	 * Updates the row height and the height of the cells in the row.
-	 * 
+	 *
 	 * @param rowArea
 	 * @param height
 	 */
 	private void updateRowHeight(Row row, int height) {
-		if (height < 0)
+		if (height < 0) {
 			return;
+		}
 		row.getArea().setHeight(height);
 		for (int i = startCol; i <= endCol; i++) {
 			CellArea cell = row.getCell(i);

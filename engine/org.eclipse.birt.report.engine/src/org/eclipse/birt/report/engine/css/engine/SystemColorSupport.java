@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - modification of Batik's SystemColorSupport.java to support BIRT's CSS rules
@@ -29,10 +32,13 @@ public class SystemColorSupport implements CSSConstants {
 
 	/**
 	 * Returns the Value corresponding to the given system color.
+	 *
+	 * @param ident
+	 * @return Returns the Value corresponding to the given system color.
 	 */
 	public static CSSValue getSystemColor(String ident) {
 		ident = ident.toLowerCase();
-		SystemColor sc = (SystemColor) factories.get(ident);
+		SystemColor sc = factories.get(ident);
 		return new RGBColorValue(new FloatValue(CSSPrimitiveValue.CSS_NUMBER, sc.getRed()),
 				new FloatValue(CSSPrimitiveValue.CSS_NUMBER, sc.getGreen()),
 				new FloatValue(CSSPrimitiveValue.CSS_NUMBER, sc.getBlue()));
@@ -41,7 +47,7 @@ public class SystemColorSupport implements CSSConstants {
 	/**
 	 * The color factories.
 	 */
-	protected final static Map factories = new HashMap();
+	protected final static Map<String, SystemColor> factories = new HashMap<String, SystemColor>();
 	static {
 		factories.put(CSS_ACTIVEBORDER_VALUE, SystemColor.windowBorder);
 		factories.put(CSS_ACTIVECAPTION_VALUE, SystemColor.activeCaption);

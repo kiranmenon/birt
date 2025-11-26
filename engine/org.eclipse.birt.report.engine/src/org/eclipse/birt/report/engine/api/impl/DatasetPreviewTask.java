@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 package org.eclipse.birt.report.engine.api.impl;
 
 import java.util.Collection;
@@ -87,6 +99,7 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		super(engine, TASK_DATASETPREVIEW);
 	}
 
+	@Override
 	public IExtractionResults execute() throws EngineException {
 		if (dataset == null) {
 			throw new IllegalArgumentException("dataset can not be null");
@@ -94,10 +107,12 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		return runDataset();
 	}
 
+	@Override
 	public IExtractionResults extract() throws EngineException {
 		return execute();
 	}
 
+	@Override
 	public void extract(IExtractionOption options) throws BirtException {
 		IDataExtractionOption option = null;
 		if (options == null) {
@@ -111,7 +126,6 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 			dataExtraction.initialize(executionContext.getReportContext(), extractOption);
 			IExtractionResults results = execute();
 			if (executionContext.isCanceled()) {
-				return;
 			} else {
 				dataExtraction.output(results);
 			}
@@ -182,10 +196,12 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		return dataExtraction;
 	}
 
+	@Override
 	public void setMaxRow(int maxRow) {
 		this.maxRow = maxRow;
 	}
 
+	@Override
 	public void setStartRow(int startRow) {
 		this.startRow = startRow;
 	}
@@ -194,6 +210,7 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 
 	}
 
+	@Override
 	public void setDataSet(DataSetHandle dataset) {
 		if (dataset == null) {
 			throw new IllegalArgumentException("dataset can not be null!");
@@ -209,14 +226,17 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		setReportRunnable((ReportRunnable) runnable);
 	}
 
+	@Override
 	public void selectColumns(String[] columnNames) {
 		selectedColumns = columnNames;
 	}
 
+	@Override
 	public void setFilters(IFilterDefinition[] simpleFilterExpression) {
 		filterExpressions = simpleFilterExpression;
 	}
 
+	@Override
 	public void setSorts(ISortDefinition[] simpleSortExpression) {
 		setSorts(simpleSortExpression, false);
 	}
@@ -244,7 +264,7 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 
 	/**
 	 * runs the report
-	 * 
+	 *
 	 * @throws EngineException throws exception when there is a run error
 	 */
 	protected IExtractionResults doRun() throws EngineException {
@@ -301,14 +321,15 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 	}
 
 	protected QueryDefinition constructQuery(DataSetHandle dataset, DataRequestSession session) throws BirtException {
-		if (this.query != null)
+		if (this.query != null) {
 			return this.query;
+		}
 		if (dataset.getCachedMetaDataHandle() == null) {
 			session.refreshMetaData(dataset);
 		}
 		QueryDefinition query = new QueryDefinition();
 		query.setDataSetName(dataset.getQualifiedName());
-		Set<String> existBindings = new HashSet<String>();
+		Set<String> existBindings = new HashSet<>();
 
 		Map<String, ResultSetColumn> columns = QueryUtil.getResultSetColumns(dataset);
 		if (this.selectedColumns == null) {
@@ -329,7 +350,7 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 				}
 			}
 		}
-		Set<String> referenced = new HashSet<String>();
+		Set<String> referenced = new HashSet<>();
 		// set max rows
 		if (maxRow >= 0) {
 			query.setMaxRows(maxRow);
@@ -430,11 +451,13 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		return adapter;
 	}
 
+	@Override
 	protected void validateStringParameter(String paramName, Object paramValue,
 			AbstractScalarParameterHandle paramHandle) throws ParameterValidationException {
 		// do not check length of parameter value even when parameter value is required
 	}
 
+	@Override
 	protected void loadDesign() {
 
 		IReportRunnable runnable = executionContext.getRunnable();
@@ -452,21 +475,20 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 
 				// Intialize the report
 				ReportScriptExecutor.handleInitialize(reportDesign, executionContext);
-			} else {
-				if (dataset != null) {
-					ModuleHandle moduleHandle = dataset.getModuleHandle();
-					Iterator iter = moduleHandle.includeScriptsIterator();
-					loadScript(iter);
+			} else if (dataset != null) {
+				ModuleHandle moduleHandle = dataset.getModuleHandle();
+				Iterator iter = moduleHandle.includeScriptsIterator();
+				loadScript(iter);
 
-					// Intialize the report
-					ReportScriptExecutor.handleInitialize(moduleHandle, executionContext);
+				// Intialize the report
+				ReportScriptExecutor.handleInitialize(moduleHandle, executionContext);
 
-				}
 			}
 		}
 
 	}
 
+	@Override
 	public void setQuery(QueryDefinition query) {
 		this.query = query;
 	}
@@ -477,6 +499,7 @@ public class DatasetPreviewTask extends EngineTask implements IDatasetPreviewTas
 		this.overrideExistingSorts = overrideExistingSorts;
 	}
 
+	@Override
 	public void setDataEngineFlowMode(DataEngineFlowMode dataEngineFlowMode) {
 		this.dataEngineFlowMode = dataEngineFlowMode;
 	}

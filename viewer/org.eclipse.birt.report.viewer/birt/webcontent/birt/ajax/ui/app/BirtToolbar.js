@@ -1,9 +1,9 @@
 /******************************************************************************
- *	Copyright (c) 2004 Actuate Corporation and others.
+ *	Copyright (c) 2004, 2025 Actuate Corporation and others.
  *	All rights reserved. This program and the accompanying materials 
- *	are made available under the terms of the Eclipse Public License v1.0
+ *	are made available under the terms of the Eclipse Public License v2.0
  *	which accompanies this distribution, and is available at
- *		http://www.eclipse.org/legal/epl-v10.html
+ *		http://www.eclipse.org/legal/epl-2.0.html
  *	
  *	Contributors:
  *		Actuate Corporation - Initial implementation.
@@ -103,9 +103,18 @@ BirtToolbar.prototype = Object.extend( new AbstractBaseToolbar( ),
 					birtEventDispatcher.broadcastEvent( birtEvent.__E_PARAMETER );
 					break;
 				}
+				case 'previewLayout':
+				{
+					birtEventDispatcher.broadcastEvent( birtEvent.__E_PREVIEW_LAYOUT );
+					break;
+				}
+				case 'infoDialog':
+				{
+					break;
+				}
 				default:
 				{
-					alert( oBtn.name );
+					birtMessageDialog.showMessage(oBtn.name);
 					break;
 				}	
 			}

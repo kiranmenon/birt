@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -37,7 +40,7 @@ import org.w3c.dom.css.CSSValue;
 /**
  * Converts the deprecated element according to the HTML 4.0 specification and
  * parses the style attribute of the HTML element.
- * 
+ *
  */
 public class HTMLStyleProcessor {
 
@@ -55,8 +58,8 @@ public class HTMLStyleProcessor {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param context the execution context
+	 *
+	 * @param report  report design handle
 	 */
 	public HTMLStyleProcessor(ReportDesignHandle report) {
 		// Takes the zero-length string as parameter just for keeping to the
@@ -67,8 +70,8 @@ public class HTMLStyleProcessor {
 
 	protected void processBackgroundImage(IStyle style, Map context) {
 		if (style != null) {
-			CSSValue value = (CSSValue) style.getProperty(StyleConstants.STYLE_BACKGROUND_IMAGE);
-			if (value != null && value instanceof URIValue) {
+			CSSValue value = style.getProperty(StyleConstants.STYLE_BACKGROUND_IMAGE);
+			if (value instanceof URIValue) {
 				String bgi = ((URIValue) value).getStringValue();
 				if ((null != bgi) && (!"".equals(bgi))) //$NON-NLS-1$
 				{
@@ -85,14 +88,8 @@ public class HTMLStyleProcessor {
 							// bgi = "url(" + bgi + ")"; //$NON-NLS-1$//$NON-NLS-2$
 						}
 					}
-					if (bgi != null) {
-						// Puts the modified URI of the resource
-						style.setBackgroundImage(bgi);
-					} else {
-						// If the resource does not exist, then removes this
-						// item.
-						style.removeProperty("background-image"); //$NON-NLS-1$
-					}
+					// Puts the modified URI of the resource
+					style.setBackgroundImage(bgi);
 				}
 			}
 		}
@@ -111,9 +108,10 @@ public class HTMLStyleProcessor {
 	 * Parses the style attribute of the element node and converts the deprecated
 	 * element node in HTML 4.0, and calls it on its children element nodes
 	 * recursively
-	 * 
-	 * @param ele  the element node in the DOM tree
-	 * @param text the text content object
+	 *
+	 * @param ele     the element node in the DOM tree
+	 * @param styles  element map and the according style properties
+	 * @param context the text content object
 	 */
 	public void execute(Element ele, HashMap<Element, StyleProperties> styles, Map context) {
 
@@ -193,40 +191,6 @@ public class HTMLStyleProcessor {
 				execute((Element) child, styles, context);
 			}
 		}
-	}
-
-	/**
-	 * Replaces the previous element with the new tag name in the same position and
-	 * return it
-	 * 
-	 * @param oldEle the replaced element
-	 * @param tag    the tag name of the new HTML element
-	 * @return the new HTML element
-	 */
-	private Element replaceElement(Element oldEle, String tag) {
-		Element newEle = oldEle.getOwnerDocument().createElement(tag);
-		// Copies the attributes
-		for (int i = 0; i < oldEle.getAttributes().getLength(); i++) {
-			String attrName = oldEle.getAttributes().item(i).getNodeName();
-			newEle.setAttribute(attrName, oldEle.getAttribute(attrName));
-		}
-		// Copies the children nodes
-		// Note: After the child node is moved to another parent node, then
-		// relationship between it and its sibling is removed. So here calls
-		// <code>Node.getFirstChild()</code>again and again till it is null.
-		for (Node child = oldEle.getFirstChild(); child != null; child = oldEle.getFirstChild()) {
-			newEle.appendChild(child);
-		}
-		oldEle.getParentNode().replaceChild(newEle, oldEle);
-		return newEle;
-	}
-
-	private void appendStyle(StringBuffer style, String name, String value) {
-		if (name == null || "".equals(name) || value == null || "".equals(value)) //$NON-NLS-1$ //$NON-NLS-2$
-		{
-			return;
-		}
-		style.append(name + ":" + value + ";"); //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 }

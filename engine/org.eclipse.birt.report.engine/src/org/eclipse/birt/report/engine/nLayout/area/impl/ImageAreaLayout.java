@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -11,8 +14,6 @@
 
 package org.eclipse.birt.report.engine.nLayout.area.impl;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
@@ -27,10 +28,11 @@ import org.eclipse.birt.report.engine.content.Dimension;
 import org.eclipse.birt.report.engine.content.IHyperlinkAction;
 import org.eclipse.birt.report.engine.content.IImageContent;
 import org.eclipse.birt.report.engine.content.IReportContent;
-import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.content.ITextContent;
 import org.eclipse.birt.report.engine.content.impl.ActionContent;
 import org.eclipse.birt.report.engine.content.impl.ObjectContent;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.emitter.ImageReader;
 import org.eclipse.birt.report.engine.i18n.EngineResourceHandle;
 import org.eclipse.birt.report.engine.i18n.MessageConstants;
@@ -42,9 +44,15 @@ import org.eclipse.birt.report.engine.nLayout.area.ILayout;
 import org.eclipse.birt.report.engine.nLayout.area.style.BoxStyle;
 
 import com.ibm.icu.util.ULocale;
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Image;
+import org.openpdf.text.Image;
 
+/**
+ *
+ * Implementation of image layout area
+ *
+ * @since 3.3
+ *
+ */
 public class ImageAreaLayout implements ILayout {
 
 	private ILayout layout = null;
@@ -58,12 +66,20 @@ public class ImageAreaLayout implements ILayout {
 
 	private static Pattern pattern = Pattern.compile(" ([^=]*)=\"([^\"]*)\"");
 
+	/**
+	 * Constructor
+	 *
+	 * @param parent  container area (parent container)
+	 * @param context layout context
+	 * @param content image content
+	 */
 	public ImageAreaLayout(ContainerArea parent, LayoutContext context, IImageContent content) {
 		this.parent = parent;
 		this.content = content;
 		this.context = context;
 	}
 
+	@Override
 	public void layout() throws BirtException {
 		initialize();
 		if (layout != null) {
@@ -105,7 +121,7 @@ public class ImageAreaLayout implements ILayout {
 	}
 
 	private ILayout createAltTextLayout(int altTextType) {
-		ITextContent altTextContent = createAltText((IImageContent) content, altTextType);
+		ITextContent altTextContent = createAltText(content, altTextType);
 		if (null == altTextContent) {
 			return null;
 		}
@@ -193,15 +209,13 @@ public class ImageAreaLayout implements ILayout {
 		}
 
 		/**
-		 * get intrinsic dimension of image in pixels. Now only support png, bmp, jpg,
+		 * Get intrinsic dimension of image in pixels. Now only support png, bmp, jpg,
 		 * gif.
-		 * 
-		 * @return
-		 * @throws IOException
-		 * @throws MalformedURLException
-		 * @throws BadElementException
+		 *
+		 * @param image image to get the dimension
+		 * @return Return the image size as dimension
 		 */
-		protected Dimension getIntrinsicDimension(IImageContent content, Image image) {
+		protected Dimension getIntrinsicDimension(Image image) {
 			if (image != null) {
 				return new Dimension((int) (image.getPlainWidth() * 1000 / resolutionX * 72),
 						(int) (image.getPlainHeight() * 1000 / resolutionY * 72));
@@ -214,25 +228,36 @@ public class ImageAreaLayout implements ILayout {
 			int imageFileDpiX = 0;
 			int imageFileDpiY = 0;
 
+			// prepare the raw image size
+			int referenceWidth = pWidth;
+			int referenceHeight = -1;
 			if (reader.getType() == ImageReader.TYPE_IMAGE_OBJECT
 					|| reader.getType() == ImageReader.TYPE_CONVERTED_SVG_OBJECT) {
 				if (imageObject != null) {
 					imageFileDpiX = imageObject.getDpiX();
 					imageFileDpiY = imageObject.getDpiY();
+
+					// set the raw image size like reference (used points)
+					referenceWidth = (int) (imageObject.getWidth()
+							/ PropertyUtil.getRenderDpi(content, context.getDpi())
+							* 72000d);
+					referenceHeight = (int) (imageObject.getHeight()
+							/ PropertyUtil.getRenderDpi(content, context.getDpi())
+							* 72000d);
 				}
 			}
 			resolutionX = PropertyUtil.getImageDpi(content, imageFileDpiX, context.getDpi());
 			resolutionY = PropertyUtil.getImageDpi(content, imageFileDpiY, context.getDpi());
 
 			try {
-				intrinsic = getIntrinsicDimension(content, imageObject);
+				intrinsic = getIntrinsicDimension(imageObject);
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, e.getLocalizedMessage());
 			}
 			int specifiedWidth = PropertyUtil.getImageDimensionValue(content, content.getWidth(), context.getDpi(),
-					pWidth);
+					referenceWidth);
 			int specifiedHeight = PropertyUtil.getImageDimensionValue(content, content.getHeight(), context.getDpi(),
-					-1);
+					referenceHeight);
 
 			Dimension dim = new Dimension(DEFAULT_WIDHT, DEFAULT_HEIGHT);
 			if (intrinsic == null) {
@@ -257,24 +282,23 @@ public class ImageAreaLayout implements ILayout {
 						dim.setDimension(intrinsic.getWidth(), intrinsic.getHeight());
 					}
 				}
-			} else {
-				if (specifiedWidth >= 0) {
-					if (specifiedHeight >= 0) {
-						dim.setDimension(specifiedWidth, specifiedHeight);
-					} else {
-						dim.setDimension(specifiedWidth, intrinsic.getHeight());
-					}
+			} else if (specifiedWidth >= 0) {
+				if (specifiedHeight >= 0) {
+					dim.setDimension(specifiedWidth, specifiedHeight);
 				} else {
-					if (specifiedHeight >= 0) {
-						dim.setDimension(intrinsic.getWidth(), specifiedHeight);
-					} else {
-						dim.setDimension(intrinsic.getWidth(), intrinsic.getHeight());
-					}
+					dim.setDimension(specifiedWidth, intrinsic.getHeight());
+				}
+			} else {
+				if (specifiedHeight >= 0) {
+					dim.setDimension(intrinsic.getWidth(), specifiedHeight);
+				} else {
+					dim.setDimension(intrinsic.getWidth(), intrinsic.getHeight());
 				}
 			}
 			return dim;
 		}
 
+		@Override
 		public void layout() throws BirtException {
 			init();
 
@@ -283,8 +307,9 @@ public class ImageAreaLayout implements ILayout {
 			if ("pdf".equalsIgnoreCase(context.getFormat()) && reader.getType() == ImageReader.TYPE_FLASH_OBJECT) {
 				innerTextInserted = true;
 				innerText = createInnerTextLayout();
-				innerText.content.getStyle().setProperty(IStyle.STYLE_TEXT_ALIGN, IStyle.CENTER_VALUE);
-				innerText.setVerticalAlign(IStyle.MIDDLE_VALUE);
+				innerText.content.getStyle().setProperty(StyleConstants.STYLE_TEXT_ALIGN,
+						CSSValueConstants.CENTER_VALUE);
+				innerText.setVerticalAlign(CSSValueConstants.MIDDLE_VALUE);
 				innerText.setIgnoreReordering(true);
 				// save current root status
 				if (PropertyUtil.isInlineElement(image)) {
@@ -396,38 +421,38 @@ public class ImageAreaLayout implements ILayout {
 					imageArea.setHeight(actualHeight);
 					root.setContentWidth(imageArea.getWidth());
 					root.setContentHeight(imageArea.getHeight());
+				} else // Fix Bugzilla – Bug 268921 [Automation][Regression]Fit to
+				// page does not work in PDF
+				if (context.getPageOverflow() == IPDFRenderOption.FIT_TO_PAGE_SIZE
+						|| context.getPageOverflow() == IPDFRenderOption.ENLARGE_PAGE_SIZE) {
+					imageArea.setWidth(actualWidth);
+					imageArea.setHeight(actualHeight);
+					root.setContentHeight(actualHeight);
+					root.setContentWidth(actualWidth);
 				} else {
-					// Fix Bugzilla – Bug 268921 [Automation][Regression]Fit to
-					// page does not work in PDF
-					if (context.getPageOverflow() == IPDFRenderOption.FIT_TO_PAGE_SIZE
-							|| context.getPageOverflow() == IPDFRenderOption.ENLARGE_PAGE_SIZE) {
-						imageArea.setWidth(actualWidth);
-						imageArea.setHeight(actualHeight);
-						root.setContentHeight(actualHeight);
-						root.setContentWidth(actualWidth);
-					} else {
-						imageArea.setWidth(actualWidth);
-						imageArea.setHeight(actualHeight);
-						root.setNeedClip(true);
-						root.setContentHeight(Math.min(maxHeight, cHeight));
-						root.setContentWidth(Math.min(maxWidth, cWidth));
-						// Fix Bugzilla - Bug 271555 The right and bottom border are still shown even
-						// the chart exceeds the page size and got cut in PDF [1200]
-						// a temporary solution. root should set the same dimension with imageArea, but
-						// currently can not find a solution to avoid empty page when a large image is
-						// put into a grid
-						if (maxWidth < cWidth) {
-							// default box style is unmodified.
-							// creates a new instance when style is default style.
-							if (root.getBoxStyle() == BoxStyle.DEFAULT)
-								root.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
-							root.getBoxStyle().setRightBorder(null);
+					imageArea.setWidth(actualWidth);
+					imageArea.setHeight(actualHeight);
+					root.setNeedClip(true);
+					root.setContentHeight(Math.min(maxHeight, cHeight));
+					root.setContentWidth(Math.min(maxWidth, cWidth));
+					// Fix Bugzilla - Bug 271555 The right and bottom border are still shown even
+					// the chart exceeds the page size and got cut in PDF [1200]
+					// a temporary solution. root should set the same dimension with imageArea, but
+					// currently can not find a solution to avoid empty page when a large image is
+					// put into a grid
+					if (maxWidth < cWidth) {
+						// default box style is unmodified.
+						// creates a new instance when style is default style.
+						if (root.getBoxStyle() == BoxStyle.DEFAULT) {
+							root.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
 						}
-						if (maxHeight < cHeight) {
-							if (root.getBoxStyle() == BoxStyle.DEFAULT)
-								root.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
-							root.getBoxStyle().setBottomBorder(null);
+						root.getBoxStyle().setRightBorder(null);
+					}
+					if (maxHeight < cHeight) {
+						if (root.getBoxStyle() == BoxStyle.DEFAULT) {
+							root.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
 						}
+						root.getBoxStyle().setBottomBorder(null);
 					}
 				}
 			} else {
@@ -464,6 +489,8 @@ public class ImageAreaLayout implements ILayout {
 			}
 
 			area.setData(data);
+			// area.setHelpText(content.getHelpText());
+			area.setHelpText(content.getAltText());
 
 			if (reader.getType() == ImageReader.TYPE_SVG_OBJECT) {
 				area.setMIMEType("image/svg+xml");
@@ -503,7 +530,7 @@ public class ImageAreaLayout implements ILayout {
 
 		/**
 		 * Creates legend for chart.
-		 * 
+		 *
 		 * @param imageContent the image content of the chart.
 		 * @param imageArea    the imageArea of the chart.
 		 */
@@ -527,7 +554,7 @@ public class ImageAreaLayout implements ILayout {
 				if (map.length() == 0) {
 					continue;
 				}
-				Map<String, String> attributes = new TreeMap<String, String>();
+				Map<String, String> attributes = new TreeMap<>();
 				Matcher matcher = pattern.matcher(map);
 				while (matcher.find()) {
 					attributes.put(matcher.group(1), matcher.group(2));
@@ -556,7 +583,7 @@ public class ImageAreaLayout implements ILayout {
 			if (url == null || url.length() == 0) {
 				return;
 			}
-			url = url.replaceAll("&amp;", "&");
+			url = url.replace("&amp;", "&");
 			ActionContent link = new ActionContent();
 			String bookmark = getBookmark(url);
 			if (bookmark != null) {
@@ -571,7 +598,7 @@ public class ImageAreaLayout implements ILayout {
 		/**
 		 * Creates an image map container, which is an empty container with an hyper
 		 * link.
-		 * 
+		 *
 		 * @param x      x coordinate of lower left corner of the container.
 		 * @param y      y coordinate of lower left corner of the container.
 		 * @param width  width of the container.
@@ -590,10 +617,10 @@ public class ImageAreaLayout implements ILayout {
 		/**
 		 * Calculates the absolute positions of image map when given the position of
 		 * image. The image map position is relative to the left up corner of the image.
-		 * 
+		 *
 		 * The argument and returned value are both 4 length integer area, the four
 		 * value of which are x, y of up left corner, width and height respectively.
-		 * 
+		 *
 		 * @param area      rectangle area of a image map.
 		 * @param imageArea image area of the image in which the image map is.
 		 * @return absolute position of the image map.
@@ -605,10 +632,10 @@ public class ImageAreaLayout implements ILayout {
 				// the image map of SVG chart is in Point.
 				int imageX = imageArea.getX();
 				int imageY = imageArea.getY();
-				result[0] = imageX + (int) (area[0] * 1000);
-				result[2] = (int) (area[2] * 1000);
-				result[1] = imageY + (int) (area[1] * 1000);
-				result[3] = (int) (area[3] * 1000);
+				result[0] = imageX + (area[0] * 1000);
+				result[2] = (area[2] * 1000);
+				result[1] = imageY + (area[1] * 1000);
+				result[3] = (area[3] * 1000);
 			} else {
 				for (int i = 0; i < 4;) {
 					area[i] = getTranslatedLengthX(area[i]);
@@ -635,11 +662,11 @@ public class ImageAreaLayout implements ILayout {
 		/**
 		 * Parse the image map position from a string which is of format "x1, y1, x2,
 		 * y2".
-		 * 
+		 *
 		 * @param string the position string.
 		 * @return a array which contains the x, y coordinate of left up corner, width
 		 *         and height in sequence.
-		 * 
+		 *
 		 */
 		private int[] getArea(String string) {
 			if (string == null) {
@@ -653,9 +680,8 @@ public class ImageAreaLayout implements ILayout {
 				area[2] = Integer.parseInt(rawDatas[4]) - area[0];
 				area[3] = Integer.parseInt(rawDatas[5]) - area[1];
 				return area;
-			} else {
-				if (rawDatas.length >= 6)
-					return generateRectangleByPolygon(rawDatas);
+			} else if (rawDatas.length >= 6) {
+				return generateRectangleByPolygon(rawDatas);
 			}
 			return null;
 		}
@@ -726,7 +752,7 @@ public class ImageAreaLayout implements ILayout {
 
 		/**
 		 * Parses out bookmark name from a url for interanl bookmark.
-		 * 
+		 *
 		 * @param url the url string
 		 * @return the bookmark name.
 		 */

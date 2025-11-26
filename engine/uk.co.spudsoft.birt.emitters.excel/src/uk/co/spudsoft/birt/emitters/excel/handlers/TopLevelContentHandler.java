@@ -1,12 +1,14 @@
 /*************************************************************************************
- * Copyright (c) 2011, 2012, 2013 James Talbut.
+ * Copyright (c) 2011, 2012, 2013, 2024 James Talbut and others
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -43,7 +45,8 @@ public class TopLevelContentHandler extends CellContentHandler {
 				(!"inline".equals(getStyleProperty(text, StyleConstants.STYLE_DISPLAY, "block"))));
 
 		Cell currentCell = state.currentSheet.getRow(state.rowNum).createCell(0);
-		currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		// currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		currentCell.setBlank();
 
 		endCellContent(state, null, text, currentCell, null);
 
@@ -60,7 +63,8 @@ public class TopLevelContentHandler extends CellContentHandler {
 				(!"inline".equals(getStyleProperty(data, StyleConstants.STYLE_DISPLAY, "block"))));
 
 		Cell currentCell = state.currentSheet.getRow(state.rowNum).createCell(0);
-		currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		// currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		currentCell.setBlank();
 
 		endCellContent(state, null, data, currentCell, null);
 
@@ -73,12 +77,13 @@ public class TopLevelContentHandler extends CellContentHandler {
 		log.debug("Creating row ", state.rowNum, " for label");
 		state.currentSheet.createRow(state.rowNum);
 
-		String labelText = (label.getLabelText() != null) ? label.getLabelText() : label.getText();
+		String labelText = (label.getText() != null) ? label.getText() : label.getLabelText();
 		emitContent(state, label, labelText,
 				(!"inline".equals(getStyleProperty(label, StyleConstants.STYLE_DISPLAY, "block"))));
 
 		Cell currentCell = state.currentSheet.getRow(state.rowNum).createCell(0);
-		currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		// currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		currentCell.setBlank();
 
 		endCellContent(state, null, label, currentCell, null);
 
@@ -105,7 +110,8 @@ public class TopLevelContentHandler extends CellContentHandler {
 
 		recordImage(state, new Coordinate(state.rowNum, 0), image, true);
 		Cell currentCell = state.currentSheet.getRow(state.rowNum).createCell(0);
-		currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		// currentCell.setCellType(Cell.CELL_TYPE_BLANK);
+		currentCell.setBlank();
 
 		endCellContent(state, null, image, currentCell, null);
 

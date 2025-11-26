@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,13 +31,14 @@ public class Listing extends ReportItem implements IListing {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param listing
 	 */
 	public Listing(ListingHandle listing) {
 		super(listing);
 	}
 
+	@Override
 	public IFilterCondition[] getFilterConditions() {
 		org.eclipse.birt.report.model.api.simpleapi.IFilterCondition[] values = ((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl)
 				.getFilterConditions();
@@ -47,6 +51,7 @@ public class Listing extends ReportItem implements IListing {
 		return filterConditions;
 	}
 
+	@Override
 	public ISortCondition[] getSortConditions() {
 		org.eclipse.birt.report.model.api.simpleapi.ISortCondition[] values = ((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl)
 				.getSortConditions();
@@ -61,11 +66,12 @@ public class Listing extends ReportItem implements IListing {
 
 	/**
 	 * Add FilterCondition
-	 * 
+	 *
 	 * @param condition
 	 * @throws ScriptException
 	 */
 
+	@Override
 	public void addFilterCondition(IFilterCondition condition) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl)
@@ -78,11 +84,12 @@ public class Listing extends ReportItem implements IListing {
 
 	/**
 	 * Add SortCondition
-	 * 
+	 *
 	 * @param condition
 	 * @throws ScriptException
 	 */
 
+	@Override
 	public void addSortCondition(ISortCondition condition) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl).addSortCondition(
@@ -92,6 +99,7 @@ public class Listing extends ReportItem implements IListing {
 		}
 	}
 
+	@Override
 	public void removeFilterCondition(IFilterCondition condition) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl)
@@ -102,6 +110,7 @@ public class Listing extends ReportItem implements IListing {
 		}
 	}
 
+	@Override
 	public void removeFilterConditions() throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl).removeFilterConditions();
@@ -110,6 +119,7 @@ public class Listing extends ReportItem implements IListing {
 		}
 	}
 
+	@Override
 	public void removeSortCondition(ISortCondition condition) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl).removeSortCondition(
@@ -119,6 +129,7 @@ public class Listing extends ReportItem implements IListing {
 		}
 	}
 
+	@Override
 	public void removeSortConditions() throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IListing) designElementImpl).removeSortConditions();

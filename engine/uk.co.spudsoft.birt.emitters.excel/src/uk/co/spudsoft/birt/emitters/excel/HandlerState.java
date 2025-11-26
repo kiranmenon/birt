@@ -1,12 +1,15 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
  * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -20,6 +23,7 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.ReportEngine;
 import org.eclipse.birt.report.engine.emitter.IContentEmitter;
@@ -72,7 +76,7 @@ public class HandlerState {
 	/**
 	 * Collection of CellImage objects for the current sheet.
 	 */
-	public List<CellImage> images = new ArrayList<CellImage>();
+	public List<CellImage> images = new ArrayList<>();
 	/**
 	 * Possible name for the current sheet
 	 */
@@ -103,13 +107,13 @@ public class HandlerState {
 	/**
 	 * Border overrides for the current row/table
 	 */
-	public List<AreaBorders> areaBorders = new ArrayList<AreaBorders>();
+	public List<AreaBorders> areaBorders = new ArrayList<>();
 
 	/**
 	 * List of Current Spans We could probably use CellRangeAdresses inside the
 	 * sheet, but this way we keep the tests to a minimum.
 	 */
-	public List<Area> rowSpans = new ArrayList<Area>();
+	public List<Area> rowSpans = new ArrayList<>();
 
 	/**
 	 * List of sheet names This map contains the names of sheets created by the
@@ -117,11 +121,11 @@ public class HandlerState {
 	 * have the count appended to the name Any other sheets that exist in the
 	 * workbook may be overwritten
 	 */
-	public Map<String, Integer> sheetNames = new HashMap<String, Integer>();
+	public Map<String, Integer> sheetNames = new HashMap<>();
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param log
 	 * @param smu
 	 * @param wb
@@ -177,7 +181,7 @@ public class HandlerState {
 
 	public void insertBorderOverload(AreaBorders defn) {
 		if (areaBorders == null) {
-			areaBorders = new ArrayList<AreaBorders>();
+			areaBorders = new ArrayList<>();
 		}
 		areaBorders.add(defn);
 	}
@@ -287,5 +291,85 @@ public class HandlerState {
 			}
 		}
 		return 0;
+	}
+
+	/**
+	 * Maximum number of characters that Excel will accept for a sheet name.
+	 */
+	public static final int MAX_SHEET_NAME_LENGTH = 31;
+	/**
+	 * Characters that Excel will not accept in a sheet name.
+	 */
+	public static final String[] ILLEGAL_SHEET_NAME_CHARACTERS = { "\\", //$NON-NLS-1$
+			"/", //$NON-NLS-1$
+			"*", //$NON-NLS-1$
+			"[", //$NON-NLS-1$
+			"]", //$NON-NLS-1$
+			":", //$NON-NLS-1$
+			"?" //$NON-NLS-1$
+	};
+
+	/**
+	 * Remove illegal characters from the sheet name and make sure it's not too
+	 * long.
+	 *
+	 * @param sheetName
+	 * @return corrected sheet name
+	 */
+	public String correctSheetName(final String sheetName) {
+		// https://www.accountingweb.com/technology/excel/seven-characters-you-cant-use-in-worksheet-names
+		if (sheetName == null) {
+			return null;
+		}
+		String correctedSheetName = sheetName;
+		for (String illegalChar : ILLEGAL_SHEET_NAME_CHARACTERS) {
+			correctedSheetName = correctedSheetName.replace(illegalChar, ""); //$NON-NLS-1$
+		}
+		if ("history".equalsIgnoreCase(correctedSheetName)) { //$NON-NLS-1$
+			return "history-sheet"; //$NON-NLS-1$
+		}
+		if (correctedSheetName.length() > MAX_SHEET_NAME_LENGTH) {
+			correctedSheetName = correctedSheetName.substring(0, MAX_SHEET_NAME_LENGTH);
+		}
+		return correctedSheetName;
+	}
+
+	/**
+	 * Add an index to the end of the sheet name if necessary. Shorten the sheet
+	 * name if necessary. The sheet name is assumed to not be too long to start
+	 * with.
+	 *
+	 * @return the prepared sheet name
+	 * @throws BirtException
+	 */
+	public String prepareSheetName() throws BirtException {
+		String sheetName = this.sheetName;
+		if (sheetName == null) {
+			return null;
+		}
+		String preparedName = sheetName;
+		Integer previousNameCount = 1;
+		while (true) {
+			Integer nameCount = this.sheetNames.get(sheetName);
+			if (nameCount == null) {
+				this.sheetNames.put(sheetName, previousNameCount);
+				return preparedName;
+			}
+			++nameCount;
+			preparedName = sheetName + " " + nameCount; //$NON-NLS-1$
+			int correction = preparedName.length() - MAX_SHEET_NAME_LENGTH;
+			if (correction <= 0) {
+				this.sheetNames.put(sheetName, nameCount);
+				return preparedName;
+			}
+			if (correction > sheetName.length()) {
+				throw new BirtException(EmitterServices.getPluginName(),
+						"Unable to fit sheet name into the maximum allowed length", //$NON-NLS-1$
+						null);
+			}
+			sheetName = sheetName.substring(0, sheetName.length() - correction);
+			preparedName = sheetName + " " + nameCount; //$NON-NLS-1$
+			previousNameCount = nameCount;
+		}
 	}
 }

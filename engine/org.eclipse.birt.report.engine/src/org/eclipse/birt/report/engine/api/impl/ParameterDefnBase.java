@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -66,10 +69,11 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api2.IParameterDefnBase#getParameterType()
 	 */
+	@Override
 	public int getParameterType() {
 		return parameterType;
 	}
@@ -83,9 +87,10 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IParameterDefnBase#getName()
 	 */
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -99,16 +104,19 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IParameterDefnBase#getDisplayName()
 	 */
+	@Override
 	public String getDisplayName() {
-		if (displayNameKey == null)
+		if (displayNameKey == null) {
 			return displayName;
+		}
 
 		String ret = designHandle.getMessage(displayNameKey, (locale == null) ? Locale.getDefault() : locale);
-		if (ret == null || ret.length() == 0)
+		if (ret == null || ret.length() == 0) {
 			return displayName;
+		}
 		return ret;
 	}
 
@@ -125,16 +133,19 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IParameterDefnBase#getHelpText()
 	 */
+	@Override
 	public String getHelpText() {
-		if (helpTextKey == null)
+		if (helpTextKey == null) {
 			return helpText;
+		}
 
 		String ret = designHandle.getMessage(helpTextKey, (locale == null) ? Locale.getDefault() : locale);
-		if (ret == null || ret.length() == 0)
+		if (ret == null || ret.length() == 0) {
 			return helpText;
+		}
 		return ret;
 	}
 
@@ -158,22 +169,24 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api2.IParameterDefnBase#getUserPropertyValues
 	 * ()
 	 */
+	@Override
 	public Map getUserPropertyValues() {
 		return Collections.unmodifiableMap(customProperties);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api2.IParameterDefnBase#getUserPropertyValue
 	 * (java.lang.String)
 	 */
+	@Override
 	public String getUserPropertyValue(String name) {
 		if (customProperties.containsKey(name)) {
 			Object value = customProperties.get(name);
@@ -184,15 +197,17 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 		return null;
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IParameterDefnBase#getTypeName()
 	 */
+	@Override
 	public String getTypeName() {
 		String typeName;
 		switch (parameterType) {
@@ -223,6 +238,7 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 	/**
 	 * @return Returns the handle.
 	 */
+	@Override
 	public ReportElementHandle getHandle() {
 		return handle;
 	}
@@ -237,9 +253,11 @@ public class ParameterDefnBase implements IParameterDefnBase, Cloneable {
 	/**
 	 * @return Returns the prompt text.
 	 */
+	@Override
 	public String getPromptText() {
-		if (promptTextKey == null)
+		if (promptTextKey == null) {
 			return promptText;
+		}
 
 		Locale theLocale = (locale == null) ? Locale.getDefault() : locale;
 		return handle.getExternalizedValue(ScalarParameterHandle.PROMPT_TEXT_ID_PROP,

@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.designer.internal.ui.swt.custom;
 
@@ -6,7 +18,7 @@ import org.eclipse.birt.report.designer.internal.ui.util.SortMap;
 import org.eclipse.birt.report.designer.nls.Messages;
 import org.eclipse.birt.report.designer.util.ColorManager;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
-import org.eclipse.birt.report.model.api.metadata.DimensionValue;
+import org.eclipse.birt.report.model.api.util.StringUtil;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -25,17 +37,30 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 
+/**
+ * Class to draw the border preview canvas
+ *
+ * @since 3.3
+ *
+ */
 public class BorderCanvas extends Canvas {
 
 	private static final String INHERITED = Messages.getString("BorderCanvas.Label.Inherited"); //$NON-NLS-1$
 	private boolean mouseIn = false;
 	private int mouseInArea = SWT.NONE;
 
+	/**
+	 * Constructore of border canvas
+	 *
+	 * @param parent container to be used for the canvas
+	 * @param style  styling of the canvas
+	 */
 	public BorderCanvas(Composite parent, int style) {
 		super(parent, SWT.NONE);
 
 		addPaintListener(new PaintListener() {
 
+			@Override
 			public void paintControl(PaintEvent e) {
 				BorderCanvas.this.paintControl(e);
 			}
@@ -43,6 +68,7 @@ public class BorderCanvas extends Canvas {
 
 		addMouseListener(new MouseAdapter() {
 
+			@Override
 			public void mouseUp(MouseEvent e) {
 				int width = getSize().x;
 				int height = getSize().y;
@@ -103,14 +129,20 @@ public class BorderCanvas extends Canvas {
 
 	private SortMap borderInfoMap = new SortMap();
 
+	/**
+	 * Set the border information for the preview
+	 *
+	 * @param info object with border information
+	 */
 	public void setBorderInfomation(BorderInfomation info) {
 		borderInfoMap.put(info.getPosition(), info);
 	}
 
 	private String resolveEmptyWidth(BorderInfomation info) {
 		String width = info.getWidth();
-		if ("".equals(width)) //$NON-NLS-1$
+		if ("".equals(width)) { //$NON-NLS-1$
 			return DesignChoiceConstants.LINE_WIDTH_MEDIUM;
+		}
 		return width;
 	}
 
@@ -134,25 +166,29 @@ public class BorderCanvas extends Canvas {
 		for (int i = 0; i < borderInfoMap.size(); i++) {
 			BorderInfomation info = (BorderInfomation) borderInfoMap.get(i);
 
-			if (info.getStyle() == null || info.getStyle().equals("")) //$NON-NLS-1$
+			if (info.getStyle() == null || info.getStyle().equals("")) { //$NON-NLS-1$
 				continue;
+			}
 
 			if (info.getColor() == null) {
 				gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_BLACK));
-			} else
+			} else {
 				gc.setForeground(ColorManager.getColor(info.getColor()));
+			}
 
 			if (!(info.getStyle().equals(DesignChoiceConstants.LINE_STYLE_DOUBLE))) {
-				if (DesignChoiceConstants.LINE_STYLE_DOTTED.equals(info.getStyle()))
+				if (DesignChoiceConstants.LINE_STYLE_DOTTED.equals(info.getStyle())) {
 					gc.setLineStyle(SWT.LINE_DOT);
-				else if (DesignChoiceConstants.LINE_STYLE_DASHED.equals(info.getStyle()))
+				} else if (DesignChoiceConstants.LINE_STYLE_DASHED.equals(info.getStyle())) {
 					gc.setLineStyle(SWT.LINE_DASH);
-				else if (DesignChoiceConstants.LINE_STYLE_SOLID.equals(info.getStyle()))
+				} else if (DesignChoiceConstants.LINE_STYLE_SOLID.equals(info.getStyle())) {
 					gc.setLineStyle(SWT.LINE_SOLID);
-				if (!DesignChoiceConstants.LINE_STYLE_NONE.equals(info.getStyle()))
+				}
+				if (!DesignChoiceConstants.LINE_STYLE_NONE.equals(info.getStyle())) {
 					drawLine(gc, width, height, info, true);
-				else
+				} else {
 					drawLine(gc, width, height, info, false);
+				}
 			} else {
 				gc.setLineStyle(SWT.LINE_SOLID);
 				int gcWidth = 1;
@@ -165,8 +201,8 @@ public class BorderCanvas extends Canvas {
 						&& !DesignChoiceConstants.LINE_WIDTH_THICK.equals(infoWidth) && infoWidth != null) // $NON-NLS-1$
 				{
 					try {
-						customWidth = (int) DimensionValue.parse(infoWidth).getMeasure();
-						if (DimensionValue.parse(infoWidth).getUnits().equals(DesignChoiceConstants.UNITS_PX)) {
+						customWidth = (int) StringUtil.parse(infoWidth).getMeasure();
+						if (StringUtil.parse(infoWidth).getUnits().equals(DesignChoiceConstants.UNITS_PX)) {
 							if (customWidth % 3 == 0) {
 								gcWidth = gcSeperator = gcInnerWidth = customWidth / 3;
 							} else if (customWidth % 3 == 1) {
@@ -201,6 +237,14 @@ public class BorderCanvas extends Canvas {
 						gc.drawLine((width - 100) / 2, (height - 100) / 2 + 100 - gc.getLineWidth() / 2 + 1,
 								(width - 100) / 2 + 100 + 1, (height - 100) / 2 + 100 - gc.getLineWidth() / 2 + 1);
 
+					} else if (info.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)) {
+						gc.drawLine((width - 100) / 2, (height - 100) / 2 + gc.getLineWidth() / 2,
+								(width - 100) / 2 + 100 + 1, (height - 100) / 2 + 100 - gc.getLineWidth() / 2 + 1);
+
+					} else if (info.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+						gc.drawLine((width - 100) / 2, (height - 100) / 2 + 100 - gc.getLineWidth() / 2 + 1,
+								(width - 100) / 2 + 100 + 1, (height - 100) / 2 + gc.getLineWidth() / 2);
+
 					}
 
 					gc.setLineWidth(gcInnerWidth);
@@ -228,8 +272,19 @@ public class BorderCanvas extends Canvas {
 								(width - 100) / 2 + 100 - (gcWidth + gcSeperator),
 								(height - 100) / 2 + 100 - (gcWidth + gcSeperator) - gc.getLineWidth() / 2);
 
-					}
+					} else if (info.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)) {
+						gc.drawLine((width - 100) / 2 + (gcWidth + gcSeperator),
+								(height - 100) / 2 + (gcWidth + gcSeperator) + gc.getLineWidth() / 2,
+								(width - 100) / 2 + 100 - (gcWidth + gcSeperator),
+								(height - 100) / 2 + 100 - (gcWidth + gcSeperator) - gc.getLineWidth() / 2);
 
+					} else if (info.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+						gc.drawLine((width - 100) / 2 + (gcWidth + gcSeperator),
+								(height - 100) / 2 + 100 - (gcWidth + gcSeperator) - gc.getLineWidth() / 2,
+								(width - 100) / 2 + 100 - (gcWidth + gcSeperator),
+								(height - 100) / 2 + (gcWidth + gcSeperator) + gc.getLineWidth() / 2);
+
+					}
 				} else if (customWidth == 3 || DesignChoiceConstants.LINE_WIDTH_THICK.equals(info.getWidth())) {
 					gc.setLineWidth(1);
 
@@ -259,6 +314,19 @@ public class BorderCanvas extends Canvas {
 						gc.drawLine((width - 100) / 2 + 2, (height - 100) / 2 + 100 - 2, (width - 100) / 2 + 100 - 2,
 								(height - 100) / 2 + 100 - 2);
 
+					} else if (info.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)) {
+						gc.drawLine((width - 100) / 2, (height - 100) / 2, (width - 100) / 2 + 100,
+								(height - 100) / 2 + 100);
+
+						gc.drawLine((width - 100) / 2 + 2, (height - 100) / 2 + 2, (width - 100) / 2 + 100 - 2,
+								(height - 100) / 2 + 100 - 2);
+
+					} else if (info.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+						gc.drawLine((width - 100) / 2, (height - 100) / 2 + 100,  (width - 100) / 2 + 100, (height - 100) / 2);
+
+						gc.drawLine((width - 100) / 2 + 2, (height - 100) / 2 + 100 - 2, (width - 100) / 2 + 100 - 2,
+								(height - 100) / 2 + 2);
+
 					}
 				} else {
 					gc.setLineStyle(SWT.LINE_SOLID);
@@ -271,19 +339,20 @@ public class BorderCanvas extends Canvas {
 
 	private void drawLine(GC gc, int width, int height, BorderInfomation info, boolean drawLine) {
 		String infoWidth = resolveEmptyWidth(info);
-		if (DesignChoiceConstants.LINE_WIDTH_THIN.equals(infoWidth))
+		if (DesignChoiceConstants.LINE_WIDTH_THIN.equals(infoWidth)) {
 			gc.setLineWidth(1);
-		else if (DesignChoiceConstants.LINE_WIDTH_MEDIUM.equals(infoWidth))
+		} else if (DesignChoiceConstants.LINE_WIDTH_MEDIUM.equals(infoWidth)) {
 			gc.setLineWidth(2);
-		else if (DesignChoiceConstants.LINE_WIDTH_THICK.equals(infoWidth))
+		} else if (DesignChoiceConstants.LINE_WIDTH_THICK.equals(infoWidth)) {
 			gc.setLineWidth(3);
-		else {
+		} else {
 			try {
 				if (infoWidth != null) // $NON-NLS-1$
 				{
-					int customWidth = (int) DimensionValue.parse(infoWidth).getMeasure();
-					if (DimensionValue.parse(infoWidth).getUnits().equals(DesignChoiceConstants.UNITS_PX))
+					int customWidth = (int) StringUtil.parse(infoWidth).getMeasure();
+					if (StringUtil.parse(infoWidth).getUnits().equals(DesignChoiceConstants.UNITS_PX)) {
 						gc.setLineWidth(customWidth);
+					}
 				}
 			} catch (Exception e1) {
 				ExceptionHandler.handle(e1);
@@ -291,9 +360,10 @@ public class BorderCanvas extends Canvas {
 		}
 
 		if (info.getPosition().equals(BorderInfomation.BORDER_LEFT)) {
-			if (drawLine)
+			if (drawLine) {
 				gc.drawLine((width - 100) / 2 + gc.getLineWidth() / 2, (height - 100) / 2,
 						(width - 100) / 2 + gc.getLineWidth() / 2, (height - 100) / 2 + 100);
+			}
 			if (isInheritedInfo(info)) {
 				gc.setAdvanced(true);
 				FontData fontData = this.getFont().getFontData()[0];
@@ -313,9 +383,10 @@ public class BorderCanvas extends Canvas {
 				gc.setAdvanced(false);
 			}
 		} else if (info.getPosition().equals(BorderInfomation.BORDER_TOP)) {
-			if (drawLine)
+			if (drawLine) {
 				gc.drawLine((width - 100) / 2, (height - 100) / 2 + gc.getLineWidth() / 2, (width - 100) / 2 + 100,
 						(height - 100) / 2 + gc.getLineWidth() / 2);
+			}
 			if (isInheritedInfo(info)) {
 				FontData fontData = this.getFont().getFontData()[0];
 				fontData.setHeight(9);
@@ -327,9 +398,10 @@ public class BorderCanvas extends Canvas {
 				font.dispose();
 			}
 		} else if (info.getPosition().equals(BorderInfomation.BORDER_RIGHT)) {
-			if (drawLine)
+			if (drawLine) {
 				gc.drawLine((width - 100) / 2 + 100 - gc.getLineWidth() / 2, (height - 100) / 2,
 						(width - 100) / 2 + 100 - gc.getLineWidth() / 2, (height - 100) / 2 + 100);
+			}
 			if (isInheritedInfo(info)) {
 				gc.setAdvanced(true);
 				FontData fontData = this.getFont().getFontData()[0];
@@ -349,9 +421,10 @@ public class BorderCanvas extends Canvas {
 				gc.setAdvanced(false);
 			}
 		} else if (info.getPosition().equals(BorderInfomation.BORDER_BOTTOM)) {
-			if (drawLine)
+			if (drawLine) {
 				gc.drawLine((width - 100) / 2, (height - 100) / 2 + 100 - gc.getLineWidth() / 2,
 						(width - 100) / 2 + 100, (height - 100) / 2 + 100 - gc.getLineWidth() / 2);
+			}
 			if (isInheritedInfo(info)) {
 				FontData fontData = this.getFont().getFontData()[0];
 				fontData.setHeight(9);
@@ -362,6 +435,48 @@ public class BorderCanvas extends Canvas {
 				gc.drawText(INHERITED, (width - size.x) / 2, (height - 100) / 2 + 100 + 1);
 				font.dispose();
 			}
+		} else if (info.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)) {
+			if (drawLine) {
+				// preview line correction depended on the line width
+				int x1Shift = 0;
+				int y1Shift = 0;
+				int x2Shift = 0;
+				int y2Shift = 0;
+				if (gc.getLineWidth() >= 4 && gc.getLineWidth() <= 7) {
+					x1Shift = -1;
+					y1Shift = 1;
+					x2Shift = -1;
+					y2Shift = 1;
+				} else if (gc.getLineWidth() >= 8) {
+					x1Shift = -2;
+					y1Shift = 2;
+					x2Shift = -2;
+					y2Shift = 2;
+				}
+				gc.drawLine((width - 100) / 2 + gc.getLineWidth() / 2 + x1Shift, (height - 100) / 2 + y1Shift,
+						(width - 100) / 2 + 100 + x2Shift, (height - 100) / 2 + 100 - gc.getLineWidth() / 2 + y2Shift);
+			}
+		} else if (info.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+			if (drawLine) {
+				// preview line correction depended on the line width
+				int x1Shift = 0;
+				int y1Shift = 0;
+				int x2Shift = 0;
+				int y2Shift = 0;
+				if (gc.getLineWidth() >= 4 && gc.getLineWidth() <= 7) {
+					x1Shift = 0;
+					y1Shift = 1;
+					x2Shift = 0;
+					y2Shift = -1;
+				} else if (gc.getLineWidth() >= 8) {
+					x1Shift = 0;
+					y1Shift = 4;
+					x2Shift = 0;
+					y2Shift = -4;
+				}
+				gc.drawLine((width - 100) / 2 + x1Shift, (height - 100) / 2 + 100 - gc.getLineWidth() / 2 + y1Shift,
+						(width - 100) / 2 + 100 + x2Shift, (height - 100) / 2 + gc.getLineWidth() / 2 + y2Shift);
+			}
 		}
 	}
 
@@ -369,14 +484,29 @@ public class BorderCanvas extends Canvas {
 		return info.isInheritedColor() && info.isInheritedStyle() && info.isInheritedWidth();
 	}
 
+	/**
+	 * Remove the border information from preview
+	 *
+	 * @param position position of the removable entry
+	 */
 	public void removeBorderInfomation(String position) {
 		borderInfoMap.remove(position);
 	}
 
+	/**
+	 * Get the preview listener
+	 *
+	 * @return Return the preview listener
+	 */
 	public Listener getListener() {
 		return listener;
 	}
 
+	/**
+	 * Set the preview listener
+	 *
+	 * @param listener listener of the preview
+	 */
 	public void setListener(Listener listener) {
 		this.listener = listener;
 	}

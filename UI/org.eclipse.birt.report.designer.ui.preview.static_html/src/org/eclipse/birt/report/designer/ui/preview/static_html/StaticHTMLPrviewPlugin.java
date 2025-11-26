@@ -1,10 +1,12 @@
 /*************************************************************************************
  * Copyright (c) 2006 Actuate Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     Actuate Corporation - Initial implementation.
  ************************************************************************************/
@@ -23,7 +25,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -32,27 +33,37 @@ import org.osgi.framework.BundleContext;
  */
 public class StaticHTMLPrviewPlugin extends AbstractUIPlugin {
 
-	// The plug-in ID
+	/** plug-in ID */
 	public static final String PLUGIN_ID = "org.eclipse.birt.report.designer.ui.preview.static_html"; //$NON-NLS-1$
 
+	/** property: navigation icon first page */
 	public static final String IMG_NAV_FIRST = "FirstPage.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon previous page */
 	public static final String IMG_NAV_PRE = "PreviousPage.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon next page */
 	public static final String IMG_NAV_NEXT = "NextPage.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon last page */
 	public static final String IMG_NAV_LAST = "LastPage.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon go to */
 	public static final String IMG_NAV_GO = "Go.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon parameter */
 	public static final String IMG_PARAMS = "parameter.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon toc */
 	public static final String IMG_TOC = "Toc.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon form title */
 	public static final String IMG_FORM_TITLE = "form_title.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon leaf */
 	public static final String IMG_TOC_LEAF = "Leaf.gif"; //$NON-NLS-1$
 
+	/** property: navigation icon preview */
 	public static final String IMG_RE_RUN = "preview.gif"; //$NON-NLS-1$
 
 	// The shared instance
@@ -67,27 +78,31 @@ public class StaticHTMLPrviewPlugin extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		if (isCleanTempfolder())
+		if (isCleanTempfolder()) {
 			deleteTempFile();
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-		if (isCleanTempfolder())
+		if (isCleanTempfolder()) {
 			deleteFile(new File(getTempFolder()));
+		}
 	}
 
 	private void deleteFile(final File dir) {
@@ -103,9 +118,9 @@ public class StaticHTMLPrviewPlugin extends AbstractUIPlugin {
 		File[] children = dir.listFiles();
 		if (children != null) {
 			for (int i = 0; i < children.length; i++) {
-				if (children[i].isDirectory())
+				if (children[i].isDirectory()) {
 					deleteFile(children[i]);
-				else {
+				} else {
 					children[i].delete();
 				}
 			}
@@ -116,6 +131,7 @@ public class StaticHTMLPrviewPlugin extends AbstractUIPlugin {
 	private void deleteTempFile() {
 		Job deleteJob = new Job("Delete temporary files") { //$NON-NLS-1$
 
+			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				deleteFile(new File(getTempFolder()));
 				return Status.OK_STATUS;
@@ -127,13 +143,14 @@ public class StaticHTMLPrviewPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance
-	 * 
+	 *
 	 * @return the shared instance
 	 */
 	public static StaticHTMLPrviewPlugin getDefault() {
 		return plugin;
 	}
 
+	@Override
 	protected void initializeImageRegistry(ImageRegistry registry) {
 		registerImage(registry, IMG_NAV_FIRST, IMG_NAV_FIRST);
 		registerImage(registry, IMG_NAV_PRE, IMG_NAV_PRE);
@@ -159,10 +176,20 @@ public class StaticHTMLPrviewPlugin extends AbstractUIPlugin {
 		}
 	}
 
+	/**
+	 * Get temp folder
+	 *
+	 * @return path of temp folder
+	 */
 	public String getTempFolder() {
 		return getPreferenceStore().getString(PreferenceConstants.TEMP_PATH);
 	}
 
+	/**
+	 * Is tem pfolder clean
+	 *
+	 * @return is temp folder cleaned
+	 */
 	public boolean isCleanTempfolder() {
 		return getPreferenceStore().getBoolean(PreferenceConstants.CLEAM_TEMP);
 	}

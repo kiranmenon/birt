@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -13,12 +16,11 @@ package org.eclipse.birt.chart.ui.swt.composites;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Base64;
 
-import org.apache.commons.codec.binary.Base64;
 import org.eclipse.birt.chart.device.IDeviceRenderer;
 import org.eclipse.birt.chart.event.PolygonRenderEvent;
 import org.eclipse.birt.chart.exception.ChartException;
@@ -57,7 +59,7 @@ import org.eclipse.swt.widgets.Display;
 
 /**
  * @author Administrator
- * 
+ *
  */
 public class FillCanvas extends Canvas implements PaintListener, DisposeListener {
 
@@ -87,7 +89,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 	}
 
 	/**
-	 * 
+	 *
 	 * @param parent
 	 * @param iStyle
 	 * @param isAutoEnabled If true, null color means auto, rather than transparent
@@ -99,7 +101,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 
 	/**
 	 * If true, null color means auto, rather than transparent
-	 * 
+	 *
 	 * @param parent
 	 * @param iStyle
 	 * @param isAutoEnabled
@@ -119,6 +121,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 		this.fCurrent = fill;
 	}
 
+	@Override
 	public void paintControl(PaintEvent pe) {
 		Color cBackground = null;
 
@@ -157,32 +160,30 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 						gc.drawText(Messages.getString("FillCanvas.Auto"), 2 + textIndent, 2); //$NON-NLS-1$
 					}
 					cText.dispose();
-				} else {
-					if (fCurrent instanceof ColorDefinition) {
-						cBackground = new Color(Display.getDefault(), ((ColorDefinition) fCurrent).getRed(),
-								((ColorDefinition) fCurrent).getGreen(), ((ColorDefinition) fCurrent).getBlue());
-						gc.setBackground(cBackground);
-						gc.fillRectangle(2, 2, this.getSize().x - 4, this.getSize().y - 4);
-					} else if (fCurrent instanceof Image) {
-						org.eclipse.swt.graphics.Image img = getSWTImage((Image) fCurrent);
-						if (fCurrent instanceof PatternImage) {
-							Pattern ptn = new Pattern(Display.getCurrent(), img);
-							gc.setBackgroundPattern(ptn);
-							gc.fillRectangle(2, 2, getSize().x - 4, this.getSize().y - 4);
-							ptn.dispose();
-						} else {
-							gc.fillRectangle(2, 2, getSize().x - 4, this.getSize().y - 4);
-							gc.drawImage(img, 2, 2);
-						}
-
-						if (img != null) {
-							img.dispose();
-						}
-					} else if (fCurrent instanceof Gradient) {
-						fillGradient(gc);
-					} else if (fCurrent instanceof MultipleFill) {
-						fillMultiFill(gc);
+				} else if (fCurrent instanceof ColorDefinition) {
+					cBackground = new Color(Display.getDefault(), ((ColorDefinition) fCurrent).getRed(),
+							((ColorDefinition) fCurrent).getGreen(), ((ColorDefinition) fCurrent).getBlue());
+					gc.setBackground(cBackground);
+					gc.fillRectangle(2, 2, this.getSize().x - 4, this.getSize().y - 4);
+				} else if (fCurrent instanceof Image) {
+					org.eclipse.swt.graphics.Image img = getSWTImage((Image) fCurrent);
+					if (fCurrent instanceof PatternImage) {
+						Pattern ptn = new Pattern(Display.getCurrent(), img);
+						gc.setBackgroundPattern(ptn);
+						gc.fillRectangle(2, 2, getSize().x - 4, this.getSize().y - 4);
+						ptn.dispose();
+					} else {
+						gc.fillRectangle(2, 2, getSize().x - 4, this.getSize().y - 4);
+						gc.drawImage(img, 2, 2);
 					}
+
+					if (img != null) {
+						img.dispose();
+					}
+				} else if (fCurrent instanceof Gradient) {
+					fillGradient(gc);
+				} else if (fCurrent instanceof MultipleFill) {
+					fillMultiFill(gc);
 				}
 
 				// Render a boundary line to indicate focus
@@ -215,7 +216,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 
 	/**
 	 * Fill gradient.
-	 * 
+	 *
 	 * @param gc
 	 */
 	protected void fillGradient(GC gc) {
@@ -227,7 +228,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 
 	/**
 	 * Fill gradient.
-	 * 
+	 *
 	 * @param gc
 	 */
 	private void fillMultiFill(GC gc) {
@@ -253,7 +254,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 			if (modelImage instanceof EmbeddedImage) {
 				String imageData = ((EmbeddedImage) modelImage).getData();
 				if (imageData != null) {
-					ByteArrayInputStream bis = new ByteArrayInputStream(Base64.decodeBase64(imageData.getBytes()));
+					ByteArrayInputStream bis = new ByteArrayInputStream(Base64.getDecoder().decode(imageData.getBytes()));
 					img = new org.eclipse.swt.graphics.Image(Display.getDefault(), bis);
 				} else {
 					// To render a blank image for null embedded data
@@ -268,37 +269,32 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 
 				ImageData imageData = new ImageData(8, 8, 32, paletteData, 4, data);
 				img = new org.eclipse.swt.graphics.Image(device, imageData);
+			} else if (imageServiceProvider == null) {
+				try {
+					img = new org.eclipse.swt.graphics.Image(Display.getCurrent(),
+							new URL(modelImage.getURL()).openStream());
+				} catch (MalformedURLException e1) {
+					img = new org.eclipse.swt.graphics.Image(Display.getCurrent(),
+							new FileInputStream(modelImage.getURL()));
+				}
+			} else if (modelImage.getSource() == ImageSourceType.REPORT) {
+				org.eclipse.swt.graphics.Image embeddedImage = imageServiceProvider
+						.getEmbeddedImage(modelImage.getURL());
+				if (embeddedImage != null) {
+					ImageData imageData = (ImageData) embeddedImage.getImageData().clone();
+					img = new org.eclipse.swt.graphics.Image(Display.getCurrent(), imageData);
+					return img;
+				}
 			} else {
-				if (imageServiceProvider == null) {
+				String url = imageServiceProvider.getImageAbsoluteURL(modelImage);
+				if (url != null) {
 					try {
-						img = new org.eclipse.swt.graphics.Image(Display.getCurrent(),
-								new URL(modelImage.getURL()).openStream());
+						img = new org.eclipse.swt.graphics.Image(Display.getCurrent(), new URL(url).openStream());
 					} catch (MalformedURLException e1) {
-						img = new org.eclipse.swt.graphics.Image(Display.getCurrent(),
-								new FileInputStream(modelImage.getURL()));
-					}
-				} else if (modelImage.getSource() == ImageSourceType.REPORT) {
-					org.eclipse.swt.graphics.Image embeddedImage = imageServiceProvider
-							.getEmbeddedImage(modelImage.getURL());
-					if (embeddedImage != null) {
-						ImageData imageData = (ImageData) embeddedImage.getImageData().clone();
-						img = new org.eclipse.swt.graphics.Image(Display.getCurrent(), imageData);
-						return img;
-					}
-				} else {
-					String url = imageServiceProvider.getImageAbsoluteURL(modelImage);
-					if (url != null) {
-						try {
-							img = new org.eclipse.swt.graphics.Image(Display.getCurrent(), new URL(url).openStream());
-						} catch (MalformedURLException e1) {
-							img = new org.eclipse.swt.graphics.Image(Display.getCurrent(), new FileInputStream(url));
-						}
+						img = new org.eclipse.swt.graphics.Image(Display.getCurrent(), new FileInputStream(url));
 					}
 				}
 			}
-		} catch (FileNotFoundException ex) {
-			logger.log(ex);
-			ex.printStackTrace();
 		} catch (IOException ex) {
 			logger.log(ex);
 			ex.printStackTrace();
@@ -312,6 +308,7 @@ public class FillCanvas extends Canvas implements PaintListener, DisposeListener
 		redraw();
 	}
 
+	@Override
 	public void widgetDisposed(DisposeEvent e) {
 		if (idr != null) {
 			idr.dispose();

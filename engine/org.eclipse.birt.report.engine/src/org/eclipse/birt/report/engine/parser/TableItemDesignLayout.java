@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -24,12 +27,19 @@ import org.eclipse.birt.report.engine.ir.TableItemDesign;
 
 /**
  * calculate the cell id explictly.
- * 
+ *
  */
 public class TableItemDesignLayout {
 
 	Table layout = new Table();
 
+	/**
+	 * Create new cell id on the grid
+	 *
+	 * @param grid      grid item design
+	 * @param newCellId new cell id
+	 * @return Return the cell id of the new cell
+	 */
 	public long layout(GridItemDesign grid, long newCellId) {
 		layout = new Table(0, grid.getColumnCount());
 		layout.reset();
@@ -79,6 +89,13 @@ public class TableItemDesignLayout {
 
 	}
 
+	/**
+	 * Create new cell id on the table
+	 *
+	 * @param table     table item design
+	 * @param newCellId new cell id
+	 * @return Return the cell id of the new cell
+	 */
 	public long layout(TableItemDesign table, long newCellId) {
 		layout = new Table(0, table.getColumnCount());
 		layoutBand((TableBandDesign) table.getHeader());
@@ -130,10 +147,12 @@ public class TableItemDesignLayout {
 			this.cell = cell;
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return cell != null;
 		}
 
+		@Override
 		public void reset() {
 		}
 

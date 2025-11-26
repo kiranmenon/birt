@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -33,6 +36,7 @@ public class LocalizedReportExecutor extends WrappedReportExecutor {
 		this.executor = executor;
 	}
 
+	@Override
 	protected IReportItemExecutor createWrappedExecutor(IReportItemExecutor executor) {
 		LocalizedReportItemExecutor l18nExecutor = null;
 		if (!freeExecutors.isEmpty()) {
@@ -44,10 +48,12 @@ public class LocalizedReportExecutor extends WrappedReportExecutor {
 		return l18nExecutor;
 	}
 
+	@Override
 	protected void closeWrappedExecutor(IReportItemExecutor executor) {
 		freeExecutors.add(executor);
 	}
 
+	@Override
 	public IReportContent execute() throws BirtException {
 		IReportContent report = super.execute();
 		if (report != null) {

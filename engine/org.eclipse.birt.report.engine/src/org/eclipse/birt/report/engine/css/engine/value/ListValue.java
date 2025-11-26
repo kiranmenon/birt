@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - modification of Batik's ListValue.java to support BIRT's CSS rules
@@ -18,7 +21,7 @@ import org.w3c.dom.css.CSSValueList;
 
 /**
  * This class represents a list of values.
- * 
+ *
  */
 public class ListValue extends Value implements CSSValueList {
 
@@ -45,13 +48,17 @@ public class ListValue extends Value implements CSSValueList {
 
 	/**
 	 * Creates a ListValue with the given separator.
+	 *
+	 * @param s separator
 	 */
 	public ListValue(char s) {
 		separator = s;
 	}
 
 	/**
-	 * Returns the separator used for this list.
+	 * Get the separator used for this list.
+	 *
+	 * @return Returns the separator used for this list.
 	 */
 	public char getSeparatorChar() {
 		return separator;
@@ -60,6 +67,7 @@ public class ListValue extends Value implements CSSValueList {
 	/**
 	 * Implements {@link Value#getCssValueType()}.
 	 */
+	@Override
 	public short getCssValueType() {
 		return CSSValue.CSS_VALUE_LIST;
 	}
@@ -67,8 +75,9 @@ public class ListValue extends Value implements CSSValueList {
 	/**
 	 * A string representation of the current value.
 	 */
+	@Override
 	public String getCssText() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {
 			Value value = (Value) items[i];
 			if (value == null) {
@@ -125,22 +134,18 @@ public class ListValue extends Value implements CSSValueList {
 				break;
 			}
 		}
-		if (needQuote)
+		if (needQuote) {
 			return '\"' + value + '\"';
-		else
-			return value;
+		}
+		return value;
 	}
 
-	/**
-	 * Implements {@link Value#getLength()}.
-	 */
+	@Override
 	public int getLength() throws DOMException {
 		return length;
 	}
 
-	/**
-	 * Implements {@link Value#item(int)}.
-	 */
+	@Override
 	public CSSValue item(int index) throws DOMException {
 		return items[index];
 	}
@@ -148,12 +153,15 @@ public class ListValue extends Value implements CSSValueList {
 	/**
 	 * Returns a printable representation of this value.
 	 */
+	@Override
 	public String toString() {
 		return getCssText();
 	}
 
 	/**
 	 * Appends an item to the list.
+	 *
+	 * @param v CSS value
 	 */
 	public void append(CSSValue v) {
 		if (length == items.length) {
@@ -166,6 +174,7 @@ public class ListValue extends Value implements CSSValueList {
 		items[length++] = v;
 	}
 
+	@Override
 	public boolean equals(Object value) {
 		if (value instanceof ListValue) {
 			ListValue l = (ListValue) value;

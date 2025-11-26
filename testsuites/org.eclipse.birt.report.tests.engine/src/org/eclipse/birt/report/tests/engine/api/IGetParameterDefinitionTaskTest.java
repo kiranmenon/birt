@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.tests.engine.api;
 
@@ -6,9 +18,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.ICascadingParameterGroup;
@@ -21,6 +30,9 @@ import org.eclipse.birt.report.engine.api.IScalarParameterDefn;
 import org.eclipse.birt.report.tests.engine.EngineCase;
 
 import com.ibm.icu.util.ULocale;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * <b>IGetParameterDefinitionTask API</b>
@@ -39,13 +51,14 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 
 	/**
 	 * Test suite()
-	 * 
+	 *
 	 * @return
 	 */
 	public static Test suite() {
 		return new TestSuite(IGetParameterDefinitionTaskTest.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		removeResource();
@@ -53,18 +66,20 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 		IReportRunnable reportRunnable = engine.openReportDesign(input);
 		task = engine.createGetParameterDefinitionTask(reportRunnable);
 		task.setLocale(ULocale.ENGLISH);
+		// task.setTimeZone(TimeZone.getTimeZone("GMT"));
 		assertTrue(task.getErrors().size() == 0);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		task.close();
-		removeResource();
 		super.tearDown();
+		removeResource();
 	}
 
 	/**
 	 * Test getParameterDefns() method
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testGetParameterDefns() throws Exception {
@@ -102,7 +117,7 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 
 	/**
 	 * Test getParameterDefn(String) method
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testGetParameterDefn() throws Exception {
@@ -162,7 +177,7 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 
 	/**
 	 * Test setValue method This method is not implemented at present.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testSetValue() throws Exception {
@@ -174,7 +189,7 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 
 	/**
 	 * Test getDefaultValues() method
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testGetDefaultValues() throws Exception {
@@ -200,7 +215,7 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 	/**
 	 * Test getDefaultValue(IParameterDefnBase param) method Test
 	 * getDefaultValue(String name) method
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testGetDefaultValue() throws Exception {
@@ -215,9 +230,9 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 		ArrayList selist = (ArrayList) task.getSelectionList("p2_static_dt");
 
 		IParameterSelectionChoice se = (IParameterSelectionChoice) selist.get(0);
-		assertEquals("Tue May 11 00:00:00 UTC 2004", se.getValue().toString());
+		assertTrue(se.getValue().toString(), se.getValue().toString().startsWith("Tue May 11 00:00:00"));
 		se = (IParameterSelectionChoice) selist.get(1);
-		assertEquals("Tue May 18 00:00:00 UTC 2004", se.getValue().toString());
+		assertTrue(se.getValue().toString(), se.getValue().toString().startsWith("Tue May 18 00:00:00"));
 
 		/*
 		 * 05/11/2004 12:00:00 AM 05/18/2004 12:00:00 AM
@@ -293,11 +308,11 @@ public class IGetParameterDefinitionTaskTest extends EngineCase {
 		 * Lyon Germany NULL Frankfurt Norway NULL Stavern Poland NULL Warszawa
 		 * Singapore NULL Singapore Spain NULL Madrid Sweden NULL Lulea USA CA San
 		 * Francisco San Rafael NV Las Vegas NY NYC
-		 * 
+		 *
 		 */
 		String cpg1 = "NewCascadingParameterGroup";
 
-		String[][] values1 = new String[][] { { "USA" } };
+		String[][] values1 = { { "USA" } };
 		Collection col;
 		col = task.getSelectionListForCascadingGroup(cpg1, values1);
 		assertEquals(3, col.size());

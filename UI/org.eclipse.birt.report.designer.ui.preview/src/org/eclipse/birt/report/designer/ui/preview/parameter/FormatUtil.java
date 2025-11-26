@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -26,20 +29,20 @@ import com.ibm.icu.util.ULocale;
 
 /**
  * Format utility.
- * 
+ *
  */
 public class FormatUtil {
 
 	/**
 	 * Checks is custom.
-	 * 
+	 *
 	 * @param formatCategory
 	 * @return <code>true</code> if is custom type. else return <code>false</code>.
 	 */
 	private static boolean isCustom(String formatCategory) {
 		if (DesignChoiceConstants.STRING_FORMAT_TYPE_CUSTOM.equals(formatCategory)
 				|| DesignChoiceConstants.NUMBER_FORMAT_TYPE_CUSTOM.equals(formatCategory)
-				|| DesignChoiceConstants.DATETIEM_FORMAT_TYPE_CUSTOM.equals(formatCategory)) {
+				|| DesignChoiceConstants.DATETIME_FORMAT_TYPE_CUSTOM.equals(formatCategory)) {
 			return true;
 		}
 		return false;
@@ -47,7 +50,7 @@ public class FormatUtil {
 
 	/**
 	 * Formats value with pattern or category.
-	 * 
+	 *
 	 * @param handle
 	 * @param inputStr
 	 * @return formatted value.
@@ -68,7 +71,7 @@ public class FormatUtil {
 
 	/**
 	 * Formats scalar parameter value.
-	 * 
+	 *
 	 * @param handle
 	 * @param inputStr
 	 * @return formatted value.

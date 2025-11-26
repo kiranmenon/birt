@@ -1,12 +1,14 @@
 /*************************************************************************************
- * Copyright (c) 2011, 2012, 2013 James Talbut.
+ * Copyright (c) 2011, 2012, 2013, 2024, 2025 James Talbut and others
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -17,12 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.ss.util.SheetUtil;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.eclipse.birt.core.exception.BirtException;
+import org.eclipse.birt.report.engine.content.IBandContent;
 import org.eclipse.birt.report.engine.content.ITableBandContent;
 import org.eclipse.birt.report.engine.content.ITableContent;
 import org.eclipse.birt.report.engine.content.ITableGroupContent;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.engine.ir.GridItemDesign;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetView;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STSheetViewType;
 
 import uk.co.spudsoft.birt.emitters.excel.AreaBorders;
 import uk.co.spudsoft.birt.emitters.excel.BirtStyle;
@@ -32,6 +38,12 @@ import uk.co.spudsoft.birt.emitters.excel.FilteredSheet;
 import uk.co.spudsoft.birt.emitters.excel.HandlerState;
 import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
 
+/**
+ * Abstract real table handler
+ *
+ * @since 3.3
+ *
+ */
 public class AbstractRealTableHandler extends AbstractHandler implements ITableHandler, NestedTableContainer {
 
 	protected int startRow;
@@ -39,30 +51,37 @@ public class AbstractRealTableHandler extends AbstractHandler implements ITableH
 	protected int startDetailsRow = -1;
 	protected int endDetailsRow;
 
-	private ITableGroupContent currentGroup;
-	private ITableBandContent currentBand;
-
 	private BirtStyle tableStyle;
 	private AreaBorders borderDefn;
 
 	private List<NestedTableHandler> nestedTables;
 
+	/**
+	 * Constructor
+	 *
+	 * @param log    log object
+	 * @param parent parent handler
+	 * @param table  table content
+	 */
 	public AbstractRealTableHandler(Logger log, IHandler parent, ITableContent table) {
 		super(log, parent, table);
 	}
 
+	@Override
 	public int getColumnCount() {
 		return ((ITableContent) this.element).getColumnCount();
 	}
 
+	@Override
 	public void addNestedTable(NestedTableHandler nestedTableHandler) {
 		if (nestedTables == null) {
-			nestedTables = new ArrayList<NestedTableHandler>();
+			nestedTables = new ArrayList<>();
 		}
 		log.debug("Adding nested table: ", nestedTableHandler);
 		nestedTables.add(nestedTableHandler);
 	}
 
+	@Override
 	public boolean rowHasNestedTable(int rowNum) {
 		if (nestedTables != null) {
 			for (NestedTableHandler nestedTableHandler : nestedTables) {
@@ -76,6 +95,7 @@ public class AbstractRealTableHandler extends AbstractHandler implements ITableH
 		return false;
 	}
 
+	@Override
 	public int extendRowBy(int rowNum) {
 		int offset = 1;
 		if (nestedTables != null) {
@@ -104,14 +124,19 @@ public class AbstractRealTableHandler extends AbstractHandler implements ITableH
 				log.debug("BIRT table column width: ", col, " = ", width);
 				int newWidth = state.getSmu().poiColumnWidthFromDimension(width);
 				int oldWidth = state.currentSheet.getColumnWidth(startCol + col);
-				if ((oldWidth == 256 * state.currentSheet.getDefaultColumnWidth()) || (newWidth > oldWidth)) {
+				// calculation excel column max value 255 * 256 excel factor
+				int maxValue = 255 * 256;
+				if (newWidth > maxValue) {
+					state.currentSheet.setColumnWidth(startCol + col, maxValue);
+				} else if ((oldWidth == 256 * state.currentSheet.getDefaultColumnWidth()) || (newWidth > oldWidth)) {
 					state.currentSheet.setColumnWidth(startCol + col, newWidth);
 				}
 			}
 		}
 
 		tableStyle = new BirtStyle(table);
-		borderDefn = AreaBorders.create(-1, startCol, startCol + table.getColumnCount() - 1, startRow, tableStyle);
+		borderDefn = AreaBorders.create(-1, startCol, startCol + table.getColumnCount() - 1, startRow, -1, -1,
+				tableStyle);
 		if (borderDefn != null) {
 			state.insertBorderOverload(borderDefn);
 		}
@@ -138,27 +163,41 @@ public class AbstractRealTableHandler extends AbstractHandler implements ITableH
 
 		log.debug("Details rows from ", startDetailsRow, " to ", endDetailsRow);
 
-		if ((startDetailsRow > 0) && (endDetailsRow > startDetailsRow)) {
+		int autoWidthStartRow = startDetailsRow;
+		if (EmitterServices.booleanOption(state.getRenderOptions(), table,
+				ExcelEmitter.AUTO_COL_WIDTHS_INCLUDE_TABLE_HEADER,
+				false)) {
+			autoWidthStartRow = startRow;
+		}
+		int autoWidthEndRow = endDetailsRow;
+		if (EmitterServices.booleanOption(state.getRenderOptions(), table,
+				ExcelEmitter.AUTO_COL_WIDTHS_INCLUDE_TABLE_FOOTER,
+				false)) {
+			autoWidthEndRow = state.rowNum - 1;
+		}
+		if ((autoWidthStartRow >= 0) && (autoWidthEndRow > autoWidthStartRow)) {
+			boolean defaultAutoColWidth = EmitterServices.booleanOption(state.getRenderOptions(), table,
+					ExcelEmitter.STREAMING_XLSX, false);
+			// force automated column width calculation if streaming mode of XLSX is enabled
 			boolean forceAutoColWidths = EmitterServices.booleanOption(state.getRenderOptions(), table,
-					ExcelEmitter.FORCEAUTOCOLWIDTHS_PROP, false);
-			for (int col = 0; col < table.getColumnCount(); ++col) {
-				int oldWidth = state.currentSheet.getColumnWidth(col);
-				if (forceAutoColWidths || (oldWidth == 256 * state.currentSheet.getDefaultColumnWidth())) {
-					FilteredSheet filteredSheet = new FilteredSheet(state.currentSheet, startDetailsRow,
-							Math.min(endDetailsRow, startDetailsRow + 12));
-					double calcWidth = SheetUtil.getColumnWidth(filteredSheet, col, false);
+					ExcelEmitter.FORCEAUTOCOLWIDTHS_PROP, defaultAutoColWidth);
 
-					if (calcWidth > 1.0) {
-						calcWidth *= 256;
-						int maxColumnWidth = 255 * 256; // The maximum column width for an individual cell is 255
-														// characters
-						if (calcWidth > maxColumnWidth) {
-							calcWidth = maxColumnWidth;
-						}
-						if (calcWidth > oldWidth) {
-							state.currentSheet.setColumnWidth(col, (int) (calcWidth));
-						}
+			int defaultColumnWidth = 256 * state.currentSheet.getDefaultColumnWidth();
+			for (int col = 0; col < table.getColumnCount(); ++col) {
+				int columnWidth = state.currentSheet.getColumnWidth(col);
+				if (forceAutoColWidths || columnWidth == defaultColumnWidth) {
+					FilteredSheet filteredSheet = new FilteredSheet(state.currentSheet, autoWidthStartRow,
+							Math.min(autoWidthEndRow, autoWidthStartRow + 12));
+					double calcWidth = SheetUtil.getColumnWidth(filteredSheet, col, false);
+					calcWidth *= 1.15 * 256; // The factor 1.15 is used to handle width differences of Apache POI.
+					int maxColumnWidth = 255 * 256; // The maximum column width for an individual cell is 255
+													// characters
+					if (calcWidth > maxColumnWidth) {
+						calcWidth = maxColumnWidth;
+					} else if (calcWidth < defaultColumnWidth) {
+						calcWidth = defaultColumnWidth;
 					}
+					state.currentSheet.setColumnWidth(col, (int) calcWidth);
 				}
 			}
 		}
@@ -181,32 +220,57 @@ public class AbstractRealTableHandler extends AbstractHandler implements ITableH
 		if (!EmitterServices.booleanOption(state.getRenderOptions(), table, ExcelEmitter.DISPLAYZEROS_PROP, true)) {
 			state.currentSheet.setDisplayZeros(false);
 		}
+		if (!EmitterServices.booleanOption(state.getRenderOptions(), table, ExcelEmitter.DISPLAYROWCOLHEADINGS_PROP,
+				true)) {
+			state.currentSheet.setDisplayRowColHeadings(false);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), table, ExcelEmitter.PRINTGRIDLINES_PROP, false)) {
+			state.currentSheet.setPrintGridlines(true);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), table, ExcelEmitter.PRINTROWCOLHEADINGS_PROP, false)) {
+			state.currentSheet.setPrintRowAndColumnHeadings(true);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), table, ExcelEmitter.PRINTFITTOPAGE_PROP, false)) {
+			state.currentSheet.setFitToPage(true);
+		}
+		int displayZoom = EmitterServices.integerOption(state.getRenderOptions(), table,
+				ExcelEmitter.DISPLAY_SHEET_ZOOM, -1);
+		if ((displayZoom >= ExcelEmitter.poiExcelDisplaySheetZoomScaleMin) && (displayZoom <= ExcelEmitter.poiExcelDisplaySheetZoomScaleMax)) {
+			state.currentSheet.setZoom(displayZoom);
+		}
+		String pagePreview = EmitterServices.stringOption(state.getRenderOptions(), table, ExcelEmitter.PAGE_PREVIEW, null);
+		if (pagePreview != null) {
+			if (pagePreview.equalsIgnoreCase(ExcelEmitter.poiExcelPreviewPageLayout)) {
+				CTSheetView view = ((XSSFSheet) state.currentSheet).getCTWorksheet().getSheetViews().getSheetViewArray(0);
+				view.setView(STSheetViewType.PAGE_LAYOUT);
+
+			} else if (pagePreview.equalsIgnoreCase(ExcelEmitter.poiExcelPreviewPageBreak)) {
+				CTSheetView view = ((XSSFSheet) state.currentSheet).getCTWorksheet().getSheetViews().getSheetViewArray(0);
+				view.setView(STSheetViewType.PAGE_BREAK_PREVIEW);
+			 }
+		}
 	}
 
 	@Override
 	public void startTableBand(HandlerState state, ITableBandContent band) throws BirtException {
-		if ((band.getBandType() == ITableBandContent.BAND_DETAIL) && (startDetailsRow < 0)) {
+		if ((band.getBandType() == IBandContent.BAND_DETAIL) && (startDetailsRow < 0)) {
 			startDetailsRow = state.rowNum;
 		}
-		currentBand = band;
 	}
 
 	@Override
 	public void endTableBand(HandlerState state, ITableBandContent band) throws BirtException {
-		if (band.getBandType() == ITableBandContent.BAND_DETAIL) {
+		if (band.getBandType() == IBandContent.BAND_DETAIL) {
 			endDetailsRow = state.rowNum - 1;
 		}
-		currentBand = null;
 	}
 
 	@Override
 	public void startTableGroup(HandlerState state, ITableGroupContent group) throws BirtException {
-		currentGroup = group;
 	}
 
 	@Override
 	public void endTableGroup(HandlerState state, ITableGroupContent group) throws BirtException {
-		currentGroup = null;
 	}
 
 }

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -20,17 +23,17 @@ import org.eclipse.birt.report.engine.content.ITableContent;
 import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.w3c.dom.css.CSSValue;
 
-//TODO: move it to HTMLReportEmitter, it is a util used to output the 
+//TODO: move it to HTMLReportEmitter, it is a util used to output the
 //column style in cells.
 /**
  * Represents style of cell with the style of column.
- * 
+ *
  * FireFox/IE handles the column style differntly, so we can only ouptut all the
  * column style to cell to get the unique display.
- * 
+ *
  * it only returns the property which defined in the column style but should be
  * outputed in the cell.
- * 
+ *
  */
 public class CellMergedStyle extends AbstractStyle {
 	IStyle cellStyle;
@@ -61,11 +64,11 @@ public class CellMergedStyle extends AbstractStyle {
 	}
 
 	/**
-	 * 
+	 *
 	 * <li>if the property is not defined in the column, return null.
-	 * 
+	 *
 	 * <li>the property has been defined in the cell style, return null.
-	 * 
+	 *
 	 * <li>property which has been defined in the column but not defined in the
 	 * cell.
 	 * <li>if it is not inheritable attributes
@@ -81,12 +84,9 @@ public class CellMergedStyle extends AbstractStyle {
 	 * </ul>
 	 * </ul>
 	 */
+	@Override
 	public CSSValue getProperty(int index) {
-		if (cellStyle != null && cellStyle.getProperty(index) != null) {
-			return null;
-		}
-
-		if (columnStyle == null) {
+		if ((cellStyle != null && cellStyle.getProperty(index) != null) || (columnStyle == null)) {
 			return null;
 		}
 
@@ -112,23 +112,19 @@ public class CellMergedStyle extends AbstractStyle {
 					}
 				}
 			}
-		} else {
-			if (rowStyle != null) {
-				CSSValue rowValue = rowStyle.getProperty(index);
-				if (rowValue != null) {
-					return null;
-				}
+		} else if (rowStyle != null) {
+			CSSValue rowValue = rowStyle.getProperty(index);
+			if (rowValue != null) {
+				return null;
 			}
 		}
 
 		return value;
 	}
 
+	@Override
 	public boolean isEmpty() {
-		if (cellStyle != null && !cellStyle.isEmpty()) {
-			return false;
-		}
-		if (rowStyle != null && !rowStyle.isEmpty()) {
+		if ((cellStyle != null && !cellStyle.isEmpty()) || (rowStyle != null && !rowStyle.isEmpty())) {
 			return false;
 		}
 		if (columnStyle != null && !columnStyle.isEmpty()) {
@@ -137,6 +133,7 @@ public class CellMergedStyle extends AbstractStyle {
 		return true;
 	}
 
+	@Override
 	public void setProperty(int index, CSSValue value) {
 	}
 

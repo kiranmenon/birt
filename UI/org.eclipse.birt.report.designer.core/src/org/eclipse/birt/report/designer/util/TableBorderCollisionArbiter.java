@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -36,6 +39,15 @@ public class TableBorderCollisionArbiter {
 	 * always lose; then compare the width, greater win; if width is equal, compare
 	 * the style, less win; or keep the original. This is the part 1 of the
 	 * algorithm.
+	 *
+	 * @param data     border data array
+	 * @param style    border style of cell
+	 * @param width    border width of cell
+	 * @param color    border color of cell
+	 * @param rowIndex row index cell
+	 * @param colIndex column index of cell
+	 * @param type     0, 1 type of bottom-, top-attribute from row or cell (0: row,
+	 *                 1: cell)
 	 */
 	public static void refreshBorderData(int[] data, int style, int width, int color, int rowIndex, int colIndex,
 			int type) {
@@ -86,6 +98,21 @@ public class TableBorderCollisionArbiter {
 	 * This method implemented the border collision algorithm in the cross point
 	 * during actual drawing according to the CSS2.0 specification. This is the part
 	 * 2 of the algorithm.
+	 *
+	 * @param data
+	 * @param extNBWidth
+	 * @param extNBStyle
+	 * @param leftHandWidth
+	 * @param leftHandStyle
+	 * @param leftHandX
+	 * @param leftHandY
+	 * @param rightHandWidth
+	 * @param rightHandStyle
+	 * @param rightHandX
+	 * @param rightHandY
+	 * @param isHead
+	 * @param isVertical
+	 * @return Return the evaluation result
 	 */
 	public static boolean canExtend(int[] data, int extNBWidth, int extNBStyle, int leftHandWidth, int leftHandStyle,
 			int leftHandX, int leftHandY, int rightHandWidth, int rightHandStyle, int rightHandX, int rightHandY,
@@ -441,6 +468,23 @@ public class TableBorderCollisionArbiter {
 	/**
 	 * This is the part 3 of the border collision algorithm according to the CSS2.0
 	 * specification. This part is used to fix some side-situation.
+	 *
+	 * @param data
+	 * @param extNBWidth
+	 * @param extNBStyle
+	 * @param extNBX
+	 * @param extNBY
+	 * @param leftHandWidth
+	 * @param leftHandStyle
+	 * @param leftHandX
+	 * @param leftHandY
+	 * @param rightHandWidth
+	 * @param rightHandStyle
+	 * @param rightHandX
+	 * @param rightHandY
+	 * @param isHead
+	 * @param isVertical
+	 * @return Return the evaluation result
 	 */
 	public static boolean isBrotherWin(int[] data, int extNBWidth, int extNBStyle, int extNBX, int extNBY,
 			int leftHandWidth, int leftHandStyle, int leftHandX, int leftHandY, int rightHandWidth, int rightHandStyle,

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -41,11 +44,19 @@ public class BorderUtil {
 	 * Position constant for Right border.
 	 */
 	public static final int RIGHT = 3;
+	/**
+	 * Position constant for Diagonal.
+	 */
+	public static final int DIAGONAL = 4;
+	/**
+	 * Position constant for Antidiagonal.
+	 */
+	public static final int ANTIDIAGONAL = 5;
 
 	/**
 	 * Width constant for default border line.
 	 */
-	private static final int[] DEFAULT_LINE_WIDTH = new int[] { 1, 1, 1, 1 };
+	private static final int[] DEFAULT_LINE_WIDTH = { 1, 1, 1, 1 };
 
 	/**
 	 * Calculate gap to avoid cross-line when drawing thick/double line.
@@ -68,8 +79,7 @@ public class BorderUtil {
 
 	/**
 	 * Draws a double style line.
-	 * 
-	 * @param figure
+	 *
 	 * @param g
 	 * @param side
 	 * @param width  the border width array, arranged by {top, bottom, left, right};
@@ -110,8 +120,7 @@ public class BorderUtil {
 
 	/**
 	 * Draws a default grayed line.
-	 * 
-	 * @param figure
+	 *
 	 * @param g
 	 * @param side
 	 * @param r
@@ -122,8 +131,7 @@ public class BorderUtil {
 
 	/**
 	 * Convenient version, set actualWidth=-1, startPos=0.
-	 * 
-	 * @param figure
+	 *
 	 * @param g
 	 * @param side
 	 * @param style
@@ -136,8 +144,7 @@ public class BorderUtil {
 
 	/**
 	 * Draws a single style line.
-	 * 
-	 * @param figure
+	 *
 	 * @param g
 	 * @param side
 	 * @param style
@@ -151,6 +158,11 @@ public class BorderUtil {
 	 */
 	private static void drawSingleLine(Graphics g, int side, int style, int[] width, int actualWidth, int startPos,
 			Rectangle r) {
+
+		// diagonal & antidiagonal: double line unsupported, set style to solid
+		if ((side == DIAGONAL || side == ANTIDIAGONAL) && style < 0) {
+			style = 1;
+		}
 		g.setLineStyle(style);
 
 		Rectangle oldClip = g.getClip(new Rectangle());
@@ -231,6 +243,76 @@ public class BorderUtil {
 				g.setClip(oldClip);
 			}
 			break;
+		case DIAGONAL:
+			if (actualWidth < 0) {
+				actualWidth = width[0];
+			}
+			g.setLineWidth(actualWidth);
+
+			clip.width = 0;
+			clip.height = 0;
+			clip.x = r.x - 10 + 10;
+			clip.y = r.y;
+			p2.x = r.x + r.width + 20 - 20;
+			p2.y = r.y + r.height;
+			// gap correction
+			if (actualWidth >= 6) {
+				p2.x = p2.x - 2;
+				p2.y = p2.y - 2;
+			}
+			clip.union(p2);
+			g.clipRect(clip);
+
+			int dP1x = clip.x;
+			int dP1y = clip.y;
+			int dP2x = p2.x;
+			int dP2y = p2.y;
+			// default corrections
+			dP1x = dP1x + 0;
+			dP1y = dP1y + 1; // - 1
+			dP2x = dP2x - 2;
+			if (actualWidth >= 6) {
+				dP2y = dP2y + 1;
+			} else {
+				dP2y = dP2y - 2;
+			}
+			g.drawLine(dP1x, dP1y, dP2x, dP2y);
+			g.setClip(oldClip);
+
+			break;
+		case ANTIDIAGONAL:
+			if (actualWidth < 0) {
+				actualWidth = width[0];
+			}
+			g.setLineWidth(actualWidth);
+			clip.width = 0;
+			clip.height = 0;
+			clip.x = r.x;
+			clip.y = r.y;
+			p2.x = r.x + r.width;
+			p2.y = r.y + r.height;
+			// gap correction
+			if (actualWidth >= 6) {
+				p2.x = p2.x - 2;
+				p2.y = p2.y + 2;
+			} else {
+				p2.y = p2.y + 3;
+			}
+			clip.union(p2);
+			g.clipRect(clip);
+
+			int adP1x = r.x;
+			int adP1y = r.y + r.height;
+			int adP2x = p2.x;
+			int adP2y = p2.y - r.height;// + 2;
+			// default corrections
+			adP1x = adP1x + 0;
+			adP1y = adP1y - 2;
+			adP2x = adP2x + 0;
+			adP2y = adP2y - 2;
+			g.drawLine(adP1x, adP1y, adP2x, adP2y);
+			g.setClip(oldClip);
+			break;
 		}
 
 		g.setClip(oldClip);
@@ -238,7 +320,7 @@ public class BorderUtil {
 
 	/**
 	 * Draws a 3D style line with the specified side, style & width.
-	 * 
+	 *
 	 * @param g     The graphics object used for drawing
 	 * @param side  the side to draw.
 	 * @param style the style to draw.
@@ -309,7 +391,7 @@ public class BorderUtil {
 
 	/**
 	 * Draws a border line with the specified side, style & width.
-	 * 
+	 *
 	 * @param g     The graphics object used for drawing
 	 * @param side  the side to draw.
 	 * @param style the style to draw.

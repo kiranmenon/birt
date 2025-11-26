@@ -1,12 +1,14 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -24,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +52,7 @@ import org.eclipse.birt.report.engine.api.IRunTask;
 import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.model.api.IResourceLocator;
+import org.eclipse.core.runtime.FileLocator;
 
 import uk.co.spudsoft.birt.emitters.bugfix.FixedRenderTask;
 import uk.co.spudsoft.birt.emitters.excel.ExcelEmitter;
@@ -79,14 +81,14 @@ public class ReportRunner {
 
 	protected String templateFile = null;
 
-	protected Map<String, Object> parameters = new HashMap<String, Object>();
+	protected Map<String, Object> parameters = new HashMap<>();
 	protected long startTime;
 	protected long runTime;
 	protected long renderTime;
 
 	private static byte[] getBytesFromFile(File file) throws IOException {
 		InputStream is = new FileInputStream(file);
-		try {
+		try (is) {
 			byte[] data = new byte[(int) file.length()];
 			int offset = 0;
 			int read = 0;
@@ -94,8 +96,6 @@ public class ReportRunner {
 				offset += read;
 			}
 			return data;
-		} finally {
-			is.close();
 		}
 	}
 
@@ -432,28 +432,16 @@ public class ReportRunner {
 		return reportEngine;
 	}
 
-	protected String deriveFilepath(String filename) throws MalformedURLException {
+	protected String deriveFilepath(String filename) throws IOException {
 		String filepath = null;
 
 		File file = new File(filename);
 		if ((file.isAbsolute()) && (file.exists())) {
 			return filename;
 		} else if (Activator.getContext() != null) {
-			URL bundleLocation = new URL(Activator.getContext().getBundle().getLocation());
-			// System.err.println( "Activator.getContext().getBundle().getLocation() = " +
-			// bundleLocation );
-			String bundleLocationFile = bundleLocation.getFile();
-			if (bundleLocationFile.startsWith("file:/")) {
-				bundleLocationFile = bundleLocationFile.substring(6);
-			}
-			// System.err.println( "bundleLocationFile = " + bundleLocationFile );
-
 			URL resourceLocation = this.getClass().getResource(filename);
-			String resourceLocationFile = resourceLocation.getFile();
-			// System.err.println( "resourceLocationFile = " + resourceLocationFile );
-
-			filepath = bundleLocationFile + "bin" + resourceLocationFile;
-			// System.err.println( "filepath = " + filepath );
+			URL fileURL = FileLocator.toFileURL(resourceLocation);
+			filepath = new File(fileURL.getFile()).toString();
 		}
 		return filepath;
 	}
@@ -477,7 +465,7 @@ public class ReportRunner {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> appContext = (Map<String, Object>) task.getAppContext();
 		if (appContext == null) {
-			appContext = new HashMap<String, Object>();
+			appContext = new HashMap<>();
 			task.setAppContext(appContext);
 		}
 		appContext.put(key, value);

@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2005, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,9 +31,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * 
+ * Utility class to handle properties
+ *
  */
-
 abstract class PropertyHandleInputDialog extends StatusDialog {
 
 	private Object structureOrHandle = null;
@@ -45,15 +48,17 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 		this.structureOrHandle = structureOrHandle;
 	}
 
+	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.window.Window#create()
 	 */
+	@Override
 	public void create() {
 		super.create();
 
@@ -70,11 +75,12 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.
 	 * Composite)
 	 */
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		GridLayout layout = new GridLayout(3, false);
@@ -98,7 +104,7 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 
 	/**
 	 * Create customized controls
-	 * 
+	 *
 	 * @param parent
 	 */
 	protected abstract void createCustomControls(Composite parent);
@@ -106,21 +112,23 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 	protected void validateSyntax() {
 		IStatus status = validateSyntax(structureOrHandle);
 
-		if (status != null)
+		if (status != null) {
 			updateStatus(status);
+		}
 	}
 
 	/**
 	 * Syntax check which determines whether to enable the Ok button
-	 * 
+	 *
 	 * @param structureOrHandle
-	 * @return
+	 * @return the validation status
 	 */
 	protected abstract IStatus validateSyntax(Object structureOrHandle);
 
 	private void addListeners() {
 		getShell().addListener(SWT.Close, new Listener() {
 
+			@Override
 			public void handleEvent(Event event) {
 				rollback();
 			}
@@ -129,19 +137,22 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
+	@Override
 	protected void okPressed() {
-		if (validateSemantics())
+		if (validateSemantics()) {
 			super.okPressed();
+		}
 	}
 
 	protected boolean validateSemantics() {
 		IStatus status = validateSemantics(structureOrHandle);
 
-		if (status == null)
+		if (status == null) {
 			return true;
+		}
 
 		updateStatus(status);
 
@@ -150,17 +161,18 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 
 	/**
 	 * Semantics check which determines whether to close the window
-	 * 
+	 *
 	 * @param structureOrHandle
-	 * @return
+	 * @return the validation status
 	 */
 	protected abstract IStatus validateSemantics(Object structureOrHandle);
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.jface.dialogs.Dialog#cancelPressed()
 	 */
+	@Override
 	protected void cancelPressed() {
 		rollback();
 
@@ -169,7 +181,7 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 
 	/**
 	 * Roll back to the original status when necessary.
-	 * 
+	 *
 	 */
 	protected abstract void rollback();
 
@@ -178,49 +190,54 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 	}
 
 	/**
-	 * 
-	 * @param value
-	 * @return
+	 * Is property blank
+	 *
+	 * @param value property value
+	 * @return true, if the property is blank
 	 */
 	protected boolean isBlankProperty(String value) {
 		return Utility.getNonNullString(value).trim().length() == 0;
 	}
 
 	/**
-	 * 
-	 * @param cellLabel
-	 * @return
+	 * Get the property status for blank value
+	 *
+	 * @param cellLabel cell label
+	 * @return the property status for blank value
 	 */
 	protected Status getBlankPropertyStatus(String cellLabel) {
 		return getMiscStatus(IStatus.ERROR,
 				Messages.getFormattedString("PropertyHandleInputDialog.messages.error.blankProperty", //$NON-NLS-1$
-						new String[] { cellLabel }));
+						new String[] { cellLabel.replace("&", "") }));
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Get the ok status
+	 *
+	 * @return the ok status
 	 */
 	protected Status getOKStatus() {
 		return getMiscStatus(IStatus.OK, ""); //$NON-NLS-1$
 	}
 
 	/**
-	 * 
-	 * @param severity
-	 * @param message
-	 * @return
+	 * Get miscellaneous status
+	 *
+	 * @param severity status level
+	 * @param message  status message
+	 * @return miscellaneous status
 	 */
 	protected Status getMiscStatus(int severity, String message) {
 		return new Status(severity, PlatformUI.PLUGIN_ID, IStatus.OK, message, null);
 	}
 
 	/**
-	 * 
-	 * @param obj
-	 * @param propertyName
-	 * @param value
-	 * @return
+	 * Set property value
+	 *
+	 * @param obj          object
+	 * @param propertyName property name
+	 * @param value        property value
+	 * @return the ok status after property set
 	 */
 	protected Status setProperty(Object obj, String propertyName, Object value) {
 		try {
@@ -233,10 +250,11 @@ abstract class PropertyHandleInputDialog extends StatusDialog {
 	}
 
 	/**
-	 * 
-	 * @param obj
-	 * @param propertyName
-	 * @return
+	 * Get the property
+	 *
+	 * @param obj          object
+	 * @param propertyName property name
+	 * @return the property
 	 */
 	protected Object getProperty(Object obj, String propertyName) {
 		try {

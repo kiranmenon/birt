@@ -1,10 +1,12 @@
 /*************************************************************************************
- * Copyright (c) 2004 Actuate Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ * Copyright (c) 2004, 2025 Actuate Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     Actuate Corporation - Initial implementation.
  ************************************************************************************/
@@ -20,7 +22,9 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -40,7 +44,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.codec.binary.Base64;
 import org.eclipse.birt.report.IBirtConstants;
 import org.eclipse.birt.report.context.BaseAttributeBean;
 import org.eclipse.birt.report.context.IContext;
@@ -66,6 +69,16 @@ import com.ibm.icu.util.ULocale;
  */
 
 public class ParameterAccessor {
+
+	/**
+	 *
+	 */
+	private static final String LOOPBACK = "127.0.0.1";
+
+	/**
+	 *
+	 */
+	private static final String LOCALHOST = "localhost";
 
 	// URL parameter constants
 	/**
@@ -118,12 +131,20 @@ public class ParameterAccessor {
 	 * URL parameter name that gives the format to display the report, html or pdf.
 	 */
 	public static final String PARAM_FORMAT = "__format"; //$NON-NLS-1$
+
+	/**
+	 * URL parameter name that gives the emitter id
+	 */
 	public static final String PARAM_EMITTER_ID = "__emitterid"; //$NON-NLS-1$
+
+	/**
+	 * Format parameter constants to display the report in htm.
+	 */
+	public static final String PARAM_FORMAT_HTM = "htm"; //$NON-NLS-1$
 
 	/**
 	 * Format parameter constants to display the report in html.
 	 */
-	public static final String PARAM_FORMAT_HTM = "htm"; //$NON-NLS-1$
 	public static final String PARAM_FORMAT_HTML = "html"; //$NON-NLS-1$
 
 	/**
@@ -411,6 +432,12 @@ public class ParameterAccessor {
 	public static final String INIT_PARAM_URL_REPORT_PATH_POLICY = "URL_REPORT_PATH_POLICY"; //$NON-NLS-1$
 
 	/**
+	 * Context parameter name that specifies the allowed domains to handle url
+	 * report paths.
+	 */
+	public static final String INIT_PARAM_URL_REPORT_PATH_DOMAINS = "URL_REPORT_PATH_DOMAINS"; //$NON-NLS-1$
+
+	/**
 	 * The parameter name that gives the repository location to put the created
 	 * documents and report design files.
 	 */
@@ -427,9 +454,15 @@ public class ParameterAccessor {
 	public static final String INIT_PARAM_VIEWER_MAXROWS = "BIRT_VIEWER_MAX_ROWS"; //$NON-NLS-1$
 
 	/**
-	 * Context parameter name that gives preview report cube fetch levels limited.
+	 * Context parameter name that gives preview report cube fetch levels limited
+	 * row
 	 */
 	public static final String INIT_PARAM_VIEWER_MAXCUBE_ROWLEVELS = "BIRT_VIEWER_MAX_CUBE_ROWLEVELS"; //$NON-NLS-1$
+
+	/**
+	 * Context parameter name that gives preview report cube fetch levels limited
+	 * column
+	 */
 	public static final String INIT_PARAM_VIEWER_MAXCUBE_COLUMNLEVELS = "BIRT_VIEWER_MAX_CUBE_COLUMNLEVELS"; //$NON-NLS-1$
 
 	/**
@@ -451,6 +484,17 @@ public class ParameterAccessor {
 	 * Context parameter name that if support print on the server
 	 */
 	public static final String INIT_PARAM_PRINT_SERVERSIDE = "BIRT_VIEWER_PRINT_SERVERSIDE"; //$NON-NLS-1$
+
+	/**
+	 * Context parameter name that if info dialog is usable
+	 */
+	public static final String INIT_PARAM_INFO_DIALOG = "BIRT_VIEWER_INFO_DIALOG"; //$NON-NLS-1$
+
+	/**
+	 * Context parameter name that define if the system detail option is accessible
+	 * at info dialog
+	 */
+	public static final String INIT_PARAM_INFO_DIALOG_SYSTEM_DETAILS = "BIRT_VIEWER_INFO_DIALOG_SYSTEM_DETAILS"; //$NON-NLS-1$
 
 	/**
 	 * Context parameter name that if force optimized HTML output.
@@ -513,9 +557,13 @@ public class ParameterAccessor {
 	public static int maxRows;
 
 	/**
-	 * Preview report max cube fetch levels
+	 * Preview report max cube fetch levels of rows
 	 */
 	public static int maxCubeRowLevels;
+
+	/**
+	 * Preview report max cube fetch levels of columns
+	 */
 	public static int maxCubeColumnLevels;
 
 	/**
@@ -553,17 +601,19 @@ public class ParameterAccessor {
 	 */
 	public static boolean isOverWrite;
 
-	/**
-	 * URL report paths policy constants
-	 */
+	/** property: URL report paths policy constants "all" */
 	public static final String POLICY_ALL = "all"; //$NON-NLS-1$
+
+	/** property: URL report paths policy constants "domain" */
 	public static final String POLICY_DOMAIN = "domain"; //$NON-NLS-1$
+
+	/** property: URL report paths policy constants "none" */
 	public static final String POLICY_NONE = "none"; //$NON-NLS-1$
 
 	/**
 	 * Indicats the url report paths accessing policy
 	 */
-	public static String urlReportPathPolicy = POLICY_DOMAIN;
+	public static String urlReportPathPolicy = POLICY_NONE;
 
 	/**
 	 * Application Context Attribute Name
@@ -583,13 +633,13 @@ public class ParameterAccessor {
 	/**
 	 * The initialized properties map
 	 */
-	public static Map initProps;
+	public static Map<String, String> initProps;
 
 	/**
 	 * The logger names to register. The key part contains the name of the logger
 	 * and the value contains the name of the level.
 	 */
-	public static Map loggers;
+	public static Map<String, String> loggers;
 
 	/**
 	 * viewer properties
@@ -623,6 +673,16 @@ public class ParameterAccessor {
 	public static boolean isSupportedPrintOnServer = true;
 
 	/**
+	 * Flag that indicated if support info dialog.
+	 */
+	public static boolean isSupportedInfoDialog = true;
+
+	/**
+	 * Flag that indicated if support info dialog includes system details option.
+	 */
+	public static boolean isSupportedInfoDialogSystemDetails = true;
+
+	/**
 	 * Optimized HTML output flag
 	 */
 	public static boolean isAgentStyle = true;
@@ -637,13 +697,14 @@ public class ParameterAccessor {
 	 */
 	public static IFilenameGenerator exportFilenameGenerator = null;
 
+	private static List<String> fUrlReportPathDomains;
+
 	/**
 	 * Get bookmark. If page exists, ignore bookmark.
-	 * 
+	 *
 	 * @param request
 	 * @return the bookemark
 	 */
-
 	public static String getBookmark(HttpServletRequest request) {
 		int page = getParameterAsInt(request, PARAM_PAGE);
 		return page < 1 ? getReportParameter(request, PARAM_BOOKMARK, null) : null;
@@ -651,7 +712,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns whether the bookmark is TOC
-	 * 
+	 *
 	 * @param request
 	 * @return boolean
 	 */
@@ -670,14 +731,13 @@ public class ParameterAccessor {
 
 	/**
 	 * Gets the query parameter string with the give name and value.
-	 * 
+	 *
 	 * @param paramName
 	 * @param value
-	 * @return
+	 * @return the query parameter string
 	 */
-
 	public static String getQueryParameterString(String paramName, String value) {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append(PARAMETER_SEPARATOR);
 		b.append(paramName);
 		b.append(EQUALS_OPERATOR);
@@ -687,11 +747,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Get report title.
-	 * 
+	 *
 	 * @param request http request
 	 * @return report title
 	 */
-
 	public static String getTitle(HttpServletRequest request) {
 		String title = getParameter(request, PARAM_TITLE);
 		if (title == null) {
@@ -704,11 +763,10 @@ public class ParameterAccessor {
 	/**
 	 * Get report format from the emitter defined by the emitter id attribute. If no
 	 * emitter id has been specified in the request, then use the format attribute.
-	 * 
+	 *
 	 * @param request http request
 	 * @return report format
 	 */
-
 	public static String getFormat(HttpServletRequest request) {
 		// get format from the URL
 		boolean formatSpecified = false;
@@ -739,11 +797,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Get emitter id.
-	 * 
+	 *
 	 * @param request http request
 	 * @return emitter id
 	 */
-
 	public static String getEmitterId(HttpServletRequest request) {
 		String emitterId = getParameter(request, PARAM_EMITTER_ID);
 		if (emitterId != null && emitterId.length() > 0) {
@@ -755,79 +812,43 @@ public class ParameterAccessor {
 
 	/**
 	 * Get preview max rows.
-	 * 
+	 *
 	 * @param request http request
 	 * @return max rows
 	 */
-
 	public static int getMaxRows(HttpServletRequest request) {
 		int maxRows = ParameterAccessor.getParameterAsInt(request, PARAM_MAXROWS);
 		return maxRows == -1 ? ParameterAccessor.maxRows : maxRows;
 	}
 
 	/**
-	 * Get preview max cube fetch row levels.
-	 * 
-	 * @param request http request
-	 * @return max levels
-	 */
-
-	// public static int getMaxCubeRowLevels( HttpServletRequest request )
-	// {
-	// int curMaxRowLevels = ParameterAccessor.getParameterAsInt( request,
-	// PARAM_MAXCUBE_ROWLEVELS );
-	// if ( curMaxRowLevels <= 0 )
-	// curMaxRowLevels = maxCubeRowLevels;
-	//
-	// return curMaxRowLevels;
-	// }
-
-	/**
-	 * Get preview max cube fetch column levels.
-	 * 
-	 * @param request http request
-	 * @return max levels
-	 */
-
-	// public static int getMaxCubeColumnLevels( HttpServletRequest request )
-	// {
-	// int curMaxColumnLevels = ParameterAccessor.getParameterAsInt( request,
-	// PARAM_MAXCUBE_COLUMNLEVELS );
-	// if ( curMaxColumnLevels <= 0 )
-	// curMaxColumnLevels = maxCubeColumnLevels;
-	//
-	// return curMaxColumnLevels;
-	// }
-
-	/**
 	 * Get cube memory size.
-	 * 
+	 *
 	 * @param request http request
 	 * @return memory size
 	 */
-
 	public static int getCubeMemorySize(HttpServletRequest request) {
 		int curMaxMemSize = ParameterAccessor.getParameterAsInt(request, PARAM_CUBEMEMSIZE);
-		if (curMaxMemSize <= 0)
+		if (curMaxMemSize <= 0) {
 			curMaxMemSize = cubeMemorySize;
+		}
 
 		return curMaxMemSize;
 	}
 
 	/**
 	 * Get report element's iid.
-	 * 
+	 *
 	 * @param request
 	 * @return report element's iid
 	 */
-
 	public static String getInstanceId(HttpServletRequest request) {
 		return getParameter(request, PARAM_INSTANCEID);
 	}
 
 	/**
 	 * Returns the timezone from the http request.
-	 * 
+	 *
 	 * @param request http request
 	 * @return TimeZone instance. If the timezone ID from the request is unknown,
 	 *         returns the GMT timezone by default. If no timezone ID was given in
@@ -845,7 +866,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns a time zone from the given string.
-	 * 
+	 *
 	 * @param timeZoneString time zone string
 	 * @return TimeZone instance. If the timezone ID from the string is unknown,
 	 *         returns the GMT timezone by default. If the string is null, returns
@@ -863,12 +884,12 @@ public class ParameterAccessor {
 
 	/**
 	 * Get report locale from Http request.
-	 * 
+	 *
 	 * @param request http request
 	 * @return report locale
 	 */
 	public static Locale getLocale(HttpServletRequest request) {
-		Locale locale = null;
+		Locale locale;
 
 		// Get Locale from URL parameter
 		locale = getLocaleFromString(getParameter(request, PARAM_LOCALE));
@@ -888,11 +909,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether the viewer is set rtl option.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return viewer is set rtl option
 	 */
-
 	public static boolean isRtl(HttpServletRequest request) {
 		boolean isRtl = false;
 
@@ -906,7 +926,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Get report locale from a given string.
-	 * 
+	 *
 	 * @param locale locale string
 	 * @return report locale
 	 */
@@ -914,33 +934,41 @@ public class ParameterAccessor {
 		if (locale == null || locale.length() <= 0) {
 			return null;
 		}
-		// remove all '<' character to avoid xss attack
-		locale = locale.replace('<', ' ');
-		return new ULocale(locale).toLocale();
+		// Use icu4j to normalize the locale string
+		ULocale ulocale = new ULocale(locale);
+
+		// In case locale string has garbage characters from xss attack
+		// We ignore the locale if it is not one of the recognized available locales
+		ULocale[] availableLocales = ULocale.getAvailableLocales();
+		List<ULocale> list = Arrays.asList(availableLocales);
+		if (!list.contains(ulocale)) {
+			return null;
+		}
+
+		return ulocale.toLocale();
 	}
 
 	/**
 	 * Get report locale in string.
-	 * 
+	 *
 	 * @param request http request
 	 * @return report String
 	 */
-
 	public static String getLocaleString(HttpServletRequest request) {
 		return getParameter(request, PARAM_LOCALE);
 	}
 
 	/**
 	 * Get report page from Http request. If frameset pattern, default page is 1.
-	 * 
+	 *
 	 * @param request http request
 	 * @return report page number
 	 */
-
 	public static int getPage(HttpServletRequest request) {
 		int page = getParameterAsInt(request, PARAM_PAGE);
-		if (page > 0)
+		if (page > 0) {
 			return page;
+		}
 
 		String servletPath = request.getServletPath();
 		if (IBirtConstants.SERVLET_PATH_FRAMESET.equalsIgnoreCase(servletPath)
@@ -955,29 +983,29 @@ public class ParameterAccessor {
 
 	/**
 	 * Get report page range from Http request.
-	 * 
+	 *
 	 * @param request http request
 	 * @return report page range
 	 */
-
 	public static String getPageRange(HttpServletRequest request) {
 		return getParameter(request, PARAM_PAGE_RANGE);
 	}
 
 	/**
 	 * Get reportlet id from Http request.
-	 * 
+	 *
 	 * @param request http request
 	 * @return reportlet id
 	 */
-
 	public static String getReportletId(HttpServletRequest request) {
 
-		if (isIidReportlet(request))
+		if (isIidReportlet(request)) {
 			return getParameter(request, PARAM_INSTANCEID);
+		}
 
-		if (isBookmarkReportlet(request))
+		if (isBookmarkReportlet(request)) {
 			return getParameter(request, PARAM_BOOKMARK);
+		}
 
 		return null;
 
@@ -986,7 +1014,7 @@ public class ParameterAccessor {
 	/**
 	 * Get report file name. If passed file path is null, get report file from
 	 * request.
-	 * 
+	 *
 	 * @param request
 	 * @param filePath
 	 * @return report file
@@ -1004,11 +1032,11 @@ public class ParameterAccessor {
 	 * Get report document name. If passed file path is null, get document file from
 	 * request. If isCreated is true, try to create the document file when file path
 	 * is null.
-	 * 
-	 * @param request
-	 * @param filePath
-	 * @param isCreate
-	 * @return
+	 *
+	 * @param request  http request
+	 * @param filePath file path
+	 * @param isCreate is created flag
+	 * @return report document name
 	 * @throws ViewerException
 	 */
 	public static String getReportDocument(HttpServletRequest request, String filePath, boolean isCreate)
@@ -1019,8 +1047,9 @@ public class ParameterAccessor {
 		filePath = decodeFilePath(request, filePath);
 
 		// don't need create the document file from report
-		if (filePath.length() <= 0 && !isCreate)
+		if (filePath.length() <= 0 && !isCreate) {
 			return null;
+		}
 
 		if (filePath.length() <= 0) {
 			// use an existing BIRT viewing session, if available, else create
@@ -1031,9 +1060,8 @@ public class ParameterAccessor {
 			}
 			// return the cached document file path
 			return session.getCachedReportDocument(getReport(request, null), null);
-		} else {
-			filePath = getRealPathOnWorkingFolder(filePath, request);
 		}
+		filePath = getRealPathOnWorkingFolder(filePath, request);
 
 		return filePath;
 
@@ -1043,19 +1071,15 @@ public class ParameterAccessor {
 	 * Returns the real path based on working folder. If file path is an absolute
 	 * path, return it directly. Else, return the absolute path based on working
 	 * folder.
-	 * 
+	 *
 	 * @param filePath
 	 * @param request
-	 * @return
+	 * @return the real path based on working folder
 	 */
 	public static String getRealPathOnWorkingFolder(String filePath, HttpServletRequest request) {
 
-		if (filePath == null || filePath.length() == 0) {
-			return filePath;
-		}
-
 		// if file path is a non-relative path, return it directly
-		if (isUniversalPath(filePath)) {
+		if (filePath == null || filePath.length() == 0 || isUniversalPath(filePath)) {
 			return filePath;
 		}
 
@@ -1072,13 +1096,12 @@ public class ParameterAccessor {
 
 	/**
 	 * Get report parameter by given name.
-	 * 
+	 *
 	 * @param request      http request
 	 * @param name         parameter name
 	 * @param defaultValue default parameter value
 	 * @return parameter value
 	 */
-
 	public static String getReportParameter(HttpServletRequest request, String name, String defaultValue) {
 		assert request != null && name != null;
 
@@ -1089,12 +1112,12 @@ public class ParameterAccessor {
 			value = ""; //$NON-NLS-1$
 		}
 
-		Map paramMap = request.getParameterMap();
+		Map<String, String[]> paramMap = request.getParameterMap();
 		if (paramMap == null || !paramMap.containsKey(name)) {
 			value = defaultValue;
 		}
 
-		Set nullParams = getParameterValues(request, PARAM_ISNULL);
+		Set<String> nullParams = getParameterValues(request, PARAM_ISNULL);
 
 		if (nullParams != null && nullParams.contains(name)) {
 			value = null;
@@ -1105,54 +1128,53 @@ public class ParameterAccessor {
 
 	/**
 	 * Get report parameters by given name, support multi-value parameter.
-	 * 
+	 *
 	 * @param request   http request
 	 * @param paramName parameter name
 	 * @return parameter value
 	 */
-
-	public static List getReportParameters(HttpServletRequest request, String paramName) {
+	public static List<String> getReportParameters(HttpServletRequest request, String paramName) {
 		assert request != null && paramName != null;
 
-		List<String> paramList = new ArrayList<String>();
+		List<String> paramList = new ArrayList<>();
 
-		Set params = getParameterValues(request, paramName);
+		Set<String> params = getParameterValues(request, paramName);
 		if (params != null) {
-			Iterator it = params.iterator();
+			Iterator<String> it = params.iterator();
 			while (it.hasNext()) {
-				String value = (String) it.next();
-				if (value != null)
+				String value = it.next();
+				if (value != null) {
 					paramList.add(value);
+				}
 			}
 		}
 
-		Set nullParams = getParameterValues(request, PARAM_ISNULL);
-		if (nullParams != null && nullParams.contains(paramName))
+		Set<String> nullParams = getParameterValues(request, PARAM_ISNULL);
+		if (nullParams != null && nullParams.contains(paramName)) {
 			paramList.add(null);
+		}
 
 		return paramList;
 	}
 
 	/**
 	 * Get result set name.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return result set name
 	 */
-
 	public static String getResultSetName(HttpServletRequest request) {
 		return getReportParameter(request, PARAM_RESULTSETNAME, null);
 	}
 
 	/**
 	 * Get selected column name list.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return column name list
 	 */
-
-	public static Collection getSelectedColumns(HttpServletRequest request) {
-		ArrayList<String> columns = new ArrayList<String>();
+	public static Collection<String> getSelectedColumns(HttpServletRequest request) {
+		ArrayList<String> columns = new ArrayList<>();
 
 		int columnCount = getParameterAsInt(request, PARAM_SELECTEDCOLUMNNUMBER);
 		for (int i = 0; i < columnCount; i++) {
@@ -1162,17 +1184,15 @@ public class ParameterAccessor {
 				columns.add(columnName);
 			}
 		}
-
 		return columns;
 	}
 
 	/**
 	 * Check whether enable svg support or not.
-	 * 
+	 *
 	 * @param request http request
 	 * @return whether or not render content toolbar
 	 */
-
 	public static boolean getSVGFlag(HttpServletRequest request) {
 		boolean svg = false;
 
@@ -1186,23 +1206,28 @@ public class ParameterAccessor {
 
 	/**
 	 * Get web application locale.
-	 * 
+	 *
 	 * @return report locale
 	 */
-
 	public static Locale getWebAppLocale() {
 		return webAppLocale;
 	}
 
 	/**
 	 * Returns the time zone configured in the web context.
-	 * 
+	 *
 	 * @return time zone object
 	 */
 	public static TimeZone getWebAppTimeZone() {
 		return webAppTimeZone;
 	}
 
+	/**
+	 * Encoding of the html header value
+	 *
+	 * @param s value to be encoded
+	 * @return encoded value
+	 */
 	public static final String htmlHeaderValueEncode(String s) {
 		if (s == null) {
 			return s;
@@ -1250,18 +1275,18 @@ public class ParameterAccessor {
 	/**
 	 * This function is used to encode an ordinary string that may contain
 	 * characters or more than one consecutive spaces for appropriate HTML display.
-	 * 
+	 *
 	 * @param s
 	 * @return String
 	 */
 	public static final String htmlEncode(String s) {
-		String sHtmlEncoded = ""; //$NON-NLS-1$
+		String sHtmlEncoded; // $NON-NLS-1$
 
 		if (s == null) {
 			return null;
 		}
 
-		StringBuffer sbHtmlEncoded = new StringBuffer();
+		StringBuilder sbHtmlEncoded = new StringBuilder();
 		final char chrarry[] = s.toCharArray();
 		final int length = chrarry.length;
 
@@ -1335,26 +1360,27 @@ public class ParameterAccessor {
 	/**
 	 * This function is used to decode a htmlEncoded string and convert to the
 	 * orginial string
-	 * 
+	 *
 	 * @param s
 	 * @return String
 	 */
 	public static final String htmlDecode(String s) {
-		if (s == null)
+		if (s == null) {
 			return null;
+		}
 
-		String sHtmlDecoded = s.replaceAll("&#09;", "\t"); //$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#13;", "\r"); //$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#32;", " ");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#34;", "\"");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#39;", "'");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#60;", "<");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#62;", ">");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#96;", "`");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#38;", "&");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#92;", "\\\\");//$NON-NLS-1$ //$NON-NLS-2$
-		sHtmlDecoded = sHtmlDecoded.replaceAll("&#47;", "/");//$NON-NLS-1$ //$NON-NLS-2$
+		String sHtmlDecoded = s.replace("&#09;", "\t"); //$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("<br>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#13;", "\r"); //$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#32;", " ");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#34;", "\"");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#39;", "'");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#60;", "<");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#62;", ">");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#96;", "`");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#38;", "&");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#92;", "\\");//$NON-NLS-1$ //$NON-NLS-2$
+		sHtmlDecoded = sHtmlDecoded.replace("&#47;", "/");//$NON-NLS-1$ //$NON-NLS-2$
 
 		return sHtmlDecoded;
 	}
@@ -1362,7 +1388,7 @@ public class ParameterAccessor {
 	/**
 	 * Initial the parameters class. Web.xml is in UTF-8 format. No need to do
 	 * encoding convertion.
-	 * 
+	 *
 	 * @param config Servlet configuration
 	 */
 
@@ -1375,16 +1401,18 @@ public class ParameterAccessor {
 	/**
 	 * Initial the parameters class. Web.xml is in UTF-8 format. No need to do
 	 * encoding convertion.
-	 * 
+	 *
 	 * @param context Servlet Context
 	 */
 
 	public synchronized static void initParameters(ServletContext context) {
-		if (isInitContext)
+		if (isInitContext) {
 			return;
+		}
 
-		if ("true".equalsIgnoreCase(System.getProperty(IBirtConstants.SYS_PROP_BIRT_ISDESIGNER))) //$NON-NLS-1$
+		if ("true".equalsIgnoreCase(System.getProperty(IBirtConstants.SYS_PROP_BIRT_ISDESIGNER))) { //$NON-NLS-1$
 			isDesigner = true;
+		}
 
 		String workingPath = "${" + IBirtConstants.SYS_PROP_WORKING_PATH + "}/"; //$NON-NLS-1$//$NON-NLS-2$
 
@@ -1393,51 +1421,72 @@ public class ParameterAccessor {
 
 		// Document folder setting
 		String initDocumentFolder = context.getInitParameter(INIT_PARAM_DOCUMENT_FOLDER);
-		if (isDesigner && initDocumentFolder == null)
+		if (isDesigner && initDocumentFolder == null) {
 			initDocumentFolder = workingPath + IBirtConstants.DEFAULT_DOCUMENT_FOLDER;
+		}
 		String documentFolder = processRealPath(context, initDocumentFolder, IBirtConstants.DEFAULT_DOCUMENT_FOLDER,
 				true);
 
 		// Image folder setting
 		String initImageFolder = context.getInitParameter(ParameterAccessor.INIT_PARAM_IMAGE_DIR);
-		if (isDesigner && initImageFolder == null)
+		if (isDesigner && initImageFolder == null) {
 			initImageFolder = workingPath + IBirtConstants.DEFAULT_IMAGE_FOLDER;
+		}
 		String imageFolder = processRealPath(context, initImageFolder, IBirtConstants.DEFAULT_IMAGE_FOLDER, true);
 
 		// Log folder setting
 		String initLogFolder = context.getInitParameter(ParameterAccessor.INIT_PARAM_LOG_DIR);
-		if (isDesigner && initLogFolder == null)
+		if (isDesigner && initLogFolder == null) {
 			initLogFolder = workingPath + IBirtConstants.DEFAULT_LOGS_FOLDER;
+		}
 		logFolder = processRealPath(context, initLogFolder, IBirtConstants.DEFAULT_LOGS_FOLDER, true);
 
 		// Log level setting
 		logLevel = context.getInitParameter(ParameterAccessor.INIT_PARAM_LOG_LEVEL);
-		if (logLevel == null)
+		if (logLevel == null) {
 			logLevel = IBirtConstants.DEFAULT_LOGS_LEVEL;
+		}
 
 		String rootPath = "${" + IBirtConstants.SYS_PROP_ROOT_PATH + "}/"; //$NON-NLS-1$//$NON-NLS-2$
 		// Script lib folder setting
 		String initScriptlibFolder = context.getInitParameter(ParameterAccessor.INIT_PARAM_SCRIPTLIB_DIR);
-		if (isDesigner && initScriptlibFolder == null)
+		if (isDesigner && initScriptlibFolder == null) {
 			initScriptlibFolder = rootPath + IBirtConstants.DEFAULT_SCRIPTLIB_FOLDER;
+		}
 		scriptLibDir = processRealPath(context, initScriptlibFolder, IBirtConstants.DEFAULT_SCRIPTLIB_FOLDER, false);
 
 		// WebApp Locale setting
 		webAppLocale = getLocaleFromString(context.getInitParameter(INIT_PARAM_LOCALE));
-		if (webAppLocale == null)
+		if (webAppLocale == null) {
 			webAppLocale = Locale.getDefault();
+		}
 
 		webAppTimeZone = getTimeZoneFromString(context.getInitParameter(INIT_PARAM_TIMEZONE));
 
-		isWorkingFolderAccessOnly = Boolean.valueOf(context.getInitParameter(INIT_PARAM_WORKING_FOLDER_ACCESS_ONLY))
-				.booleanValue();
+		isWorkingFolderAccessOnly = Boolean
+				.parseBoolean(context.getInitParameter(INIT_PARAM_WORKING_FOLDER_ACCESS_ONLY));
 
 		urlReportPathPolicy = context.getInitParameter(INIT_PARAM_URL_REPORT_PATH_POLICY);
+		if (urlReportPathPolicy == null) {
+			urlReportPathPolicy = POLICY_NONE;
+		}
+		String domains = context.getInitParameter(INIT_PARAM_URL_REPORT_PATH_DOMAINS);
+		fUrlReportPathDomains = new ArrayList<>();
+		if (domains == null) {
+			fUrlReportPathDomains.add(LOCALHOST);
+			fUrlReportPathDomains.add(LOOPBACK);
+		} else {
+			for (String domain : domains.split(",")) {
+				if (!domain.trim().isEmpty()) {
+					fUrlReportPathDomains.add(domain);
+				}
+			}
+		}
 
 		// Get preview report max rows parameter from ServletContext
 		String s_maxRows = context.getInitParameter(INIT_PARAM_VIEWER_MAXROWS);
 		try {
-			maxRows = Integer.valueOf(s_maxRows).intValue();
+			maxRows = Integer.parseInt(s_maxRows);
 		} catch (NumberFormatException e) {
 			maxRows = -1;
 		}
@@ -1446,14 +1495,14 @@ public class ParameterAccessor {
 		// ServletContext
 		String s_maxRowLevels = context.getInitParameter(INIT_PARAM_VIEWER_MAXCUBE_ROWLEVELS);
 		try {
-			maxCubeRowLevels = Integer.valueOf(s_maxRowLevels).intValue();
+			maxCubeRowLevels = Integer.parseInt(s_maxRowLevels);
 		} catch (NumberFormatException e) {
 			maxCubeRowLevels = -1;
 		}
 
 		String s_maxColumnLevels = context.getInitParameter(INIT_PARAM_VIEWER_MAXCUBE_COLUMNLEVELS);
 		try {
-			maxCubeColumnLevels = Integer.valueOf(s_maxColumnLevels).intValue();
+			maxCubeColumnLevels = Integer.parseInt(s_maxColumnLevels);
 		} catch (NumberFormatException e) {
 			maxCubeColumnLevels = -1;
 		}
@@ -1461,15 +1510,16 @@ public class ParameterAccessor {
 		// Get cube memory size parameter from ServletContext
 		String s_cubeMemSize = context.getInitParameter(INIT_PARAM_VIEWER_CUBEMEMSIZE);
 		try {
-			cubeMemorySize = Integer.valueOf(s_cubeMemSize).intValue();
+			cubeMemorySize = Integer.parseInt(s_cubeMemSize);
 		} catch (NumberFormatException e) {
 			cubeMemorySize = 0;
 		}
 
 		// default resource path
 		String initResourceFolder = context.getInitParameter(INIT_PARAM_BIRT_RESOURCE_PATH);
-		if (isDesigner && initResourceFolder == null)
+		if (isDesigner && initResourceFolder == null) {
 			initResourceFolder = "${" + IBirtConstants.SYS_PROP_RESOURCE_PATH + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		birtResourceFolder = processRealPath(context, initResourceFolder, null, false);
 
 		if (isDesigner) {
@@ -1491,12 +1541,12 @@ public class ParameterAccessor {
 		initProps = initViewerProps(context, initProps);
 
 		if (loggers == null) {
-			loggers = new HashMap();
+			loggers = new HashMap<String, String>();
 		}
 
 		// retrieve the logger names from the application properties
-		for (Iterator i = initProps.keySet().iterator(); i.hasNext();) {
-			String name = (String) i.next();
+		for (Iterator<String> i = initProps.keySet().iterator(); i.hasNext();) {
+			String name = i.next();
 			if (name.startsWith("logger.")) //$NON-NLS-1$
 			{
 				String loggerName = name.replaceFirst("logger.", //$NON-NLS-1$
@@ -1518,10 +1568,28 @@ public class ParameterAccessor {
 			isSupportedPrintOnServer = false;
 		}
 
+		// info dialog is available
+		String infoDialog = DataUtil.trimString(context.getInitParameter(INIT_PARAM_INFO_DIALOG));
+		if (IBirtConstants.VAR_ON.equalsIgnoreCase(infoDialog)) {
+			isSupportedInfoDialog = true;
+		} else if (IBirtConstants.VAR_OFF.equalsIgnoreCase(infoDialog)) {
+			isSupportedInfoDialog = false;
+		}
+
+		// info dialog shows option system details
+		String infoDialogSystemDetails = DataUtil
+				.trimString(context.getInitParameter(INIT_PARAM_INFO_DIALOG_SYSTEM_DETAILS));
+		if (IBirtConstants.VAR_ON.equalsIgnoreCase(infoDialogSystemDetails)) {
+			isSupportedInfoDialogSystemDetails = true;
+		} else if (IBirtConstants.VAR_OFF.equalsIgnoreCase(infoDialogSystemDetails)) {
+			isSupportedInfoDialogSystemDetails = false;
+		}
+
 		// get agent style flag
 		String s_agentstyle = context.getInitParameter(INIT_PARAM_AGENTSTYLE_ENGINE);
-		if ("false".equalsIgnoreCase(s_agentstyle)) //$NON-NLS-1$
+		if ("false".equalsIgnoreCase(s_agentstyle)) { //$NON-NLS-1$
 			isAgentStyle = false;
+		}
 
 		// try from servlet context
 		String exportFilenameGeneratorClassName = context.getInitParameter(INIT_PARAM_FILENAME_GENERATOR_CLASS);
@@ -1556,7 +1624,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Initializes the viewing session configuration.
-	 * 
+	 *
 	 * @param documentFolder
 	 * @param imageFolder
 	 */
@@ -1600,8 +1668,8 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether the viewer is used in designer or not.
-	 * 
-	 * @return
+	 *
+	 * @return viewer is used in designer
 	 */
 	public static boolean isDesigner() {
 		return isDesigner;
@@ -1613,11 +1681,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether the request is to get image.
-	 * 
+	 *
 	 * @param request http request
 	 * @return is get image or not
 	 */
-
 	public static boolean isGetImageOperator(HttpServletRequest request) {
 		String imageName = getParameter(request, PARAM_IMAGEID);
 		return imageName != null && imageName.length() > 0;
@@ -1625,7 +1692,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns whether the current servlet is the given servlet.
-	 * 
+	 *
 	 * @param request request
 	 * @param servlet servlet to check
 	 * @return true if the servlet path matches
@@ -1636,7 +1703,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether the request is to get reportlet.
-	 * 
+	 *
 	 * @param request http request
 	 * @return is get reportlet or not
 	 */
@@ -1649,7 +1716,7 @@ public class ParameterAccessor {
 	/**
 	 * if the PARAM_ISREPORTLET is trure and the PARAM_BOOKMARK is not null, this
 	 * method will return true. Otherwise, return false.
-	 * 
+	 *
 	 * @param request
 	 * @return true for render the reportlet based on bookmark, else, false.
 	 */
@@ -1665,7 +1732,7 @@ public class ParameterAccessor {
 	/**
 	 * if the PARAM_INSTANCEID parameter in the url is not null, then return true to
 	 * render the reportlet.
-	 * 
+	 *
 	 * @param request
 	 * @return true for render the reprtlet based on the instance id.
 	 */
@@ -1676,11 +1743,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether the viewer allows master page content or not.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the viewer allows master page content
 	 */
-
 	public static boolean isMasterPageContent(HttpServletRequest request) {
 		boolean isMasterPageContent = true;
 
@@ -1694,11 +1760,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether report design will overwrite report doc or not.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return report design will overwrite report doc
 	 */
-
 	public static boolean isOverwrite(HttpServletRequest request) {
 		boolean overwrite = isOverWrite;
 
@@ -1717,12 +1782,11 @@ public class ParameterAccessor {
 	/**
 	 * Checks if a given file name is a relative path. This will only check for
 	 * local file path.
-	 * 
+	 *
 	 * @param fileName The file name.
 	 * @return A <code>boolean</code> value indicating if the file name is a
 	 *         relative path or not.
 	 */
-
 	public static boolean isRelativePath(String fileName) {
 		if (fileName == null) {
 			return false;
@@ -1735,9 +1799,9 @@ public class ParameterAccessor {
 	 * Check if the given file path is a universal path, it could be either an
 	 * absolute file path or a valid url path. This will check for both local file
 	 * path and global url path like "http://", "jndi://", etc.
-	 * 
+	 *
 	 * @param fileName
-	 * @return
+	 * @return if the given file path is a universal path
 	 */
 	public static boolean isUniversalPath(String fileName) {
 		if (fileName == null) {
@@ -1761,22 +1825,21 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether report parameter exists in the url.
-	 * 
+	 *
 	 * @param request http request
 	 * @param name    parameter name
 	 * @return whether report parameter exists in the url
 	 */
-
 	public static boolean isReportParameterExist(HttpServletRequest request, String name) {
 		assert request != null && name != null;
 
 		boolean isExist = false;
 
-		Map paramMap = request.getParameterMap();
+		Map<String, String[]> paramMap = request.getParameterMap();
 		if (paramMap != null) {
 			isExist = (paramMap.containsKey(name));
 		}
-		Set nullParams = getParameterValues(request, PARAM_ISNULL);
+		Set<String> nullParams = getParameterValues(request, PARAM_ISNULL);
 		if (nullParams != null && nullParams.contains(name)) {
 			isExist = true;
 		}
@@ -1787,14 +1850,16 @@ public class ParameterAccessor {
 	/**
 	 * If set isWorkingFolderAccessOnly as true, check the file if exist in working
 	 * folder.
-	 * 
+	 *
+	 * @param request
 	 * @param filePath
+	 *
 	 * @return boolean
 	 */
-
 	public static boolean isValidFilePath(HttpServletRequest request, String filePath) {
-		if (filePath == null)
+		if (filePath == null) {
 			return false;
+		}
 
 		// check and aply url report path policy
 		if (!POLICY_ALL.equalsIgnoreCase(urlReportPathPolicy)) {
@@ -1805,9 +1870,7 @@ public class ParameterAccessor {
 					URL url = new URL(filePath);
 
 					if (POLICY_DOMAIN.equalsIgnoreCase(urlReportPathPolicy)) {
-						String dm = request.getServerName();
-
-						if (!dm.equals(url.getHost())) {
+						if (!fUrlReportPathDomains.contains(url.getHost())) {
 							return false;
 						}
 					} else {
@@ -1824,8 +1887,9 @@ public class ParameterAccessor {
 
 			File docFile = new File(filePath);
 			if (!docFile.isAbsolute()) {
-				if (filePath.indexOf("..") != -1) //$NON-NLS-1$
+				if (filePath.indexOf("..") != -1) { //$NON-NLS-1$
 					return false;
+				}
 
 				return true;
 			}
@@ -1842,10 +1906,9 @@ public class ParameterAccessor {
 				}
 
 				return absolutePath.startsWith(docFolderPath);
-			} else {
-				// if workingFolder is relative path, return false.
-				return false;
 			}
+			// if workingFolder is relative path, return false.
+			return false;
 		}
 
 		return true;
@@ -1854,12 +1917,11 @@ public class ParameterAccessor {
 	/**
 	 * Gets a named parameter from the http request. The given parameter name must
 	 * be in UTF-8.
-	 * 
+	 *
 	 * @param request       incoming http request
 	 * @param parameterName parameter name
-	 * @return
+	 * @return named parameter from the http request
 	 */
-
 	public static String getParameter(HttpServletRequest request, String parameterName) {
 
 		if (request.getCharacterEncoding() == null) {
@@ -1874,12 +1936,11 @@ public class ParameterAccessor {
 	/**
 	 * Get named parameter as integer from http request. parameter names and values
 	 * are all in iso-8859-1 format in request.
-	 * 
+	 *
 	 * @param request
 	 * @param parameterName
-	 * @return
+	 * @return named parameter as integer from http request
 	 */
-
 	protected static int getParameterAsInt(HttpServletRequest request, String parameterName) {
 		int iValue = -1;
 		String value = getParameter(request, parameterName);
@@ -1897,18 +1958,17 @@ public class ParameterAccessor {
 	/**
 	 * Get named parameters from http request. parameter names and values are all in
 	 * iso-8859-1 format in request.
-	 * 
+	 *
 	 * @param request       incoming http request
 	 * @param parameterName parameter name
-	 * @return
+	 * @return named parameters from http request
 	 */
-
-	public static Set getParameterValues(HttpServletRequest request, String parameterName) {
+	public static Set<String> getParameterValues(HttpServletRequest request, String parameterName) {
 		Set<String> parameterValues = null;
 		String[] parameterValuesArray = request.getParameterValues(parameterName);
 
 		if (parameterValuesArray != null) {
-			parameterValues = new LinkedHashSet<String>();
+			parameterValues = new LinkedHashSet<>();
 
 			for (int i = 0; i < parameterValuesArray.length; i++) {
 				parameterValues.add(parameterValuesArray[i]);
@@ -1920,12 +1980,11 @@ public class ParameterAccessor {
 
 	/**
 	 * URL encoding based on incoming encoding format.
-	 * 
+	 *
 	 * @param s      string to be encoded.
 	 * @param format encoding format.
-	 * @return
+	 * @return encoded URL
 	 */
-
 	public static String urlEncode(String s, String format) {
 		String encodedString = s;
 
@@ -1942,7 +2001,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Encode a file name in base 64.
-	 * 
+	 *
 	 * @param fileName
 	 * @return file name encoded in base 64
 	 */
@@ -1950,26 +2009,25 @@ public class ParameterAccessor {
 		if (fileName != null) {
 			try {
 				byte[] decodedBytes = fileName.getBytes(ParameterAccessor.UTF_8_ENCODE);
-				byte[] encodedBytes = Base64.encodeBase64(decodedBytes);
+				byte[] encodedBytes = Base64.getEncoder().encode(decodedBytes);
 				return new String(encodedBytes, ParameterAccessor.UTF_8_ENCODE);
 			} catch (UnsupportedEncodingException e) {
 				return fileName;
 			}
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
 	 * Decodes a base64 string.
-	 * 
+	 *
 	 * @param string
-	 * @return
+	 * @return decoded base64 string
 	 */
 	public static String decodeBase64(String string) {
 		try {
 			byte[] encodedBytes = string.getBytes(ParameterAccessor.UTF_8_ENCODE);
-			byte[] decodedBytes = Base64.decodeBase64(encodedBytes);
+			byte[] decodedBytes = Base64.getDecoder().decode(encodedBytes);
 			return new String(decodedBytes, ParameterAccessor.UTF_8_ENCODE);
 		} catch (UnsupportedEncodingException e) {
 			return string;
@@ -1979,10 +2037,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Decodes a file name according to the value of the "encoded paths" flag.
-	 * 
+	 *
 	 * @param request
 	 * @param filePath file path to decode
-	 * @return
+	 * @return decoded file path
 	 */
 	public static String decodeFilePath(HttpServletRequest request, String filePath) {
 		if (filePath == null) {
@@ -1991,21 +2049,20 @@ public class ParameterAccessor {
 		filePath = htmlDecode(filePath);
 		if (isEncodedPaths(request)) {
 			return decodeBase64(filePath);
-		} else {
-			return filePath;
 		}
+		return filePath;
 	}
 
 	/**
 	 * Parse config file name from report design filename.
-	 * 
+	 *
 	 * @param reportDesignName String
 	 * @return String
 	 */
-
 	public static String getConfigFileName(String reportDesignName) {
-		if (reportDesignName == null)
+		if (reportDesignName == null) {
 			return null;
+		}
 
 		String[] result = reportDesignName.split("\\."); //$NON-NLS-1$
 		String extensionName = result[result.length - 1];
@@ -2017,16 +2074,16 @@ public class ParameterAccessor {
 
 	/**
 	 * Get current format of parameter.
-	 * 
+	 *
 	 * @param request   HttpServletRequest
 	 * @param paramName String
-	 * 
+	 *
 	 * @return String
 	 */
-
 	public static String getFormat(HttpServletRequest request, String paramName) {
-		if (request == null || paramName == null)
+		if (request == null || paramName == null) {
 			return null;
+		}
 
 		return getParameter(request, paramName + "_format"); //$NON-NLS-1$
 	}
@@ -2039,21 +2096,37 @@ public class ParameterAccessor {
 	}
 
 	/**
+	 * The possible values are
+	 * <li>none (default)</li>
+	 * <li>domain (must match any of the domains in
+	 * {@link #getUrlReportPathDomains()})</li>
+	 * <li>all (DANGEROUS)</li>
+	 *
 	 * @return the url report path accessing policy
+	 * @see #getUrlReportPathDomains()
 	 */
 	public static String getUrlReportPathPolicy() {
 		return urlReportPathPolicy;
 	}
 
 	/**
+	 * @return the unmodifiable list of allowed url report path domains
+	 * @see #getUrlReportPathPolicy()
+	 */
+	public static List<String> getUrlReportPathDomains() {
+		return Collections.unmodifiableList(fUrlReportPathDomains);
+	}
+
+	/**
 	 * if display text of select parameter
-	 * 
+	 *
 	 * @param paramName
-	 * @return
+	 * @return display the text of select parameter
 	 */
 	public static String isDisplayText(String paramName) {
-		if (paramName == null)
+		if (paramName == null) {
 			return null;
+		}
 
 		if (paramName.startsWith(PREFIX_DISPLAY_TEXT)) {
 			return paramName.replaceFirst(PREFIX_DISPLAY_TEXT, ""); //$NON-NLS-1$
@@ -2064,9 +2137,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Generates a file name for output attachment.
-	 * 
-	 * @param request
-	 * @param format
+	 *
 	 * @return the file name
 	 */
 	public static IFilenameGenerator getFilenameGenerator() {
@@ -2081,9 +2152,9 @@ public class ParameterAccessor {
 	}
 
 	/**
-	 * 
+	 *
 	 * Check if OS system is windows
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public static boolean isWindowsPlatform() {
@@ -2093,7 +2164,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Get the resource folder.
-	 * 
+	 *
 	 * @param request the request to retrieve
 	 * @return the resource folder of the request
 	 */
@@ -2105,8 +2176,9 @@ public class ParameterAccessor {
 		resourceFolder = decodeFilePath(request, resourceFolder);
 
 		// set it as init params from web.xml
-		if (resourceFolder == null || resourceFolder.trim().length() <= 0)
+		if (resourceFolder == null || resourceFolder.trim().length() <= 0) {
 			resourceFolder = birtResourceFolder;
+		}
 
 		return resourceFolder;
 	}
@@ -2116,14 +2188,15 @@ public class ParameterAccessor {
 	 * user-defined application context is retrieved from the http request, if
 	 * available, else from the session. If nothing is found, nothing is added and
 	 * the map is returned as is.
-	 * 
+	 *
 	 * @param map     application context map
 	 * @param request http request object containing appContext key to push
 	 * @return map containing the appContext key
 	 */
-	public static Map pushAppContext(Map map, HttpServletRequest request) {
-		if (map == null)
-			map = new HashMap();
+	public static Map<String, Object> pushAppContext(Map<String, Object> map, HttpServletRequest request) {
+		if (map == null) {
+			map = new HashMap<String, Object>();
+		}
 
 		// Get application context key from request
 		String appContextKey = (String) request.getAttribute(ATTR_APPCONTEXT_KEY);
@@ -2138,7 +2211,6 @@ public class ParameterAccessor {
 				appContextKey = (String) session.getAttribute(ATTR_APPCONTEXT_KEY);
 				if (appContextKey != null) {
 					map.put(appContextKey, session.getAttribute(ATTR_APPCONTEXT_VALUE));
-
 				}
 			}
 		}
@@ -2148,28 +2220,27 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the encoding for export data.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the encoding for export data
 	 */
-
 	public static String getExportEncoding(HttpServletRequest request) {
 		String encoding = getParameter(request, PARAM_EXPORT_ENCODING);
 
 		// use UTF-8 as the default encoding
-		if (encoding == null)
+		if (encoding == null) {
 			encoding = UTF_8_ENCODE;
+		}
 
 		return encoding;
 	}
 
 	/**
 	 * Check whether show the report title.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return show the report title
 	 */
-
 	public static boolean isShowTitle(HttpServletRequest request) {
 		boolean isTitle = true;
 
@@ -2183,11 +2254,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether show the toolbar.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return show the toolbar
 	 */
-
 	public static boolean isShowToolbar(HttpServletRequest request) {
 		boolean isToolbar = true;
 
@@ -2201,11 +2271,10 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether show the navigationbar.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return show the navigationbar
 	 */
-
 	public static boolean isShowNavigationbar(HttpServletRequest request) {
 		boolean isNavigationbar = true;
 
@@ -2219,9 +2288,9 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether show parameter dialog or not. Default to false.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return show the parameter dialog
 	 */
 
 	public static String getShowParameterPage(HttpServletRequest request) {
@@ -2230,28 +2299,31 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the application properties
-	 * 
-	 * @param context
-	 * @param props
-	 * @return
+	 *
+	 * @param context servlet context
+	 * @param props   properties
+	 * @return the application properties
 	 */
-	public synchronized static Map initViewerProps(ServletContext context, Map props) {
+	public synchronized static Map<String, String> initViewerProps(ServletContext context, Map<String, String> props) {
 		// initialize map
-		if (props == null)
-			props = new HashMap();
+		if (props == null) {
+			props = new HashMap<String, String>();
+		}
 
 		// get config file
 		String file = context.getInitParameter(INIT_PARAM_CONFIG_FILE);
-		if (file == null || file.trim().length() <= 0)
+		if (file == null || file.trim().length() <= 0) {
 			file = IBirtConstants.DEFAULT_VIEWER_CONFIG_FILE;
+		}
 
 		try {
 
 			InputStream is = null;
 			if (isRelativePath(file)) {
 				// realtive path
-				if (!file.startsWith("/")) //$NON-NLS-1$
+				if (!file.startsWith("/")) { // $NON-NLS-1$
 					file = "/" + file; //$NON-NLS-1$
+				}
 
 				is = context.getResourceAsStream(file);
 			} else {
@@ -2266,8 +2338,9 @@ public class ParameterAccessor {
 				while (keys != null && keys.hasMoreElements()) {
 					String key = keys.nextElement();
 					String value = (String) bundle.getObject(key);
-					if (key != null && value != null)
+					if (key != null && value != null) {
 						props.put(key, value);
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -2278,22 +2351,23 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the property by name from initialized properties map
-	 * 
+	 *
 	 * @param key
-	 * @return
+	 * @return the property by name from initialized properties map
 	 */
 	public static String getInitProp(String key) {
-		if (initProps == null || key == null)
+		if (initProps == null || key == null) {
 			return null;
+		}
 
-		return (String) initProps.get(key);
+		return initProps.get(key);
 	}
 
 	/**
 	 * Returns the property by name from initialized properties map
-	 * 
+	 *
 	 * @param key
-	 * @return
+	 * @return the property by name from initialized properties map
 	 */
 	public static int getIntegerInitProp(String key) {
 		String value = getInitProp(key);
@@ -2309,9 +2383,9 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the property by name from initialized properties map
-	 * 
+	 *
 	 * @param key
-	 * @return
+	 * @return the property by name from initialized properties map
 	 */
 	public static long getLongInitProp(String key) {
 		String value = getInitProp(key);
@@ -2327,9 +2401,9 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the property by name from initialized properties map
-	 * 
+	 *
 	 * @param key
-	 * @return
+	 * @return the property by name from initialized properties map
 	 */
 	public static float getFloatInitProp(String key) {
 		String value = getInitProp(key);
@@ -2345,61 +2419,66 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the extension name according to format
-	 * 
+	 *
 	 * @param format
-	 * @return
+	 * @return the extension name according to format
 	 */
 	public static String getExtensionName(String format) {
-		if (format == null)
+		if (format == null) {
 			return null;
+		}
 
-		String key = "viewer.extension." + format.replaceAll(" ", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String key = "viewer.extension." + format.replace(' ', '_'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return DataUtil.trimString(getInitProp(key));
 	}
 
 	/**
 	 * Returns the output format label name
-	 * 
+	 *
 	 * @param format
-	 * @return
+	 * @return the output format label name
 	 */
 	public static String getOutputFormatLabel(String format) {
-		if (format == null)
+		if (format == null) {
 			return null;
+		}
 
-		String key = "viewer.label." + format.replaceAll(" ", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String key = "viewer.label." + format.replace(' ', '_'); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		String label = DataUtil.trimString(getInitProp(key));
-		if (label.length() <= 0)
+		if (label.length() <= 0) {
 			label = format;
+		}
 
 		return label;
 	}
 
 	/**
 	 * Returns the base url defined in config file
-	 * 
-	 * @return
+	 *
+	 * @return base URL on config file
 	 */
 	public static String getBaseURL() {
 		String baseURL = getInitProp(PROP_BASE_URL);
 		if (baseURL != null && baseURL.length() > 0) {
-			if (baseURL.endsWith("/")) //$NON-NLS-1$
+			if (baseURL.endsWith("/")) { //$NON-NLS-1$
 				baseURL = baseURL.substring(0, baseURL.length() - 1);
+			}
 		}
 
 		return baseURL;
 	}
 
 	/**
-	 * convert path from System Properties Definition. For example:
+	 * Convert path from System Properties Definition. For example:
 	 * ${java.io.tmpdir}
-	 * 
+	 *
 	 * @param path
-	 * @return
+	 * @return converted path
 	 */
 	protected static String convertSystemPath(String path) {
-		if (path == null)
+		if (path == null) {
 			return path;
+		}
 
 		// parse System Properties
 		Pattern p = Pattern.compile("\\$\\s*\\{([^\\}]*)\\}\\s*(.*)", //$NON-NLS-1$
@@ -2407,10 +2486,10 @@ public class ParameterAccessor {
 		Matcher m = p.matcher(path);
 		if (m.find()) {
 			String sysPath = DataUtil.trimSepEnd(System.getProperty(m.group(1).trim()));
-			if (sysPath.length() <= 0)
+			if (sysPath.length() <= 0) {
 				return DataUtil.trimSepFirst(m.group(2).trim());
-			else
-				return sysPath + m.group(2).trim();
+			}
+			return sysPath + m.group(2).trim();
 		}
 
 		return path;
@@ -2419,10 +2498,10 @@ public class ParameterAccessor {
 	/**
 	 * Process working folder setting. If path is a relative path, first relative to
 	 * context.
-	 * 
+	 *
 	 * @param context
 	 * @param path
-	 * @return
+	 * @return working folder
 	 */
 	public static String processWorkingFolder(ServletContext context, String path) {
 		path = convertSystemPath(DataUtil.trimString(path));
@@ -2445,7 +2524,7 @@ public class ParameterAccessor {
 	 * Process folder settings with absolute path. If path is a relative path, first
 	 * relative to context. If set canWrite to true, then check the folder if
 	 * writable.If not, relative to ${java.io.tmpdir} folder.
-	 * 
+	 *
 	 * @param context
 	 * @param path
 	 * @param defaultPath
@@ -2466,8 +2545,9 @@ public class ParameterAccessor {
 		// If path is a relative path
 		if (isRelativePath(path)) {
 			isRelative = true;
-			if (!path.startsWith("/")) //$NON-NLS-1$
+			if (!path.startsWith("/")) { // $NON-NLS-1$
 				path = "/" + path; //$NON-NLS-1$
+			}
 
 			realPath = DataUtil.trimSepEnd(getRealPath(path, context));
 		} else {
@@ -2478,14 +2558,16 @@ public class ParameterAccessor {
 		boolean flag = makeDir(realPath);
 
 		// don't need writable
-		if (!canWrite)
+		if (!canWrite) {
 			return realPath;
+		}
 
 		// check if the folder is writable
 		if (flag) {
 			try {
-				if (canWrite && new File(realPath).canWrite())
+				if (canWrite && new File(realPath).canWrite()) {
 					return realPath;
+				}
 			} catch (Exception e) {
 			}
 		}
@@ -2493,10 +2575,9 @@ public class ParameterAccessor {
 		// try to create folder in ${java.io.tmpdir}
 		if (isRelative) {
 			realPath = DataUtil.trimSepEnd(System.getProperty("java.io.tmpdir")) + path; //$NON-NLS-1$
-		} else {
-			// if absolute path, create default path in temp folder
-			if (defaultPath != null)
-				realPath = DataUtil.trimSepEnd(System.getProperty("java.io.tmpdir")) + File.separator + defaultPath; //$NON-NLS-1$
+		} else // if absolute path, create default path in temp folder
+		if (defaultPath != null) {
+			realPath = DataUtil.trimSepEnd(System.getProperty("java.io.tmpdir")) + File.separator + defaultPath; //$NON-NLS-1$
 		}
 
 		// try to create folder
@@ -2507,7 +2588,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns real path relative to context
-	 * 
+	 *
 	 * @param path
 	 * @param context
 	 * @return
@@ -2546,14 +2627,12 @@ public class ParameterAccessor {
 						}
 						if (orginalPath.startsWith(urlRoot)) {
 							realPath = orginalPath;
+						} else if (urlRoot.endsWith("/") //$NON-NLS-1$
+								|| orginalPath.startsWith("/")) //$NON-NLS-1$
+						{
+							realPath = urlRoot + orginalPath;
 						} else {
-							if (urlRoot.endsWith("/") //$NON-NLS-1$
-									|| orginalPath.startsWith("/")) //$NON-NLS-1$
-							{
-								realPath = urlRoot + orginalPath;
-							} else {
-								realPath = urlRoot + "/" + orginalPath; //$NON-NLS-1$
-							}
+							realPath = urlRoot + "/" + orginalPath; //$NON-NLS-1$
 						}
 					}
 				}
@@ -2567,80 +2646,85 @@ public class ParameterAccessor {
 
 	/**
 	 * Make directory
-	 * 
+	 *
 	 * @param path
 	 * @return
 	 */
 	private static boolean makeDir(String path) {
 		assert path != null;
 		File file = new File(path);
-		if (!file.exists())
+		if (!file.exists()) {
 			return file.mkdirs();
+		}
 
 		return true;
 	}
 
 	/**
 	 * Returns the overflow mode
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the overflow mode
 	 */
 	public static int getPageOverflow(HttpServletRequest request) {
 		int pageOverflow = getParameterAsInt(request, PARAM_PAGE_OVERFLOW);
-		if (pageOverflow < 0)
+		if (pageOverflow < 0) {
 			pageOverflow = IBirtConstants.PAGE_OVERFLOW_AUTO;
+		}
 
 		return pageOverflow;
 	}
 
 	/**
 	 * Returns if pagebreak pagination only
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return is pagebreak only is in use
 	 */
 	public static boolean isPagebreakOnly(HttpServletRequest request) {
 		String pagebreakOnly = getParameter(request, PARAM_PAGEBREAK_ONLY);
-		if ("false".equalsIgnoreCase(pagebreakOnly)) //$NON-NLS-1$
+		if ("false".equalsIgnoreCase(pagebreakOnly)) { //$NON-NLS-1$
 			return false;
+		}
 
 		return true;
 	}
 
 	/**
 	 * Returns how to open attachment( inline or attachment )
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return get the open attachment type ( inline or attachment )
 	 */
 	public static String getOpenType(HttpServletRequest request) {
 		if ("true".equalsIgnoreCase(getParameter(request, //$NON-NLS-1$
-				PARAM_AS_ATTACHMENT)))
+				PARAM_AS_ATTACHMENT))) {
 			return IBirtConstants.OPEN_TYPE_ATTACHMENT;
+		}
 
 		return IBirtConstants.OPEN_TYPE_INLINE;
 	}
 
 	/**
 	 * Returns whether open report as attachment
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return is the open report opend as attachment
 	 */
 	public static boolean isOpenAsAttachment(HttpServletRequest request) {
 		if ("true".equalsIgnoreCase(getParameter(request, //$NON-NLS-1$
-				PARAM_AS_ATTACHMENT)))
+				PARAM_AS_ATTACHMENT))) {
 			return true;
+		}
 
 		return false;
 	}
 
 	/**
 	 * Returns action name
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return action name
 	 */
 	public static String getAction(HttpServletRequest request) {
 		return getParameter(request, PARAM_ACTION);
@@ -2648,23 +2732,24 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the dpi setting from http request
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the dpi setting from http request
 	 */
 	public static Number getDpi(HttpServletRequest request) {
 		String dpi = getParameter(request, PARAM_DPI);
-		if (dpi == null || dpi.trim().length() <= 0)
+		if (dpi == null || dpi.trim().length() <= 0) {
 			return null;
+		}
 
 		return Integer.valueOf(dpi);
 	}
 
 	/**
-	 * Check If force optimized HTML output.
-	 * 
+	 * Check if force optimized HTML output.
+	 *
 	 * @param request
-	 * @return
+	 * @return if the optimized HTML is in use
 	 */
 	public static boolean isAgentStyle(HttpServletRequest request) {
 		boolean flag = isAgentStyle;
@@ -2683,18 +2768,20 @@ public class ParameterAccessor {
 
 	/**
 	 * Check whether the output format uses PDF Layout
-	 * 
+	 *
 	 * @param format
-	 * @return
+	 * @return is the output format is PDF
 	 */
 	public static boolean isPDFLayout(String format) {
-		if (format == null)
+		if (format == null) {
 			return false;
+		}
 
 		if (IBirtConstants.PDF_RENDER_FORMAT.equalsIgnoreCase(format)
 				|| IBirtConstants.POSTSCRIPT_RENDER_FORMAT.equalsIgnoreCase(format)
-				|| IBirtConstants.PPT_RENDER_FORMAT.equalsIgnoreCase(format))
+				|| IBirtConstants.PPT_RENDER_FORMAT.equalsIgnoreCase(format)) {
 			return true;
+		}
 
 		return false;
 	}
@@ -2702,21 +2789,22 @@ public class ParameterAccessor {
 	/**
 	 * Returns the flag to indicate whether close current window. Currently, it is
 	 * only used when output confirm information.
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the flag to indicate whether close current window
 	 */
 	public static boolean isCloseWindow(HttpServletRequest request) {
 		String isCloseWin = getParameter(request, PARAM_CLOSEWIN);
-		if ("true".equalsIgnoreCase(isCloseWin)) //$NON-NLS-1$
+		if ("true".equalsIgnoreCase(isCloseWin)) { //$NON-NLS-1$
 			return true;
+		}
 
 		return false;
 	}
 
 	/**
 	 * Returns whether the "encoded paths" flag is set.
-	 * 
+	 *
 	 * @param request
 	 * @return true if the flag is set
 	 */
@@ -2727,9 +2815,9 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the appcontext extension name
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the appcontext extension name
 	 */
 	public static String getAppContextName(HttpServletRequest request) {
 		return getParameter(request, PARAM_APPCONTEXTNAME);
@@ -2737,9 +2825,9 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the data extraction format
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the data extraction format
 	 */
 	public static String getExtractFormat(HttpServletRequest request) {
 		return getParameter(request, PARAM_DATA_EXTRACT_FORMAT);
@@ -2747,9 +2835,9 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the data extraction extension
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return the data extraction extension
 	 */
 	public static String getExtractExtension(HttpServletRequest request) {
 		return getParameter(request, PARAM_DATA_EXTRACT_EXTENSION);
@@ -2757,16 +2845,16 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns all URL parameters as map
-	 * 
+	 *
 	 * @param request
-	 * @return
+	 * @return all URL parameters as map
 	 */
 	public static Map<String, String> getParameterAsMap(HttpServletRequest request) {
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new HashMap<>();
 
-		Enumeration names = request.getParameterNames();
+		Enumeration<String> names = request.getParameterNames();
 		while (names.hasMoreElements()) {
-			String name = (String) names.nextElement();
+			String name = names.nextElement();
 			String value = getParameter(request, name);
 			map.put(name, value);
 		}
@@ -2790,9 +2878,8 @@ public class ParameterAccessor {
 	/**
 	 * Gets the mime-type of the given emitter id or format. If the emitter id is
 	 * defined, use it, else use the format.
-	 * 
+	 *
 	 * @param emitterId emitter id
-	 * @param format    format
 	 * @return mime-type of the extended emitter format
 	 */
 	public static String getEmitterMimeType(String emitterId) {
@@ -2807,7 +2894,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the emitter info for a given emitter id.
-	 * 
+	 *
 	 * @param emitterId emitter ID
 	 * @return EmitterInfo instance or null if the emitterId is invalid
 	 */
@@ -2817,7 +2904,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the format returned by the emitter designed by the given emitter id.
-	 * 
+	 *
 	 * @param emitterId emitter id
 	 * @return format string or null if no emitter exists
 	 */
@@ -2825,20 +2912,21 @@ public class ParameterAccessor {
 		EmitterInfo emitterInfo = getEmitterInfo(emitterId);
 		if (emitterInfo != null) {
 			return emitterInfo.getFormat();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
 	 * Gets the mime-type of the given data extraction format.
-	 * 
-	 * @param format
+	 *
+	 * @param extractFormat    extract format
+	 * @param extractExtension extract extension
 	 * @return mime-type of the extended data extraction format
 	 */
 	public static String getExtractionMIMEType(String extractFormat, String extractExtension) {
-		if (supportedDataExtractions.length <= 0)
+		if (supportedDataExtractions.length <= 0) {
 			return null;
+		}
 
 		String mimeType = null;
 		if (extractExtension != null) {
@@ -2866,13 +2954,14 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the extract format by extract extension id.
-	 * 
+	 *
 	 * @param extractExtension
-	 * @return
+	 * @return the extract format by extract extension id
 	 */
 	public static String getExtractFormat(String extractExtension) {
-		if (supportedDataExtractions.length <= 0)
+		if (supportedDataExtractions.length <= 0) {
 			return null;
+		}
 
 		String extractFormat = null;
 
@@ -2890,19 +2979,21 @@ public class ParameterAccessor {
 
 	/**
 	 * Validate extract format
-	 * 
+	 *
 	 * @param extractFormat
-	 * @return
+	 * @return is the extraction format supported
 	 */
 	public static boolean validateExtractFormat(String extractFormat) {
-		if (supportedDataExtractions.length <= 0 || extractFormat == null)
+		if (supportedDataExtractions.length <= 0 || extractFormat == null) {
 			return false;
+		}
 
 		// validate extraction format
 		for (int i = 0; i < supportedDataExtractions.length; i++) {
 			DataExtractionFormatInfo info = supportedDataExtractions[i];
-			if (info != null && extractFormat.equals(info.getFormat()))
+			if (info != null && extractFormat.equals(info.getFormat())) {
 				return true;
+			}
 		}
 
 		return false;
@@ -2910,19 +3001,21 @@ public class ParameterAccessor {
 
 	/**
 	 * Validate extract extension
-	 * 
+	 *
 	 * @param extractExtension
-	 * @return
+	 * @return is the extraction extension supported
 	 */
 	public static boolean validateExtractExtension(String extractExtension) {
-		if (supportedDataExtractions.length <= 0 || extractExtension == null)
+		if (supportedDataExtractions.length <= 0 || extractExtension == null) {
 			return false;
+		}
 
 		// validate extraction extension id
 		for (int i = 0; i < supportedDataExtractions.length; i++) {
 			DataExtractionFormatInfo info = supportedDataExtractions[i];
-			if (info != null && extractExtension.equals(info.getId()))
+			if (info != null && extractExtension.equals(info.getId())) {
 				return true;
+			}
 		}
 
 		return false;
@@ -2930,17 +3023,17 @@ public class ParameterAccessor {
 
 	/**
 	 * Creates an options map for the filename generator.
-	 * 
+	 *
 	 * @param context context
 	 * @return options map
 	 * @see IFilenameGenerator
 	 */
-	public static Map makeFilenameGeneratorOptions(IContext context) {
+	public static Map<String, Object> makeFilenameGeneratorOptions(IContext context) {
 		HttpServletRequest request = context.getRequest();
-		Map options = new HashMap();
+		Map<String, Object> options = new HashMap<String, Object>();
 		options.put(IFilenameGenerator.OPTIONS_SERVLET_CONTEXT, request.getSession().getServletContext());
 		options.put(IFilenameGenerator.OPTIONS_HTTP_REQUEST, request);
-		BaseAttributeBean attrBean = (BaseAttributeBean) context.getBean();
+		BaseAttributeBean attrBean = context.getBean();
 		options.put(IFilenameGenerator.OPTIONS_VIEWER_ATTRIBUTES_BEAN, attrBean);
 		if (attrBean != null) {
 			String reportDesignName = attrBean.getReportDesignName();
@@ -2958,14 +3051,16 @@ public class ParameterAccessor {
 	}
 
 	/**
-	 * @param context
-	 * @param format
-	 * @param emitterId
-	 * @return
+	 * Get the export file name
+	 *
+	 * @param context   context
+	 * @param format    format
+	 * @param emitterId emitter id
+	 * @return the export file name
 	 */
 	public static String getExportFilename(IContext context, String format, String emitterId) {
 		IFilenameGenerator gen = ParameterAccessor.getFilenameGenerator();
-		Map options = ParameterAccessor.makeFilenameGeneratorOptions(context);
+		Map<String, Object> options = ParameterAccessor.makeFilenameGeneratorOptions(context);
 
 		if (emitterId != null) {
 			EmitterInfo emitterInfo = ParameterAccessor.getEmitterInfo(emitterId);
@@ -2989,14 +3084,15 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the extraction file name.
-	 * 
-	 * @param context       birt context
-	 * @param extractFormat extraction extension
+	 *
+	 * @param context          birt context
+	 * @param extractExtension extraction extension
+	 * @param extractFormat    extraction format
 	 * @return extraction file name
 	 */
 	public static String getExtractionFilename(IContext context, String extractExtension, String extractFormat) {
 		IFilenameGenerator gen = ParameterAccessor.getFilenameGenerator();
-		Map options = ParameterAccessor.makeFilenameGeneratorOptions(context);
+		Map<String, Object> options = ParameterAccessor.makeFilenameGeneratorOptions(context);
 		if (extractFormat != null) {
 			options.put(IFilenameGenerator.OPTIONS_TARGET_FILE_EXTENSION, extractFormat);
 		}
@@ -3010,13 +3106,13 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the report document name based on the report design name.
-	 * 
+	 *
 	 * @param context birt context
 	 * @return report document name
 	 */
 	public static String getGeneratedReportDocumentName(IContext context) {
 		IFilenameGenerator gen = ParameterAccessor.getFilenameGenerator();
-		Map options = ParameterAccessor.makeFilenameGeneratorOptions(context);
+		Map<String, Object> options = ParameterAccessor.makeFilenameGeneratorOptions(context);
 		String baseName = stripFileExtension((String) options.get(IFilenameGenerator.OPTIONS_REPORT_DESIGN));
 		return gen.getFilename(baseName, IBirtConstants.SUFFIX_DESIGN_DOCUMENT,
 				IFilenameGenerator.OUTPUT_TYPE_REPORT_DOCUMENT, options);
@@ -3024,7 +3120,7 @@ public class ParameterAccessor {
 
 	/**
 	 * Returns the file name without extension from a base file name.
-	 * 
+	 *
 	 * @param baseName file name to strip
 	 * @return file name without extension
 	 */
@@ -3046,9 +3142,16 @@ public class ParameterAccessor {
 		return fileName;
 	}
 
+	/**
+	 * Get the supported formats sorted based on the display name
+	 *
+	 * @param values
+	 * @return the sorted supported formats
+	 */
 	public static String[] sortSupportedFormatsByDisplayName(String[] values) {
 		Arrays.sort(values, new Comparator<String>() {
 
+			@Override
 			public int compare(String o1, String o2) {
 				if (getOutputFormatLabel(o1) != null) {
 					return getOutputFormatLabel(o1).compareToIgnoreCase(getOutputFormatLabel(o2));

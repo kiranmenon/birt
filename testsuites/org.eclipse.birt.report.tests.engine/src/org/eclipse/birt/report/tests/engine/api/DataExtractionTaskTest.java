@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.tests.engine.api;
 
@@ -49,6 +61,7 @@ public class DataExtractionTaskTest extends EngineCase {
 	final static String OUTPUT_subquery = "DataExtraction_subquery.rptdocument";
 	final static String OUTPUT_nestquery = "DataExtraction_nestquery.rptdocument";
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		removeResource();
@@ -57,7 +70,9 @@ public class DataExtractionTaskTest extends EngineCase {
 		copyResource_INPUT(INPUT_nestquery, INPUT_nestquery);
 	}
 
-	public void tearDown() {
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
 		removeResource();
 	}
 
@@ -103,7 +118,7 @@ public class DataExtractionTaskTest extends EngineCase {
 
 	/**
 	 * Test normal data extraction with filter
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testDataExtractionWithFilter() throws Exception {
@@ -148,7 +163,7 @@ public class DataExtractionTaskTest extends EngineCase {
 
 	/**
 	 * test setInstanceID in DataExtractionTask with subquery structure
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testDataExtractionFromIID_subquery() throws Exception {
@@ -258,7 +273,7 @@ public class DataExtractionTaskTest extends EngineCase {
 
 	/**
 	 * test setInstanceID in DataExtractionTask with subquery structure
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testDataExtractionFromIID_nestquery() throws Exception {
@@ -367,7 +382,7 @@ public class DataExtractionTaskTest extends EngineCase {
 
 	/**
 	 * create the report document.
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -391,8 +406,8 @@ public class DataExtractionTaskTest extends EngineCase {
 
 	private ArrayList findIID(String doc, String type) throws EngineException, UnsupportedEncodingException {
 		ArrayList iids = new ArrayList();
-		IRenderTask task = null;
-		IReportDocument reportDoc = null;
+		IRenderTask task;
+		IReportDocument reportDoc;
 		reportDoc = engine.openReportDocument(doc);
 		task = engine.createRenderTask(reportDoc);
 

@@ -1,9 +1,9 @@
 /******************************************************************************
- *	Copyright (c) 2004 Actuate Corporation and others.
+ *	Copyright (c) 2004, 2025 Actuate Corporation and others.
  *	All rights reserved. This program and the accompanying materials 
- *	are made available under the terms of the Eclipse Public License v1.0
+ *	are made available under the terms of the Eclipse Public License v2.0
  *	which accompanies this distribution, and is available at
- *		http://www.eclipse.org/legal/epl-v10.html
+ *		http://www.eclipse.org/legal/epl-2.0.html
  *	
  *	Contributors:
  *		Actuate Corporation - Initial implementation.
@@ -33,6 +33,7 @@ BirtEvent.prototype =
 	__E_CANCEL_TASK : '__E_CANCEL_TASK', // Cancel current task event.
 	__E_GETPAGE_ALL : '__E_GETPAGE_ALL', // Get all pages.
 	__E_EXPORT_REPORT : '__E_EXPORT_REPORT', // Export report
+	__E_PREVIEW_LAYOUT : '__E_PREVIEW_LAYOUT', // Preview layout
  	
 	/**
 	 *	Initialization routine required by "ProtoType" lib.

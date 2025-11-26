@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -65,47 +68,47 @@ public class ExtensionManager {
 	/**
 	 * stores references to all the generation extensions
 	 */
-	protected HashMap generationExtensions = new HashMap();
+	protected HashMap<Object, Object> generationExtensions = new HashMap<>();
 
 	/**
 	 * stores references to all the presentation extensions
 	 */
-	protected HashMap presentationExtensions = new HashMap();
+	protected HashMap<Object, Object> presentationExtensions = new HashMap<>();
 
 	/**
 	 * reference to all the query extesions.
 	 */
-	protected HashMap queryExtensions = new HashMap();
+	protected HashMap<Object, Object> queryExtensions = new HashMap<>();
 
 	/*
 	 * stores references to extended event handlers
 	 */
-	protected HashMap eventHandlerExtensions = new HashMap();
+	protected HashMap<String, IConfigurationElement> eventHandlerExtensions = new HashMap<>();
 
 	/*
 	 * references to prepare extentions
 	 */
-	protected HashMap preparationExtensions = new HashMap();
+	protected HashMap<Object, Object> preparationExtensions = new HashMap<>();
 
 	/**
 	 * extended item factory
 	 */
-	protected HashMap factories = new HashMap();
+	protected HashMap<String, IConfigurationElement> factories = new HashMap<>();
 
 	/**
 	 * emitterId to emitter info mapping
 	 */
-	protected HashMap<String, EmitterInfo> emitters = new HashMap<String, EmitterInfo>();
+	protected HashMap<String, EmitterInfo> emitters = new HashMap<>();
 
 	/**
 	 * output format to MIMEType mapping
 	 */
-	protected HashMap<String, String> format2MIMEType = new HashMap<String, String>();
+	protected HashMap<String, String> format2MIMEType = new HashMap<>();
 
 	/**
 	 * format to the default emitter id mapping
 	 */
-	private static HashMap<String, String> format2DefaultEmitterID = new HashMap<String, String>();
+	private static HashMap<String, String> format2DefaultEmitterID = new HashMap<>();
 	static {
 		format2DefaultEmitterID.put("doc", "org.eclipse.birt.report.engine.emitter.word");
 		format2DefaultEmitterID.put("docx", "org.eclipse.birt.report.engine.emitter.docx");
@@ -120,7 +123,7 @@ public class ExtensionManager {
 		format2DefaultEmitterID.put("xls", "org.eclipse.birt.report.engine.emitter.prototype.excel");
 	}
 
-	protected Map dataExtractionFormats = new HashMap();
+	protected Map<String, DataExtractionFormatInfo> dataExtractionFormats = new HashMap<>();
 
 	/**
 	 * HTML pagination.
@@ -173,21 +176,24 @@ public class ExtensionManager {
 	 * not need to be synchronized
 	 */
 	private synchronized static void createInstance() {
-		if (sm_instance == null)
+		if (sm_instance == null) {
 			sm_instance = new ExtensionManager();
+		}
 	}
 
 	/**
 	 * @return the single instance for the extension manager
 	 */
 	static public ExtensionManager getInstance() {
-		if (sm_instance == null)
+		if (sm_instance == null) {
 			createInstance();
+		}
 
 		return sm_instance;
 	}
 
 	/**
+	 * @param manager
 	 * @param itemType
 	 * @return an object that is used for generation time extended item processing
 	 */
@@ -243,7 +249,7 @@ public class ExtensionManager {
 	public boolean getAllRows(String itemType) {
 		IConfigurationElement config = (IConfigurationElement) queryExtensions.get(itemType);
 		if (config != null) {
-			return Boolean.valueOf(config.getAttribute("getAllRows")).booleanValue();
+			return Boolean.parseBoolean(config.getAttribute("getAllRows"));
 		}
 		return false;
 	}
@@ -271,7 +277,7 @@ public class ExtensionManager {
 
 	/**
 	 * Creates a data extraction extension according to its extension id.
-	 * 
+	 *
 	 * @param id the extension id of a data extraction extension.
 	 * @return a data extraction extension.
 	 */
@@ -279,7 +285,7 @@ public class ExtensionManager {
 		if (id == null) {
 			return null;
 		}
-		DataExtractionFormatInfo info = (DataExtractionFormatInfo) dataExtractionFormats.get(id);
+		DataExtractionFormatInfo info = dataExtractionFormats.get(id);
 		IConfigurationElement config = info.getDataExtractionExtension();
 		if (config != null) {
 			Object object = createObject(config, "class"); //$NON-NLS-1$
@@ -292,7 +298,7 @@ public class ExtensionManager {
 
 	/**
 	 * Creates a data extraction extension according to its format.
-	 * 
+	 *
 	 * @param format the format id of a data extraction extension.
 	 * @return a data extraction extension.
 	 */
@@ -301,9 +307,9 @@ public class ExtensionManager {
 			return null;
 		}
 		IConfigurationElement config = null;
-		Iterator extensions = dataExtractionFormats.values().iterator();
+		Iterator<DataExtractionFormatInfo> extensions = dataExtractionFormats.values().iterator();
 		while (extensions.hasNext()) {
-			DataExtractionFormatInfo info = (DataExtractionFormatInfo) extensions.next();
+			DataExtractionFormatInfo info = extensions.next();
 			if (format.equals(info.getFormat())) {
 				config = info.getDataExtractionExtension();
 				break;
@@ -323,7 +329,7 @@ public class ExtensionManager {
 	 * @return an object that extended items use to handle java event
 	 */
 	public IReportEventHandler createEventHandler(String itemType) {
-		IConfigurationElement config = (IConfigurationElement) eventHandlerExtensions.get(itemType);
+		IConfigurationElement config = eventHandlerExtensions.get(itemType);
 		if (config != null) {
 			Object object = createObject(config, "class"); //$NON-NLS-1$
 			if (object instanceof IReportEventHandler) {
@@ -349,12 +355,12 @@ public class ExtensionManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param itemType itemType the type of the extended item, i.e., "chart"
 	 * @return
 	 */
 	public IExtendedItemFactory createExtendedItemFactory(String itemType) {
-		IConfigurationElement config = (IConfigurationElement) factories.get(itemType);
+		IConfigurationElement config = factories.get(itemType);
 		if (config != null) {
 			Object object = createObject(config, "class");
 			if (object instanceof IExtendedItemFactory) {
@@ -367,20 +373,20 @@ public class ExtensionManager {
 	/**
 	 * @return all the emitter extensions
 	 */
-	public Collection getSupportedFormat() {
+	public Collection<String> getSupportedFormat() {
 		return format2MIMEType.keySet();
 	}
 
 	/**
 	 * return all emitter informations
-	 * 
+	 *
 	 * @return all emitter informations
 	 */
 	public EmitterInfo[] getEmitterInfo() {
 		EmitterInfo[] infos = new EmitterInfo[emitters.size()];
 		Object[] keys = emitters.keySet().toArray();
 		for (int index = 0, length = keys.length; index < length; index++) {
-			infos[index] = (EmitterInfo) emitters.get(keys[index].toString());
+			infos[index] = emitters.get(keys[index].toString());
 		}
 		return infos;
 	}
@@ -395,8 +401,9 @@ public class ExtensionManager {
 			String value = config.getAttribute(property);
 			if (value != null) {
 				Object object = config.createExecutableExtension(property);
-				if (object != null)
+				if (object != null) {
 					return object;
+				}
 			}
 		} catch (FrameworkException ex) {
 			if (logger.isLoggable(Level.WARNING)) {
@@ -412,8 +419,9 @@ public class ExtensionManager {
 	 */
 	protected void loadGenerationExtensionDefns() {
 		IExtension[] exts = getExtensions(EXTENSION_POINT_GENERATION);
-		if (exts == null)
+		if (exts == null) {
 			return;
+		}
 
 		for (int i = 0; i < exts.length; i++) {
 			IConfigurationElement[] configs = exts[i].getConfigurationElements();
@@ -482,7 +490,7 @@ public class ExtensionManager {
 				String overridePriority = configs[j].getAttribute("overridePriority");
 				int priority = 0;
 				if (null != overridePriority) {
-					priority = Integer.valueOf(overridePriority).intValue();
+					priority = Integer.parseInt(overridePriority);
 				}
 				String format = configs[j].getAttribute("format"); //$NON-NLS-1$
 				String mimeType = configs[j].getAttribute("mimeType"); //$NON-NLS-1$
@@ -495,11 +503,11 @@ public class ExtensionManager {
 				Boolean outDisplayNone = Boolean.valueOf(configs[j].getAttribute("outputDisplayNone"));
 				String fileExtension = configs[j].getAttribute("fileExtension");
 				Boolean isHidden = Boolean.valueOf(configs[j].getAttribute("isHidden"));
-				boolean needOutputResultSet = Boolean.valueOf(configs[j].getAttribute("needOutputResultSet"));
+				boolean needOutputResultSet = Boolean.parseBoolean(configs[j].getAttribute("needOutputResultSet"));
 				String isFormatDeprecated = configs[j].getAttribute("isFormatDeprecated");
 				boolean deprecated = false;
 				if (null != isFormatDeprecated) {
-					deprecated = Boolean.valueOf(isFormatDeprecated).booleanValue();
+					deprecated = Boolean.parseBoolean(isFormatDeprecated);
 				}
 				if (!Pattern.matches(emitterFormatPattern, format)) {
 					logger.log(Level.SEVERE, "\"" + format
@@ -585,8 +593,9 @@ public class ExtensionManager {
 	private IExtension[] getExtensions(String extensionPoint) {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint extPoint = registry.getExtensionPoint(extensionPoint);
-		if (extPoint == null)
+		if (extPoint == null) {
 			return null;
+		}
 
 		IExtension[] exts = extPoint.getExtensions();
 		logger.log(Level.FINE, "Start load extension point: {0}", extensionPoint); //$NON-NLS-1$
@@ -657,7 +666,7 @@ public class ExtensionManager {
 
 	public String getSupportedImageFormats(String emitterId) {
 		if (emitterId != null) {
-			EmitterInfo emitterInfo = (EmitterInfo) emitters.get(emitterId);
+			EmitterInfo emitterInfo = emitters.get(emitterId);
 			if (emitterInfo != null) {
 				String supportedImageFormats = emitterInfo.getSupportedImageFormats();
 				if (null != supportedImageFormats) {
@@ -700,10 +709,10 @@ public class ExtensionManager {
 
 	public boolean isSupportedFormat(String format) {
 		boolean supported = false;
-		Collection supportedFormats = getSupportedFormat();
-		Iterator iter = supportedFormats.iterator();
+		Collection<String> supportedFormats = getSupportedFormat();
+		Iterator<String> iter = supportedFormats.iterator();
 		while (iter.hasNext()) {
-			String supportedFormat = (String) iter.next();
+			String supportedFormat = iter.next();
 			if (supportedFormat != null && supportedFormat.equalsIgnoreCase(format)) {
 				supported = true;
 				break;
@@ -713,10 +722,10 @@ public class ExtensionManager {
 	}
 
 	public String getSupportedFormat(String format) {
-		Collection supportedFormats = getSupportedFormat();
-		Iterator iter = supportedFormats.iterator();
+		Collection<String> supportedFormats = getSupportedFormat();
+		Iterator<String> iter = supportedFormats.iterator();
 		while (iter.hasNext()) {
-			String supportedFormat = (String) iter.next();
+			String supportedFormat = iter.next();
 			if (supportedFormat != null && supportedFormat.equalsIgnoreCase(format)) {
 				return supportedFormat;
 			}
@@ -736,7 +745,7 @@ public class ExtensionManager {
 		String emitterId = format2DefaultEmitterID.get(format);
 		if (emitterId == null) {
 			for (String id : emitters.keySet()) {
-				EmitterInfo emitterInfo = (EmitterInfo) emitters.get(id);
+				EmitterInfo emitterInfo = emitters.get(id);
 				if (format.equalsIgnoreCase(emitterInfo.getFormat())) {
 					emitterId = emitterInfo.getID();
 					break;

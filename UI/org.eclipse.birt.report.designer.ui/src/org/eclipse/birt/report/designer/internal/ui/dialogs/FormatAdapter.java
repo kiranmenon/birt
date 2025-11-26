@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -26,9 +29,11 @@ import com.ibm.icu.util.ULocale;
  */
 public abstract class FormatAdapter {
 
+	/** property: label of NONE */
 	public static final String NONE = Messages.getString("FormatAdapter.DisplayName.None"); //$NON-NLS-1$
 
-	public final static TreeMap<String, ULocale> LOCALE_TABLE = new TreeMap<String, ULocale>(Collator.getInstance());
+	/** property: tree map of local table */
+	public final static TreeMap<String, ULocale> LOCALE_TABLE = new TreeMap<>(Collator.getInstance());
 
 	static {
 		// Initialize the locale mapping table
@@ -43,13 +48,24 @@ public abstract class FormatAdapter {
 		}
 	}
 
+	/**
+	 * Get locale display name
+	 *
+	 * @param locale locale for the display name
+	 * @return Return the locale display name
+	 */
 	public static String getLocaleDisplayName(ULocale locale) {
-		if (locale == null)
+		if (locale == null) {
 			return NONE;
-		else
-			return locale.getDisplayName();
+		}
+		return locale.getDisplayName();
 	}
 
+	/**
+	 * Get locale display name array
+	 *
+	 * @return Return the locale display name array
+	 */
 	public static String[] getLocaleDisplayNames() {
 		String[] oldNames = LOCALE_TABLE.keySet().toArray(new String[0]);
 		String[] newNames = new String[oldNames.length + 1];
@@ -58,12 +74,26 @@ public abstract class FormatAdapter {
 		return newNames;
 	}
 
+	/**
+	 * Get the locale of display name
+	 *
+	 * @param localeDisplayName the display name to get the locale
+	 * @return Return the locale of the display name
+	 */
 	public static ULocale getLocaleByDisplayName(String localeDisplayName) {
-		if (NONE.equals(localeDisplayName) || localeDisplayName == null)
+		if (NONE.equals(localeDisplayName) || localeDisplayName == null) {
 			return null;
+		}
 		return LOCALE_TABLE.get(localeDisplayName);
 	}
 
+	/**
+	 * Get the matrix of choice like array
+	 *
+	 * @param structName  structure name
+	 * @param popertyName property name
+	 * @return Return the matrix of choice like array
+	 */
 	public static String[][] getChoiceArray(String structName, String popertyName) {
 		IChoiceSet set = ChoiceSetFactory.getStructChoiceSet(structName, popertyName);
 		IChoice[] choices = set.getChoices();
@@ -86,21 +116,54 @@ public abstract class FormatAdapter {
 		return ca;
 	}
 
+	/**
+	 * Get the init choice array
+	 *
+	 * @return Return the init choice array
+	 */
 	public abstract String[][] initChoiceArray();
 
 	/**
 	 * Gets the format types for display names.
+	 *
+	 * @param locale locale of the format types
+	 *
+	 * @return Return the format types for display names.
 	 */
 	public abstract String[] getFormatTypes(ULocale locale);
 
+	/**
+	 * Get the index of category
+	 *
+	 * @param name name to get the category index
+	 * @return Return the index of category
+	 */
 	public abstract int getIndexOfCategory(String name);
 
+	/**
+	 * Get the display name based on category
+	 *
+	 * @param category
+	 * @return Return the display name based on category
+	 */
 	public abstract String getDisplayName4Category(String category);
 
 	/**
 	 * Gets the corresponding category for given display name.
+	 *
+	 * @param displayName display name
+	 *
+	 * @return Return the corresponding category for given display name
 	 */
 	public abstract String getCategory4DisplayName(String displayName);
 
+	/**
+	 * Gets the corresponding category for given display name locale based
+	 *
+	 * @param displayName display name
+	 * @param locale      locale of display name
+	 *
+	 * @return Return the corresponding category for given display name locale based
+	 */
 	public abstract String getPattern4DisplayName(String displayName, ULocale locale);
 }

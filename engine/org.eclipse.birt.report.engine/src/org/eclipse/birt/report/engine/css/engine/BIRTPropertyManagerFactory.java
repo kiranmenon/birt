@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -18,6 +21,7 @@ import org.eclipse.birt.report.engine.css.engine.value.birt.BooleanManager;
 import org.eclipse.birt.report.engine.css.engine.value.birt.DataFormatManager;
 import org.eclipse.birt.report.engine.css.engine.value.birt.VisibleFormatManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.BackgroundAttachmentManager;
+import org.eclipse.birt.report.engine.css.engine.value.css.BackgroundImageType;
 import org.eclipse.birt.report.engine.css.engine.value.css.BackgroundRepeatManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.BackgroundSizeManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.BorderColorManager;
@@ -43,6 +47,7 @@ import org.eclipse.birt.report.engine.css.engine.value.css.PageBreakInsideManage
 import org.eclipse.birt.report.engine.css.engine.value.css.SpacingManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.StringManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.TextAlignManager;
+import org.eclipse.birt.report.engine.css.engine.value.css.TextHyperlinkManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.TextLineThroughManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.TextOverlineManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.TextTransformManager;
@@ -52,14 +57,16 @@ import org.eclipse.birt.report.engine.css.engine.value.css.VerticalAlignManager;
 import org.eclipse.birt.report.engine.css.engine.value.css.WhiteSpaceManager;
 
 /**
- * provide engine a utilitis to parser the styles.
- * 
- * 
+ * Provide engine a utilities to parser the styles.
+ *
  */
 public class BIRTPropertyManagerFactory implements PropertyManagerFactory {
 
 	ValueManager[] vms;
 
+	/**
+	 * Constructor
+	 */
 	public BIRTPropertyManagerFactory() {
 		vms = new ValueManager[PerfectHash.TOTAL_KEYWORDS];
 
@@ -177,20 +184,46 @@ public class BIRTPropertyManagerFactory implements PropertyManagerFactory {
 				CSSValueConstants.NUMBER_0);
 		vms[StyleConstants.STYLE_WIDTH] = new LengthManager(CSSConstants.CSS_WIDTH_PROPERTY, false,
 				CSSValueConstants.NUMBER_0);
+		vms[StyleConstants.STYLE_BACKGROUND_IMAGE_TYPE] = new BackgroundImageType();
+
+		vms[StyleConstants.STYLE_BORDER_DIAGONAL_NUMBER] = new IntegerManager(
+				CSSConstants.CSS_BORDER_DIAGONAL_NUMBER_PROPERTY, false, 1);
+
+		vms[StyleConstants.STYLE_BORDER_DIAGONAL_WIDTH] = new BorderWidthManager(
+				CSSConstants.CSS_BORDER_DIAGONAL_WIDTH_PROPERTY);
+		vms[StyleConstants.STYLE_BORDER_DIAGONAL_COLOR] = new BorderColorManager(
+				CSSConstants.CSS_BORDER_DIAGONAL_COLOR_PROPERTY);
+		vms[StyleConstants.STYLE_BORDER_DIAGONAL_STYLE] = new BorderStyleManager(
+				CSSConstants.CSS_BORDER_DIAGONAL_STYLE_PROPERTY);
+
+		vms[StyleConstants.STYLE_BORDER_ANTIDIAGONAL_NUMBER] = new IntegerManager(
+				CSSConstants.CSS_BORDER_DIAGONAL_NUMBER_PROPERTY, false, 1);
+
+		vms[StyleConstants.STYLE_BORDER_ANTIDIAGONAL_WIDTH] = new BorderWidthManager(
+				CSSConstants.CSS_BORDER_ANTIDIAGONAL_WIDTH_PROPERTY);
+		vms[StyleConstants.STYLE_BORDER_ANTIDIAGONAL_COLOR] = new BorderColorManager(
+				CSSConstants.CSS_BORDER_ANTIDIAGONAL_COLOR_PROPERTY);
+		vms[StyleConstants.STYLE_BORDER_ANTIDIAGONAL_STYLE] = new BorderStyleManager(
+				CSSConstants.CSS_BORDER_ANTIDIAGONAL_STYLE_PROPERTY);
+		vms[StyleConstants.STYLE_TEXT_HYPERLINK_STYLE] = new TextHyperlinkManager();
 	}
 
+	@Override
 	public int getNumberOfProperties() {
 		return PerfectHash.TOTAL_KEYWORDS;
 	}
 
+	@Override
 	public int getPropertyIndex(String name) {
 		return PerfectHash.in_word_set(name);
 	}
 
+	@Override
 	public ValueManager getValueManager(int idx) {
 		return vms[idx];
 	}
 
+	@Override
 	public String getPropertyName(int idx) {
 		return vms[idx].getPropertyName();
 	}

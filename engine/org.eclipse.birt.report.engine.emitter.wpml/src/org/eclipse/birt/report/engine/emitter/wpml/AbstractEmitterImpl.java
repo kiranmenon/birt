@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2008, 2024, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,11 +16,15 @@ package org.eclipse.birt.report.engine.emitter.wpml;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -27,10 +34,10 @@ import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IHTMLActionHandler;
+import org.eclipse.birt.report.engine.api.IHTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.InstanceID;
-import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.engine.content.IAutoTextContent;
 import org.eclipse.birt.report.engine.content.IBandContent;
@@ -61,12 +68,15 @@ import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.css.engine.value.DataFormatValue;
 import org.eclipse.birt.report.engine.css.engine.value.FloatValue;
 import org.eclipse.birt.report.engine.css.engine.value.birt.BIRTConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.emitter.EmitterUtil;
 import org.eclipse.birt.report.engine.emitter.IEmitterServices;
 import org.eclipse.birt.report.engine.i18n.EngineResourceHandle;
 import org.eclipse.birt.report.engine.i18n.MessageConstants;
 import org.eclipse.birt.report.engine.ir.DimensionType;
-import org.eclipse.birt.report.engine.ir.EngineIRConstants;
+import org.eclipse.birt.report.engine.ir.Expression;
+import org.eclipse.birt.report.engine.ir.ReportItemDesign;
 import org.eclipse.birt.report.engine.ir.SimpleMasterPageDesign;
 import org.eclipse.birt.report.engine.layout.emitter.Image;
 import org.eclipse.birt.report.engine.layout.pdf.font.FontMappingManager;
@@ -80,42 +90,81 @@ import org.eclipse.birt.report.engine.presentation.ContentEmitterVisitor;
 import org.eclipse.birt.report.engine.util.FlashFile;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
-
 import org.w3c.dom.css.CSSValue;
 import org.w3c.dom.css.CSSValueList;
 
 import com.ibm.icu.util.ULocale;
 
+/**
+ * Abstract emitter implementation of word emitter 
+ * 
+ * @since 3.3
+ *
+ */
 public abstract class AbstractEmitterImpl {
 
+	/** static flag: normal */
 	public final static int NORMAL = -1;
+	
+	/** flag for a word field function */
+	public final static int CUSTOM_FIELD = -2;
 
-	public static enum InlineFlag {
-		FIRST_INLINE, MIDDLE_INLINE, BLOCK
-	};
-
-	public static enum TextFlag {
-		START, MIDDLE, END, WHOLE
-	};
-
-	private static Set<Integer> nonInherityStyles = new HashSet<Integer>();
-
-	static {
-		nonInherityStyles.add(IStyle.STYLE_BORDER_BOTTOM_COLOR);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_BOTTOM_STYLE);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_BOTTOM_WIDTH);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_TOP_COLOR);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_TOP_STYLE);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_TOP_WIDTH);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_LEFT_COLOR);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_LEFT_STYLE);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_LEFT_WIDTH);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_RIGHT_COLOR);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_RIGHT_STYLE);
-		nonInherityStyles.add(IStyle.STYLE_BORDER_RIGHT_WIDTH);
+	/**
+	 * Enumeration definition of the inline flag
+	 *
+	 * @since 3.3
+	 */
+	public enum InlineFlag {
+		/** inline flag: first inline */
+		FIRST_INLINE
+		/** inline flag: middle inline */
+		, MIDDLE_INLINE
+		/** inline flag: block */
+		, BLOCK 
 	}
 
-	private static final HashMap<String, String> genericFontMapping = new HashMap<String, String>();
+	/**
+	 * Enumeration definition of the text flag
+	 *
+	 * @since 3.3
+	 */
+	public enum TextFlag {
+		/** text flag: text orientation start */
+		START
+		/** text flag: text orientation middle */
+		, MIDDLE
+		/** text flag: text orientation end */
+		, END
+		/** text flag: text orientation whole */
+		,WHOLE
+	}
+
+	private static Set<Integer> nonInherityStyles = new HashSet<>();
+
+	static {
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_BOTTOM_COLOR);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_BOTTOM_STYLE);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_BOTTOM_WIDTH);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_TOP_COLOR);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_TOP_STYLE);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_TOP_WIDTH);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_LEFT_COLOR);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_LEFT_STYLE);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_LEFT_WIDTH);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_RIGHT_COLOR);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_RIGHT_STYLE);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_RIGHT_WIDTH);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_DIAGONAL_NUMBER);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_DIAGONAL_COLOR);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_DIAGONAL_STYLE);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_DIAGONAL_WIDTH);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_NUMBER);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_COLOR);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_STYLE);
+		nonInherityStyles.add(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_WIDTH);
+	}
+
+	private static final HashMap<String, String> genericFontMapping = new HashMap<>();
 
 	static {
 		genericFontMapping.put("sans-serif", "Arial");
@@ -139,7 +188,7 @@ public abstract class AbstractEmitterImpl {
 
 	protected IReportContent reportContent;
 
-	protected Stack<IStyle> styles = new Stack<IStyle>();
+	protected Stack<IStyle> styles = new Stack<>();
 
 	private int pageWidth = 0;
 
@@ -169,15 +218,15 @@ public abstract class AbstractEmitterImpl {
 
 	private String orientation = "portrait";
 
-	private HashSet<String> bookmarks = new HashSet<String>();
+	private HashSet<String> bookmarks = new HashSet<>();
 
 	private boolean rowFilledFlag = false;
 
-	private ArrayList<InstanceID> groupIdList = new ArrayList<InstanceID>();
+	private ArrayList<InstanceID> groupIdList = new ArrayList<>();
 
 	private int tocLevel = 1;
 
-	private List<TocInfo> tableTocs = new ArrayList<TocInfo>();
+	private List<TocInfo> tableTocs = new ArrayList<>();
 
 	private IReportRunnable reportRunnable;
 
@@ -193,43 +242,66 @@ public abstract class AbstractEmitterImpl {
 
 	private boolean fixedLayout;
 
+	private ULocale locale = null;
+
 	protected int reportDpi;
 
+	protected boolean combineMarginPadding = false;
+
+	protected boolean wrappedTableForMarginPadding = false;
+
+	protected boolean wrappedTableHeaderFooter = false;
+	
+	protected boolean addEmptyParagraphToTableCell = false;
+
+	protected boolean addEmptyParagraphToListCell = false;
+
 	/**
-	 * The original DOCX emitters generated output for word version 2010.
-	 * Newer version of Microsoft Word render these files incorrectly
-	 * the compatibility mode is activated manually after opening the file.
+	 * The original DOCX emitters generated output for word version 2010. Newer
+	 * version of Microsoft Word render these files incorrectly the compatibility
+	 * mode is activated manually after opening the file.
 	 *
 	 * The original WPML emitter generated the same WordProcessing ML.
 	 *
-	 * When wordVersion is set to a value of 2016, the resulting XML file
-	 * is a bit different (mainly some XML schema names changed).
+	 * When wordVersion is set to a value of 2016, the resulting XML file is a bit
+	 * different (mainly some XML schema names changed).
 	 *
-	 * If you want the document generated by BIRT to look correctly
-	 * in MS Word, you should no longer user 2010, but 2016.
+	 * If you want the document generated by BIRT to look correctly in MS Word, you
+	 * should no longer user 2010, but 2016.
 	 *
-	 * Since this file is shared by the DOCX emitter and the WPML emitter
-	 * (Word 2003 XML, uncompressed) and we don't want to touch the WPML
-	 * emitter, the default here is still 2010.
+	 * Since this file is shared by the DOCX emitter and the WPML emitter (Word 2003
+	 * XML, uncompressed) and we don't want to touch the WPML emitter, the default
+	 * here is still 2010.
 	 */
 	private int wordVersion = 2010;
 
 	protected static final String EMPTY_FOOTER = " ";
 
+	private static final String URL_PROTOCOL_TYPE_DATA = "data:";
+
+	private static final String URL_PROTOCOL_TYPE_FILE = "file:";
+
+	private static final String URL_PROTOCOL_URL_ENCODED_SPACE = "%20";
+
+	/**
+	 * Initialize of the service
+	 * 
+	 * @param service emitter service
+	 * @throws EngineException engine exception
+	 */
 	public void initialize(IEmitterServices service) throws EngineException {
 		if (service != null) {
 			this.out = EmitterUtil.getOuputStream(service, "report." + getOutputFormat());
 			this.reportRunnable = service.getReportRunnable();
-			this.actionHandler = (IHTMLActionHandler) service.getOption(RenderOption.ACTION_HANDLER);
+			this.actionHandler = (IHTMLActionHandler) service.getOption(IRenderOption.ACTION_HANDLER);
 			reportContext = service.getReportContext();
-			ULocale locale = null;
 			if (reportContext != null) {
-				locale = ULocale.forLocale(reportContext.getLocale());
+				this.locale = ULocale.forLocale(reportContext.getLocale());
 			}
-			if (locale == null) {
-				locale = ULocale.getDefault();
+			if (this.locale == null) {
+				this.locale = ULocale.getDefault();
 			}
-			EngineResourceHandle resourceHandle = new EngineResourceHandle(locale);
+			EngineResourceHandle resourceHandle = new EngineResourceHandle(this.locale);
 			messageFlashObjectNotSupported = resourceHandle
 					.getMessage(MessageConstants.FLASH_OBJECT_NOT_SUPPORTED_PROMPT);
 			messageReportItemNotSupported = resourceHandle
@@ -243,10 +315,15 @@ public abstract class AbstractEmitterImpl {
 		context = new EmitterContext();
 	}
 
+	/**
+	 * Start the rendering process
+	 * 
+	 * @param report report content
+	 */ 
 	public void start(IReportContent report) {
 		Object dpi = report.getReportContext().getRenderOption().getOption(IRenderOption.RENDER_DPI);
 		int renderDpi = 0;
-		if (dpi != null && dpi instanceof Integer) {
+		if (dpi instanceof Integer) {
 			renderDpi = ((Integer) dpi).intValue();
 		}
 		reportDpi = PropertyUtil.getRenderDpi(report, renderDpi);
@@ -256,15 +333,45 @@ public abstract class AbstractEmitterImpl {
 			if (designHandle != null) {
 				String reportLayoutPreference = designHandle.getLayoutPreference();
 				if (DesignChoiceConstants.REPORT_LAYOUT_PREFERENCE_FIXED_LAYOUT.equals(reportLayoutPreference)) {
-					layoutPreference = HTMLRenderOption.LAYOUT_PREFERENCE_FIXED;
+					layoutPreference = IHTMLRenderOption.LAYOUT_PREFERENCE_FIXED;
 				} else if (DesignChoiceConstants.REPORT_LAYOUT_PREFERENCE_AUTO_LAYOUT.equals(reportLayoutPreference)) {
-					layoutPreference = HTMLRenderOption.LAYOUT_PREFERENCE_AUTO;
+					layoutPreference = IHTMLRenderOption.LAYOUT_PREFERENCE_AUTO;
 				}
 			}
-			fixedLayout = HTMLRenderOption.LAYOUT_PREFERENCE_FIXED.equals(layoutPreference);
+			fixedLayout = IHTMLRenderOption.LAYOUT_PREFERENCE_FIXED.equals(layoutPreference);
+		}
+
+		// foreign text: wrap HTML-text with table to simulate margin & padding
+		if (EmitterServices.booleanOption(null, report, DocEmitter.WORD_MARGIN_PADDING_WRAPPED_TABLE, false)) {
+			wrappedTableForMarginPadding = true;
+		}
+		// foreign text: use for indent calculation margin & padding
+		if (!wrappedTableForMarginPadding && EmitterServices.booleanOption(null, report, DocEmitter.WORD_MARGIN_PADDING_COMBINE, true)) {
+			combineMarginPadding = true;
+		}
+		// header & footer: wrap header and footer with table
+		if (EmitterServices.booleanOption(null, report, DocEmitter.WORD_HEADER_FOOTER_WRAPPED_TABLE, false)) {
+			wrappedTableHeaderFooter = true;
+			wordWriter.setWrappedTableHeaderFooter(wrappedTableHeaderFooter);
+		}
+		// foreign text: add empty paragraph to wrapper table cell
+		if (wrappedTableForMarginPadding || EmitterServices.booleanOption(null, report, DocEmitter.WORD_ADD_EMPTY_PARAGRAPH_FOR_TABLE_CELL, true)) {
+			addEmptyParagraphToTableCell = true;
+		}
+		
+		// list: add empty paragraph to list table cell
+		if (EmitterServices.booleanOption(null, report, DocEmitter.WORD_ADD_EMPTY_PARAGRAPH_FOR_LIST_CELL, true)) {
+			addEmptyParagraphToListCell = true;
 		}
 	}
 
+	/**
+	 * Start of the page rendering
+	 * 
+	 * @param page page object
+	 * @throws IOException io exception
+	 * @throws BirtException birt exception
+	 */
 	public void startPage(IPageContent page) throws IOException, BirtException {
 		if (previousPage != null) {
 			outputPrePageProperties();
@@ -287,6 +394,7 @@ public abstract class AbstractEmitterImpl {
 				isRtl = rootContent != null && rootContent.isRTL();
 			}
 			wordWriter.start(isRtl, creator, title, comments, subject);
+			wordWriter.setDocumentLanguage(this.locale.toLanguageTag());
 			drawDocumentBackground();
 		}
 		computePageProperties(page);
@@ -300,6 +408,13 @@ public abstract class AbstractEmitterImpl {
 		wordWriter.endPage();
 	}
 
+	/**
+	 * End the rendering
+	 * 
+	 * @param report report object
+	 * @throws IOException io exception
+	 * @throws BirtException birt exception
+	 */
 	public void end(IReportContent report) throws IOException, BirtException {
 		if (previousPage != null) {
 			adjustInline();
@@ -309,27 +424,70 @@ public abstract class AbstractEmitterImpl {
 		}
 	}
 
+	/**
+	 * End of the container element
+	 * 
+	 * @param container container element
+	 */
 	public void endContainer(IContainerContent container) {
 		// Do nothing.
 	}
 
+	/**
+	 * Start of the container element
+	 * 
+	 * @param container container element
+	 */
 	public void startContainer(IContainerContent container) {
 		// Do nothing.
 	}
 
+	/**
+	 * End of the table element
+	 * 
+	 * @param table table element
+	 */
 	public abstract void endTable(ITableContent table);
 
+	/**
+	 * Start of handling of the foreign content
+	 * 
+	 * @param foreign foreign content
+	 * @throws BirtException birt exception
+	 */
 	public abstract void startForeign(IForeignContent foreign) throws BirtException;
 
+	/**
+	 * Write the content of the element
+	 * 
+	 * @param type type of the element
+	 * @param txt text of the content
+	 * @param content content element
+	 */
 	protected abstract void writeContent(int type, String txt, IContent content);
 
+	/**
+	 * Get the output format
+	 * 
+	 * @return Return the output format
+	 */
 	public abstract String getOutputFormat();
 
+	/**
+	 * Calculate the page properties
+	 * 
+	 * @param page page content element
+	 */
 	public void computePageProperties(IPageContent page) {
 		// Default height/width is the width/height of A4, the width 595.275pt *
 		// PT_TWIPS, the height is 841.889 * PT_TWIPS
 		pageWidth = WordUtil.convertTo(page.getPageWidth(), 11906, reportDpi);
+		// MS Word limitation, maximum width: 22in
+		pageWidth = Math.min(pageWidth, WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS);
+		
 		pageHeight = WordUtil.convertTo(page.getPageHeight(), 16838, reportDpi);
+		// MS Word limitation, maximum height: 22in
+		pageHeight = Math.min(pageHeight, WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS);
 
 		footerHeight = WordUtil.convertTo(page.getFooterHeight(), 0, reportDpi);
 		headerHeight = WordUtil.convertTo(page.getHeaderHeight(), 0, reportDpi);
@@ -357,24 +515,89 @@ public abstract class AbstractEmitterImpl {
 		orientation = page.getOrientation();
 	}
 
+	/**
+	 * Get the value of a user property.
+	 * 
+	 * @param elem      a report element, e.g. a IListContent
+	 * @param propName  a property name.
+	 * @return the value, if the user property is present, otherwise null.
+	 */
+	protected Object getUserProperty(IContent elem, String propName) {
+		Object val = null;
+		Map<String, Object> userprops = elem.getUserProperties();
+		if (userprops != null) {
+			val = userprops.get(propName);
+		}
+		if (val == null) {
+			ReportItemDesign designElem = (ReportItemDesign )elem.getGenerateBy();
+			if (designElem != null) {
+				Map<String,Expression> designUserprops = designElem.getUserProperties();
+				if (designUserprops != null) {
+					Expression expression = designUserprops.get(propName);
+					if( expression instanceof Expression.Constant ) {
+						Expression.Constant constant = (Expression.Constant)expression;
+						val = constant.getValue();
+					}
+				}
+			}
+		}
+		return val;
+	}
+	
+	/**
+	 * Start the auto text content handling
+	 * 
+	 * @param autoText auto text content
+	 */
 	public void startAutoText(IAutoTextContent autoText) {
 		writeContent(autoText.getType(), autoText.getText(), autoText);
 	}
 
+	/**
+	 * Start the data content handling
+	 * 
+	 * @param data data content
+	 */
 	public void startData(IDataContent data) {
 		writeContent(AbstractEmitterImpl.NORMAL, data.getText(), data);
 	}
 
+	/**
+	 * Start the label content handling
+	 * 
+	 * @param label label content
+	 */
 	public void startLabel(ILabelContent label) {
 		String txt = label.getText() == null ? label.getLabelText() : label.getText();
 		txt = txt == null ? "" : txt;
-		writeContent(AbstractEmitterImpl.NORMAL, txt, label);
+		int type = AbstractEmitterImpl.NORMAL;
+		String fieldFunction = (String)getUserProperty(label, DocEmitter.WORD_FIELD_FUNCTION);
+		if (fieldFunction != null && !(fieldFunction.isEmpty())){
+			type = AbstractEmitterImpl.CUSTOM_FIELD;
+			writeContent(type, fieldFunction + "\n" + txt, label);
+			// We transfer the fieldFunction piggyback using the label text.
+			// The function is the first line, the label text is the rest.
+			// We use the label text as the placeholder value for displaying the field function,
+			// because we don't actually evaluate the function - that's a task for MS Word later.
+		} else {
+			writeContent(type, txt, label);
+		}
 	}
 
+	/**
+	 * Start the text content handling
+	 * 
+	 * @param text text content
+	 */
 	public void startText(ITextContent text) {
 		writeContent(AbstractEmitterImpl.NORMAL, text.getText(), text);
 	}
 
+	/**
+	 * Start the list content handling
+	 * 
+	 * @param list list content
+	 */
 	public void startList(IListContent list) {
 		adjustInline();
 
@@ -397,17 +620,32 @@ public abstract class AbstractEmitterImpl {
 		context.startCell();
 		wordWriter.startTableRow(-1);
 		IStyle style = computeStyle(list.getComputedStyle());
-		wordWriter.startTableCell(context.getCurrentWidth(), style, null);
+		wordWriter.startTableCell(context.getCurrentWidth(), style, null, null);
 		writeTableToc();
 	}
 
+	/**
+	 * Start the list band content handling
+	 * 
+	 * @param listBand list band content
+	 */
 	public void startListBand(IListBandContent listBand) {
 	}
 
+	/**
+	 * Start the list group content handling
+	 * 
+	 * @param group list group content
+	 */
 	public void startListGroup(IListGroupContent group) {
 		setGroupToc(group);
 	}
 
+	/**
+	 * Start the row content handling
+	 * 
+	 * @param row row content
+	 */
 	public void startRow(IRowContent row) {
 		if (!isHidden(row)) {
 			writeBookmark(row);
@@ -425,13 +663,28 @@ public abstract class AbstractEmitterImpl {
 		}
 	}
 
+	/**
+	 * Start the content handling
+	 * 
+	 * @param content content
+	 */
 	public void startContent(IContent content) {
 	}
 
+	/**
+	 * Start the group content handling
+	 * 
+	 * @param group group content
+	 */
 	public void startGroup(IGroupContent group) {
 		setGroupToc(group);
 	}
 
+	/**
+	 * Start the cell content handling
+	 * 
+	 * @param cell cell content
+	 */
 	public void startCell(ICellContent cell) {
 		rowFilledFlag = true;
 		context.startCell();
@@ -448,40 +701,172 @@ public abstract class AbstractEmitterImpl {
 		int rowSpan = cell.getRowSpan();
 		int cellWidth = context.getCellWidth(columnId, columnSpan);
 
-		IStyle style = computeStyle(cell.getComputedStyle());
-//		style.get
+		IStyle cellStyle = computeStyle(cell.getComputedStyle());
+		Boolean[] inheritedStyleFromRow = inheritCellStyle(cell);
 
 		if (rowSpan > 1) {
-			context.addSpan(columnId, columnSpan, cellWidth, rowSpan, style);
+			context.addSpan(columnId, columnSpan, cellWidth, rowSpan, cellStyle);
 		}
 
 		SpanInfo info = null;
 
 		if (columnSpan > 1 || rowSpan > 1) {
-			info = new SpanInfo(columnId, columnSpan, cellWidth, true, style);
+			info = new SpanInfo(columnId, columnSpan, cellWidth, true, cellStyle);
 		}
-		wordWriter.startTableCell(cellWidth, style, info);
-		context.addWidth(getCellWidth(cellWidth, style));
+		DiagonalLineInfo diagonalLineInfo = createDiagonalLineInfo(cell, WordUtil.twipToPt(cellWidth));
+		wordWriter.startTableCell(cellWidth, cellStyle, info, diagonalLineInfo);
+		context.addWidth(getCellWidth(cellWidth, cellStyle));
 		writeTableToc();
-		if (cell.getDiagonalNumber() != 0 && cell.getDiagonalStyle() != null
-				&& !"none".equalsIgnoreCase(cell.getDiagonalStyle())) {
-			drawDiagonalLine(cell, WordUtil.twipToPt(cellWidth));
+
+		resetInheritedStyle(cellStyle, inheritedStyleFromRow);
+	}
+
+	private void resetInheritedStyle(IStyle cellStyle, Boolean[] inheritedStyleFromRow) {
+
+		// border style top
+		if (inheritedStyleFromRow[0]) {
+			cellStyle.setBorderTopStyle(null);
+			cellStyle.setBorderTopColor(null);
+			cellStyle.setBorderTopWidth(null);
+		}
+		// border style bottom
+		if (inheritedStyleFromRow[1]) {
+			cellStyle.setBorderBottomStyle(null);
+			cellStyle.setBorderBottomColor(null);
+			cellStyle.setBorderBottomWidth(null);
+		}
+		// border style left
+		if (inheritedStyleFromRow[2]) {
+			cellStyle.setBorderLeftStyle(null);
+			cellStyle.setBorderLeftColor(null);
+			cellStyle.setBorderLeftWidth(null);
+		}
+		// border style right
+		if (inheritedStyleFromRow[3]) {
+			cellStyle.setBorderRightStyle(null);
+			cellStyle.setBorderRightColor(null);
+			cellStyle.setBorderRightWidth(null);
 		}
 	}
 
-	private boolean hasBorder(String borderStyle) {
-		return !(borderStyle == null || "none".equalsIgnoreCase(borderStyle));
+	private Boolean[] inheritCellStyle(ICellContent cell) {
+
+		// cell border inherited from row, order: top, bottom, left, right
+		Boolean[] inheritedStyleFromRow = { false, false, false, false };
+
+		IRowContent row = (IRowContent) cell.getParent();
+		IStyle rowStyle = row.getComputedStyle();
+		IStyle cellStyle = computeStyle(cell.getComputedStyle());
+
+		// border top: inherited from the row line top
+		if ("none".equals(cellStyle.getBorderTopStyle())) {
+			cellStyle.setBorderTopStyle(rowStyle.getBorderTopStyle());
+			cellStyle.setBorderTopWidth(rowStyle.getBorderTopWidth());
+			cellStyle.setBorderTopColor(rowStyle.getBorderTopColor());
+			inheritedStyleFromRow[0] = true;
+		}
+		// border bottom: inherited from the row line bottom
+		if ("none".equals(cellStyle.getBorderBottomStyle())) {
+			cellStyle.setBorderBottomStyle(rowStyle.getBorderBottomStyle());
+			cellStyle.setBorderBottomWidth(rowStyle.getBorderBottomWidth());
+			cellStyle.setBorderBottomColor(rowStyle.getBorderBottomColor());
+			inheritedStyleFromRow[1] = true;
+		}
+		// 1st cell of row: inherited left border style if cell style is "none"
+		if (cell.getColumn() == 0 && "none".equals(cellStyle.getBorderLeftStyle())) {
+			cellStyle.setBorderLeftStyle(rowStyle.getBorderLeftStyle());
+			cellStyle.setBorderLeftWidth(rowStyle.getBorderLeftWidth());
+			cellStyle.setBorderLeftColor(rowStyle.getBorderLeftColor());
+			inheritedStyleFromRow[2] = true;
+		}
+		// last cell of row: inherited left border style if cell style is "none"
+		if (cell.isLastChild() && "none".equals(cellStyle.getBorderRightStyle())) {
+			cellStyle.setBorderRightStyle(rowStyle.getBorderRightStyle());
+			cellStyle.setBorderRightWidth(rowStyle.getBorderRightWidth());
+			cellStyle.setBorderRightColor(rowStyle.getBorderRightColor());
+			inheritedStyleFromRow[3] = true;
+		}
+		return inheritedStyleFromRow;
 	}
 
-	private void drawDiagonalLine(ICellContent cell, double cellWidth) {
-		if (cellWidth == 0)
-			return;
+	private DiagonalLineInfo createDiagonalLineInfo(ICellContent cell, double cellWidth) {
 		int cellHeight = WordUtil.convertTo(getCellHeight(cell), 0, reportDpi) / 20;
-		if (cellHeight == 0)
-			return;
+
+		int diagonalSourceType = 0;
+		int antidiagonalSourceType = 0;
+
+		if (cell.getDiagonalNumber() > 0 && cell.getDiagonalStyle() != null
+				&& !"none".equalsIgnoreCase(cell.getDiagonalStyle())) {
+			diagonalSourceType = 1;
+		}
+		if (cell.getAntidiagonalNumber() > 0 && cell.getAntidiagonalStyle() != null
+				&& !"none".equalsIgnoreCase(cell.getAntidiagonalStyle())) {
+			antidiagonalSourceType = 1;
+		}
+
+		if (diagonalSourceType == 0 && antidiagonalSourceType == 0)
+			return null;
 
 		DiagonalLineInfo diagonalLineInfo = new DiagonalLineInfo();
-		int diagonalWidth = PropertyUtil.getDimensionValue(cell, cell.getDiagonalWidth(), (int) cellWidth) / 1000;
+
+		int cellDiagonalNumber = 0;
+		DimensionType cellDiagonalWidth = null;
+		String cellDiagonalStyle = null;
+		String cellDiagonalColor = null;
+
+		if (diagonalSourceType == 1) {
+			cellDiagonalNumber = cell.getDiagonalNumber();
+			cellDiagonalStyle = cell.getDiagonalStyle();
+			cellDiagonalWidth = cell.getDiagonalWidth();
+			if (cell.getDiagonalColor() != null) {
+				cellDiagonalColor = cell.getDiagonalColor();
+			} else {
+				cellDiagonalColor = WordUtil.parseColor(cell.getDiagonalColor());
+			}
+			diagonalLineInfo.setDiagonalColor(cellDiagonalColor);
+		}
+
+		int cellAntidiagonalNumber = 0;
+		DimensionType cellAntidiagonalWidth = null;
+		String cellAntidiagonalStyle = null;
+		String cellAntidiagonalColor = null;
+
+		if (antidiagonalSourceType == 1) {
+			cellAntidiagonalNumber = cell.getAntidiagonalNumber();
+			cellAntidiagonalStyle = cell.getAntidiagonalStyle();
+			cellAntidiagonalWidth = cell.getAntidiagonalWidth();
+			if (cell.getAntidiagonalColor() != null) {
+				cellAntidiagonalColor = cell.getAntidiagonalColor();
+			} else {
+				cellAntidiagonalColor = WordUtil.parseColor(cell.getAntidiagonalColor());
+			}
+			diagonalLineInfo.setAntidiagonalColor(cellAntidiagonalColor);
+		}
+
+		int diagonalWidth = PropertyUtil.getDimensionValue(cell, cellDiagonalWidth, (int) cellWidth) / 1000;
+		diagonalLineInfo.setDiagonalLine(cellDiagonalNumber, cellDiagonalStyle, diagonalWidth);
+
+		int antidiagonalWidth = PropertyUtil.getDimensionValue(cell, cellAntidiagonalWidth, (int) cellWidth) / 1000;
+		diagonalLineInfo.setAntidiagonalLine(cellAntidiagonalNumber, cellAntidiagonalStyle, antidiagonalWidth);
+
+		diagonalLineInfo.setCoordinateSize(cellWidth, cellHeight);
+
+		return diagonalLineInfo;
+	}
+
+	@SuppressWarnings("unused")
+	private void drawDiagonalLine(ICellContent cell, double cellWidth) {
+		if (cellWidth == 0) {
+			return;
+		}
+		int cellHeight = WordUtil.convertTo(getCellHeight(cell), 0, reportDpi) / 20;
+		if (cellHeight == 0) {
+			return;
+		}
+		DimensionType cellDiagonalWidth = cell.getDiagonalWidth();
+
+		DiagonalLineInfo diagonalLineInfo = new DiagonalLineInfo();
+		int diagonalWidth = PropertyUtil.getDimensionValue(cell, cellDiagonalWidth, (int) cellWidth) / 1000;
 		diagonalLineInfo.setDiagonalLine(cell.getDiagonalNumber(), cell.getDiagonalStyle(), diagonalWidth);
 		diagonalLineInfo.setAntidiagonalLine(0, null, 0);
 		diagonalLineInfo.setCoordinateSize(cellWidth, cellHeight);
@@ -503,6 +888,11 @@ public abstract class AbstractEmitterImpl {
 		return ((IRowContent) parent).getHeight();
 	}
 
+	/**
+	 * Start the table content handling
+	 * 
+	 * @param table table content
+	 */
 	public void startTable(ITableContent table) {
 		adjustInline();
 		styles.push(table.getComputedStyle());
@@ -539,9 +929,19 @@ public abstract class AbstractEmitterImpl {
 		return tableWidth;
 	}
 
+	/**
+	 * Start the table band content handling
+	 * 
+	 * @param band table band content
+	 */
 	public void startTableBand(ITableBandContent band) {
 	}
 
+	/**
+	 * Start the table group content handling
+	 * 
+	 * @param group table group content
+	 */
 	public void startTableGroup(ITableGroupContent group) {
 		setGroupToc(group);
 	}
@@ -571,23 +971,56 @@ public abstract class AbstractEmitterImpl {
 		}
 	}
 
+	/**
+	 * End of the cell content handling
+	 * 
+	 * @param cell cell content
+	 */
 	public void endCell(ICellContent cell) {
 		adjustInline();
 		context.removeWidth();
-		wordWriter.endTableCell(context.needEmptyP());
+		if (addEmptyParagraphToTableCell) {
+			wordWriter.endTableCell(context.needEmptyP());
+		} else {
+			boolean needEmptyPara = !cell.hasChildren();
+			if (needEmptyPara) {
+				needEmptyPara = context.needEmptyP();
+			}
+			wordWriter.endTableCell(needEmptyPara, true);
+		}
 		context.endCell();
 	}
 
+	/**
+	 * End of the content handling
+	 * 
+	 * @param content content
+	 */
 	public void endContent(IContent content) {
 	}
 
+	/**
+	 * End of the group content handling
+	 * 
+	 * @param group group content
+	 */
 	public void endGroup(IGroupContent group) {
 		decreaseTOCLevel(group);
 	}
 
+	/**
+	 * End of the list content handling
+	 * 
+	 * @param list list content
+	 */
 	public void endList(IListContent list) {
 		adjustInline();
-		wordWriter.endTableCell(context.needEmptyP());
+		// main handle of the usage of empty list cell paragraph
+		boolean needEmptyP = addEmptyParagraphToListCell;
+		if (needEmptyP) {
+			needEmptyP = context.needEmptyP();
+		}
+		wordWriter.endTableCell(needEmptyP);
 		context.endCell();
 		wordWriter.endTableRow();
 		if (!styles.isEmpty()) {
@@ -600,13 +1033,28 @@ public abstract class AbstractEmitterImpl {
 		decreaseTOCLevel(list);
 	}
 
+	/**
+	 * End of the list band content handling
+	 * 
+	 * @param listBand list band content
+	 */
 	public void endListBand(IListBandContent listBand) {
 	}
 
+	/**
+	 * End of the list group content handling
+	 * 
+	 * @param group list group content
+	 */
 	public void endListGroup(IListGroupContent group) {
 		decreaseTOCLevel(group);
 	}
 
+	/**
+	 * End of the row content handling
+	 * 
+	 * @param row row content
+	 */
 	public void endRow(IRowContent row) {
 		if (!isHidden(row)) {
 			if (!styles.isEmpty()) {
@@ -634,26 +1082,49 @@ public abstract class AbstractEmitterImpl {
 		}
 	}
 
+	/**
+	 * End of the table band content handling
+	 * 
+	 * @param band table band content
+	 */
 	public void endTableBand(ITableBandContent band) {
 	}
 
+	/**
+	 * End of the table group content handling
+	 * 
+	 * @param group table group content
+	 */
 	public void endTableGroup(ITableGroupContent group) {
 		decreaseTOCLevel(group);
 	}
 
+	/**
+	 * End of the page content handling
+	 * 
+	 * @param page page content
+	 */
 	public void endPage(IPageContent page) {
 	}
 
+	/**
+	 * Start of the image content handling
+	 * 
+	 * @param image image content
+	 */
 	public void startImage(IImageContent image) {
 		IStyle style = image.getComputedStyle();
 		InlineFlag inlineFlag = getInlineFlag(style);
-		String uri = image.getURI();
+		String uri = this.verifyURI(image.getURI());
 		String mimeType = image.getMIMEType();
 		String extension = image.getExtension();
 		String altText = image.getAltText();
-		double height = WordUtil.convertImageSize(image.getHeight(), 0, reportDpi);
-		int parentWidth = (int) (WordUtil.twipToPt(context.getCurrentWidth()) * reportDpi / 72);
-		double width = WordUtil.convertImageSize(image.getWidth(), parentWidth, reportDpi);
+		int referenceWidth = (int) (WordUtil.twipToPt(context.getCurrentWidth()) * reportDpi / 72);
+		int referenceHeight = 0;
+		
+		double width = WordUtil.convertImageSize(image.getWidth(), referenceWidth, reportDpi);
+		double height = WordUtil.convertImageSize(image.getHeight(), referenceHeight, reportDpi);
+		double fitReferenceWidth = WordUtil.convertImageSize(null, referenceWidth, reportDpi);
 		context.addContainer(false);
 
 		if (FlashFile.isFlash(mimeType, uri, extension)) {
@@ -690,7 +1161,29 @@ public abstract class AbstractEmitterImpl {
 				float scale = ((float) imageInfo.getHeight()) / ((float) imageInfo.getWidth());
 				height = width * scale;
 			}
+			if (image.getWidth() != null && DimensionType.UNITS_PERCENTAGE.equalsIgnoreCase(image.getWidth().getUnits())) {
+				referenceWidth = imageInfo.getWidth();
+				width = WordUtil.convertImageSize(image.getWidth(), referenceWidth,	PropertyUtil.getImageDpi(image, imageFileWidthDpi, 0));
+			}
+			if (image.getHeight() != null && DimensionType.UNITS_PERCENTAGE.equalsIgnoreCase(image.getHeight().getUnits())) {
+				referenceHeight = imageInfo.getHeight();
+				height = WordUtil.convertImageSize(image.getHeight(), referenceHeight, PropertyUtil.getImageDpi(image, imageFileHeightDpi, 0));
+			}
+			if (image.getWidth() == null && width == 0 && height > 0) {
+				width = height;
+			}
+			if (width > 0 && image.getHeight() == null && height == 0) {
+				height = width;
+			}
 
+			// fit image to the container
+			if (image.isFitToContainer() && width > 0 && fitReferenceWidth > 0 && width > fitReferenceWidth) {
+				double ratio = fitReferenceWidth / width;
+				double recalcHeight = height * ratio;
+				width = fitReferenceWidth;
+				height = recalcHeight;
+			}
+			
 			writeBookmark(image);
 			writeToc(image);
 			HyperlinkInfo hyper = getHyperlink(image);
@@ -733,29 +1226,37 @@ public abstract class AbstractEmitterImpl {
 
 	protected void writeSectionInP() throws IOException, BirtException {
 		wordWriter.startSectionInParagraph();
-		writeHeaderFooter();
-		// the border width /8*20 means to convert an eighth of a point to twips.
-		wordWriter.writePageProperties(pageHeight, pageWidth, headerHeight, footerHeight,
-				topMargin + (int) (pageTopBorderWidth / 8 * 20), bottomMargin + (int) (pageBottomBorderWidth / 8 * 20),
-				leftMargin + (int) (pageLeftBorderWidth / 8 * 20), rightMargin + (int) (pageRightBorderWidth / 8 * 20),
-				orientation);
-		wordWriter.writePageBorders(previousPage.getComputedStyle(), topMargin, bottomMargin, leftMargin, rightMargin);
+		writeSectionPageProperties();
 		wordWriter.endSectionInParagraph();
 	}
 
 	protected void writeSectionInBody() throws IOException, BirtException {
 		wordWriter.startSection();
-		writeHeaderFooter();
-		wordWriter.writePageProperties(pageHeight, pageWidth, headerHeight, footerHeight,
-				topMargin + (int) (pageTopBorderWidth / 8 * 20), bottomMargin + (int) (pageBottomBorderWidth / 8 * 20),
-				leftMargin + (int) (pageLeftBorderWidth / 8 * 20), rightMargin + (int) (pageRightBorderWidth / 8 * 20),
-				orientation);
-		wordWriter.writePageBorders(previousPage.getComputedStyle(), topMargin, bottomMargin, leftMargin, rightMargin);
+		writeSectionPageProperties();
 		wordWriter.endSection();
 	}
 
-	// TOC must not contain space,word may not process TOC with
-	// space
+	protected void writeSectionPageProperties() throws IOException, BirtException {
+		writeHeaderFooter();
+
+		// WPML, header/footer without layout grid:
+		// a recalculation of the "header margin top"/"header margin bottom" is necessary
+		// WPML, borders:
+		// the border width 8*20 means to convert an eighth of a point to twips.
+		int topMarginComputed = topMargin + (this.wrappedTableHeaderFooter ? 0 : headerHeight) + pageTopBorderWidth / 8 * 20;
+		int bottomMarginComputed = bottomMargin + (this.wrappedTableHeaderFooter ? 0 : footerHeight) + pageBottomBorderWidth / 8 * 20;
+		int leftMarginComputed = leftMargin + pageLeftBorderWidth / 8 * 20;
+		int rightMarginComputed = rightMargin + pageRightBorderWidth / 8 * 20;
+
+		int headerHeightComputed = topMargin;
+		int footerHeightComputed = bottomMargin;
+
+		wordWriter.writePageProperties(pageHeight, pageWidth, headerHeightComputed, footerHeightComputed,
+				topMarginComputed, bottomMarginComputed, leftMarginComputed, rightMarginComputed, orientation);
+		wordWriter.writePageBorders(previousPage.getComputedStyle(), topMargin, bottomMargin, leftMargin, rightMargin);
+	}
+		
+	// TOC must not contain space, word may not process TOC with space
 	protected void writeToc(IContent content) {
 		writeToc(content, false);
 	}
@@ -782,37 +1283,34 @@ public abstract class AbstractEmitterImpl {
 			if (context.isFirstInline()) {
 				context.startInline();
 				inlineFlag = InlineFlag.FIRST_INLINE;
-			} else
+			} else {
 				inlineFlag = InlineFlag.MIDDLE_INLINE;
+			}
 		} else {
 			adjustInline();
 		}
 		return inlineFlag;
 	}
 
-	private Set<String> set = new HashSet<String>();
+	private Set<String> set = new HashSet<>();
 
 	private boolean hasTocOutputed(IContent content) {
 		String bookmark = content.getBookmark();
 		if (set.contains(bookmark)) {
 			return true;
-		} else {
-			set.add(bookmark);
-			return false;
 		}
+		set.add(bookmark);
+		return false;
 	}
 
 	protected void writeBookmark(IContent content) {
 		String bookmark = content.getBookmark();
 		// birt use __TOC_X_X as bookmark for toc and thus it is not a
 		// really bookmark
-		if (bookmark == null || bookmark.startsWith("_TOC")) {
+		if (bookmark == null || bookmark.startsWith("_TOC") || bookmarks.contains(bookmark)) {
 			return;
 		}
-		if (bookmarks.contains(bookmark)) {
-			return;
-		}
-		bookmark = bookmark.replaceAll(" ", "_");
+		bookmark = bookmark.replace(' ', '_');
 		wordWriter.writeBookmark(bookmark);
 		bookmarks.add(bookmark);
 	}
@@ -825,7 +1323,7 @@ public abstract class AbstractEmitterImpl {
 			String bookmark = linkAction.getBookmark();
 			switch (linkAction.getType()) {
 			case IHyperlinkAction.ACTION_BOOKMARK:
-				bookmark = bookmark.replaceAll(" ", "_");
+				bookmark = bookmark.replace(' ', '_');
 				hyperlink = new HyperlinkInfo(HyperlinkInfo.BOOKMARK, bookmark, tooltip);
 				break;
 			case IHyperlinkAction.ACTION_HYPERLINK:
@@ -838,6 +1336,10 @@ public abstract class AbstractEmitterImpl {
 		if (hyperlink != null) {
 			String color = WordUtil.parseColor(content.getStyle().getColor());
 			hyperlink.setColor(color);
+			if (content.getComputedStyle().getProperty(StyleConstants.STYLE_TEXT_HYPERLINK_STYLE) != null) {
+				hyperlink.setHasHyperlinkDecoration(content.getComputedStyle().getProperty(StyleConstants.STYLE_TEXT_HYPERLINK_STYLE).getCssText()
+					.equals(CSSConstants.CSS_TEXT_HYPERLINK_DECORATION_VALUE));			
+			}
 		}
 		return hyperlink;
 	}
@@ -921,9 +1423,8 @@ public abstract class AbstractEmitterImpl {
 		String fontName = genericFontMapping.get(font);
 		if (fontName == null) {
 			return font;
-		} else {
-			return fontName;
 		}
+		return fontName;
 	}
 
 	private FontSplitter getFontSplitter(IContent content, String text) {
@@ -936,7 +1437,7 @@ public abstract class AbstractEmitterImpl {
 	private boolean isHidden(IContent content) {
 		if (content != null) {
 			IStyle style = content.getStyle();
-			if (!IStyle.NONE_VALUE.equals(style.getProperty(IStyle.STYLE_DISPLAY))) {
+			if (!CSSValueConstants.NONE_VALUE.equals(style.getProperty(StyleConstants.STYLE_DISPLAY))) {
 				return isHiddenByVisibility(content);
 			}
 			return true;
@@ -946,7 +1447,7 @@ public abstract class AbstractEmitterImpl {
 
 	/**
 	 * if the content is hidden
-	 * 
+	 *
 	 * @return
 	 */
 	private boolean isHiddenByVisibility(IContent content) {
@@ -957,7 +1458,7 @@ public abstract class AbstractEmitterImpl {
 	}
 
 	private boolean contains(String formats, String format) {
-		if (formats != null && (formats.indexOf(EngineIRConstants.FORMAT_TYPE_VIEWER) >= 0
+		if (formats != null && (formats.indexOf(DesignChoiceConstants.FORMAT_TYPE_VIEWER) >= 0
 				|| formats.indexOf(BIRTConstants.BIRT_ALL_VALUE) >= 0 || formats.indexOf(format) >= 0)) {
 			return true;
 		}
@@ -989,11 +1490,7 @@ public abstract class AbstractEmitterImpl {
 	}
 
 	protected boolean isNullValue(CSSValue value) {
-		if (value == null) {
-			return true;
-		}
-
-		if (value instanceof DataFormatValue) {
+		if ((value == null) || (value instanceof DataFormatValue)) {
 			return true;
 		}
 
@@ -1010,11 +1507,14 @@ public abstract class AbstractEmitterImpl {
 		String backgroundWidth = style.getBackgroundWidth();
 
 		SimpleMasterPageDesign master = (SimpleMasterPageDesign) previousPage.getGenerateBy();
-
+		boolean showHeaderOnFirst = master.isShowHeaderOnFirst();
+		if (!wordWriter.isFirstSection()) {
+			showHeaderOnFirst = true;
+		}
+		boolean empty = true; 
 		if (previousPage.getPageHeader() != null || backgroundHeight != null || backgroundWidth != null) {
-			wordWriter.startHeader(!master.isShowHeaderOnFirst() && previousPage.getPageNumber() == 1, headerHeight,
-					contentWidth);
-
+			empty = false;
+			wordWriter.startHeader(showHeaderOnFirst, headerHeight, contentWidth);
 			if (backgroundHeight != null || backgroundWidth != null) {
 				String backgroundImageUrl = EmitterUtil.getBackgroundImageUrl(style,
 						reportContent.getDesign().getReportDesign(), reportContext.getAppContext());
@@ -1027,18 +1527,25 @@ public abstract class AbstractEmitterImpl {
 			wordWriter.endHeader();
 		}
 		if (previousPage.getPageFooter() != null) {
-			if (!master.isShowFooterOnLast() && previousPage.getPageNumber() == reportContent.getTotalPage()) {
+			empty = false;
+			// We support showFooterOnLast == false only in separate RunTask and RenderTask.  
+			if (!master.isShowFooterOnLast() &&
+					reportContext.getAppContext().get("EngineTask").getClass().getSimpleName().equals("RenderTask")
+					&& previousPage.getPageNumber() == reportContent.getTotalPage()) {
 				IContent footer = previousPage.getPageFooter();
 				ILabelContent emptyContent = footer.getReportContent().createLabelContent();
-				emptyContent.setText(this.EMPTY_FOOTER);
-				wordWriter.startFooter(footerHeight, contentWidth);
+				emptyContent.setText(AbstractEmitterImpl.EMPTY_FOOTER);
+				wordWriter.startFooter(false, footerHeight, contentWidth);
 				contentVisitor.visit(emptyContent, null);
 				wordWriter.endFooter();
 			} else {
-				wordWriter.startFooter(footerHeight, contentWidth);
+				wordWriter.startFooter(showHeaderOnFirst, footerHeight, contentWidth);
 				contentVisitor.visitChildren(previousPage.getPageFooter(), null);
 				wordWriter.endFooter();
 			}
+		}
+		if (!empty && !showHeaderOnFirst) {
+			wordWriter.writeEmptyElement("w:titlePg");
 		}
 	}
 
@@ -1046,13 +1553,13 @@ public abstract class AbstractEmitterImpl {
 	 * Transfer background for current page to Doc format. Now, the exported file
 	 * will apply the first background properties, and followed background will
 	 * ignore.
-	 * 
+	 *
 	 * In addition, Since the Word only support fill-in background, the background
 	 * attach, pos, posX, posY and repeat are not mapped to Word easyly. At present,
 	 * ignore those properties.
-	 * 
+	 *
 	 * @throws IOException
-	 * 
+	 *
 	 * @TODO support background properties. attach, pos, posx, posy and repeat.
 	 */
 
@@ -1072,8 +1579,8 @@ public abstract class AbstractEmitterImpl {
 	}
 
 	private int getCellWidth(int cellWidth, IStyle style) {
-		int leftPadding = getPadding(style.getProperty(IStyle.STYLE_PADDING_LEFT));
-		int rightPadding = getPadding(style.getProperty(IStyle.STYLE_PADDING_RIGHT));
+		int leftPadding = getPadding(style.getProperty(StyleConstants.STYLE_PADDING_LEFT));
+		int rightPadding = getPadding(style.getProperty(StyleConstants.STYLE_PADDING_RIGHT));
 
 		if (leftPadding > cellWidth) {
 			leftPadding = 0;
@@ -1087,7 +1594,7 @@ public abstract class AbstractEmitterImpl {
 			rightPadding = 0;
 		}
 
-		return (int) (cellWidth - leftPadding - rightPadding);
+		return cellWidth - leftPadding - rightPadding;
 	}
 
 	private int getPadding(CSSValue padding) {
@@ -1105,7 +1612,10 @@ public abstract class AbstractEmitterImpl {
 				tblColumns[i] = -1;
 				count++;
 			} else {
-				tblColumns[i] = WordUtil.convertTo(col.getWidth(), tblWidth, reportDpi);
+				int colWidth = WordUtil.convertTo(col.getWidth(), tblWidth, reportDpi);
+				// validate the maximum of column width 
+				colWidth = (colWidth > WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS) ? WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS : colWidth;
+				tblColumns[i] = colWidth;
 				total += tblColumns[i];
 			}
 		}
@@ -1114,19 +1624,35 @@ public abstract class AbstractEmitterImpl {
 			return tblColumns;
 		}
 		tblWidth = Math.min(tblWidth, context.getCurrentWidth());
-		return EmitterUtil.resizeTableColumn(tblWidth, tblColumns, count, total);
+		tblWidth = (tblWidth > WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS) ? WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS : tblWidth;
+
+		int[] tblColWidth = EmitterUtil.resizeTableColumn(tblWidth, tblColumns, count, total);
+		// validate the maximum of column width 
+		for (int i = 0; i < tblColWidth.length; i++) {
+			tblColWidth[i] = (tblColWidth[i] > WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS) ? WordUtil.MAX_ELEMENT_WIDTH_INCH_TWIPS : tblColWidth[i];
+		}
+		return tblColWidth;
 	}
 
+	/**
+	 * Get the word version
+	 * 
+	 * @return Return the word version
+	 */
 	public int getWordVersion() {
 		return wordVersion;
 	}
 
+	/**
+	 * Set the word version
+	 * 
+	 * @param wordVersion set the word version
+	 */
 	public void setWordVersion(int wordVersion) {
 		this.wordVersion = wordVersion;
 	}
 
-	static class TocInfo
-	{
+	static class TocInfo {
 		String tocValue;
 		int tocLevel;
 
@@ -1135,4 +1661,26 @@ public abstract class AbstractEmitterImpl {
 			this.tocLevel = tocLevel;
 		}
 	}
+
+	/**
+	 * Check the URL to be valid and fall back try it like file-URL
+	 */
+	private String verifyURI(String uri) {
+		if (uri != null && !uri.toLowerCase().startsWith(URL_PROTOCOL_TYPE_DATA)) {
+			String tmpUrl = uri.replaceAll(" ", URL_PROTOCOL_URL_ENCODED_SPACE);
+			try {
+				new URL(tmpUrl).toURI();
+			} catch (MalformedURLException | URISyntaxException excUrl) {
+				// invalid URI try it like "file:"
+				try {
+					tmpUrl = URL_PROTOCOL_TYPE_FILE + "///" + uri;
+					new URL(tmpUrl).toURI();
+					uri = tmpUrl;
+				} catch (MalformedURLException | URISyntaxException excFile) {
+				}
+			}
+		}
+		return uri;
+	}
+
 }

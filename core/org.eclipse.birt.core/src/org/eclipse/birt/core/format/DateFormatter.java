@@ -1,9 +1,12 @@
 /*******************************************************************************
 * Copyright (c) 2004,2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,28 +16,31 @@ package org.eclipse.birt.core.format;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.ibm.icu.text.DateFormat;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.ibm.icu.util.TimeZone;
 import com.ibm.icu.util.ULocale;
 
 /**
  * DateFormatter.
- * 
+ *
  * Design for Class DateFormatter.This version is for open source, so we only
  * apply the function which Java has provided. Beside these basic function, in
  * this version, we also provide some new API for further implementation in the
  * future
- * 
+ *
  */
 public class DateFormatter implements IFormatter {
 
 	private static final String UNFORMATTED = "Unformatted";
+	/** property: date time unformatted */
 	public static final String DATETIME_UNFORMATTED = "DateTime" + UNFORMATTED;
+	/** property: date unformatted */
 	public static final String DATE_UNFORMATTED = "Date" + UNFORMATTED;
+	/** property: time unformatted */
 	public static final String TIME_UNFORMATTED = "Time" + UNFORMATTED;
 
 	/**
@@ -64,19 +70,24 @@ public class DateFormatter implements IFormatter {
 	static protected Logger logger = Logger.getLogger(DateFormatter.class.getName());
 
 	/**
-	 * constuctor method with no paremeter
+	 * Constructor method with no parameter
 	 */
 	public DateFormatter() {
 		this(null, null, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param timeZone
+	 */
 	public DateFormatter(TimeZone timeZone) {
 		this(null, null, timeZone);
 	}
 
 	/**
-	 * constuctor method with String parameter
-	 * 
+	 * Constructor method with String parameter
+	 *
 	 * @param pattern
 	 */
 	public DateFormatter(String pattern) {
@@ -84,30 +95,28 @@ public class DateFormatter implements IFormatter {
 	}
 
 	/**
-	 * constuctor method with Locale parameters
-	 * 
+	 * Constructor method with Locale parameters
+	 *
 	 * @param localeLoc
 	 */
 	public DateFormatter(ULocale localeLoc) {
 		this(null, localeLoc, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param localeLoc
+	 * @param timeZone
+	 */
 	public DateFormatter(ULocale localeLoc, TimeZone timeZone) {
 		this(null, localeLoc, timeZone);
 	}
 
 	/**
-	 * @deprecated since 2.1
-	 * @return
-	 */
-	public DateFormatter(Locale localeLoc) {
-		this(null, ULocale.forLocale(localeLoc), null);
-	}
-
-	/**
-	 * constuctor method with two parameters, one is String type while the other is
+	 * Constructor method with two parameters, one is String type while the other is
 	 * Locale type
-	 * 
+	 *
 	 * @param pattern
 	 * @param localeLoc
 	 */
@@ -115,31 +124,37 @@ public class DateFormatter implements IFormatter {
 		this(pattern, localeLoc, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param pattern   pattern of date
+	 * @param localeLoc local of date
+	 * @param timeZone  time zone of date
+	 */
 	public DateFormatter(String pattern, ULocale localeLoc, TimeZone timeZone) {
-		if (localeLoc != null)
+		if (localeLoc != null) {
 			locale = localeLoc;
-		if (timeZone != null)
+		}
+		if (timeZone != null) {
 			this.timeZone = timeZone;
+		}
 		applyPattern(pattern);
 	}
 
 	/**
-	 * @deprecated since 2.1
-	 * @return
-	 */
-	public DateFormatter(String pattern, Locale localeLoc) {
-		this(pattern, ULocale.forLocale(localeLoc));
-	}
-
-	/**
 	 * get the string pattern
-	 * 
-	 * @return
+	 *
+	 * @return Return the string pattern
 	 */
 	public String getPattern() {
 		return this.formatPattern;
 	}
 
+	/**
+	 * Method to set the date/time format string
+	 *
+	 * @param formatString
+	 */
 	public void applyPattern(String formatString) {
 		createPattern(formatString);
 
@@ -157,10 +172,10 @@ public class DateFormatter implements IFormatter {
 	/**
 	 * Convert into predefine pattern, when format is null, the case cover english.
 	 * It will add if other language is require
-	 * 
+	 *
 	 * @param dateformat
 	 * @param locale
-	 * @return
+	 * @return Return formatted date
 	 */
 	@SuppressWarnings("nls")
 	private SimpleDateFormat toPredefinedPattern(SimpleDateFormat dateformat, ULocale locale) {
@@ -173,11 +188,12 @@ public class DateFormatter implements IFormatter {
 
 	/**
 	 * define pattern and locale here
-	 * 
+	 *
 	 * @param formatString
 	 */
 	@SuppressWarnings("nls")
 	private void createPattern(String formatString) {
+
 		try {
 			this.formatPattern = formatString;
 			this.dateTimeFormat = null;
@@ -329,37 +345,51 @@ public class DateFormatter implements IFormatter {
 			if (formatString.equals("Long Date")) {
 				dateTimeFormat = com.ibm.icu.text.DateFormat.getDateInstance(com.ibm.icu.text.DateFormat.LONG, locale);
 				return;
-
 			}
 			if (formatString.equals("Medium Date")) {
 				dateTimeFormat = com.ibm.icu.text.DateFormat.getDateInstance(com.ibm.icu.text.DateFormat.MEDIUM,
 						locale);
 				return;
-
 			}
 			if (formatString.equals("Short Date")) {
 				dateTimeFormat = com.ibm.icu.text.DateFormat.getDateInstance(com.ibm.icu.text.DateFormat.SHORT, locale);
 				return;
-
 			}
 			if (formatString.equals("Long Time")) {
 				dateTimeFormat = com.ibm.icu.text.DateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.LONG, locale);
 				return;
-
 			}
 			if (formatString.equals("Medium Time")) {
 				dateTimeFormat = com.ibm.icu.text.DateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.MEDIUM,
 						locale);
 				return;
-
 			}
 			if (formatString.equals("Short Time")) {
 				dateTimeFormat = new SimpleDateFormat("kk:mm", locale);
 				return;
-
 			}
-			dateTimeFormat = new SimpleDateFormat(formatString, locale);
+			if (formatString.equals("Date Picker")) {
+				dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd", locale);
+				return;
+			}
+			if (formatString.equals("Date Picker, Short Time")) {
+				dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", locale);
+				return;
+			}
+			if (formatString.equals("Date Picker, Medium Time")) {
+				dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", locale);
+				return;
+			}
+			if (formatString.equals("Time Picker, Short Time")) {
+				dateTimeFormat = new SimpleDateFormat("HH:mm", locale);
+				return;
+			}
+			if (formatString.equals("Time Picker, Medium Time")) {
+				dateTimeFormat = new SimpleDateFormat("HH:mm:ss", locale);
+				return;
+			}
 
+			dateTimeFormat = new SimpleDateFormat(formatString, locale);
 		} catch (Exception e) {
 			logger.log(Level.WARNING, e.getMessage(), e);
 		}
@@ -393,7 +423,7 @@ public class DateFormatter implements IFormatter {
 			if (pattern.indexOf("yyyy") == -1) {
 				int idx = pattern.indexOf("yy");
 				if (idx >= 0) {
-					StringBuffer strBuf = new StringBuffer(pattern);
+					StringBuilder strBuf = new StringBuilder(pattern);
 					strBuf.insert(idx, 'y');
 					pattern = strBuf.toString();
 				}
@@ -411,7 +441,7 @@ public class DateFormatter implements IFormatter {
 			if (pattern.indexOf("SSS") == -1) {
 				int idx = pattern.indexOf("ss");
 				if (idx >= 0) {
-					StringBuffer strBuf = new StringBuffer(pattern);
+					StringBuilder strBuf = new StringBuilder(pattern);
 
 					strBuf.insert(idx + 2, ".SSS");
 					pattern = strBuf.toString();
@@ -422,9 +452,12 @@ public class DateFormatter implements IFormatter {
 		return factoryFormat;
 	}
 
-	/*
+	/**
 	 * transfer the format string pattern from msdn to the string pattern which java
 	 * can recognize
+	 *
+	 * @param date Date to recognize the format of Java
+	 * @return Returns the analyst format of date
 	 */
 	public String format(Date date) {
 		try {
@@ -445,7 +478,9 @@ public class DateFormatter implements IFormatter {
 	}
 
 	/**
-	 * Returns format code according to format type and current locale
+	 * Method to return format code according to format type and current locale
+	 *
+	 * @return Returns format code according to format type and current locale
 	 */
 	public String getFormatCode() {
 		if (UNFORMATTED.equals(formatPattern) || DATETIME_UNFORMATTED.equals(formatPattern)
@@ -456,13 +491,14 @@ public class DateFormatter implements IFormatter {
 		SimpleDateFormat format = getFormatter();
 		if (format == null) {
 			return ((SimpleDateFormat) dateFormat).toPattern();
-		} else {
-			return format.toPattern();
 		}
+		return format.toPattern();
 	}
 
 	/**
-	 * Returns format code according to format type and current locale
+	 * Method to return the format code according to format type and current locale
+	 *
+	 * @return Returns format code according to format type and current locale
 	 */
 	public String getLocalizedFormatCode() {
 		if (UNFORMATTED.equals(formatPattern) || DATETIME_UNFORMATTED.equals(formatPattern)
@@ -473,38 +509,39 @@ public class DateFormatter implements IFormatter {
 		SimpleDateFormat format = getFormatter();
 		if (format == null) {
 			return ((SimpleDateFormat) dateFormat).toPattern();
-		} else {
-			return format.toLocalizedPattern();
 		}
+		return format.toLocalizedPattern();
 	}
 
 	/**
-	 * Returns format code according to format type and current locale
+	 * Method to return the format code according to format type and current locale
+	 *
+	 * @return Returns format code according to format type and current locale
 	 */
 	public SimpleDateFormat getFormatter() {
 		SimpleDateFormat dateFormat = null;
 		if (formatPattern.equals("General Date")) {
-			dateFormat = (SimpleDateFormat) SimpleDateFormat.getDateTimeInstance(com.ibm.icu.text.DateFormat.LONG,
+			dateFormat = (SimpleDateFormat) DateFormat.getDateTimeInstance(com.ibm.icu.text.DateFormat.LONG,
 					com.ibm.icu.text.DateFormat.LONG, locale);
 		}
 		if (formatPattern.equals("Long Date")) {
-			dateFormat = (SimpleDateFormat) SimpleDateFormat.getDateInstance(com.ibm.icu.text.DateFormat.LONG, locale);
+			dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(com.ibm.icu.text.DateFormat.LONG, locale);
 
 		}
 		if (formatPattern.equals("Medium Date")) {
-			dateFormat = (SimpleDateFormat) SimpleDateFormat.getDateInstance(com.ibm.icu.text.DateFormat.MEDIUM,
+			dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(com.ibm.icu.text.DateFormat.MEDIUM,
 					locale);
-
 		}
 		if (formatPattern.equals("Short Date")) {
-			dateFormat = (SimpleDateFormat) SimpleDateFormat.getDateInstance(com.ibm.icu.text.DateFormat.SHORT, locale);
+			dateFormat = (SimpleDateFormat) DateFormat.getDateInstance(com.ibm.icu.text.DateFormat.SHORT, locale);
+
 		}
 		if (formatPattern.equals("Long Time")) {
-			dateFormat = (SimpleDateFormat) SimpleDateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.LONG, locale);
+			dateFormat = (SimpleDateFormat) DateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.LONG, locale);
 
 		}
 		if (formatPattern.equals("Medium Time")) {
-			dateFormat = (SimpleDateFormat) SimpleDateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.MEDIUM,
+			dateFormat = (SimpleDateFormat) DateFormat.getTimeInstance(com.ibm.icu.text.DateFormat.MEDIUM,
 					locale);
 		}
 		if (formatPattern.equals("Short Time")) {
@@ -515,7 +552,7 @@ public class DateFormatter implements IFormatter {
 
 	/**
 	 * Parses the input string into a formatted date type.
-	 * 
+	 *
 	 * @param date the input string to parse
 	 * @return the formatted date
 	 * @throws ParseException if the beginning of the specified string cannot be
@@ -545,6 +582,7 @@ public class DateFormatter implements IFormatter {
 		}
 	}
 
+	@Override
 	public String formatValue(Object value) {
 		assert value instanceof Date;
 		return format((Date) value);

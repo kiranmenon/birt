@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -25,9 +28,9 @@ import org.eclipse.birt.report.engine.presentation.IPageHint;
 
 /**
  * page hint reader
- * 
+ *
  * It can support multiple versions.
- * 
+ *
  */
 public class PageHintReader implements IPageHintReader {
 
@@ -48,22 +51,27 @@ public class PageHintReader implements IPageHintReader {
 		}
 	}
 
+	@Override
 	public int getVersion() {
 		return reader.getVersion();
 	}
 
+	@Override
 	public void close() {
 		reader.close();
 	}
 
+	@Override
 	public long getTotalPage() throws IOException {
 		return reader.getTotalPage();
 	}
 
+	@Override
 	public Collection<PageVariable> getPageVariables() throws IOException {
 		return reader.getPageVariables();
 	}
 
+	@Override
 	public IPageHint getPageHint(long pageNumber) throws IOException {
 		if (cachedHint != null && cachedHint.getPageNumber() == pageNumber) {
 			return cachedHint;
@@ -72,6 +80,7 @@ public class PageHintReader implements IPageHintReader {
 		return cachedHint;
 	}
 
+	@Override
 	public long getPageOffset(long pageNumber, String masterPage) throws IOException {
 		return reader.getPageOffset(pageNumber, masterPage);
 	}

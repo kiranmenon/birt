@@ -1,9 +1,9 @@
 /*******************************************************************************
   * Copyright (c) 2012 Megha Nidhi Dahal and others.
   * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
+  * are made available under the terms of the Eclipse Public License v2.0
   * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
+  * http://www.eclipse.org/legal/epl-2.0.html
   *
   * Contributors:
   *    Megha Nidhi Dahal - initial API and implementation and/or initial documentation
@@ -14,7 +14,6 @@
 
 package org.eclipse.birt.report.data.oda.excel.impl.util;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -25,12 +24,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.eclipse.birt.report.data.oda.excel.ExcelODAConstants;
@@ -84,8 +84,9 @@ public class ExcelFileReader {
 		for (int cnt = currentRowIndex + 1; cnt <= (currentRowIndex + ExcelODAConstants.BLANK_LOOK_AHEAD); cnt++) {
 			Row row = sheet.getRow(cnt);
 			if (row != null) {
-				if (maxColumnIndex == 0)
+				if (maxColumnIndex == 0) {
 					maxColumnIndex = row.getLastCellNum();
+				}
 
 				for (short colIx = 0; colIx < maxColumnIndex; colIx++) {
 					Cell cell = row.getCell(colIx);
@@ -100,19 +101,22 @@ public class ExcelFileReader {
 	}
 
 	public List<String> readLine() throws IOException, OdaException {
-		if (!isInitialised)
+		if (!isInitialised) {
 			initialise();
+		}
 
 		if (currentRowIndex >= maxRowsInThisSheet) {
-			if (!initialiseNextSheet())
+			if (!initialiseNextSheet()) {
 				return null;
+			}
 		}
-		List<String> rowData = new ArrayList<String>();
+		List<String> rowData = new ArrayList<>();
 		if (isXlsFile(fileExtension)) {
 			Row row = sheet.getRow(currentRowIndex);
 			if (row != null) {
-				if (maxColumnIndex == 0)
+				if (maxColumnIndex == 0) {
 					maxColumnIndex = row.getLastCellNum();
+				}
 
 				boolean blankRow = true;
 				for (short colIx = 0; colIx < maxColumnIndex; colIx++) {
@@ -124,8 +128,9 @@ public class ExcelFileReader {
 					rowData.add(cellVal);
 				}
 				if (blankRow) {
-					if (checkXlsEndOfRows())
+					if (checkXlsEndOfRows()) {
 						return null;
+					}
 				}
 
 			} else {
@@ -153,8 +158,9 @@ public class ExcelFileReader {
 
 				for (String sheetName : workSheetList) {
 					String rid = xlsxSheetRidNameMap.get(sheetName);
-					if (rid == null)
+					if (rid == null) {
 						throw new OdaException(Messages.getString("invalid_sheet_name")); //$NON-NLS-1$
+					}
 
 					xlsxread.processSheet(rid, callback, this.xlsxRowsToRead);
 					maxRowsInAllSheet = callback.getMaxRowsInSheet();
@@ -167,10 +173,11 @@ public class ExcelFileReader {
 					workBook = new HSSFWorkbook(fis);
 				}
 				formulaEvaluator = workBook.getCreationHelper().createFormulaEvaluator();
-				workBook.setMissingCellPolicy(Row.RETURN_NULL_AND_BLANK);
+				workBook.setMissingCellPolicy(MissingCellPolicy.RETURN_NULL_AND_BLANK /* Row.RETURN_NULL_AND_BLANK */);
 				sheet = workBook.getSheet(workSheetList.get(currentSheetIndex));
-				if (sheet == null)
+				if (sheet == null) {
 					throw new OdaException(Messages.getString("invalid_sheet_name"));
+				}
 				maxRowsInThisSheet = sheet.getPhysicalNumberOfRows();
 
 				for (String sheetName : workSheetList) {
@@ -179,9 +186,7 @@ public class ExcelFileReader {
 				}
 			}
 			isInitialised = true;
-		} catch (NullPointerException e) {
-			throw new OdaException(e);
-		} catch (OpenXML4JException e) {
+		} catch (NullPointerException | OpenXML4JException e) {
 			throw new OdaException(e);
 		} catch (SAXException e) {
 			if (e.getMessage().equalsIgnoreCase(XlsxFileReader.ROW_LIMIT_REACHED_EX_MSG)) {
@@ -205,8 +210,9 @@ public class ExcelFileReader {
 				maxRowsInThisSheet = sheet.getPhysicalNumberOfRows();
 			} while (maxRowsInThisSheet == 0 && (workSheetList.size() < ++currentSheetIndex));
 		}
-		if (maxRowsInThisSheet == 0)
+		if (maxRowsInThisSheet == 0) {
 			return false;
+		}
 
 		currentRowIndex = 0;
 		return true;
@@ -259,32 +265,34 @@ public class ExcelFileReader {
 	}
 
 	public String getCellValue(Cell cell) {
-		if (cell == null)
+		if (cell == null) {
 			return ExcelODAConstants.EMPTY_STRING;
+		}
 
-		if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+		if (cell.getCellType() == CellType.FORMULA /* Cell.CELL_TYPE_FORMULA */) {
 			return resolveFormula(cell);
 		}
 
-		if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-			if (HSSFDateUtil.isCellDateFormatted(cell)) {
-				Date myjavadate = HSSFDateUtil.getJavaDate(cell.getNumericCellValue());
+		if (cell.getCellType() == CellType.NUMERIC /* Cell.CELL_TYPE_NUMERIC */) {
+			if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+				Date myjavadate = org.apache.poi.ss.usermodel.DateUtil.getJavaDate(cell.getNumericCellValue());
 				return sdf.format(myjavadate);
 			}
-			return ((Double) cell.getNumericCellValue()).toString();
+			return Double.toString(cell.getNumericCellValue());
 		}
 
 		return cell.toString();
 	}
 
 	private String resolveFormula(Cell cell) {
-		if (formulaEvaluator == null)
+		if (formulaEvaluator == null) {
 			return cell.toString();
+		}
 		switch (formulaEvaluator.evaluateFormulaCell(cell)) {
-		case Cell.CELL_TYPE_BOOLEAN:
-			return ((Boolean) cell.getBooleanCellValue()).toString();
+		case BOOLEAN /* Cell.CELL_TYPE_BOOLEAN */:
+			return Boolean.toString(cell.getBooleanCellValue());
 
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC /* Cell.CELL_TYPE_NUMERIC */:
 			if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
 				// need to check for nulls
 				// double myexdate =
@@ -292,9 +300,9 @@ public class ExcelFileReader {
 				Date myjavadate = org.apache.poi.ss.usermodel.DateUtil.getJavaDate(cell.getNumericCellValue());
 				return sdf.format(myjavadate);
 			}
-			return ((Double) cell.getNumericCellValue()).toString();
+			return Double.toString(cell.getNumericCellValue());
 
-		case Cell.CELL_TYPE_STRING:
+		case STRING /* Cell.CELL_TYPE_STRING */:
 			return cell.getStringCellValue();
 
 		default:
@@ -303,15 +311,16 @@ public class ExcelFileReader {
 	}
 
 	public int getMaxRows() throws IOException, OdaException {
-		if (!isInitialised)
+		if (!isInitialised) {
 			initialise();
+		}
 		return maxRowsInAllSheet;
 	}
 
 	public static List<String> getSheetNamesInExcelFile(Object file) throws MalformedURLException, IOException {
 		String extension = getExtensionName(file);
 		InputStream fis = ResourceLocatorUtil.getURIStream(file);
-		List<String> sheetNames = new ArrayList<String>();
+		List<String> sheetNames = new ArrayList<>();
 		try {
 
 			// using uri, we may not know the extension name of the file.
@@ -329,8 +338,6 @@ public class ExcelFileReader {
 					sheetNames.add(lworkBook.getSheetName(i));
 				}
 			}
-		} catch (FileNotFoundException e) {
-			// do nothing
 		} catch (IOException e) {
 			// do nothing
 		} catch (Exception e) {

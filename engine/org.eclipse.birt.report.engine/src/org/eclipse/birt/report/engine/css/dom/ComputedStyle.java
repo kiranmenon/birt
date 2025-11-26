@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.engine.css.dom;
 
@@ -9,17 +21,29 @@ import org.eclipse.birt.report.engine.css.engine.CSSStylableElement;
 import org.eclipse.birt.report.engine.css.engine.value.Value;
 import org.w3c.dom.css.CSSValue;
 
+/**
+ * Computed style
+ *
+ * @since 3.3
+ *
+ */
 public class ComputedStyle extends AbstractStyle {
-	Map<String, ComputedStyle> cachedStyles = new HashMap<String, ComputedStyle>();
+	Map<String, ComputedStyle> cachedStyles = new HashMap<>();
 	boolean[] caculated;
 	CSSStylableElement elt;
 	CSSValue[] values;
 
+	/**
+	 * Constructor
+	 *
+	 * @param elt stylable element
+	 */
 	public ComputedStyle(CSSStylableElement elt) {
 		super(elt.getCSSEngine());
 		this.elt = elt;
 	}
 
+	@Override
 	public CSSValue getProperty(int index) {
 		if (values == null) {
 			values = new CSSValue[NUMBER_OF_STYLE];
@@ -55,21 +79,35 @@ public class ComputedStyle extends AbstractStyle {
 		return cv;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return false;
 	}
 
+	@Override
 	public void setProperty(int index, CSSValue value) {
 		caculated[index] = false;
 		values[index] = null;
 		elt.getStyle().setProperty(index, value);
 	}
 
+	/**
+	 * Add cached style
+	 *
+	 * @param styleClass style class names
+	 * @param style      computed style
+	 */
 	public void addCachedStyle(String styleClass, ComputedStyle style) {
 		cachedStyles.put(styleClass, style);
 	}
 
+	/**
+	 * Get the cached style
+	 *
+	 * @param styleClass style class name
+	 * @return Return the cached style
+	 */
 	public ComputedStyle getCachedStyle(String styleClass) {
-		return (ComputedStyle) cachedStyles.get(styleClass);
+		return cachedStyles.get(styleClass);
 	}
 }

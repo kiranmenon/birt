@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -19,7 +22,7 @@ import org.eclipse.birt.report.engine.layout.area.ITextArea;
 import org.eclipse.birt.report.engine.layout.pdf.font.FontInfo;
 
 import com.ibm.icu.text.Bidi;
-import com.lowagie.text.Font;
+import org.openpdf.text.Font;
 
 public class TextArea extends AbstractArea implements ITextArea {
 	protected String text;
@@ -61,6 +64,7 @@ public class TextArea extends AbstractArea implements ITextArea {
 	 * @param text
 	 * @param fi
 	 */
+	@Deprecated
 	public TextArea(ITextContent textContent, String text, FontInfo fi) {
 		super(textContent);
 		this.textContent = textContent;
@@ -154,6 +158,7 @@ public class TextArea extends AbstractArea implements ITextArea {
 		}
 	}
 
+	@Override
 	public String getLogicalOrderText() {
 		calculateText();
 		return text;
@@ -161,10 +166,11 @@ public class TextArea extends AbstractArea implements ITextArea {
 
 	/**
 	 * Gets the text in visual order.
-	 * 
+	 *
 	 * @param text the original text.
 	 * @return the text in visual order.
 	 */
+	@Override
 	public String getText() {
 		calculateText();
 		if ((runLevel & 1) == 0) {
@@ -182,10 +188,12 @@ public class TextArea extends AbstractArea implements ITextArea {
 		return runLevel;
 	}
 
+	@Override
 	public FontInfo getFontInfo() {
 		return this.fi;
 	}
 
+	@Override
 	public void accept(IAreaVisitor visitor) {
 		visitor.visitText(this);
 	}
@@ -214,6 +222,7 @@ public class TextArea extends AbstractArea implements ITextArea {
 		this.maxWidth = maxWidth;
 	}
 
+	@Override
 	public int getWidth() {
 		int fontStyle = fi.getFontStyle();
 		// get width for text with simulated italic font.

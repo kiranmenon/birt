@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -23,7 +26,7 @@ import org.w3c.css.sac.Selector;
 import org.w3c.css.sac.SiblingSelector;
 
 /**
- * 
+ *
  * Converts some CSS objects, such as <code>LexicalUnit</code>,
  * <code>Selector</code> to the string representations.
  */
@@ -33,14 +36,19 @@ public final class CssUtil {
 	/**
 	 * Gets the string output for a lexical unit implementation of the Flute
 	 * package.
-	 * 
+	 *
 	 * @param lu the lexical unit of Flute implementation
 	 * @return the string output of the lexical unit
 	 */
 
 	public static String toString(LexicalUnit lu) {
+		StringBuilder sb = new StringBuilder();
+		toString(sb, lu);
+		return sb.toString();
+	}
+
+	private static void toString(StringBuilder sb, LexicalUnit lu) {
 		int type = lu.getLexicalUnitType();
-		StringBuffer sb = new StringBuffer();
 		switch (type) {
 		case LexicalUnit.SAC_OPERATOR_COMMA:
 			sb.append(","); //$NON-NLS-1$
@@ -117,7 +125,7 @@ public final class CssUtil {
 			break;
 		case LexicalUnit.SAC_RGBCOLOR:
 			sb.append("rgb("); //$NON-NLS-1$
-			sb.append(lu.getParameters());
+			toStringParameters(sb, lu);
 			sb.append(")"); //$NON-NLS-1$
 			break;
 		case LexicalUnit.SAC_IDENT:
@@ -128,12 +136,12 @@ public final class CssUtil {
 			break;
 		case LexicalUnit.SAC_ATTR:
 			sb.append("attr("); //$NON-NLS-1$
-			sb.append(lu.getParameters());
+			toStringParameters(sb, lu);
 			sb.append(")"); //$NON-NLS-1$
 			break;
 		case LexicalUnit.SAC_RECT_FUNCTION:
 			sb.append("rect("); //$NON-NLS-1$
-			sb.append(lu.getParameters());
+			toStringParameters(sb, lu);
 			sb.append(")"); //$NON-NLS-1$
 			break;
 		case LexicalUnit.SAC_UNICODERANGE:
@@ -144,17 +152,27 @@ public final class CssUtil {
 			break;
 		case LexicalUnit.SAC_FUNCTION:
 			sb.append(lu.getFunctionName());
-			sb.append(lu.getParameters());
+			sb.append("("); //$NON-NLS-1$
+			toStringParameters(sb, lu);
 			sb.append(")"); //$NON-NLS-1$
 			break;
 		}
-		return sb.toString();
+	}
+
+	private static void toStringParameters(StringBuilder sb, LexicalUnit lu) {
+		LexicalUnit parameters = lu.getParameters();
+		sb.append(toString(parameters));
+		for (LexicalUnit nextLexicalUnit = parameters
+				.getNextLexicalUnit(); nextLexicalUnit != null; nextLexicalUnit = nextLexicalUnit
+						.getNextLexicalUnit()) {
+			sb.append(toString(nextLexicalUnit));
+		}
 	}
 
 	/**
 	 * Trims the float value. If the value is an integer, method will return value
 	 * that has "#.##" format(9->9.00).
-	 * 
+	 *
 	 * @param f the float value to handle
 	 * @return the trimmed float value string
 	 */
@@ -166,14 +184,15 @@ public final class CssUtil {
 
 	/**
 	 * Converts a selector to a string representation.
-	 * 
+	 *
 	 * @param selector the selector to handle
 	 * @return the string representation of the selector
 	 */
 
 	public static String toString(Selector selector) {
-		if (selector == null)
+		if (selector == null) {
 			return null;
+		}
 
 		switch (selector.getSelectorType()) {
 		case Selector.SAC_CONDITIONAL_SELECTOR:
@@ -212,14 +231,15 @@ public final class CssUtil {
 
 	/**
 	 * Converts a condition to a string representation.
-	 * 
+	 *
 	 * @param condition the condition to handle
 	 * @return the string representation of the condition
 	 */
 
 	static String toString(Condition condition) {
-		if (condition == null)
+		if (condition == null) {
 			return null;
+		}
 		switch (condition.getConditionType()) {
 		case Condition.SAC_AND_CONDITION:
 			assert condition instanceof CombinatorCondition;

@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -12,6 +15,8 @@
 package org.eclipse.birt.report.model.api;
 
 import org.eclipse.birt.report.model.api.activity.SemanticException;
+import org.eclipse.birt.report.model.api.metadata.DimensionValue;
+import org.eclipse.birt.report.model.api.util.StringUtil;
 import org.eclipse.birt.report.model.core.DesignElement;
 import org.eclipse.birt.report.model.core.Module;
 import org.eclipse.birt.report.model.elements.interfaces.ICellModel;
@@ -25,7 +30,7 @@ import org.eclipse.birt.report.model.elements.interfaces.ICellModel;
  * The application generally does not create cell handles directly. Instead, it
  * uses one of the navigation methods available on other element handles such as
  * <code>RowHandle</code>.
- * 
+ *
  * @see org.eclipse.birt.report.model.elements.Cell
  * @see RowHandle#getCells()
  */
@@ -36,7 +41,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * Constructs a handle for the given design and design element. The application
 	 * generally does not create handles directly. Instead, it uses one of the
 	 * navigation methods available on other element handles.
-	 * 
+	 *
 	 * @param module  the module
 	 * @param element the model representation of the element
 	 */
@@ -48,7 +53,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Returns the cell's column span. This is the number of table or grid columns
 	 * occupied by this cell.
-	 * 
+	 *
 	 * @return the column span
 	 */
 
@@ -59,9 +64,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the cell's column span. This is the number of table or grid columns
 	 * occupied by this cell.
-	 * 
+	 *
 	 * @param span the column span
-	 * 
+	 *
 	 * @throws SemanticException if this property is locked.
 	 */
 
@@ -72,7 +77,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Returns the cell's row span. This is the number of table or grid rows
 	 * occupied by this cell.
-	 * 
+	 *
 	 * @return the row span
 	 */
 
@@ -83,9 +88,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the cell's row span. This is the number of table or grid rows occupied
 	 * by this cell.
-	 * 
+	 *
 	 * @param span the row span
-	 * 
+	 *
 	 * @throws SemanticException if this property is locked.
 	 */
 
@@ -97,7 +102,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * Returns the cell's drop property. This is how the cell should expand to fill
 	 * the entire table or group. This property is valid only for cells within a
 	 * table; but not for cells within a grid.
-	 * 
+	 *
 	 * @return the string value of the drop property
 	 * @see #setDrop(String)
 	 */
@@ -109,23 +114,23 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the cell's drop property. The input value is defined in
 	 * <code>DesignChoiceConstants</code> and can be one of:
-	 * 
+	 *
 	 * <ul>
 	 * <li>DROP_TYPE_NONE</li>
 	 * <li>DROP_TYPE_DETAIL</li>
 	 * <li>DROP_TYPE_ALL</li>
 	 * </ul>
-	 * 
+	 *
 	 * <p>
-	 * 
+	 *
 	 * Note that This property is valid only for cells within a table; but not for
 	 * cells within a grid.
-	 * 
+	 *
 	 * @param drop the string value of the drop property
-	 * 
+	 *
 	 * @throws SemanticException if the property is locked or the input value is not
 	 *                           one of the above.
-	 * 
+	 *
 	 * @see #getDrop()
 	 */
 
@@ -136,7 +141,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Returns the contents of the cell. The cell can contain any number of items,
 	 * but normally contains just one.
-	 * 
+	 *
 	 * @return a handle to the content slot
 	 */
 
@@ -147,7 +152,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Returns the cell's column property. The return value gives the column in
 	 * which the cell starts. Columns are numbered from 1.
-	 * 
+	 *
 	 * @return the column index, starting from 1.
 	 */
 
@@ -158,9 +163,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the cell's column property. The input value gives the column in which
 	 * the cell starts. Columns are numbered from 1.
-	 * 
+	 *
 	 * @param column the column index, starting from 1.
-	 * 
+	 *
 	 * @throws SemanticException if this property is locked.
 	 */
 
@@ -170,7 +175,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Returns the cell's height.
-	 * 
+	 *
 	 * @return the cell's height
 	 */
 
@@ -180,7 +185,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Returns the cell's width.
-	 * 
+	 *
 	 * @return the cell's width
 	 */
 
@@ -191,9 +196,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Gets the on-prepare script of the group. Startup phase. No data binding yet.
 	 * The design of an element can be changed here.
-	 * 
+	 *
 	 * @return the on-prepare script of the group
-	 * 
+	 *
 	 */
 
 	public String getOnPrepare() {
@@ -203,7 +208,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Gets the on-finish script of the group. Presentation phase. The report item
 	 * has been read from the report document, but not sent to emitter yet.
-	 * 
+	 *
 	 * @return the on-finish script of the group
 	 */
 
@@ -214,7 +219,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Gets the on-finish script of the group. Presentation phase. The report item
 	 * has been read from the report document, but not sent to emitter yet.
-	 * 
+	 *
 	 * @return the on-finish script of the group
 	 */
 
@@ -224,10 +229,10 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the on-prepare script of the group element.
-	 * 
+	 *
 	 * @param script the script to set
 	 * @throws SemanticException if the method is locked.
-	 * 
+	 *
 	 * @see #getOnPrepare()
 	 */
 
@@ -237,12 +242,12 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the on-create script of the group element.
-	 * 
+	 *
 	 * @param script the script to set
 	 * @throws SemanticException if the method is locked.
-	 * 
+	 *
 	 * @see #getOnCreate()
-	 * 
+	 *
 	 */
 
 	public void setOnCreate(String script) throws SemanticException {
@@ -251,10 +256,10 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the on-render script of the group element.
-	 * 
+	 *
 	 * @param script the script to set
 	 * @throws SemanticException if the method is locked.
-	 * 
+	 *
 	 * @see #getOnRender()
 	 */
 
@@ -265,7 +270,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the number of the diagonal lines that are from top-left to bottom-right
 	 * corners.
-	 * 
+	 *
 	 * @param diagonalNumber the diagonal number
 	 * @throws SemanticException
 	 */
@@ -276,7 +281,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Gets the number of the diagonal lines that are from top-left to bottom-right
 	 * corners.
-	 * 
+	 *
 	 * @return the diagonal number.
 	 */
 	public int getDiagonalNumber() {
@@ -292,7 +297,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * <li><code>LINE_WIDTH_MEDIUM</code>
 	 * <li><code>LINE_WIDTH_THICK</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return a DimensionHandle for the diagonal thickness
 	 */
 	public DimensionHandle getDiagonalThickness() {
@@ -314,7 +319,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param lineStyle the line style.
 	 * @throws SemanticException if the input value is not one of the above values.
 	 */
@@ -337,7 +342,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the diagonal style.
 	 */
 	public String getDiagonalStyle() {
@@ -346,7 +351,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Gets a color handle to deal with the color of the diagonal.
-	 * 
+	 *
 	 * @return a ColorHandle to for the color of the diagonal.
 	 */
 
@@ -357,7 +362,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the number of the anti-diagonal lines that are from the top-right to
 	 * bottom-left.
-	 * 
+	 *
 	 * @param antidiagonalNumber the anti-diagonal number
 	 * @throws SemanticException
 	 */
@@ -368,7 +373,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Gets the number of the anti-diagonal lines that are from the top-right to
 	 * bottom-left.
-	 * 
+	 *
 	 * @return the anti-diagonal number.
 	 */
 	public int getAntidiagonalNumber() {
@@ -384,7 +389,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * <li><code>LINE_WIDTH_MEDIUM</code>
 	 * <li><code>LINE_WIDTH_THICK</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return a DimensionHandle for the anti-diagonal thickness
 	 */
 	public DimensionHandle getAntidiagonalThickness() {
@@ -406,7 +411,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the anti-diagonal style.
 	 */
 	public String getAntidiagonalStyle() {
@@ -428,7 +433,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param antidiagonalStyle the anti-diagonal style.
 	 * @throws SemanticException if the input value is not one of the above values.
 	 */
@@ -438,7 +443,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Gets a color handle to deal with the color of the anti-diagonal.
-	 * 
+	 *
 	 * @return a ColorHandle to for the color of the anti-diagonal.
 	 */
 
@@ -449,14 +454,14 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Sets the scope value of the cell.The input value is one of the constants
 	 * defined in <code>DesignChoiceConstants</code>:
-	 * 
+	 *
 	 * <ul>
 	 * <li><code>SCOPE_TYPE_ROW</code></li>
 	 * <li><code>SCOPE_TYPE_COL</code></li>
 	 * <li><code>SCOPE_TYPE_ROWGROUP</code></li>
 	 * <li><code>SCOPE_TYPE_COLGROUP</code></li>
 	 * </ul>
-	 * 
+	 *
 	 * @param scope the scope
 	 * @throws SemanticException if the input value is not one of the above values.
 	 */
@@ -467,14 +472,14 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 	/**
 	 * Gets the scope value of the cell.The return value is one of the constants
 	 * defined in <code>DesignChoiceConstants</code>:
-	 * 
+	 *
 	 * <ul>
 	 * <li><code>SCOPE_TYPE_ROW</code></li>
 	 * <li><code>SCOPE_TYPE_COL</code></li>
 	 * <li><code>SCOPE_TYPE_ROWGROUP</code></li>
 	 * <li><code>SCOPE_TYPE_COLGROUP</code></li>
 	 * </ul>
-	 * 
+	 *
 	 * @return the scope.
 	 */
 	public String getScope() {
@@ -483,7 +488,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the book mark value on the cell element.
-	 * 
+	 *
 	 * @param bookmark the book mark.
 	 * @throws SemanticException if this property is locked.
 	 */
@@ -493,7 +498,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Gets the book mark value on the cell element.
-	 * 
+	 *
 	 * @return the book mark value.
 	 */
 	public String getBookmark() {
@@ -502,7 +507,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Gets the headers value on the cell element.
-	 * 
+	 *
 	 * @return the headers value.
 	 */
 	public String getHeaders() {
@@ -511,7 +516,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the headers value on the cell element.
-	 * 
+	 *
 	 * @param headers the headers value.
 	 * @throws SemanticException if this property is locked.
 	 */
@@ -521,7 +526,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Gets the display name of the bookmark.
-	 * 
+	 *
 	 * @return the display name of the bookmark.
 	 */
 	public String getBookmarkDisplayName() {
@@ -530,7 +535,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the display name of the bookmark.
-	 * 
+	 *
 	 * @param bookmarkDisplayName the display name of the bookmark to set
 	 * @throws SemanticException
 	 */
@@ -540,7 +545,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Returns the tag type of this label item.
-	 * 
+	 *
 	 * @return the tag type value
 	 */
 
@@ -550,9 +555,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the tag type of this label item.
-	 * 
-	 * @param tag type the tag type
-	 * 
+	 *
+	 * @param tagType type the tag type
+	 *
 	 * @throws SemanticException if the property is locked.
 	 */
 
@@ -562,7 +567,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Returns the language of this label item.
-	 * 
+	 *
 	 * @return the language
 	 */
 
@@ -572,9 +577,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the language of this label item.
-	 * 
+	 *
 	 * @param language the language
-	 * 
+	 *
 	 * @throws SemanticException if the property is locked.
 	 */
 
@@ -584,7 +589,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Returns the alternate text of this label item.
-	 * 
+	 *
 	 * @return the alternate text
 	 */
 
@@ -594,9 +599,9 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the alternate text of this label item.
-	 * 
+	 *
 	 * @param altText the alternate text expression.
-	 * 
+	 *
 	 * @throws SemanticException if the property is locked.
 	 */
 	public void setAltTextExpression(Expression altText) throws SemanticException {
@@ -606,7 +611,7 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Returns the resource key of the alternate text of this image.
-	 * 
+	 *
 	 * @return the resource key of the alternate text
 	 */
 
@@ -616,12 +621,56 @@ public class CellHandle extends ReportElementHandle implements ICellModel {
 
 	/**
 	 * Sets the resource key of the alternate text of this image.
-	 * 
+	 *
 	 * @param altTextKey the alternate text key
 	 * @throws SemanticException
 	 */
 
 	public void setAltTextKey(String altTextKey) throws SemanticException {
 		setProperty(ALT_TEXT_KEY_PROP, altTextKey);
+	}
+
+	/**
+	 * Set the cell width based on unit string without locale handling
+	 *
+	 * @param width cell width
+	 *
+	 * @throws SemanticException
+	 */
+	public void setWidth(String width) throws SemanticException {
+		setProperty(WIDTH_PROP, StringUtil.parse(width));
+	}
+
+	/**
+	 * Set the cell width based on dimension value
+	 *
+	 * @param width cell width
+	 *
+	 * @throws SemanticException
+	 */
+	public void setWidth(DimensionValue width) throws SemanticException {
+		setProperty(WIDTH_PROP, width);
+	}
+
+	/**
+	 * Set the cell height based on unit string without locale handling
+	 *
+	 * @param height cell height
+	 *
+	 * @throws SemanticException
+	 */
+	public void setHeight(String height) throws SemanticException {
+		setProperty(HEIGHT_PROP, StringUtil.parse(height));
+	}
+
+	/**
+	 * Set the cell height based on dimension value
+	 *
+	 * @param height cell height
+	 *
+	 * @throws SemanticException
+	 */
+	public void setHeight(DimensionValue height) throws SemanticException {
+		setProperty(HEIGHT_PROP, height);
 	}
 }

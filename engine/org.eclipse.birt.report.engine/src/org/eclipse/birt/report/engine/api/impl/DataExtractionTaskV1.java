@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -249,8 +252,9 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	 * prepare the meta data of DataExtractionTask.
 	 */
 	private void prepareMetaData() throws EngineException {
-		if (isMetaDataPrepared == true)
+		if (isMetaDataPrepared) {
 			return;
+		}
 
 		Map appContext = executionContext.getAppContext();
 		IDataEngine dataEngine = executionContext.getDataEngine();
@@ -296,7 +300,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get the query name through query id.
-	 * 
+	 *
 	 * @param queryId
 	 * @return query name
 	 */
@@ -306,7 +310,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get the query defintion from the query id
-	 * 
+	 *
 	 * @param queryId
 	 * @return
 	 */
@@ -396,12 +400,12 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * Transfer the rset relation array to a string.
-	 * 
+	 *
 	 * @param rsetRelation
 	 * @return
 	 */
 	private String getDteMetaInfoString(String[] rsetRelation) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 
 		String pRsetId = rsetRelation[0];
 		String rowId = rsetRelation[1];
@@ -430,7 +434,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get the resultset id from the query id.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -450,7 +454,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get the rset id from the rset name.
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -470,7 +474,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get the rset name from the rset id.
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
@@ -478,6 +482,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		return (String) rsetName2IdMapping.get(name);
 	}
 
+	@Override
 	public void setInstanceID(InstanceID iid) {
 		assert iid != null;
 
@@ -492,6 +497,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		selectedColumns = null;
 	}
 
+	@Override
 	public void selectResultSet(String displayName) {
 		assert displayName != null;
 
@@ -511,10 +517,12 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		selectedColumns = null;
 	}
 
+	@Override
 	public List getMetaData() throws EngineException {
 		return getResultSetList();
 	}
 
+	@Override
 	public List getResultSetList() throws EngineException {
 		prepareMetaData();
 		if (instanceId != null) {
@@ -535,7 +543,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get the metadata of a result set.
-	 * 
+	 *
 	 * @param rsetName
 	 * @return
 	 */
@@ -552,7 +560,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * get a result set.
-	 * 
+	 *
 	 * @param rsetName
 	 * @return
 	 */
@@ -567,10 +575,12 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		return null;
 	}
 
+	@Override
 	public void selectColumns(String[] columnNames) {
 		selectedColumns = columnNames;
 	}
 
+	@Override
 	public IExtractionResults extract() throws EngineException {
 		IExtractionResults results = null;
 		try {
@@ -651,7 +661,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		DataRequestSession dataSession = executionContext.getDataEngine().getDTESession();
 		String rsetId = rsetName2Id(rsetName);
 		if (rsetId != null) {
-			IQueryResults results = null;
+			IQueryResults results;
 			String queryId = (String) rsetId2queryIdMapping.get(rsetId);
 			QueryDefinition query = (QueryDefinition) getQuery(queryId);
 			if (null == query) {
@@ -709,13 +719,14 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		QueryTask task = plan.get(0);
 		IBaseQueryDefinition query = (IBaseQueryDefinition) task.getQuery();
 		IResultSetIDProvider resultsIDProvider = new IResultSetIDProvider() {
+			@Override
 			public String getResultsID(String parent, String rawId, IDataQueryDefinition query) {
 				String queryId = getQueryId(query);
 				return getResultsetID(parent, rawId, queryId);
 			}
 		};
 		if (groupMode) {
-			IBaseQueryDefinition newQuery = null;
+			IBaseQueryDefinition newQuery;
 			newQuery = cloneQuery(query);
 			setupQueryWithFilterAndSort(newQuery);
 
@@ -812,7 +823,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 			IBaseQueryDefinition srcQuery = query.getSourceQuery();
 			Map bindings = srcQuery.getBindings();
 			if (bindings != null) {
-				Set<String> existColumns = new HashSet<String>();
+				Set<String> existColumns = new HashSet<>();
 				for (int index = 0; index < selectedColumns.length; index++) {
 					String colName = selectedColumns[index];
 					IBinding binding = (IBinding) bindings.get(colName);
@@ -895,16 +906,16 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	/*
 	 * private IResultIterator executeQuery( String rset, QueryDefinition query )
 	 * throws BirtException { ( (QueryDefinition) query ).setQueryResultsID( rset );
-	 * 
+	 *
 	 * DataRequestSession dataSession = executionContext.getDataEngine( )
 	 * .getDTESession( ); Scriptable scope = executionContext.getSharedScope( ); Map
 	 * appContext = executionContext.getAppContext( ); // prepare the query
 	 * processQueryExtensions( query );
-	 * 
+	 *
 	 * IPreparedQuery pQuery = dataSession.prepare( query, appContext );
 	 * IQueryResults results = pQuery.execute( scope ); return
 	 * results.getResultIterator( ); }
-	 * 
+	 *
 	 * private IResultIterator executeSubQuery( DataSetID dataSet, long rowId,
 	 * ISubqueryDefinition query ) throws BirtException { IResultIterator rsetIter =
 	 * null; String rset = dataSet.getDataSetName( ); if ( rset != null ) { rsetIter
@@ -914,7 +925,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	 * rowId ); String queryName = query.getName( ); Scriptable scope =
 	 * executionContext.getSharedScope( ); return rsetIter.getSecondaryIterator(
 	 * queryName, scope ); }
-	 * 
+	 *
 	 * private IResultIterator executeQuery( DataSetID dataSet, long rowId,
 	 * IQueryDefinition query, String queryId ) throws BirtException {
 	 * IResultIterator rsetIter = null; String rset = dataSet.getDataSetName( ); if
@@ -929,12 +940,12 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	 * dataSet.getParentID( ), dataSet .getRowID( ), parentQuery, parentQueryId ); }
 	 * rsetIter.moveTo( (int) rowId ); int rawId = rsetIter.getRowId( ); return
 	 * executeQuery( rset, rawId, queryId, query ); } }
-	 * 
+	 *
 	 * private IResultIterator executeQuery( String prset, long rowId, String
 	 * queryId, IQueryDefinition query ) throws BirtException { String rsId =
 	 * getResultsetID( prset, rowId, queryId ); if ( rsId != null ) { return
 	 * executeQuery( rsId, (QueryDefinition) query ); } return null; }
-	 * 
+	 *
 	 * IBaseResultSet executeQuery( IBaseResultSet prset, InstanceID iid ) throws
 	 * BirtException { DataID dataId = iid.getDataID( ); if ( dataId != null &&
 	 * prset != null ) { if ( prset instanceof IQueryResultSet ) { (
@@ -945,7 +956,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	 * null ) { IDataQueryDefinition query = design.getQuery( ); if ( query != null
 	 * ) { return executionContext.getDataEngine( ).execute( prset, query, false );
 	 * } } return prset; }
-	 * 
+	 *
 	 * protected String instanceId2RsetName( InstanceID iid ) { InstanceID[] iids =
 	 * getAncestors( iid ); ArrayList rsets = new ArrayList( ); IBaseResultSet prset
 	 * = null; IBaseResultSet rset = null; String rsetName = null; try { for ( int i
@@ -954,10 +965,10 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	 * rset != null ) { rsetName = rset.getID( ).getDataSetName( ); } } catch (
 	 * BirtException ex ) { logger.log( Level.SEVERE, ex.getLocalizedMessage( ), ex
 	 * );
-	 * 
+	 *
 	 * } for ( int i = 0; i < rsets.size( ); i++ ) { rset = (IBaseResultSet)
 	 * rsets.get( i ); rset.close( ); }
-	 * 
+	 *
 	 * if ( rsetName != null ) { return rsetId2Name( rsetName ); } return rsetName;
 	 * }
 	 */
@@ -993,7 +1004,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/**
 	 * copy a query.
-	 * 
+	 *
 	 * @param query
 	 * @return
 	 */
@@ -1036,6 +1047,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	 *                               for now, i.e., LHS must be a column name, only
 	 *                               <, >, = and startWith is supported.
 	 */
+	@Override
 	public void setFilters(IFilterDefinition[] simpleFilterExpression) {
 		filterExpressions = simpleFilterExpression;
 	}
@@ -1043,6 +1055,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	/**
 	 * @param simpleSortExpression
 	 */
+	@Override
 	public void setSorts(ISortDefinition[] simpleSortExpression) {
 		setSorts(simpleSortExpression, false);
 	}
@@ -1056,10 +1069,12 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 	/**
 	 * @param maxRows
 	 */
+	@Override
 	public void setMaxRows(int maxRows) {
 		this.maxRows = maxRows;
 	}
 
+	@Override
 	public void extract(IExtractionOption options) throws BirtException {
 		DataExtractionOption option = null;
 		if (options == null) {
@@ -1073,7 +1088,6 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 			dataExtraction.initialize(executionContext.getReportContext(), extractOption);
 			IExtractionResults results = extract();
 			if (executionContext.isCanceled()) {
-				return;
 			} else {
 				dataExtraction.output(results);
 			}
@@ -1109,6 +1123,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		return dataExtraction;
 	}
 
+	@Override
 	public void setStartRow(int startRow) {
 		this.startRow = startRow;
 		if (startRow > 0) {
@@ -1116,6 +1131,7 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 		}
 	}
 
+	@Override
 	public void setDistinctValuesOnly(boolean distinct) {
 		this.distinct = distinct;
 		if (distinct) {
@@ -1193,21 +1209,23 @@ public class DataExtractionTaskV1 extends EngineTask implements IDataExtractionT
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.IDataExtractionTask#setCubeExportEnabled(
 	 * boolean)
 	 */
+	@Override
 	public void setCubeExportEnabled(boolean isCubeExportEnabled) {
 		this.isCubeExportEnabled = isCubeExportEnabled;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.IDataExtractionTask#isCubeExportEnabled()
 	 */
+	@Override
 	public boolean isCubeExportEnabled() {
 		return this.isCubeExportEnabled;
 	}

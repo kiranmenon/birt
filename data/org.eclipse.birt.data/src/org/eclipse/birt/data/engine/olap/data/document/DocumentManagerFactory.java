@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -17,7 +20,6 @@ import java.io.IOException;
 import org.eclipse.birt.core.archive.IDocArchiveReader;
 import org.eclipse.birt.data.engine.core.DataException;
 import org.eclipse.birt.data.engine.core.security.FileSecurity;
-import org.eclipse.birt.data.engine.core.security.PropertySecurity;
 
 /**
  * A factory class used to create the instance of IDocumentManager.
@@ -25,17 +27,18 @@ import org.eclipse.birt.data.engine.core.security.PropertySecurity;
 
 public class DocumentManagerFactory {
 
-	private static final String tmpPath = PropertySecurity.getSystemProperty("java.io.tmpdir");
+	private static final String tmpPath = System.getProperty("java.io.tmpdir");
 	private static final String DEFAULT_CUB_MANAGER_NAME = "cub1";
 
 	static {
 		File tmp = new File(tmpPath);
-		if (FileSecurity.fileExist(tmp) == false)
+		if (!FileSecurity.fileExist(tmp)) {
 			FileSecurity.fileMakeDirs(tmp);
+		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws DataException
 	 */
@@ -44,7 +47,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws DataException
 	 * @throws IOException
@@ -54,7 +57,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws DataException
 	 * @throws IOException
@@ -64,7 +67,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws DataException
 	 * @throws IOException
@@ -74,7 +77,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param docArchiveWriter
 	 * @return
 	 * @throws DataException
@@ -85,7 +88,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws DataException
 	 */
@@ -95,7 +98,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 * @throws DataException
 	 * @throws IOException
@@ -106,7 +109,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param dirName
 	 * @param managerName
 	 * @param cacheSize
@@ -120,7 +123,7 @@ public class DocumentManagerFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param dirName
 	 * @param managerName
 	 * @return

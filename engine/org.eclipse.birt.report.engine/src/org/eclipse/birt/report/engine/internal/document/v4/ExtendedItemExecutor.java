@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -39,11 +42,13 @@ public class ExtendedItemExecutor extends ContainerExecutor {
 		super(manager, ExecutorManager.EXTENDEDITEM);
 	}
 
+	@Override
 	public void close() {
 		closeQuery();
 		super.close();
 	}
 
+	@Override
 	protected IReportItemExecutor prepareChildExecutor() throws Exception {
 		// prepare the offset of the next content
 		if (prepareFirstChild) {
@@ -123,6 +128,7 @@ public class ExtendedItemExecutor extends ContainerExecutor {
 		return childExecutor;
 	}
 
+	@Override
 	public IContent execute() {
 
 		if (!executed) {
@@ -157,6 +163,7 @@ public class ExtendedItemExecutor extends ContainerExecutor {
 		return content;
 	}
 
+	@Override
 	protected void doExecute() throws IOException, BirtException {
 		InstanceID iid = content.getInstanceID();
 		DataID dataId = iid.getDataID();
@@ -184,6 +191,7 @@ public class ExtendedItemExecutor extends ContainerExecutor {
 		executeQuery();
 	}
 
+	@Override
 	protected void executeQuery() {
 		getParentResultSet();
 		/*
@@ -217,10 +225,12 @@ public class ExtendedItemExecutor extends ContainerExecutor {
 		}
 	}
 
+	@Override
 	protected IContent doCreateContent() {
 		throw new java.lang.IllegalStateException("can not create the content for extended item");
 	}
 
+	@Override
 	protected ReportItemExecutor doCreateExecutor(long offset) throws Exception {
 		if (offset != -1) {
 			IContent content = reader.loadContent(offset);
@@ -231,6 +241,7 @@ public class ExtendedItemExecutor extends ContainerExecutor {
 		return null;
 	}
 
+	@Override
 	protected void doSkipToExecutor(InstanceID id, long offset) throws Exception {
 	}
 }

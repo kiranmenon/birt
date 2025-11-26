@@ -1,70 +1,67 @@
 
 /*******************************************************************************
  * Copyright (c) 2004, 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
  *******************************************************************************/
 package org.eclipse.birt.data.engine.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 
+ *
  */
 
 public class CancelManager extends TimerTask {
 	//
-	private List<ICancellable> cancellableList;
+	private final Set<ICancellable> cancellables = ConcurrentHashMap.newKeySet();
 
 	/**
 	 * Constructor
 	 */
 	public CancelManager() {
-		cancellableList = new ArrayList<ICancellable>();
 	}
 
 	/**
-	 * 
+	 *
 	 * @param cancellable
 	 */
 	public void register(ICancellable cancellable) {
-		synchronized (cancellableList) {
-			cancellableList.add(cancellable);
-		}
+		cancellables.add(cancellable);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param cancellable
 	 */
 	public void deregister(ICancellable cancellable) {
-		synchronized (cancellableList) {
-			cancellableList.remove(cancellable);
-		}
+		cancellables.remove(cancellable);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run() {
 		doCancel();
 	}
 
 	public void doCancel() {
-		synchronized (cancellableList) {
-			List<ICancellable> cancellableLists = new ArrayList<ICancellable>(cancellableList);
-			for (ICancellable cancellable : cancellableLists) {
-				if (cancellable.doCancel())
-					cancellable.cancel();
+		for (ICancellable cancellable : cancellables.toArray(ICancellable[]::new)) {
+			if (cancellable.doCancel()) {
+				cancellable.cancel();
 			}
 		}
 	}

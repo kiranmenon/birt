@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -78,7 +81,7 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param handle           - the entry point to the DE report design IR
 	 * @param executionContext - the execution context to execute the onPrepare
 	 *                         script
@@ -89,11 +92,13 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 		this.executionContext = executionContext;
 	}
 
+	@Override
 	protected void handleOnPrepare(ReportDesignHandle handle) {
 		boolean hasJavaScript = (handle.getOnPrepare() != null) && (handle.getOnPrepare().length() != 0);
 		boolean hasJavaCode = (handle.getEventHandlerClass() != null) && (handle.getEventHandlerClass().length() != 0);
-		if (!hasJavaScript && !hasJavaCode)
+		if (!hasJavaScript && !hasJavaCode) {
 			return;
+		}
 		executionContext.pushHandle(handle);
 		if (hasJavaScript) {
 			IDesignElement element = SimpleElementFactory.getInstance().getElement(handle);
@@ -107,11 +112,13 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 		}
 	}
 
+	@Override
 	protected void handleOnPrepare(ReportItemHandle handle) {
 		boolean hasJavaScript = (handle.getOnPrepare() != null) && (handle.getOnPrepare().length() != 0);
 		boolean hasJavaCode = (handle.getEventHandlerClass() != null) && (handle.getEventHandlerClass().length() != 0);
-		if (!hasJavaScript && !hasJavaCode)
+		if (!hasJavaScript && !hasJavaCode) {
 			return;
+		}
 		executionContext.pushHandle(handle);
 		if (hasJavaScript) {
 			IDesignElement element = SimpleElementFactory.getInstance().getElement(handle);
@@ -163,7 +170,6 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 					}
 				}
 			}
-			return;
 		} catch (BirtException ex) {
 			executionContext.addException(handle, ex);
 			return;
@@ -189,7 +195,6 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 					}
 				}
 			}
-			return;
 		} catch (BirtException ex) {
 			executionContext.addException(handle, ex);
 			return;
@@ -213,12 +218,14 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 
 	// TODO: Merge this function with the above one when DE add onPrepare to
 	// DesignElementHandle
+	@Override
 	protected void handleOnPrepare(CellHandle handle) {
 
 		boolean hasJavaScript = (handle.getOnPrepare() != null) && (handle.getOnPrepare().length() != 0);
 		boolean hasJavaCode = (handle.getEventHandlerClass() != null) && (handle.getEventHandlerClass().length() != 0);
-		if (!hasJavaScript && !hasJavaCode)
+		if (!hasJavaScript && !hasJavaCode) {
 			return;
+		}
 		executionContext.pushHandle(handle);
 		if (hasJavaScript) {
 			IDesignElement element = SimpleElementFactory.getInstance().getElement(handle);
@@ -253,11 +260,13 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 
 	// TODO: Merge this function with the above one when DE add onPrepare to
 	// DesignElementHandle
+	@Override
 	protected void handleOnPrepare(GroupHandle handle) {
 		boolean hasJavaScript = (handle.getOnPrepare() != null) && (handle.getOnPrepare().length() != 0);
 		boolean hasJavaCode = (handle.getEventHandlerClass() != null) && (handle.getEventHandlerClass().length() != 0);
-		if (!hasJavaScript && !hasJavaCode)
+		if (!hasJavaScript && !hasJavaCode) {
 			return;
+		}
 		executionContext.pushHandle(handle);
 		if (hasJavaScript) {
 			IDesignElement element = SimpleElementFactory.getInstance().getElement(handle);
@@ -284,10 +293,12 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 			}
 		}
 		try {
-			if (handle instanceof TableGroupHandle)
+			if (handle instanceof TableGroupHandle) {
 				TableGroupScriptExecutor.handleOnPrepare((TableGroupHandle) handle, executionContext);
-			if (handle instanceof ListGroupHandle)
+			}
+			if (handle instanceof ListGroupHandle) {
 				ListGroupScriptExecutor.handleOnPrepare((ListGroupHandle) handle, executionContext);
+			}
 		} finally {
 			executionContext.popHandle();
 		}
@@ -295,11 +306,13 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 
 	// TODO: Merge this function with the above one when DE add onPrepare to
 	// DesignElementHandle
+	@Override
 	protected void handleOnPrepare(RowHandle handle) {
 		boolean hasJavaScript = (handle.getOnPrepare() != null) && (handle.getOnPrepare().length() != 0);
 		boolean hasJavaCode = (handle.getEventHandlerClass() != null) && (handle.getEventHandlerClass().length() != 0);
-		if (!hasJavaScript && !hasJavaCode)
+		if (!hasJavaScript && !hasJavaCode) {
 			return;
+		}
 		executionContext.pushHandle(handle);
 		if (hasJavaScript) {
 			IDesignElement element = SimpleElementFactory.getInstance().getElement(handle);
@@ -331,6 +344,7 @@ public class ScriptedDesignHandler extends ScriptedDesignVisitor {
 		}
 	}
 
+	@Override
 	protected void visitExtendedItem(ExtendedItemHandle handle) {
 		IReportItemPreparation itemPreparation = executionContext.getExtendedItemManager().createPreparation(handle);
 		if (itemPreparation != null) {

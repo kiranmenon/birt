@@ -1,15 +1,28 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.tests.engine.api;
 
 import java.io.File;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.nio.file.FileSystems;
 
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunTask;
 import org.eclipse.birt.report.tests.engine.EngineCase;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * <b>IRunTask test</b>
@@ -20,7 +33,7 @@ public class RunTaskTest extends EngineCase {
 
 	private Boolean signal = new Boolean(false);
 
-	private String separator = System.getProperty("file.separator");
+	private String separator = FileSystems.getDefault().getSeparator();
 
 	private String INPUT = this.genInputFolder() + separator;
 
@@ -29,15 +42,18 @@ public class RunTaskTest extends EngineCase {
 
 	// private String OUTPUT = getClassFolder( ) + separator + OUTPUT_FOLDER
 	// + separator;
-	private String report_design, report_document, name;
+	private String report_design;
 	private IReportRunnable runnable;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		removeResource();
 	}
 
-	public void tearDown() {
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
 		removeResource();
 	}
 
@@ -226,6 +242,7 @@ public class RunTaskTest extends EngineCase {
 			runTask = task;
 		}
 
+		@Override
 		public void run() {
 			try {
 				System.out.print("cancel started waiting");

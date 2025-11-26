@@ -1,9 +1,9 @@
 <%-----------------------------------------------------------------------------
 	Copyright (c) 2004 Actuate Corporation and others.
 	All rights reserved. This program and the accompanying materials 
-	are made available under the terms of the Eclipse Public License v1.0
+	are made available under the terms of the Eclipse Public License v2.0
 	which accompanies this distribution, and is available at
-	http://www.eclipse.org/legal/epl-v10.html
+	http://www.eclipse.org/legal/epl-2.0.html
 	
 	Contributors:
 		Actuate Corporation - Initial implementation.
@@ -32,7 +32,7 @@
 %>
 <TR>
 	<TD NOWRAP>
-		<IMG SRC="birt/images/parameter.gif" ALT="<%= parameterBean.getDisplayName( ) %>" TITLE="<%= parameterBean.getToolTip( ) %>"/>
+		<IMG class="icon_parameter" SRC="birt/images/Parameter.png" ALT="<%= parameterBean.getDisplayName( ) %>" TITLE="<%= parameterBean.getToolTip( ) %>"/>
 	</TD>
 	<TD NOWRAP>
 		<LABEL TITLE="<%= parameterBean.getToolTip( ) %>" ID="id_<%= parameterBean.getName()%>" FOR="<%=encodedParameterName%>" + "0"><%= parameterBean.getDisplayName( ) %>:</LABEL>
@@ -41,7 +41,7 @@
 		if ( parameterBean.isRequired( ) )
 		{
 		%>
-			<FONT COLOR="red">*</FONT>
+			<SPAN style="color:red;">*</SPAN>
 		<%
 		}
 		%>

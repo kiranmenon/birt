@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,15 +18,17 @@ import org.apache.batik.css.parser.Parser;
 import org.eclipse.birt.report.engine.css.engine.value.css.FontFamilyManager;
 import org.w3c.dom.css.CSSValue;
 
+/**
+ * Class of BIRT CSS engine
+ *
+ * @since 3.3
+ *
+ */
 public class BIRTCSSEngine extends CSSEngine {
 
 	/**
 	 * Creates a new SVGCSSEngine.
-	 * 
-	 * @param doc The associated document.
-	 * @param uri The document URI.
-	 * @param p   The CSS parser to use.
-	 * @param ctx The CSS context.
+	 *
 	 */
 	public BIRTCSSEngine() {
 		super(new Parser(), new BIRTPropertyManagerFactory(), new BIRTContext());
@@ -31,6 +36,7 @@ public class BIRTCSSEngine extends CSSEngine {
 
 	static class BIRTContext implements CSSContext {
 
+		@Override
 		public CSSValue getSystemColor(String ident) {
 			return SystemColorSupport.getSystemColor(ident);
 		}
@@ -38,6 +44,7 @@ public class BIRTCSSEngine extends CSSEngine {
 		/**
 		 * Returns the default font family.
 		 */
+		@Override
 		public CSSValue getDefaultFontFamily() {
 			return FontFamilyManager.DEFAULT_VALUE;
 		}
@@ -45,6 +52,7 @@ public class BIRTCSSEngine extends CSSEngine {
 		/**
 		 * Returns the size of a px CSS unit in millimeters.
 		 */
+		@Override
 		public float getPixelUnitToMillimeter() {
 			return 0.26458333333333333333333333333333f; // 96dpi
 		}
@@ -52,6 +60,7 @@ public class BIRTCSSEngine extends CSSEngine {
 		/**
 		 * Returns the medium font size.
 		 */
+		@Override
 		public float getMediumFontSize() {
 			// 12pt (72pt == 1in)
 			return 12f;
@@ -60,6 +69,7 @@ public class BIRTCSSEngine extends CSSEngine {
 		/**
 		 * Returns a lighter font-weight.
 		 */
+		@Override
 		public float getLighterFontWeight(float f) {
 			// Round f to nearest 100...
 			int weight = ((int) ((f + 50) / 100)) * 100;
@@ -90,6 +100,7 @@ public class BIRTCSSEngine extends CSSEngine {
 		/**
 		 * Returns a bolder font-weight.
 		 */
+		@Override
 		public float getBolderFontWeight(float f) {
 			// Round f to nearest 100...
 			int weight = ((int) ((f + 50) / 100)) * 100;

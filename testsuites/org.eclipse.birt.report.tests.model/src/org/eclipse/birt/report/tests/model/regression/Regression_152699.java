@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse
- * Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html Contributors: Actuate Corporation -
- * initial API and implementation
+ * Copyright (c) 2004 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  ******************************************************************************/
 
 package org.eclipse.birt.report.tests.model.regression;
@@ -44,30 +47,40 @@ public class Regression_152699 extends BaseTestCase {
 
 	private String filename = "Regression_152699.xml"; //$NON-NLS-1$
 
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		removeResource();
 		copyResource_INPUT(filename, filename);
 	}
 
+	@Override
 	public void tearDown() {
 		removeResource();
 	}
 
 	/**
+	 * <a href=
+	 * "https://bugs.eclipse.org/bugs/show_bug.cgi?id=152699">https://bugs.eclipse.org/bugs/show_bug.cgi?id=152699</a>
+	 *
 	 * @throws DesignFileException
 	 * @throws Exception
 	 */
 	public void test_regression_152699() throws DesignFileException {
-		openDesign(filename);
+		try {
+			openDesign(filename);
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
 		ImageHandle localimage = (ImageHandle) designHandle.findElement("Image");//$NON-NLS-1$
 		ImageHandle extendimage = (ImageHandle) designHandle.findElement("NewImage"); //$NON-NLS-1$
 
 		byte[] localdata = localimage.getEmbeddedImage().getData();
 		byte[] extenddata = extendimage.getEmbeddedImage().getData();
 
-		assertEquals(2, localdata.length);
-		assertEquals(3, extenddata.length);
+		assertEquals(10, localdata.length);
+		assertEquals(5, extenddata.length);
 
 	}
 

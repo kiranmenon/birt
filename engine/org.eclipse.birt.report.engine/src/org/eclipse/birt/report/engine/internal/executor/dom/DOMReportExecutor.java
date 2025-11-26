@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.engine.internal.executor.dom;
 
@@ -19,16 +31,19 @@ public class DOMReportExecutor implements IReportExecutor {
 		manager = new DOMReportItemExecutorManager(cloneContent);
 	}
 
+	@Override
 	public IReportContent execute() {
 		childIterator = new ArrayList().iterator();
 		return reportContent;
 	}
 
+	@Override
 	public void close() {
 	}
 
 	Iterator childIterator;
 
+	@Override
 	public IReportItemExecutor getNextChild() {
 		if (childIterator.hasNext()) {
 			IContent child = (IContent) childIterator.next();
@@ -37,10 +52,12 @@ public class DOMReportExecutor implements IReportExecutor {
 		return null;
 	}
 
+	@Override
 	public boolean hasNextChild() {
 		return childIterator.hasNext();
 	}
 
+	@Override
 	public IReportItemExecutor createPageExecutor(long pageNumber, MasterPageDesign pageDesign) {
 		return null;
 	}

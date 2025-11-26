@@ -1,9 +1,9 @@
 /******************************************************************************
  *	Copyright (c) 2004 Actuate Corporation and others.
  *	All rights reserved. This program and the accompanying materials 
- *	are made available under the terms of the Eclipse Public License v1.0
+ *	are made available under the terms of the Eclipse Public License v2.0
  *	which accompanies this distribution, and is available at
- *		http://www.eclipse.org/legal/epl-v10.html
+ *		http://www.eclipse.org/legal/epl-2.0.html
  *	
  *	Contributors:
  *		Actuate Corporation - Initial implementation.
@@ -31,11 +31,15 @@ var BirtPosition =
 		return window.undefined; 
 	},
 	
-	center: function( )
+	center: function(elementId)
 	{
       	var element = $( arguments[0] );
-      	if ( !element ) return;
-      	
+		if ( !element && elementId !== null ) {
+	      	element = $( "#" + elementId );
+		}
+		if ( !element ) {
+			  return;
+		}      	
 		var scTop = parseInt( document.documentElement.scrollTop, 10 );
 		var scLeft = parseInt( document.documentElement.scrollLeft, 10 );
 

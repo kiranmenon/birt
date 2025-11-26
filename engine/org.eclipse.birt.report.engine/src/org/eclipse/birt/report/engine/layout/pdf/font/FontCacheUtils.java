@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,14 +22,26 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfWriter;
+import org.openpdf.text.Document;
+import org.openpdf.text.Font;
+import org.openpdf.text.pdf.BaseFont;
+import org.openpdf.text.pdf.PdfContentByte;
+import org.openpdf.text.pdf.PdfWriter;
 
+/**
+ * Font cache utils
+ *
+ * @since 3.3
+ *
+ */
 public class FontCacheUtils {
 
+	/**
+	 * Main method of the class
+	 *
+	 * @param args
+	 * @throws Exception
+	 */
 	static public void main(String[] args) throws Exception {
 		createUnicodeText("unicode.txt");
 		createUnicodePDF("pdf", Locale.CHINESE, "unicode.pdf");
@@ -39,7 +54,7 @@ public class FontCacheUtils {
 		OutputStream out = new FileOutputStream(fileName);
 		Writer writer = new OutputStreamWriter(out, "utf-8");
 		for (int seg = 0; seg < 0xFF; seg++) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append(Integer.toHexString(seg * 0xFF)).append('\n');
 			writer.write(sb.toString());
 			for (int hi = 0; hi < 16; hi++) {
@@ -88,7 +103,7 @@ public class FontCacheUtils {
 
 	static void createFontIndex(String fontName, String encoding, Writer writer) throws Exception {
 		BaseFont font = BaseFont.createFont(fontName, encoding, false);
-		ArrayList charSegs = new ArrayList();
+		ArrayList<CharSegment> charSegs = new ArrayList<CharSegment>();
 		int start = 0;
 		int end = 0;
 		for (char ch = 0; ch < 0xFFFF; ch++) {
@@ -97,18 +112,16 @@ public class FontCacheUtils {
 					start = ch;
 				}
 				end = ch;
-			} else {
-				if (start != -1) {
-					charSegs.add(new CharSegment(start, end, fontName));
-					start = -1;
-				}
+			} else if (start != -1) {
+				charSegs.add(new CharSegment(start, end, fontName));
+				start = -1;
 			}
 		}
 		if (start != -1) {
 			charSegs.add(new CharSegment(start, end, fontName));
 		}
 		for (int i = 0; i < charSegs.size(); i++) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("<block region-start=\"").append(start).append("\" region-end=\"").append(end).append("\"/>")
 					.append('\n');
 			writer.write(sb.toString());

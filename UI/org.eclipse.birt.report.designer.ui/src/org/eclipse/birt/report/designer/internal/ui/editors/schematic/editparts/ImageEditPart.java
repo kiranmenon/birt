@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,7 +18,7 @@ import java.util.List;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.core.model.schematic.ImageHandleAdapter;
-import org.eclipse.birt.report.designer.core.util.mediator.request.ReportRequest;
+import org.eclipse.birt.report.designer.core.util.mediator.request.ReportRequestConstants;
 import org.eclipse.birt.report.designer.internal.ui.editors.schematic.border.LineBorder;
 import org.eclipse.birt.report.designer.internal.ui.editors.schematic.editpolicies.ReportComponentEditPolicy;
 import org.eclipse.birt.report.designer.internal.ui.editors.schematic.figures.ImageFigure;
@@ -49,7 +52,7 @@ import org.eclipse.ui.PlatformUI;
  * <p>
  * Image edit part
  * </p>
- * 
+ *
  */
 public class ImageEditPart extends ReportElementEditPart implements IResourceEditPart {
 
@@ -57,7 +60,7 @@ public class ImageEditPart extends ReportElementEditPart implements IResourceEdi
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param model
 	 */
 	public ImageEditPart(Object model) {
@@ -73,26 +76,30 @@ public class ImageEditPart extends ReportElementEditPart implements IResourceEdi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
+	@Override
 	protected IFigure createFigure() {
 		return new ImageFigure();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#createEditPolicies()
 	 */
+	@Override
 	protected void createEditPolicies() {
 		installEditPolicy(EditPolicy.COMPONENT_ROLE, new ReportComponentEditPolicy() {
 
+			@Override
 			public boolean understandsRequest(Request request) {
 				if (RequestConstants.REQ_DIRECT_EDIT.equals(request.getType())
 						|| RequestConstants.REQ_OPEN.equals(request.getType())
-						|| ReportRequest.CREATE_ELEMENT.equals(request.getType()))
+						|| ReportRequestConstants.CREATE_ELEMENT.equals(request.getType())) {
 					return true;
+				}
 				return super.understandsRequest(request);
 			}
 		});
@@ -100,11 +107,12 @@ public class ImageEditPart extends ReportElementEditPart implements IResourceEdi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.designer.internal.ui.editors.schematic.editparts.
 	 * ReportElementEditPart#refreshFigure()
 	 */
+	@Override
 	public void refreshFigure() {
 		refreshBorder((DesignElementHandle) getModel(), new LineBorder());
 
@@ -125,6 +133,9 @@ public class ImageEditPart extends ReportElementEditPart implements IResourceEdi
 		}
 
 		((ImageFigure) this.getFigure()).setImage(image);
+		if (((ImageFigure) this.getFigure()).getImage() != null) {
+			this.getImageAdapter().setImageFigureDimension(((ImageFigure) this.getFigure()).getImage().getBounds());
+		}
 
 		if (getImageAdapter().getSize() != null) {
 			this.getFigure().setSize(getImageAdapter().getSize());
@@ -176,11 +187,12 @@ public class ImageEditPart extends ReportElementEditPart implements IResourceEdi
 	}
 
 	/**
-	 * 
+	 *
 	 */
+	@Override
 	public void performDirectEdit() {
 //		List dataSetList = DEUtil.getDataSetList( (DesignElementHandle) getModel( ) );
-		List dataSetList = DEUtil.getDataSetListExcludeSelf((DesignElementHandle) getModel());
+		List<?> dataSetList = DEUtil.getDataSetListExcludeSelf((DesignElementHandle) getModel());
 		ImageBuilder dialog = new ImageBuilder(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
 				ImageBuilder.DLG_TITLE_EDIT, dataSetList);
 		dialog.setInput(getModel());
@@ -196,11 +208,12 @@ public class ImageEditPart extends ReportElementEditPart implements IResourceEdi
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.designer.internal.ui.editors.schematic.editparts.
 	 * IResourceEditPart#refreshResource()
 	 */
+	@Override
 	public void refreshResource() {
 		String imageSource = ((ImageHandle) getImageAdapter().getHandle()).getSource();
 		if (DesignChoiceConstants.IMAGE_REF_TYPE_FILE.equalsIgnoreCase(imageSource)

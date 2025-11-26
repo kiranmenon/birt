@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -21,7 +24,7 @@ import org.eclipse.birt.report.engine.content.IContent;
  * a buffered report emitter that allows content objects from the engine to be
  * buffered before output to a specific format. Buffering is needed sometimes,
  * for handling drop, table, etc.
- * 
+ *
  */
 public class BufferedReportEmitter extends ContentEmitterAdapter {
 
@@ -34,7 +37,7 @@ public class BufferedReportEmitter extends ContentEmitterAdapter {
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param emitter
 	 */
 	public BufferedReportEmitter(IContentEmitter emitter) {
@@ -62,10 +65,12 @@ public class BufferedReportEmitter extends ContentEmitterAdapter {
 		events.clear();
 	}
 
+	@Override
 	public void startContent(IContent content) {
 		events.add(new BufferedNode(content, true));
 	}
 
+	@Override
 	public void endContent(IContent content) {
 		events.add(new BufferedNode(content, false));
 	}

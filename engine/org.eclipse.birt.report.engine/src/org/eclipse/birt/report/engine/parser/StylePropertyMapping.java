@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -26,11 +29,11 @@ import org.eclipse.birt.report.model.metadata.MetaDataDictionary;
 
 /**
  * Style is used to store the style properties.
- * 
+ *
  */
 public class StylePropertyMapping {
 
-	protected static final HashMap nameMapping = new HashMap();
+	protected static final HashMap<String, Integer> nameMapping = new HashMap<String, Integer>();
 
 	static {
 		nameMapping.put(IStyleModel.FONT_FAMILY_PROP, Integer.valueOf(StyleConstants.STYLE_FONT_FAMILY));
@@ -41,6 +44,8 @@ public class StylePropertyMapping {
 		nameMapping.put(IStyleModel.COLOR_PROP, Integer.valueOf(StyleConstants.STYLE_COLOR));
 		nameMapping.put(IStyleModel.BACKGROUND_COLOR_PROP, Integer.valueOf(StyleConstants.STYLE_BACKGROUND_COLOR));
 		nameMapping.put(IStyleModel.BACKGROUND_IMAGE_PROP, Integer.valueOf(StyleConstants.STYLE_BACKGROUND_IMAGE));
+		nameMapping.put(IStyleModel.BACKGROUND_IMAGE_TYPE_PROP,
+				Integer.valueOf(StyleConstants.STYLE_BACKGROUND_IMAGE_TYPE));
 		nameMapping.put(IStyleModel.BACKGROUND_REPEAT_PROP, Integer.valueOf(StyleConstants.STYLE_BACKGROUND_REPEAT));
 		nameMapping.put(IStyleModel.BACKGROUND_ATTACHMENT_PROP,
 				Integer.valueOf(StyleConstants.STYLE_BACKGROUND_ATTACHMENT));
@@ -53,6 +58,8 @@ public class StylePropertyMapping {
 		nameMapping.put(IStyleModel.TEXT_UNDERLINE_PROP, Integer.valueOf(StyleConstants.STYLE_TEXT_UNDERLINE));
 		nameMapping.put(IStyleModel.TEXT_OVERLINE_PROP, Integer.valueOf(StyleConstants.STYLE_TEXT_OVERLINE));
 		nameMapping.put(IStyleModel.TEXT_LINE_THROUGH_PROP, Integer.valueOf(StyleConstants.STYLE_TEXT_LINETHROUGH));
+		nameMapping.put(IStyleModel.TEXT_HYPERLINK_STYLE_PROP,
+				Integer.valueOf(StyleConstants.STYLE_TEXT_HYPERLINK_STYLE));
 		nameMapping.put(IStyleModel.VERTICAL_ALIGN_PROP, Integer.valueOf(StyleConstants.STYLE_VERTICAL_ALIGN));
 		nameMapping.put(IStyleModel.TEXT_TRANSFORM_PROP, Integer.valueOf(StyleConstants.STYLE_TEXT_TRANSFORM));
 		nameMapping.put(IStyleModel.TEXT_ALIGN_PROP, Integer.valueOf(StyleConstants.STYLE_TEXT_ALIGN));
@@ -110,9 +117,9 @@ public class StylePropertyMapping {
 
 	/**
 	 * get the style element definition.
-	 * 
+	 *
 	 * @return style definition.
-	 * 
+	 *
 	 */
 	protected static IElementDefn getStyleDefn() {
 		if (styleDefn != null) {
@@ -125,7 +132,7 @@ public class StylePropertyMapping {
 
 	/**
 	 * if the property is inheritable.
-	 * 
+	 *
 	 * @param name property name
 	 * @return true: can inherit, false: can't inherit.
 	 */
@@ -137,6 +144,12 @@ public class StylePropertyMapping {
 		return false;
 	}
 
+	/**
+	 * Get default value
+	 *
+	 * @param name name of property
+	 * @return Return default value
+	 */
 	public static Object getDefaultValue(String name) {
 		IElementPropertyDefn defn = getStyleDefn().getProperty(name);
 		if (defn != null) {
@@ -146,25 +159,40 @@ public class StylePropertyMapping {
 	}
 
 	/**
-	 * @param name
-	 * @param handle
-	 * @return
+	 * Get default value
+	 *
+	 * @param name   name of property
+	 * @param handle report handle
+	 * @return Return the default value
 	 * @author bidi_hcg
 	 */
 	public static Object getDefaultValue(String name, ReportDesignHandle handle) {
 		Object value = getDefaultValue(name);
 
 		if (value == null && handle != null && handle.isDirectionRTL()) {
-			if (IStyleModel.TEXT_DIRECTION_PROP.equals(name))
+			if (IStyleModel.TEXT_DIRECTION_PROP.equals(name)) {
 				return DesignChoiceConstants.BIDI_DIRECTION_RTL;
+			}
 		}
 		return value;
 	}
 
+	/**
+	 * Get default value
+	 *
+	 * @param index property index
+	 * @return Return the default value
+	 */
 	public static Object getDefaultValue(int index) {
 		return getDefaultValue(nameMapping.get(Integer.valueOf(index)).toString());
 	}
 
+	/**
+	 * Get the property id
+	 *
+	 * @param name name of property
+	 * @return Return the property ID
+	 */
 	public static int getPropertyID(String name) {
 		int id = -1;
 		Object obj = nameMapping.get(name);
@@ -174,7 +202,12 @@ public class StylePropertyMapping {
 		return id;
 	}
 
-	public static Set getPropertyMapping() {
+	/**
+	 * Get property mapping
+	 *
+	 * @return Return a set with the property mapping
+	 */
+	public static Set<?> getPropertyMapping() {
 		return nameMapping.entrySet();
 	}
 

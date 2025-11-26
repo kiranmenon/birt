@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -27,234 +30,311 @@ import com.ibm.icu.util.ULocale;
 
 /**
  * The object represents the report content as a whole.
- * 
+ *
  */
 public interface IReportContent {
 	/**
 	 * get the report design used to create this report content.
-	 * 
+	 *
 	 * @return the report design.
 	 */
-	public Report getDesign();
+	Report getDesign();
 
 	/**
 	 * get the error list which occurs in the generation.
-	 * 
+	 *
 	 * @return error list.
 	 */
-	public List getErrors();
+	List getErrors();
 
 	/**
 	 * get the TOC structure constructed in the generation.
-	 * 
+	 *
 	 * @return the TOC structure.
 	 * @deprecated This method shoule be substituted by:<br>
 	 *             &nbsp;&nbsp;&nbsp;&nbsp;
 	 *             <code>getTOCTree( format, locale ).getTOCTree( );</code>
 	 */
-	public TOCNode getTOC();
+	@Deprecated
+	TOCNode getTOC();
 
 	/**
 	 * Gets the toc tree of this report content.
-	 * 
+	 *
+	 * @param format
+	 * @param locale
+	 *
 	 * @return the TOC Tree
 	 */
-	public ITOCTree getTOCTree(String format, ULocale locale);
+	ITOCTree getTOCTree(String format, ULocale locale);
 
 	/**
-	 * return root content
-	 * 
-	 * @return
+	 * Get the root content
+	 *
+	 * @return Return the root content
 	 */
-	public IContent getRoot();
+	IContent getRoot();
 
-	public long getTotalPage();
+	/**
+	 * Get the total page
+	 *
+	 * @return Return the total page
+	 */
+	long getTotalPage();
 
 	/**
 	 * The page content in the report content. If the page is not exist, return
 	 * NULL.
-	 * 
+	 *
 	 * @param pageNumber page number
 	 * @return the page content object.
 	 */
-	public IPageContent getPageContent(long pageNumber);
+	IPageContent getPageContent(long pageNumber);
 
 	/**
 	 * return the content in this report.
-	 * 
+	 *
 	 * @param id content id
 	 * @return the content object
 	 */
-	public IContent getContent(InstanceID id);
+	IContent getContent(InstanceID id);
 
 	/**
 	 * find the named style.
-	 * 
+	 *
 	 * @param styleClass style name.
 	 * @return style named with the name, null if not exists.
 	 */
-	public IStyle findStyle(String styleClass);
+	IStyle findStyle(String styleClass);
 
 	/**
 	 * create a anction content. The action content can only be use in this report
 	 * content.
-	 * 
+	 *
 	 * @return the action content.
 	 */
-	public IHyperlinkAction createActionContent();
+	IHyperlinkAction createActionContent();
 
 	/**
 	 * create a style. the style can only be used in this report.
-	 * 
+	 *
 	 * @return style created.
 	 */
-	public IStyle createStyle();
+	IStyle createStyle();
 
 	/**
 	 * create a cell content. the content can only be used in this report.
-	 * 
+	 *
 	 * @return cell content.
 	 */
-	public ICellContent createCellContent();
+	ICellContent createCellContent();
 
 	/**
 	 * create a container content. the content can only be used in this report.
-	 * 
+	 *
 	 * @return the container content.
 	 */
-	public IContainerContent createContainerContent();
+	IContainerContent createContainerContent();
 
 	/**
 	 * create a page content. the page content can only be used in this report.
-	 * 
+	 *
 	 * @return the page content.
 	 */
-	public IPageContent createPageContent();
+	IPageContent createPageContent();
 
 	/**
 	 * create an table content. the table content can only be used in this report.
-	 * 
+	 *
 	 * @return the table.
 	 */
-	public ITableContent createTableContent();
+	ITableContent createTableContent();
 
-	public ITableGroupContent createTableGroupContent();
+	/**
+	 * Create the table group content
+	 *
+	 * @return Return the table group content
+	 */
+	ITableGroupContent createTableGroupContent();
 
-	public ITableBandContent createTableBandContent();
+	/**
+	 * Create the table band content
+	 *
+	 * @return Return the table band content
+	 */
+	ITableBandContent createTableBandContent();
 
-	public IListContent createListContent();
+	/**
+	 * Create the list content
+	 *
+	 * @return Return the list content
+	 */
+	IListContent createListContent();
 
-	public IListGroupContent createListGroupContent();
+	/**
+	 * Create the list group content
+	 *
+	 * @return Return the list group content
+	 */
+	IListGroupContent createListGroupContent();
 
-	public IListBandContent createListBandContent();
+	/**
+	 * Create the list band content
+	 *
+	 * @return Return the list band content
+	 */
+	IListBandContent createListBandContent();
 
 	/**
 	 * create the row content. the row can only be used in this report.
-	 * 
+	 *
 	 * @return the row content.
 	 */
-	public IRowContent createRowContent();
+	IRowContent createRowContent();
 
 	/**
 	 * create the text content. the text can only be used in this report.
-	 * 
+	 *
 	 * @return the text content.
 	 */
-	public ITextContent createTextContent();
+	ITextContent createTextContent();
 
 	/**
 	 * create the text content, copy the properties from the template content. the
 	 * text can only be used in this report.
-	 * 
+	 *
 	 * @param content the content template.
 	 * @return the text content.
 	 */
-	public ITextContent createTextContent(IContent conent);
+	ITextContent createTextContent(IContent content);
 
 	/**
 	 * create the foreign content. the foreign content can only be used in this
 	 * report.
-	 * 
+	 *
 	 * @return the foreign content
 	 */
-	public IForeignContent createForeignContent();
+	IForeignContent createForeignContent();
 
 	/**
 	 * create the image content. the image can only be used in this report.
-	 * 
+	 *
 	 * @return the image content.
 	 */
-	public IImageContent createImageContent();
+	IImageContent createImageContent();
 
 	/**
 	 * create the image content, copy the properties from the template content. the
 	 * image can only be used in this report.
-	 * 
+	 *
 	 * @param content the content template.
 	 * @return the image content.
 	 */
-	public IImageContent createImageContent(IContent conent);
+	IImageContent createImageContent(IContent content);
 
 	/**
 	 * create the label content. the label can only be used in this report.
-	 * 
+	 *
 	 * @return the label content.
 	 */
-	public ILabelContent createLabelContent();
+	ILabelContent createLabelContent();
 
 	/**
 	 * create the auto text content. the auto text can only be used in this report.
-	 * 
+	 *
 	 * @return the auto text content.
 	 */
-	public IAutoTextContent createAutoTextContent();
+	IAutoTextContent createAutoTextContent();
 
 	/**
 	 * create the label content, copy the properties from the template content. the
 	 * label can only be used in this report.
-	 * 
+	 *
 	 * @param content the content template.
 	 * @return the label content.
 	 */
-	public ILabelContent createLabelContent(IContent conent);
+	ILabelContent createLabelContent(IContent content);
 
 	/**
 	 * create the data content. the data can only be used in this report.
-	 * 
+	 *
 	 * @return the data content.
 	 */
-	public IDataContent createDataContent();
+	IDataContent createDataContent();
 
 	/**
 	 * create the data content, copy the properties from the template content. the
 	 * data can only be used in this report.
-	 * 
+	 *
 	 * @param content the content template.
 	 * @return the data content.
 	 */
-	public IDataContent createDataContent(IContent conent);
-
-	public String getACL();
-
-	public void setACL(String acl);
+	IDataContent createDataContent(IContent content);
 
 	/**
-	 * 
+	 * Get the ACL
+	 *
+	 * @return Return the ACL
+	 */
+	String getACL();
+
+	/**
+	 * Set the ACL
+	 *
+	 * @param acl
+	 */
+	void setACL(String acl);
+
+	/**
+	 *
 	 * @return the ReportContext
 	 */
-	public IReportContext getReportContext();
+	IReportContext getReportContext();
 
-	public Map<String, Object> getUserProperties();
+	/**
+	 * Get the user properties
+	 *
+	 * @return Return the user properties
+	 */
+	Map<String, Object> getUserProperties();
 
-	public Map<String, Object> getExtensions();
+	/**
+	 * Get the extensions
+	 *
+	 * @return Return the extensions
+	 */
+	Map<String, Object> getExtensions();
 
-	public void setExtensions(Map<String, Object> properties);
+	/**
+	 * Set the extensions
+	 *
+	 * @param properties properties of extensions
+	 */
+	void setExtensions(Map<String, Object> properties);
 
+	/**
+	 * Write the content
+	 *
+	 * @param out output stream
+	 * @throws IOException
+	 */
 	void writeContent(DataOutputStream out) throws IOException;
 
+	/**
+	 * Read content
+	 *
+	 * @param in     input stream
+	 * @param loader class loader
+	 * @throws IOException
+	 */
 	void readContent(DataInputStream in, ClassLoader loader) throws IOException;
 
-	public String getTitle();
+	/**
+	 * Get the title
+	 *
+	 * @return Return the title
+	 */
+	String getTitle();
 
-	public void setTitle(String title);
+	void setTitle(String title);
 }

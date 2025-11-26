@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -29,6 +32,7 @@ abstract public class AbstractReportContentWriter implements IReportContentWrite
 
 	protected static Logger logger = Logger.getLogger(IReportContentWriter.class.getName());
 
+	@Override
 	public long writeFullContent(IContent content) throws IOException, BirtException {
 		long offset = getOffset();
 		new ContentWriterVisitor().write(content, this);
@@ -37,7 +41,7 @@ abstract public class AbstractReportContentWriter implements IReportContentWrite
 
 	/**
 	 * use to writer the content into the disk.
-	 * 
+	 *
 	 */
 	private static class ContentWriterVisitor extends ContentVisitorAdapter {
 
@@ -45,6 +49,7 @@ abstract public class AbstractReportContentWriter implements IReportContentWrite
 			visit(content, writer);
 		}
 
+		@Override
 		public Object visitContent(IContent content, Object value) {
 			IReportContentWriter writer = (IReportContentWriter) value;
 			try {
@@ -60,6 +65,7 @@ abstract public class AbstractReportContentWriter implements IReportContentWrite
 			return value;
 		}
 
+		@Override
 		public Object visitPage(IPageContent page, Object value) {
 			IReportContentWriter writer = (IReportContentWriter) value;
 			try {

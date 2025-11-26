@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,29 +22,32 @@ import java.util.Map;
 import org.eclipse.birt.report.designer.util.DEUtil;
 import org.eclipse.birt.report.model.api.metadata.IClassInfo;
 
+
 /**
  * A JSSyntaxContext represents a variables container. JSSyntaxContext also
- * provides methods to access avaible Type meta-data.
+ * provides methods to access available Type meta-data.
+ *
+ * @since 3.3
+ *
  */
-
 public class JSSyntaxContext {
 
 	/**
 	 * BIRT engine objects defined in DesignEngine.
 	 */
-	private static Map<String, JSObjectMetaData> engineObjectMap = new HashMap<String, JSObjectMetaData>();
+	private static Map<String, JSObjectMetaData> engineObjectMap = new HashMap<>();
 
 	// Java class object cache
-	private static Map<String, JSObjectMetaData> javaObjectMap = new HashMap<String, JSObjectMetaData>();
+	private static Map<String, JSObjectMetaData> javaObjectMap = new HashMap<>();
 
 	/**
 	 * Context variables map.
 	 */
-	private Map<String, JSObjectMetaData> objectMetaMap = new HashMap<String, JSObjectMetaData>();
+	private Map<String, JSObjectMetaData> objectMetaMap = new HashMap<>();
 
 	static {
-		List engineClassesList = DEUtil.getClasses();
-		for (Iterator iter = engineClassesList.iterator(); iter.hasNext();) {
+		List<?> engineClassesList = DEUtil.getClasses();
+		for (Iterator<?> iter = engineClassesList.iterator(); iter.hasNext();) {
 			IClassInfo element = (IClassInfo) iter.next();
 			engineObjectMap.put(element.getName(), new EngineClassJSObject(element));
 		}
@@ -49,29 +55,53 @@ public class JSSyntaxContext {
 
 	// static methods
 
+	/**
+	 * Get object of the JavaScript engine
+	 *
+	 * @param classType class type of the object
+	 * @return the engine object
+	 */
 	public static JSObjectMetaData getEnginJSObject(String classType) {
 		return engineObjectMap.containsKey(classType) ? (JSObjectMetaData) engineObjectMap.get(classType) : null;
 	}
 
+	/**
+	 * Get all object of the JavaScript engine
+	 *
+	 * @return all object of the JavaScript engine
+	 */
 	public static JSObjectMetaData[] getAllEnginJSObjects() {
-		return engineObjectMap.values().toArray(new JSObjectMetaData[engineObjectMap.values().size()]);
+		return engineObjectMap.values().toArray(new JSObjectMetaData[engineObjectMap.size()]);
 	}
 
-	public static JSObjectMetaData getJavaClassMeta(Class<?> clazz) {
-		if (clazz == null) {
+	/**
+	 * Get the Java class meta data
+	 *
+	 * @param classObject Java class
+	 * @return the Java class meta data
+	 */
+	public static JSObjectMetaData getJavaClassMeta(Class<?> classObject) {
+		if (classObject == null) {
 			return null;
 		}
 
 		JSObjectMetaData meta = null;
-		if (!javaObjectMap.containsKey(clazz.getName())) {
-			meta = new JavaClassJSObject(clazz);
-			javaObjectMap.put(clazz.getName(), meta);
+		if (!javaObjectMap.containsKey(classObject.getName())) {
+			meta = new JavaClassJSObject(classObject);
+			javaObjectMap.put(classObject.getName(), meta);
 		} else {
-			meta = javaObjectMap.get(clazz.getName());
+			meta = javaObjectMap.get(classObject.getName());
 		}
 		return meta;
 	}
 
+	/**
+	 * Get the Java class meta data
+	 *
+	 * @param className Java class name
+	 * @return the Java class meta data
+	 * @throws ClassNotFoundException
+	 */
 	public static JSObjectMetaData getJavaClassMeta(String className) throws ClassNotFoundException {
 		if (className == null) {
 			return null;
@@ -112,10 +142,11 @@ public class JSSyntaxContext {
 	}
 
 	public void setVariable(String name, IClassInfo classInfo) {
-		if (classInfo == null)
+		if (classInfo == null) {
 			objectMetaMap.put(name, null);
-		else
+		} else {
 			objectMetaMap.put(name, new ExtensionClassJSObject(classInfo));
+		}
 	}
 
 	public void setVariable(String name, JSObjectMetaData meta) {

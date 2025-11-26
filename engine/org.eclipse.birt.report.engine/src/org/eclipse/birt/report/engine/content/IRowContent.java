@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,26 +16,71 @@ package org.eclipse.birt.report.engine.content;
 
 /**
  * Provides the interfaces for the Row AbstractContent
- * 
- * 
+ *
  */
 public interface IRowContent extends IContainerContent {
-	public int getRowID();
 
-	public void setRowID(int rowID);
+	/**
+	 * Get the row id
+	 *
+	 * @return the row id
+	 */
+	int getRowID();
 
-	public ITableContent getTable();
+	/**
+	 * Set the row id
+	 *
+	 * @param rowID row id
+	 */
+	void setRowID(int rowID);
 
-	public String getGroupId();
+	/**
+	 * Get the table
+	 *
+	 * @return the table
+	 */
+	ITableContent getTable();
 
-	public void setGroupId(String groupId);
+	/**
+	 * Get the group id
+	 *
+	 * @return the group id
+	 */
+	String getGroupId();
 
-	public IGroupContent getGroup();
+	/**
+	 * Set the group id
+	 *
+	 * @param groupId group id
+	 */
+	void setGroupId(String groupId);
 
-	public IBandContent getBand();
+	/**
+	 * Get the group
+	 *
+	 * @return the group
+	 */
+	IGroupContent getGroup();
 
-	public void setRepeatable(boolean repeatable);
+	/**
+	 * Get the band
+	 *
+	 * @return the band
+	 */
+	IBandContent getBand();
 
-	public boolean isRepeatable();
+	/**
+	 * Set repeatable
+	 *
+	 * @param repeatable is repeatable
+	 */
+	void setRepeatable(boolean repeatable);
+
+	/**
+	 * Is repeatable
+	 *
+	 * @return is repeatable
+	 */
+	boolean isRepeatable();
 
 }

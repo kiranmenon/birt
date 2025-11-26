@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -64,7 +67,7 @@ public class LayoutContext {
 
 	protected HTMLLayoutContext htmlLayoutContext = null;
 
-	protected HashMap<String, Long> bookmarkMap = new HashMap<String, Long>();
+	protected HashMap<String, Long> bookmarkMap = new HashMap<>();
 
 	protected boolean displayNone = false;
 
@@ -336,7 +339,7 @@ public class LayoutContext {
 	}
 
 	public void setReserveDocumentPageNumbers(boolean reserveDocumentPageNumbers) {
-		this.reserveDocumentPageNumbers = Boolean.valueOf(reserveDocumentPageNumbers);
+		this.reserveDocumentPageNumbers = reserveDocumentPageNumbers;
 	}
 
 	private int totalPageTemplateWidth;
@@ -435,7 +438,7 @@ public class LayoutContext {
 
 	/**
 	 * Gets unresolved hints.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<UnresolvedRowHint> getUnresolvedRowHints() {
@@ -458,7 +461,7 @@ public class LayoutContext {
 
 	/**
 	 * Indicates if the page break is triggered by content size exceeding page size.
-	 * 
+	 *
 	 * @return true when the page break is triggered by content size exceeding page
 	 *         size
 	 * @since 4.6
@@ -470,7 +473,7 @@ public class LayoutContext {
 	/**
 	 * Sets the state if the page break is triggered by content size exceeding page
 	 * size.
-	 * 
+	 *
 	 * @param sizeOverflowPageBreak true when the page break is triggered by content
 	 *                              size exceeding page size
 	 * @since 4.6

@@ -1,12 +1,14 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -17,10 +19,10 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
+import java.awt.font.TextMeasurer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URLConnection;
 import java.text.AttributedString;
 import java.text.DateFormat;
@@ -30,8 +32,11 @@ import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.PrintSetup;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
@@ -46,6 +51,7 @@ import org.eclipse.birt.report.engine.css.engine.value.StringValue;
 import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.model.api.util.ColorUtil;
+import org.w3c.dom.css.CSSPrimitiveValue;
 import org.w3c.dom.css.CSSValue;
 
 import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
@@ -58,7 +64,7 @@ import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
  * <p>
  * StyleManagerUtils is abstract to support a small number of methods that
  * require HSSF/XSSF specific implementations.
- * 
+ *
  * @author Jim Talbut
  *
  */
@@ -68,7 +74,17 @@ public abstract class StyleManagerUtils {
 
 	protected static final FontRenderContext frc = new FontRenderContext(null, true, true);
 
+	/**
+	 * Constructor of factory interface
+	 *
+	 * @since 3.3
+	 *
+	 */
 	public interface Factory {
+		/**
+		 * @param log
+		 * @return Return a style manager util object
+		 */
 		StyleManagerUtils create(Logger log);
 	}
 
@@ -81,7 +97,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Create a RichTextString representing a given string.
-	 * 
+	 *
 	 * @param value The string to represent in the RichTextString.
 	 * @return A RichTextString representing value.
 	 */
@@ -89,7 +105,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Compare two objects in a null-safe manner.
-	 * 
+	 *
 	 * @param lhs The first object to compare.
 	 * @param rhs The second object to compare.
 	 * @return true is both objects are null or lhs.equals(rhs), otherwise false.
@@ -98,6 +114,13 @@ public abstract class StyleManagerUtils {
 		return (lhs == null) ? (rhs == null) : lhs.equals(rhs);
 	}
 
+	/**
+	 * Compare date formats
+	 *
+	 * @param dataFormat1 date format 1
+	 * @param dataFormat2 date format 2
+	 * @return Retun the result of the date format compare
+	 */
 	public static boolean dataFormatsEquivalent(DataFormatValue dataFormat1, DataFormatValue dataFormat2) {
 		if (dataFormat1 == null) {
 			return (dataFormat2 == null);
@@ -116,27 +139,27 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Convert a BIRT text alignment string into a POI CellStyle constant.
-	 * 
+	 *
 	 * @param alignment The BIRT alignment string.
 	 * @return One of the CellStyle.ALIGN* constants.
 	 */
-	public short poiAlignmentFromBirtAlignment(String alignment) {
+	public HorizontalAlignment poiAlignmentFromBirtAlignment(String alignment) {
 		if (CSSConstants.CSS_LEFT_VALUE.equals(alignment)) {
-			return CellStyle.ALIGN_LEFT;
+			return HorizontalAlignment.LEFT; // CellStyle.ALIGN_LEFT;
 		}
 		if (CSSConstants.CSS_RIGHT_VALUE.equals(alignment)) {
-			return CellStyle.ALIGN_RIGHT;
+			return HorizontalAlignment.RIGHT; // CellStyle.ALIGN_RIGHT;
 		}
 		if (CSSConstants.CSS_CENTER_VALUE.equals(alignment)) {
-			return CellStyle.ALIGN_CENTER;
+			return HorizontalAlignment.CENTER; // CellStyle.ALIGN_CENTER;
 		}
-		return CellStyle.ALIGN_GENERAL;
+		return HorizontalAlignment.GENERAL; // CellStyle.ALIGN_GENERAL;
 	}
 
 	/**
 	 * Convert a BIRT font size string (either a dimensioned string or "xx-small" -
 	 * "xx-large") to a point size.
-	 * 
+	 *
 	 * @param fontSize The BIRT font size.
 	 * @return An appropriate size in points.
 	 */
@@ -184,7 +207,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Obtain a POI column width from a BIRT DimensionType.
-	 * 
+	 *
 	 * @param dim The BIRT dimension, which must be in absolute units.
 	 * @return The column with in width units, or zero if a suitable conversion
 	 *         could not be performed.
@@ -194,38 +217,86 @@ public abstract class StyleManagerUtils {
 			double mmWidth = dim.getMeasure();
 			if ((DimensionType.UNITS_CM.equals(dim.getUnits())) || (DimensionType.UNITS_IN.equals(dim.getUnits()))
 					|| (DimensionType.UNITS_PT.equals(dim.getUnits()))
-					|| (DimensionType.UNITS_PC.equals(dim.getUnits()))) {
+					|| (DimensionType.UNITS_PC.equals(dim.getUnits()))
+					) {
 				mmWidth = dim.convertTo("mm");
+			} else if ((DimensionType.UNITS_PX.equals(dim.getUnits()))) {
+				mmWidth = ClientAnchorConversions.pixels2Millimetres(mmWidth);
 			}
 			int result = ClientAnchorConversions.millimetres2WidthUnits(mmWidth);
 			// log.debug( "Column width in mm: ", mmWidth, "; converted result: ", result );
 			return result;
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 
 	/**
+	 * Calculation of millimetres based on dimension
+	 *
+	 * @param dim The BIRT dimension, which must be in absolute units.
+	 * @return The calculated millimetres unit
+	 */
+	public double convertDimensionToMillimetres(DimensionType dim) {
+		if (dim != null) {
+			double mmWidth = dim.getMeasure();
+			if ((DimensionType.UNITS_CM.equals(dim.getUnits())) || (DimensionType.UNITS_IN.equals(dim.getUnits()))
+					|| (DimensionType.UNITS_PT.equals(dim.getUnits()))
+					|| (DimensionType.UNITS_PC.equals(dim.getUnits()))) {
+				mmWidth = dim.convertTo("mm");
+			} else if ((DimensionType.UNITS_PX.equals(dim.getUnits()))) {
+				mmWidth = ClientAnchorConversions.pixels2Millimetres(mmWidth);
+			}
+			return mmWidth;
+		}
+		return 0;
+	}
+
+	/**
+	 * Converting from millimetres to indent width
+	 *
+	 * @param mmWidth The BIRT millimetres
+	 * @return The calculated indent with unit
+	 */
+	public int poiIndentUnit(double mmWidth) {
+		return ClientAnchorConversions.millimetres2IndentUnits(mmWidth);
+	}
+
+	/**
+	 * Converting from millimetres to indent width
+	 *
+	 * @param dim The BIRT dimension millimetres
+	 * @return The calculated indent with unit
+	 */
+	public int poiIndentUnit(DimensionType dim) {
+		if (dim != null) {
+			double mmWidth = dim.getMeasure();
+			if (DimensionType.UNITS_MM.equals(dim.getUnits())) {
+				return ClientAnchorConversions.millimetres2IndentUnits(mmWidth);
+			}
+		}
+		return 0;
+	}
+	/**
 	 * Object a POI font weight from a BIRT string.
-	 * 
+	 *
 	 * @param fontWeight The font weight as understood by BIRT.
 	 * @return One of the Font.BOLDWEIGHT_* constants.
 	 */
-	public short poiFontWeightFromBirt(String fontWeight) {
+	public boolean poiFontWeightFromBirt(String fontWeight) {
 		if (fontWeight == null) {
-			return 0;
+			return false; // 0;
 		}
 		if ("bold".equals(fontWeight)) {
-			return Font.BOLDWEIGHT_BOLD;
+			return true; // Font.BOLDWEIGHT_BOLD;
 		}
-		return Font.BOLDWEIGHT_NORMAL;
+		return false; // Font.BOLDWEIGHT_NORMAL;
 	}
 
 	/**
 	 * Convert a BIRT font name into a system font name. <br>
 	 * Just returns the passed in name unless that is a known family name ("serif"
 	 * or "sans-serif").
-	 * 
+	 *
 	 * @param fontName The font name from BIRT.
 	 * @return A real font name.
 	 */
@@ -248,7 +319,7 @@ public abstract class StyleManagerUtils {
 	 * In the current implementations the XSSF implementation will always produce
 	 * exactly the right colour, whilst the HSSF implementation takes the best
 	 * approximation from the current palette.
-	 * 
+	 *
 	 * @param workbook The workbook in which the Font is to be used, needed to
 	 *                 obtain the colour palette.
 	 * @param font     The font to which the colour is to be added.
@@ -265,7 +336,7 @@ public abstract class StyleManagerUtils {
 	 * In the current implementations the XSSF implementation will always produce
 	 * exactly the right colour, whilst the HSSF implementation takes the best
 	 * approximation from the current palette.
-	 * 
+	 *
 	 * @param workbook The workbook in which the Font is to be used, needed to
 	 *                 obtain the colour palette.
 	 * @param style    The style to which the colour is to be added.
@@ -275,27 +346,27 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Check whether a cell is empty and unformatted.
-	 * 
+	 *
 	 * @param cell The cell to consider.
 	 * @return true is the cell is empty and has no style or has no background fill.
 	 */
 	public static boolean cellIsEmpty(Cell cell) {
-		if (cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+		// if (cell.getCellType() != Cell.CELL_TYPE_BLANK) {
+		if (!CellType.BLANK.equals(cell.getCellType())) {
 			return false;
 		}
 		CellStyle cellStyle = cell.getCellStyle();
-		if (cellStyle == null) {
-			return true;
-		}
-		if (cellStyle.getFillPattern() == CellStyle.NO_FILL) {
+		// if (cellStyle.getFillPattern() == CellStyle.NO_FILL) {
+		if ((cellStyle == null) || FillPatternType.NO_FILL.equals(cellStyle.getFillPattern())) {
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * Apply a BIRT border style to one side of a POI CellStyle.
-	 * 
+	 * Apply a BIRT border style to one side of a POI CellStyle usage: xls-format /
+	 * StyleManagerHUtils
+	 *
 	 * @param workbook    The workbook that contains the cell being styled.
 	 * @param style       The POI CellStyle that is to have the border applied to
 	 *                    it.
@@ -310,6 +381,17 @@ public abstract class StyleManagerUtils {
 			CSSValue borderStyle, CSSValue width);
 
 	/**
+	 * Apply a BIRT border style to one side of a POI CellStyle. usage: xlsx-format
+	 * / StyleManagerXUtils
+	 *
+	 * @param workbook  The workbook that contains the cell being styled.
+	 * @param style     The POI CellStyle that is to have the border applied to it.
+	 * @param birtStyle birt cell style with all border information
+	 * @since 4.13
+	 */
+	public abstract void applyBorderStyle(Workbook workbook, CellStyle style, BirtStyle birtStyle);
+
+	/**
 	 * <p>
 	 * Convert a MIME string into a Workbook.PICTURE* constant.
 	 * </p>
@@ -317,7 +399,7 @@ public abstract class StyleManagerUtils {
 	 * In some cases BIRT fails to submit a MIME string, in which case this method
 	 * falls back to basic data signatures for JPEG and PNG images.
 	 * <p>
-	 * 
+	 *
 	 * @param mimeType The MIME type.
 	 * @param data     The image data to consider if no recognisable MIME type is
 	 *                 provided.
@@ -351,7 +433,7 @@ public abstract class StyleManagerUtils {
 	/**
 	 * Read an InputStream in full and put the results into a byte[]. <br>
 	 * This is needed by the emitter to handle images accessed by URL.
-	 * 
+	 *
 	 * @param stream The InputStream to read.
 	 * @param length The length of the InputStream
 	 * @return A byte array containing the contents of the InputStream.
@@ -379,7 +461,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Read an image from a URLConnection into a byte array.
-	 * 
+	 *
 	 * @param conn The URLConnection to provide the data.
 	 * @return A byte array containing the data downloaded from the URL.
 	 */
@@ -387,14 +469,9 @@ public abstract class StyleManagerUtils {
 		try {
 			int contentLength = conn.getContentLength();
 			InputStream imageStream = conn.getInputStream();
-			try {
+			try (imageStream) {
 				return streamToByteArray(imageStream, contentLength);
-			} finally {
-				imageStream.close();
 			}
-		} catch (MalformedURLException ex) {
-			log.debug(ex.getClass(), ": ", ex.getMessage());
-			return null;
 		} catch (IOException ex) {
 			log.debug(ex.getClass(), ": ", ex.getMessage());
 			return null;
@@ -404,7 +481,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Convert a BIRT paper size string into a POI PrintSetup.*PAPERSIZE constant.
-	 * 
+	 *
 	 * @param name The paper size as a BIRT string.
 	 * @return A POI PrintSetup.*PAPERSIZE constant.
 	 */
@@ -422,7 +499,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Check whether a DimensionType represents an absolute (physical) dimension.
-	 * 
+	 *
 	 * @param dim The DimensionType to consider.
 	 * @return true if dim represents an absolute measurement.
 	 */
@@ -438,7 +515,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Check whether a DimensionType represents pixels.
-	 * 
+	 *
 	 * @param dim The DimensionType to consider.
 	 * @return true if dim represents pixels.
 	 */
@@ -454,7 +531,7 @@ public abstract class StyleManagerUtils {
 	 * There is no way this function is complete! More special cases will be added
 	 * as they are found.
 	 * </p>
-	 * 
+	 *
 	 * @param birtFormat A string representing a number format in BIRT.
 	 * @return A string representing a data format in Excel.
 	 */
@@ -484,7 +561,7 @@ public abstract class StyleManagerUtils {
 	 * it is still likely to have issues. More special cases will be added as they
 	 * are found.
 	 * </p>
-	 * 
+	 *
 	 * @param birtFormat A string representing a date/time format in BIRT.
 	 * @return A string representing a data format in Excel.
 	 */
@@ -513,6 +590,12 @@ public abstract class StyleManagerUtils {
 		return DateFormatConverter.convert(locale, birtFormat);
 	}
 
+	/**
+	 * Get number format
+	 *
+	 * @param style birt style
+	 * @return Return the number format
+	 */
 	public static String getNumberFormat(BirtStyle style) {
 		CSSValue dataFormat = style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dataFormat instanceof DataFormatValue) {
@@ -522,6 +605,12 @@ public abstract class StyleManagerUtils {
 		return null;
 	}
 
+	/**
+	 * Get date format
+	 *
+	 * @param style birt style
+	 * @return Return the date format
+	 */
 	public static String getDateFormat(BirtStyle style) {
 		CSSValue dataFormat = style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dataFormat instanceof DataFormatValue) {
@@ -531,6 +620,12 @@ public abstract class StyleManagerUtils {
 		return null;
 	}
 
+	/**
+	 * Get date time format
+	 *
+	 * @param style birt style
+	 * @return Return the date time format
+	 */
 	public static String getDateTimeFormat(BirtStyle style) {
 		CSSValue dataFormat = style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dataFormat instanceof DataFormatValue) {
@@ -540,6 +635,12 @@ public abstract class StyleManagerUtils {
 		return null;
 	}
 
+	/**
+	 * Get time format
+	 *
+	 * @param style birt style
+	 * @return Return the time format
+	 */
 	public static String getTimeFormat(BirtStyle style) {
 		CSSValue dataFormat = style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dataFormat instanceof DataFormatValue) {
@@ -549,6 +650,12 @@ public abstract class StyleManagerUtils {
 		return null;
 	}
 
+	/**
+	 * Clone the date format
+	 *
+	 * @param dataValue date format value
+	 * @return Return the cloned date format value
+	 */
 	public static DataFormatValue cloneDataFormatValue(DataFormatValue dataValue) {
 		DataFormatValue newValue = new DataFormatValue();
 		newValue.setDateFormat(dataValue.getDatePattern(), dataValue.getDateLocale());
@@ -559,6 +666,13 @@ public abstract class StyleManagerUtils {
 		return newValue;
 	}
 
+	/**
+	 * Set the number format
+	 *
+	 * @param style   birt style
+	 * @param pattern pattern of format
+	 * @param locale  locale
+	 */
 	public static void setNumberFormat(BirtStyle style, String pattern, String locale) {
 		DataFormatValue dfv = (DataFormatValue) style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dfv == null) {
@@ -570,6 +684,13 @@ public abstract class StyleManagerUtils {
 		style.setProperty(StyleConstants.STYLE_DATA_FORMAT, dfv);
 	}
 
+	/**
+	 * Set the date format
+	 *
+	 * @param style   birt style
+	 * @param pattern pattern of format
+	 * @param locale  locale
+	 */
 	public static void setDateFormat(BirtStyle style, String pattern, String locale) {
 		DataFormatValue dfv = (DataFormatValue) style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dfv == null) {
@@ -581,6 +702,13 @@ public abstract class StyleManagerUtils {
 		style.setProperty(StyleConstants.STYLE_DATA_FORMAT, dfv);
 	}
 
+	/**
+	 * Set the date time format
+	 *
+	 * @param style   birt style
+	 * @param pattern pattern of format
+	 * @param locale  locale
+	 */
 	public static void setDateTimeFormat(BirtStyle style, String pattern, String locale) {
 		DataFormatValue dfv = (DataFormatValue) style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dfv == null) {
@@ -592,6 +720,13 @@ public abstract class StyleManagerUtils {
 		style.setProperty(StyleConstants.STYLE_DATA_FORMAT, dfv);
 	}
 
+	/**
+	 * Set the time format
+	 *
+	 * @param style   birt style
+	 * @param pattern pattern of format
+	 * @param locale  locale
+	 */
 	public static void setTimeFormat(BirtStyle style, String pattern, String locale) {
 		DataFormatValue dfv = (DataFormatValue) style.getProperty(StyleConstants.STYLE_DATA_FORMAT);
 		if (dfv == null) {
@@ -605,11 +740,12 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Apply a BIRT number/date/time format to a POI CellStyle.
-	 * 
+	 *
 	 * @param workbook  The workbook containing the CellStyle (needed to create a
 	 *                  new DataFormat).
 	 * @param birtStyle The BIRT style which may contain a number format.
 	 * @param poiStyle  The CellStyle that is to receive the number format.
+	 * @param locale    Locale
 	 */
 	public void applyNumberFormat(Workbook workbook, BirtStyle birtStyle, CellStyle poiStyle, Locale locale) {
 		String dataFormat = null;
@@ -645,7 +781,7 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Add font details to an AttributedString.
-	 * 
+	 *
 	 * @param attrString The AttributedString to modify.
 	 * @param font       The font to take attributes from.
 	 * @param startIdx   The index of the first character to be attributed
@@ -656,17 +792,21 @@ public abstract class StyleManagerUtils {
 	protected void addFontAttributes(AttributedString attrString, Font font, int startIdx, int endIdx) {
 		attrString.addAttribute(TextAttribute.FAMILY, font.getFontName(), startIdx, endIdx);
 		attrString.addAttribute(TextAttribute.SIZE, (float) font.getFontHeightInPoints(), startIdx, endIdx);
-		if (font.getBoldweight() == Font.BOLDWEIGHT_BOLD)
+		// if (font.getBoldweight() == Font.BOLDWEIGHT_BOLD)
+		if (font.getBold()) {
 			attrString.addAttribute(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD, startIdx, endIdx);
-		if (font.getItalic())
+		}
+		if (font.getItalic()) {
 			attrString.addAttribute(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE, startIdx, endIdx);
-		if (font.getUnderline() == Font.U_SINGLE)
+		}
+		if (font.getUnderline() == Font.U_SINGLE) {
 			attrString.addAttribute(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON, startIdx, endIdx);
+		}
 	}
 
 	/**
 	 * Find a RichTextRun that includes a specific index.
-	 * 
+	 *
 	 * @param richTextRuns The list of RichTextRuns to search.
 	 * @param startIndex   The character index being sought.
 	 * @return The index into richTextRuns such that
@@ -688,16 +828,19 @@ public abstract class StyleManagerUtils {
 	/**
 	 * Calculate the height of a string formatted according to a set of RichTextRuns
 	 * and fitted within a give width.
-	 * 
+	 *
 	 * @param sourceText   The string to be measured.
 	 * @param defaultFont  The font to be used prior to the first RichTextRun.
 	 * @param widthMM      The width of the output.
 	 * @param richTextRuns The list of RichTextRuns to be applied to the string
-	 * @return The heigh, in points, of a box big enough to contain the formatted
+	 * @param wrap         If the excel cell marked as wrapped text then use the
+	 *                     wrapped line break LineBreakMeasurer else use raw
+	 *                     TextMeasurer
+	 * @return The height, in points, of a box big enough to contain the formatted
 	 *         sourceText.
 	 */
 	public float calculateTextHeightPoints(String sourceText, Font defaultFont, double widthMM,
-			List<RichTextRun> richTextRuns) {
+			List<RichTextRun> richTextRuns, boolean wrap) {
 		log.debug("Calculating height for ", sourceText);
 
 		final float widthPt = (float) (72 * Math.max(0, widthMM - 6) / 25.4);
@@ -750,21 +893,37 @@ public abstract class StyleManagerUtils {
 				}
 			}
 
-			LineBreakMeasurer measurer = new LineBreakMeasurer(attrString.getIterator(), frc);
 
-			float heightAdjustment = 0.0F;
-			int lineLength = textLine.isEmpty() ? 1 : textLine.length();
-			while (measurer.getPosition() < lineLength) {
-				TextLayout layout = measurer.nextLayout(widthPt);
-				float lineHeight = layout.getAscent() + layout.getDescent() + layout.getLeading();
-				if (layout.getDescent() + layout.getLeading() > heightAdjustment) {
-					heightAdjustment = layout.getDescent() + layout.getLeading();
+			try {
+				if (wrap) {
+					LineBreakMeasurer measurer = new LineBreakMeasurer(attrString.getIterator(), frc);
+
+					float heightAdjustment = 0.0F;
+					int lineLength = textLine.isEmpty() ? 1 : textLine.length();
+					while (measurer.getPosition() < lineLength) {
+						TextLayout layout = measurer.nextLayout(widthPt);
+						float lineHeight = layout.getAscent() + layout.getDescent() + layout.getLeading();
+						if (layout.getDescent() + layout.getLeading() > heightAdjustment) {
+							heightAdjustment = layout.getDescent() + layout.getLeading();
+						}
+						log.debug("Line: ", textLine, " gives height ", lineHeight, "(", layout.getAscent(), "/",
+								layout.getDescent(), "/", layout.getLeading(), ")");
+						totalHeight += lineHeight;
+					}
+					totalHeight += heightAdjustment;
+				} else {
+					if (textLine.length() > 0) {
+						TextMeasurer measurer = new TextMeasurer(attrString.getIterator(), frc);
+						TextLayout layout = measurer.getLayout(0, textLine.length());
+						float lineHeight = layout.getAscent() + 2 * (layout.getDescent() + layout.getLeading());
+						log.debug("Line: ", textLine, " gives height ", lineHeight, "(", layout.getAscent(), "/",
+								layout.getDescent(), "/", layout.getLeading(), ")");
+						totalHeight += lineHeight;
+					}
 				}
-				log.debug("Line: ", textLine, " gives height ", lineHeight, "(", layout.getAscent(), "/",
-						layout.getDescent(), "/", layout.getLeading(), ")");
-				totalHeight += lineHeight;
+			} catch (Throwable ex) {
+				log.error(0, "Calculating height of line \"" + textLine + "\" threw: ", ex);
 			}
-			totalHeight += heightAdjustment;
 
 		}
 		log.debug("Height calculated as ", totalHeight);
@@ -774,9 +933,8 @@ public abstract class StyleManagerUtils {
 	protected String contrastColour(int colour[]) {
 		if ((colour[0] == 0) && (colour[1] == 0) && (colour[2] == 0)) {
 			return "white";
-		} else {
-			return "black";
 		}
+		return "black";
 	}
 
 	protected int[] rgbOnly(int rgb[]) {
@@ -799,12 +957,11 @@ public abstract class StyleManagerUtils {
 		if (rgb == null) {
 			return new int[] { 0, 0, 0 };
 		} else if (rgb.length >= 3) {
-			return new int[] { (int) rgb[rgb.length - 3] & 0xFF, (int) rgb[rgb.length - 2] & 0xFF,
-					(int) rgb[rgb.length - 1] & 0xFF };
+			return new int[] { rgb[rgb.length - 3] & 0xFF, rgb[rgb.length - 2] & 0xFF, rgb[rgb.length - 1] & 0xFF };
 		} else if (rgb.length == 2) {
-			return new int[] { (int) rgb[0] & 0xFF, (int) rgb[1] & 0xFF, 0 };
+			return new int[] { rgb[0] & 0xFF, rgb[1] & 0xFF, 0 };
 		} else if (rgb.length == 2) {
-			return new int[] { (int) rgb[0] & 0xFF, 0, 0 };
+			return new int[] { rgb[0] & 0xFF, 0, 0 };
 		} else {
 			return new int[] { 0, 0, 0 };
 		}
@@ -814,13 +971,26 @@ public abstract class StyleManagerUtils {
 		if ((colour == null) || (CSSConstants.CSS_TRANSPARENT_VALUE.equals(colour))
 				|| (CSSConstants.CSS_AUTO_VALUE.equals(colour))) {
 			return rgbOnly(ColorUtil.getRGBs(defaultColour));
-		} else {
-			return rgbOnly(ColorUtil.getRGBs(colour));
 		}
+		return rgbOnly(ColorUtil.getRGBs(colour));
 	}
 
+	/**
+	 * Correction of font color if background
+	 *
+	 * @param fm        font manager
+	 * @param wb        workbook
+	 * @param birtStyle birt style
+	 * @param font      font
+	 * @return Return the corrected font color
+	 */
 	public abstract Font correctFontColorIfBackground(FontManager fm, Workbook wb, BirtStyle birtStyle, Font font);
 
+	/**
+	 * Correction of font color if background
+	 *
+	 * @param birtStyle birt style
+	 */
 	public void correctFontColorIfBackground(BirtStyle birtStyle) {
 		CSSValue bgColour = birtStyle.getProperty(StyleConstants.STYLE_BACKGROUND_COLOR);
 		CSSValue fgColour = birtStyle.getProperty(StyleConstants.STYLE_COLOR);
@@ -829,7 +999,7 @@ public abstract class StyleManagerUtils {
 		int fgRgb[] = parseColour(fgColour == null ? null : fgColour.getCssText(), "black");
 
 		if ((bgRgb[0] == fgRgb[0]) && (bgRgb[1] == fgRgb[1]) && (bgRgb[2] == fgRgb[2])) {
-			CSSValue newColour = new StringValue(StringValue.CSS_STRING, contrastColour(bgRgb));
+			CSSValue newColour = new StringValue(CSSPrimitiveValue.CSS_STRING, contrastColour(bgRgb));
 			birtStyle.setProperty(StyleConstants.STYLE_COLOR, newColour);
 		}
 	}
@@ -837,7 +1007,7 @@ public abstract class StyleManagerUtils {
 	/**
 	 * Convert a horizontal position in a column (in mm) to a ClientAnchor DX
 	 * position.
-	 * 
+	 *
 	 * @param width    The position within the column.
 	 * @param colWidth The width of the column.
 	 * @return A value suitable for use as an argument to setDx2() on ClientAnchor.
@@ -847,7 +1017,7 @@ public abstract class StyleManagerUtils {
 	/**
 	 * Convert a vertical position in a row (in points) to a ClientAnchor DY
 	 * position.
-	 * 
+	 *
 	 * @param height    The position within the row.
 	 * @param rowHeight The height of the row.
 	 * @return A value suitable for use as an argument to setDy2() on ClientAnchor.
@@ -857,15 +1027,19 @@ public abstract class StyleManagerUtils {
 
 	/**
 	 * Prepare the margin dimensions on the sheet as per the BIRT page.
-	 * 
-	 * @param page The BIRT page.
+	 *
+	 * @param sheet Sheet
+	 * @param page  The BIRT page.
 	 */
 	public abstract void prepareMarginDimensions(Sheet sheet, IPageContent page);
 
 	/**
 	 * Place a border around a region on the current sheet. This is used to apply
 	 * borders to entire rows or entire tables.
-	 * 
+	 *
+	 * @param sm
+	 * @param sheet
+	 *
 	 * @param colStart    The column marking the left-side boundary of the region.
 	 * @param colEnd      The column marking the right-side boundary of the region.
 	 * @param rowStart    The row marking the top boundary of the region.
@@ -890,6 +1064,13 @@ public abstract class StyleManagerUtils {
 		CSSValue borderStyleTop = borderStyle.getProperty(StyleConstants.STYLE_BORDER_TOP_STYLE);
 		CSSValue borderWidthTop = borderStyle.getProperty(StyleConstants.STYLE_BORDER_TOP_WIDTH);
 		CSSValue borderColourTop = borderStyle.getProperty(StyleConstants.STYLE_BORDER_TOP_COLOR);
+
+		CSSValue borderStyleDiagonal = borderStyle.getProperty(StyleConstants.STYLE_BORDER_DIAGONAL_STYLE);
+		CSSValue borderWidthDiagonal = borderStyle.getProperty(StyleConstants.STYLE_BORDER_DIAGONAL_WIDTH);
+		CSSValue borderColourDiagonal = borderStyle.getProperty(StyleConstants.STYLE_BORDER_DIAGONAL_COLOR);
+		CSSValue borderStyleAntidiagonal = borderStyle.getProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_STYLE);
+		CSSValue borderWidthAntidiagonal = borderStyle.getProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_WIDTH);
+		CSSValue borderColourAntidiagonal = borderStyle.getProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_COLOR);
 
 		/*
 		 * borderMsg.append( ", Bottom:" ).append( borderStyleBottom ).append( "/"
@@ -934,10 +1115,31 @@ public abstract class StyleManagerUtils {
 			borderColourTop = null;
 		}
 
+		if ((borderStyleDiagonal == null) || (CSSConstants.CSS_NONE_VALUE.equals(borderStyleDiagonal))
+				|| (borderWidthDiagonal == null) || ("0".equals(borderWidthDiagonal)) || (borderColourDiagonal == null)
+				|| (CSSConstants.CSS_TRANSPARENT_VALUE.equals(borderColourDiagonal.getCssText()))) {
+			borderStyleDiagonal = null;
+			borderWidthDiagonal = null;
+			borderColourDiagonal = null;
+		}
+
+		if ((borderStyleAntidiagonal == null) || (CSSConstants.CSS_NONE_VALUE.equals(borderStyleAntidiagonal))
+				|| (borderWidthAntidiagonal == null) || ("0".equals(borderWidthDiagonal))
+				|| (borderColourDiagonal == null)
+				|| (CSSConstants.CSS_TRANSPARENT_VALUE.equals(borderColourAntidiagonal.getCssText()))) {
+			borderStyleAntidiagonal = null;
+			borderWidthAntidiagonal = null;
+			borderColourAntidiagonal = null;
+		}
+
 		if ((borderStyleBottom != null) || (borderWidthBottom != null) || (borderColourBottom != null)
 				|| (borderStyleLeft != null) || (borderWidthLeft != null) || (borderColourLeft != null)
 				|| (borderStyleRight != null) || (borderWidthRight != null) || (borderColourRight != null)
-				|| (borderStyleTop != null) || (borderWidthTop != null) || (borderColourTop != null)) {
+				|| (borderStyleTop != null) || (borderWidthTop != null) || (borderColourTop != null)
+				|| (borderStyleDiagonal != null) || (borderWidthDiagonal != null) || (borderColourDiagonal != null)
+				|| (borderStyleAntidiagonal != null) || (borderWidthAntidiagonal != null)
+				|| (borderColourAntidiagonal != null)
+		) {
 			for (int row = rowStart; row <= rowEnd; ++row) {
 				Row styleRow = sheet.getRow(row);
 				if (styleRow != null) {
@@ -963,7 +1165,15 @@ public abstract class StyleManagerUtils {
 										((col == colEnd) ? borderColourRight : null),
 										((row == rowStart) ? borderStyleTop : null),
 										((row == rowStart) ? borderWidthTop : null),
-										((row == rowStart) ? borderColourTop : null));
+										((row == rowStart) ? borderColourTop : null),
+										((row == rowStart) ? borderStyleDiagonal : null),
+										((row == rowStart) ? borderWidthDiagonal : null),
+										((row == rowStart) ? borderColourDiagonal : null),
+										((row == rowStart) ? borderStyleAntidiagonal : null),
+										((row == rowStart) ? borderWidthAntidiagonal : null),
+										((row == rowStart) ? borderColourAntidiagonal : null)
+
+								);
 								styleCell.setCellStyle(newStyle);
 							}
 						}
@@ -976,7 +1186,9 @@ public abstract class StyleManagerUtils {
 	/**
 	 * Place a border around a region on the current sheet. This is used to apply
 	 * borders to entire rows or entire tables.
-	 * 
+	 *
+	 * @param sm          Style manager
+	 * @param sheet       Sheet
 	 * @param colStart    The column marking the left-side boundary of the region.
 	 * @param colEnd      The column marking the right-side boundary of the region.
 	 * @param row         The row to get a bottom border.
@@ -1009,6 +1221,7 @@ public abstract class StyleManagerUtils {
 						// styleCell.getColumnIndex() + "]");
 						CellStyle newStyle = sm.getStyleWithBorders(styleCell.getCellStyle(), borderStyleBottom,
 								borderWidthBottom, borderColourBottom, null, null, null, null, null, null, null, null,
+								null, null, null, null, null, null,
 								null);
 						styleCell.setCellStyle(newStyle);
 					}
@@ -1017,6 +1230,16 @@ public abstract class StyleManagerUtils {
 		}
 	}
 
+	/**
+	 * Apply the area border to cell
+	 *
+	 * @param knownAreaBorders Area borders collection
+	 * @param cell             cell instance
+	 * @param birtCellStyle    birt cell style
+	 * @param rowIndex         row index
+	 * @param colIndex         column index
+	 * @return Return the column index
+	 */
 	public int applyAreaBordersToCell(Collection<AreaBorders> knownAreaBorders, Cell cell, BirtStyle birtCellStyle,
 			int rowIndex, int colIndex) {
 		for (AreaBorders areaBorders : knownAreaBorders) {
@@ -1055,10 +1278,37 @@ public abstract class StyleManagerUtils {
 					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_TOP_COLOR, areaBorders.cssColour[3]);
 				}
 			}
+			if ((areaBorders.left == colIndex) && ((areaBorders.top <= rowIndex)
+					&& ((areaBorders.bottom < 0) || (areaBorders.bottom >= rowIndex)))) {
+				if ((areaBorders.cssStyle[4] != null) && (areaBorders.cssWidth[4] != null)
+						&& (areaBorders.cssColour[4] != null)) {
+					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_DIAGONAL_STYLE, areaBorders.cssStyle[4]);
+					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_DIAGONAL_WIDTH, areaBorders.cssWidth[4]);
+					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_DIAGONAL_COLOR, areaBorders.cssColour[4]);
+				}
+			}
+			if ((areaBorders.left == colIndex) && ((areaBorders.top <= rowIndex)
+					&& ((areaBorders.bottom < 0) || (areaBorders.bottom >= rowIndex)))) {
+				if ((areaBorders.cssStyle[5] != null) && (areaBorders.cssWidth[5] != null)
+						&& (areaBorders.cssColour[5] != null)) {
+					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_STYLE, areaBorders.cssStyle[5]);
+					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_WIDTH, areaBorders.cssWidth[5]);
+					birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_COLOR, areaBorders.cssColour[5]);
+				}
+			}
 		}
 		return colIndex;
 	}
 
+	/**
+	 * Extend rows
+	 *
+	 * @param state    handler state
+	 * @param startRow start row
+	 * @param startCol start column
+	 * @param endRow   end row
+	 * @param endCol   end column
+	 */
 	public void extendRows(HandlerState state, int startRow, int startCol, int endRow, int endCol) {
 		for (int colNum = startCol; colNum < endCol; ++colNum) {
 			Cell lastCell = null;
@@ -1076,7 +1326,14 @@ public abstract class StyleManagerUtils {
 						lastCell.getColumnIndex(), lastCell.getColumnIndex());
 				log.debug("Extend: merging from [", range.getFirstRow(), ",", range.getFirstColumn(), "] to [",
 						range.getLastRow(), ",", range.getLastColumn(), "]");
-				state.currentSheet.addMergedRegion(range);
+
+				try {
+					state.currentSheet.addMergedRegion(range);
+				} catch (IllegalStateException ise) {
+					log.error(0, "Error of merged regions: " + ise.getLocalizedMessage(),
+							ise);
+				}
+
 				for (int rowNum = lastCell.getRowIndex() + 1; rowNum < endRow; ++rowNum) {
 					Row row = state.currentSheet.getRow(rowNum);
 					if (row == null) {
@@ -1090,4 +1347,5 @@ public abstract class StyleManagerUtils {
 			}
 		}
 	}
+
 }

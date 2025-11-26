@@ -1,9 +1,9 @@
 <%-----------------------------------------------------------------------------
-	Copyright (c) 2004-2008 Actuate Corporation and others.
+	Copyright (c) 2004-2008, 2025 Actuate Corporation and others.
 	All rights reserved. This program and the accompanying materials 
-	are made available under the terms of the Eclipse Public License v1.0
+	are made available under the terms of the Eclipse Public License v2.0
 	which accompanies this distribution, and is available at
-	http://www.eclipse.org/legal/epl-v10.html
+	http://www.eclipse.org/legal/epl-2.0.html
 	
 	Contributors:
 		Actuate Corporation - Initial implementation.
@@ -37,13 +37,14 @@
 <%-----------------------------------------------------------------------------
 	Viewer root fragment
 -----------------------------------------------------------------------------%>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<!DOCTYPE HTML>
 <HTML lang="<%= ParameterAccessor.htmlEncode( attributeBean.getLanguage() ) %>">
 	<HEAD>
 		<TITLE><%= ParameterAccessor.htmlEncode( attributeBean.getReportTitle( ) ) %></TITLE>
 		<BASE href="<%= baseHref %>" >
 		
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8">
+		<LINK href="https://eclipse-birt.github.io/birt-website/img/BIRT-Icon.ico" type=image/x-icon rel="shortcut icon">
 		<LINK REL="stylesheet" HREF="birt/styles/style.css" TYPE="text/css">
 		<%
 		if( attributeBean.isRtl() )
@@ -104,6 +105,8 @@
 		<script src="birt/ajax/ui/app/AbstractUIComponent.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/app/AbstractBaseToolbar.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/app/BirtToolbar.js" type="text/javascript"></script>
+		<script src="birt/ajax/ui/app/BirtToolbarTheme.js" type="text/javascript"></script>
+		<script src="birt/ajax/ui/app/BirtZoomer.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/app/BirtNavigationBar.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/app/AbstractBaseToc.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/app/BirtToc.js" type="text/javascript"></script>
@@ -124,6 +127,7 @@
 		<script src="birt/ajax/ui/dialog/AbstractExceptionDialog.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/dialog/BirtExceptionDialog.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/dialog/BirtConfirmationDialog.js" type="text/javascript"></script>
+		<script src="birt/ajax/ui/dialog/BirtMessageDialog.js" type="text/javascript"></script>
 		
 		<script src="birt/ajax/utility/BirtPosition.js" type="text/javascript"></script>
 		<script src="birt/ajax/utility/Printer.js" type="text/javascript"></script>
@@ -150,18 +154,18 @@
 			<TR CLASS='body_caption_top'>
 				<TD COLSPAN='2'></TD>
 			</TR>
-			<TR CLASS='body_caption' VALIGN='bottom'>
+			<TR CLASS='body_caption'>
 				<TD COLSPAN='2'>
 					<TABLE BORDER=0 CELLSPACING="0" CELLPADDING="1px" WIDTH="100%">
 						<TR>
-							<TD WIDTH="3px"/>
+							<TD WIDTH="4px"/>
 							<TD>
 								<B><%= ParameterAccessor.htmlEncode( attributeBean.getReportTitle( ) ) %>
 								</B>
 							</TD>
 							<TD ALIGN='right'>
 							</TD>
-							<TD WIDTH="3px"/>
+							<TD WIDTH="4px"/>
 						</TR>
 					</TABLE>
 				</TD>
@@ -224,6 +228,7 @@
 		var birtPrintReportServerDialog = new BirtPrintReportServerDialog( 'printReportServerDialog' );
 		var birtExceptionDialog = new BirtExceptionDialog( 'exceptionDialog' );
 		var birtConfirmationDialog = new BirtConfirmationDialog( 'confirmationDialog' );
+		var birtMessageDialog = new BirtMessageDialog( 'messageDialog' );
 
 		// register the base elements to the mask, so their input
 		// will be disabled when a dialog is popped up.

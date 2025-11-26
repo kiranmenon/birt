@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -23,25 +26,20 @@ import org.eclipse.swt.accessibility.AccessibleControlEvent;
 import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Listener;
 
 /**
  * @author Actuate Corporation
- * 
+ *
  */
 public class IntegerSpinControl extends AbstractChartIntSpinner implements SelectionListener, Listener {
-
-	private transient int iSize = 16;
 
 	private transient int iMinValue = 0;
 
@@ -50,12 +48,6 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 	protected transient int iCurrentValue = 0;
 
 	private transient int iIncrement = 1;
-
-	protected transient Composite cmpContentOuter = null;
-
-	private transient Composite cmpContentInner = null;
-
-	private transient Composite cmpBtnContainer = null;
 
 	protected transient Button btnIncrement = null;
 
@@ -86,97 +78,73 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void init() {
 		if (Display.getCurrent().getHighContrast()) {
-			GC gc = new GC(this);
-			iSize = gc.getFontMetrics().getHeight();
+			// GC gc = new GC(this);
+			// iSize = gc.getFontMetrics().getHeight();
 		}
-		this.setSize(getParent().getClientArea().width, getParent().getClientArea().height);
-		vListeners = new Vector<Listener>();
+//		this.setSize(getParent().getClientArea().width, getParent().getClientArea().height);
+		vListeners = new Vector<>();
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	protected void placeComponents() {
-		FillLayout fl = new FillLayout();
-		fl.marginHeight = 0;
-		fl.marginWidth = 0;
-		setLayout(fl);
-
-		// THE LAYOUT OF THE OUTER COMPOSITE (THAT GROWS VERTICALLY BUT ANCHORS
-		// ITS CONTENT NORTH)
-		cmpContentOuter = new Composite(this, SWT.NONE);
-		GridLayout gl = new GridLayout();
-		gl.verticalSpacing = 0;
-		gl.horizontalSpacing = 0;
-		gl.marginHeight = 0;
-		gl.marginWidth = 0;
-		gl.numColumns = 1;
-		cmpContentOuter.setLayout(gl);
-
-		creaetSpinner(cmpContentOuter);
+		creaetSpinner(this);
 	}
 
 	protected void creaetSpinner(Composite parent) {
 		// THE LAYOUT OF THE INNER COMPOSITE (ANCHORED NORTH AND ENCAPSULATES
 		// THE CANVAS + BUTTON)
-		cmpContentInner = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout();
-		gl.verticalSpacing = 0;
-		gl.horizontalSpacing = 0;
-		gl.marginHeight = 0;
-		gl.marginWidth = 0;
-		gl.numColumns = 2;
-		cmpContentInner.setLayout(gl);
-		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
-		cmpContentInner.setLayoutData(gd);
 
-		txtValue = new TextEditorComposite(cmpContentInner, SWT.BORDER);
-		gd = new GridData(GridData.FILL_HORIZONTAL);
-		gd.grabExcessHorizontalSpace = true;
-		gd.verticalAlignment = GridData.BEGINNING;
-		gd.heightHint = iSize + 8;
-		gd.minimumWidth = 30;
-		txtValue.setLayoutData(gd);
+		setLayout(new InternalLayout());
+
+		txtValue = new TextEditorComposite(this, SWT.BORDER);
 		txtValue.setText(String.valueOf(iCurrentValue));
 		txtValue.addListener(this);
 
-		cmpBtnContainer = new Composite(cmpContentInner, SWT.NONE);
-		gd = new GridData();
-		gd.verticalAlignment = GridData.BEGINNING;
-		gd.horizontalAlignment = SWT.END;
-		cmpBtnContainer.setLayoutData(gd);
-		cmpBtnContainer.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
-		gl = new GridLayout();
-		gl.horizontalSpacing = 0;
-		gl.verticalSpacing = 0;
-		gl.marginHeight = 0;
-		gl.marginWidth = 0;
-		cmpBtnContainer.setLayout(gl);
-
-		final int iHalf = (iSize + 8) / 2;
-		btnIncrement = new Button(cmpBtnContainer, SWT.ARROW | SWT.UP);
-		gd = new GridData();
-		gd.grabExcessVerticalSpace = true;
-		gd.grabExcessHorizontalSpace = true;
-		gd.heightHint = iHalf;
-		gd.widthHint = iHalf;
-		btnIncrement.setLayoutData(gd);
+		btnIncrement = new Button(this, SWT.ARROW | SWT.RIGHT);
 		btnIncrement.addSelectionListener(this);
 
-		btnDecrement = new Button(cmpBtnContainer, SWT.ARROW | SWT.DOWN);
-		gd = new GridData();
-		gd.grabExcessVerticalSpace = true;
-		gd.grabExcessHorizontalSpace = true;
-		gd.heightHint = iHalf;
-		gd.widthHint = iHalf;
-		btnDecrement.setLayoutData(gd);
+		btnDecrement = new Button(this, SWT.ARROW | SWT.LEFT);
 		btnDecrement.addSelectionListener(this);
 	}
 
+	private class InternalLayout extends Layout {
+		@Override
+		public Point computeSize(Composite editor, int wHint, int hHint, boolean force) {
+			if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
+				return new Point(wHint, hHint);
+			}
+			Point textBoxSize = txtValue.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point incButtonSize = btnIncrement.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point decButtonSize = btnDecrement.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+
+			return new Point(textBoxSize.x + incButtonSize.x + decButtonSize.x,
+					Math.max(textBoxSize.y, incButtonSize.y));
+		}
+
+		@Override
+		public void layout(Composite editor, boolean force) {
+			Rectangle bounds = editor.getClientArea();
+
+			Point textBoxSize = txtValue.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point incButtonSize = btnIncrement.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point decButtonSize = btnDecrement.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+
+			int maxButtonWidth = Math.max(incButtonSize.x, decButtonSize.x);
+
+			btnDecrement.setBounds(0, 0, maxButtonWidth, bounds.height);
+			txtValue.setBounds(maxButtonWidth, 0, bounds.width - maxButtonWidth * 2, bounds.height);
+			btnIncrement.setBounds(bounds.width - maxButtonWidth, 0, maxButtonWidth,
+					bounds.height);
+		}
+	}
+
+	@Override
 	public void setMinimum(int iMin) {
 		this.iMinValue = iMin;
 	}
@@ -185,6 +153,7 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 		return this.iMinValue;
 	}
 
+	@Override
 	public void setMaximum(int iMax) {
 		this.iMaxValue = iMax;
 	}
@@ -193,22 +162,25 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 		return this.iMaxValue;
 	}
 
+	@Override
 	public void setIncrement(int iIncrement) {
 		this.iIncrement = iIncrement;
 	}
 
+	@Override
 	public void setValue(int iCurrent) {
 		this.iCurrentValue = iCurrent;
 		this.txtValue.setText(String.valueOf(iCurrentValue));
 	}
 
+	@Override
 	public int getValue() {
 		return this.iCurrentValue;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.swt.widgets.Control#setEnabled(boolean)
 	 */
 	@Override
@@ -224,28 +196,32 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 		this.txtValue.setEnabled(bState);
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return this.bEnabled;
 	}
 
+	@Override
 	public boolean isSpinnerEnabled() {
 		return isEnabled();
 	}
 
+	@Override
 	public void addListener(Listener listener) {
 		vListeners.add(listener);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.
 	 * events.SelectionEvent)
 	 */
+	@Override
 	public void widgetSelected(SelectionEvent e) {
 		int iTextValue = iCurrentValue;
 		try {
-			iTextValue = Integer.valueOf(txtValue.getText()).intValue();
+			iTextValue = Integer.parseInt(txtValue.getText());
 		} catch (NumberFormatException e1) {
 			return;
 		}
@@ -285,11 +261,12 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.
 	 * swt.events.SelectionEvent)
 	 */
+	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 
@@ -299,14 +276,15 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
 	 */
+	@Override
 	public void handleEvent(Event event) {
 		if (event.type == TextEditorComposite.TEXT_MODIFIED) {
 			try {
-				int iValue = (Integer.valueOf(txtValue.getText()).intValue());
+				int iValue = (Integer.parseInt(txtValue.getText()));
 				if (iValue >= iMinValue && iValue <= iMaxValue) {
 					iCurrentValue = iValue;
 					fireValueChangedEvent();
@@ -346,18 +324,21 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 
 	}
 
+	@Override
 	public void setToolTipText(String string) {
 		txtValue.setToolTipText(string);
 	}
 
 	void initAccessible() {
 		getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getHelp(AccessibleEvent e) {
 				e.result = getToolTipText();
 			}
 		});
 
 		getAccessible().addAccessibleControlListener(new AccessibleControlAdapter() {
+			@Override
 			public void getChildAtPoint(AccessibleControlEvent e) {
 				Point testPoint = toControl(new Point(e.x, e.y));
 				if (getBounds().contains(testPoint)) {
@@ -365,6 +346,7 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 				}
 			}
 
+			@Override
 			public void getLocation(AccessibleControlEvent e) {
 				Rectangle location = getBounds();
 				Point pt = toDisplay(new Point(location.x, location.y));
@@ -374,14 +356,17 @@ public class IntegerSpinControl extends AbstractChartIntSpinner implements Selec
 				e.height = location.height;
 			}
 
+			@Override
 			public void getChildCount(AccessibleControlEvent e) {
 				e.detail = 0;
 			}
 
+			@Override
 			public void getRole(AccessibleControlEvent e) {
 				e.detail = ACC.ROLE_COMBOBOX;
 			}
 
+			@Override
 			public void getState(AccessibleControlEvent e) {
 				e.detail = ACC.STATE_NORMAL;
 			}

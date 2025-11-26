@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -17,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.birt.data.aggregation.api.IBuildInAggregation;
+import org.eclipse.birt.data.aggregation.impl.rank.TotalDenseRank;
 import org.eclipse.birt.data.aggregation.impl.rank.TotalIsBottomN;
 import org.eclipse.birt.data.aggregation.impl.rank.TotalIsBottomNPercent;
 import org.eclipse.birt.data.aggregation.impl.rank.TotalIsTopN;
@@ -30,16 +34,16 @@ import org.eclipse.birt.data.engine.api.aggregation.IAggrFunction;
 import org.eclipse.birt.data.engine.api.aggregation.IAggregationFactory;
 
 /**
- * 
+ *
  */
 
 public class BuildInAggregationFactory implements IAggregationFactory {
 
-	private Map<String, IAggrFunction> aggrMap = new HashMap<String, IAggrFunction>();
-	private List<IAggrFunction> aggregations = new ArrayList<IAggrFunction>();
+	private Map<String, IAggrFunction> aggrMap = new HashMap<>();
+	private List<IAggrFunction> aggregations = new ArrayList<>();
 
 	/**
-	 * 
+	 *
 	 */
 	private void populateAggregations() {
 		final TotalCount totalCount = new TotalCount();
@@ -136,10 +140,14 @@ public class BuildInAggregationFactory implements IAggregationFactory {
 		final TotalRange totalRange = new TotalRange();
 		aggrMap.put(IBuildInAggregation.TOTAL_RANGE_FUNC, totalRange);
 		aggregations.add(totalRange);
+
+		final TotalDenseRank totalDenseRank = new TotalDenseRank();
+		aggrMap.put(IBuildInAggregation.TOTAL_DENSERANK_FUNC, totalDenseRank);
+		aggregations.add(totalDenseRank);
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public BuildInAggregationFactory() {
 		populateAggregations();
@@ -147,20 +155,22 @@ public class BuildInAggregationFactory implements IAggregationFactory {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.data.engine.api.aggregation.IAggregationFactory#
 	 * getAggregations()
 	 */
+	@Override
 	public List<IAggrFunction> getAggregations() {
 		return aggregations;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.data.engine.api.aggregation.IAggregationFactory#
 	 * getAggregation(java.lang.String)
 	 */
+	@Override
 	public IAggrFunction getAggregation(String name) {
 		return aggrMap.get(name.toUpperCase());
 	}

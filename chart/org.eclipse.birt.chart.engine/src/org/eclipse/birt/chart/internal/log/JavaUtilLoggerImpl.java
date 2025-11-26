@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,9 +16,6 @@ package org.eclipse.birt.chart.internal.log;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.FileHandler;
@@ -60,13 +60,18 @@ public class JavaUtilLoggerImpl implements ILogger {
 		}
 	}
 
+	/**
+	 * Set state directory
+	 *
+	 * @param sStateDir
+	 */
 	public static void setStateDir(String sStateDir) {
 		stateDir = sStateDir;
 	}
 
 	/**
 	 * The constructor.
-	 * 
+	 *
 	 * @param name
 	 */
 	public JavaUtilLoggerImpl(String name) {
@@ -87,8 +92,9 @@ public class JavaUtilLoggerImpl implements ILogger {
 
 	/**
 	 * The constructor.
-	 * 
-	 * @param name
+	 *
+	 * @param name         logger name
+	 * @param verboseLevel set verbose level
 	 */
 	public JavaUtilLoggerImpl(String name, int verboseLevel) {
 		this.logger = Logger.getLogger(name);
@@ -104,9 +110,10 @@ public class JavaUtilLoggerImpl implements ILogger {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.log.ILogger#setVerboseLevel(int)
 	 */
+	@Override
 	public void setVerboseLevel(int iVerboseLevel) {
 		this.javaLevel = toJavaUtilLevel(iVerboseLevel);
 
@@ -115,9 +122,10 @@ public class JavaUtilLoggerImpl implements ILogger {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.log.ILogger#log(int, java.lang.String)
 	 */
+	@Override
 	public void log(int iCode, String sMessage) {
 		Level level = toJavaUtilLevel(iCode);
 
@@ -132,9 +140,10 @@ public class JavaUtilLoggerImpl implements ILogger {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.log.ILogger#log(java.lang.Exception)
 	 */
+	@Override
 	public void log(Exception ex) {
 		if (logger.isLoggable(Level.WARNING)) {
 			LogRecord lr = new LogRecord(Level.WARNING, "Exception"); //$NON-NLS-1$
@@ -199,13 +208,20 @@ public class JavaUtilLoggerImpl implements ILogger {
 		return Level.SEVERE;
 	}
 
+	/**
+	 * Init file handler for logging
+	 *
+	 * @param sLogFolder log file folder
+	 * @param level      log level
+	 * @throws SecurityException security exception
+	 * @throws IOException       IO exception
+	 */
 	public static void initFileHandler(String sLogFolder, final Level level) throws SecurityException, IOException {
 		if (sLogFolder == null) {
 			if (stateDir == null) {
 				return;
-			} else {
-				sLogFolder = stateDir;
 			}
+			sLogFolder = stateDir;
 		}
 
 		if (sLogFolder.length() > 0 && sLogFolder.lastIndexOf(File.separator) == sLogFolder.length() - 1) {
@@ -216,20 +232,12 @@ public class JavaUtilLoggerImpl implements ILogger {
 		final String sDir = sLogFolder;
 
 		try {
-			fileHandler = AccessController.doPrivileged(new PrivilegedExceptionAction<FileHandler>() {
+			Level logLevel = level != null ? level : Level.FINEST;
+			fileHandler = new FileHandler(sDir + File.separator + sName + ".log", true); //$NON-NLS-1$
+			fileHandler.setFormatter(new SimpleFormatter());
+			fileHandler.setLevel(logLevel);
 
-				public FileHandler run() throws Exception {
-					Level logLevel = level != null ? level : Level.FINEST;
-
-					FileHandler fileHandler = new FileHandler(sDir + File.separator + sName + ".log", true); //$NON-NLS-1$
-					fileHandler.setFormatter(new SimpleFormatter());
-					fileHandler.setLevel(logLevel);
-					return fileHandler;
-				}
-
-			});
-		} catch (PrivilegedActionException e) {
-			Exception typedException = e.getException();
+		} catch (Exception typedException) {
 			if (typedException instanceof SecurityException) {
 				throw (SecurityException) typedException;
 			} else if (typedException instanceof IOException) {

@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -38,6 +41,7 @@ import org.eclipse.birt.report.model.api.ThemeHandle;
 import org.eclipse.birt.report.model.api.VariableElementHandle;
 import org.eclipse.birt.report.model.api.css.CssStyleSheetHandle;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
+import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
@@ -45,8 +49,8 @@ import org.eclipse.ui.ISharedImages;
 
 /**
  * This class provides the UI images for JRP platform.
- * 
- * 
+ *
+ *
  */
 public class ReportPlatformUIImages {
 
@@ -58,19 +62,33 @@ public class ReportPlatformUIImages {
 
 	public final static String ICONS_PATH = "icons/";//$NON-NLS-1$
 
+	/** path constant: dobj16 */
 	public final static String DOBJ16_PATH = "dobj16/";//$NON-NLS-1$
+	/** path constant: dtool16 */
 	public final static String DTOOL16_PATH = "dtool16/";//$NON-NLS-1$
+	/** path constant: etool16 */
 	public final static String ETOOL16_PATH = "etool16/";//$NON-NLS-1$
+	/** path constant: eview16 */
 	public final static String EVIEW16_PATH = "eview16/";//$NON-NLS-1$
+	/** path constant: obj16 */
 	public final static String OBJ16_PATH = "obj16/";//$NON-NLS-1$
+	/** path constant: pal */
 	public final static String PAL_PATH = "pal/";//$NON-NLS-1$
+	/** path constant: progress */
 	public final static String PROGRESS_PATH = "progress/";//$NON-NLS-1$
+	/** path constant: misc */
 	public final static String MISC_PATH = "misc/";//$NON-NLS-1$
+	/** path constant: wizban */
 	public final static String WIZBAN_PATH = "wizban/";//$NON-NLS-1$
+	/** path constant: lib */
 	public final static String LINK_PATH = "lib/";//$NON-NLS-1$
+	/** path constant: data */
 	public final static String DATA_PATH = "data/"; //$NON-NLS-1$
+	/** path constant: others */
 	public final static String OTHERS_PATH = "others/"; //$NON-NLS-1$
+	/** path constant: ovr16 */
 	public final static String OVR16_PATH = "ovr16/"; //$NON-NLS-1$
+	/** path constant: layout16 */
 	public final static String LAYOUT16_PATH = "layout16/"; //$NON-NLS-1$
 
 	static {
@@ -81,7 +99,7 @@ public class ReportPlatformUIImages {
 	 * Declares a workbench image given the path of the image file (relative to the
 	 * workbench plug-in). This is a helper method that creates the image descriptor
 	 * and passes it to the main <code>declareImage</code> method.
-	 * 
+	 *
 	 * @param key  the symbolic name of the image
 	 * @param path the path of the image file relative to the base of the workbench
 	 *             plug-ins install directory
@@ -364,6 +382,11 @@ public class ReportPlatformUIImages {
 
 		declareImage(IReportGraphicConstants.ICON_BORDER_RIGHT, ICONS_PATH + OBJ16_PATH + "border_right.gif"); //$NON-NLS-1$
 
+		declareImage(IReportGraphicConstants.ICON_BORDER_DIAGONAL, ICONS_PATH + OBJ16_PATH + "border_diagonal.gif"); //$NON-NLS-1$
+
+		declareImage(IReportGraphicConstants.ICON_BORDER_ANTIDIAGONAL,
+				ICONS_PATH + OBJ16_PATH + "border_antidiagonal.gif"); //$NON-NLS-1$
+
 		declareImage(IReportGraphicConstants.ICON_BORDER_NOBORDER, ICONS_PATH + OBJ16_PATH + "border_none.gif"); //$NON-NLS-1$
 
 		// missing image icons
@@ -388,9 +411,12 @@ public class ReportPlatformUIImages {
 		declareImage(IReportGraphicConstants.ICON_DATA_COLUMN, ICONS_PATH + OBJ16_PATH + "data_column.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_INHERIT_COLUMN, ICONS_PATH + OBJ16_PATH + "inherit_column.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_ALPHABETIC_SORT, ICONS_PATH + OBJ16_PATH + "alpha_sort.gif"); //$NON-NLS-1$
+		declareImage(IReportGraphicConstants.ICON_ALPHABETIC_SORT_ASCENDING,
+				ICONS_PATH + OBJ16_PATH + "alpha_sort_ascending.gif"); //$NON-NLS-1$
+		declareImage(IReportGraphicConstants.ICON_ALPHABETIC_SORT_DESCENDING,
+				ICONS_PATH + OBJ16_PATH + "alpha_sort_descending.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_GROUP_SORT, ICONS_PATH + OBJ16_PATH + "group_sort.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_LOCAL_PROPERTIES, ICONS_PATH + OBJ16_PATH + "local_prop.gif"); //$NON-NLS-1$
-		declareImage(IReportGraphicConstants.ICON_ALPHABETIC_SORT, ICONS_PATH + OBJ16_PATH + "alpha_sort.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_EXPRESSION_OPERATOR, ICONS_PATH + OBJ16_PATH + "operator.gif"); //$NON-NLS-1$
 
 		declareImage(IReportGraphicConstants.ICON_EXPRESSION_GLOBAL, ICONS_PATH + OBJ16_PATH + "global.gif"); //$NON-NLS-1$
@@ -447,6 +473,10 @@ public class ReportPlatformUIImages {
 		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_BORDER_TOP, ICONS_PATH + OBJ16_PATH + "border_top.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_BORDER_BOTTOM,
 				ICONS_PATH + OBJ16_PATH + "border_bottom.gif"); //$NON-NLS-1$
+		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_BORDER_DIAGONAL,
+				ICONS_PATH + OBJ16_PATH + "border_diagonal.gif"); //$NON-NLS-1$
+		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_BORDER_ANTIDIAGONAL,
+				ICONS_PATH + OBJ16_PATH + "border_antidiagonal.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_TEXT_ALIGN_CENTER,
 				ICONS_PATH + OBJ16_PATH + "center_align.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_TEXT_ALIGN_CENTER + IReportGraphicConstants.DIS,
@@ -601,6 +631,8 @@ public class ReportPlatformUIImages {
 				ICONS_PATH + LAYOUT16_PATH + "layoutPreference.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_COPY_FORMAT, ICONS_PATH + MISC_PATH + "copy_format.gif"); //$NON-NLS-1$
 		declareImage(IReportGraphicConstants.ICON_PASTE_FORMAT, ICONS_PATH + MISC_PATH + "paste_format.gif"); //$NON-NLS-1$
+		declareImage(IReportGraphicConstants.ICON_ATTRIBUTE_TEXT_HYPERLINK_STYLE,
+				ICONS_PATH + OBJ16_PATH + "hyperlink-style-none.gif"); //$NON-NLS-1$
 
 	}
 
@@ -620,7 +652,7 @@ public class ReportPlatformUIImages {
 	 * the image objects they create from it. (This is made confusing by the
 	 * historical fact that the API interface is called "ISharedImages".)
 	 * </p>
-	 * 
+	 *
 	 * @param symbolicName the symbolic name of the image
 	 * @param descriptor   the image descriptor
 	 */
@@ -632,12 +664,15 @@ public class ReportPlatformUIImages {
 	 * Returns the image stored in the workbench plugin's image registry under the
 	 * given symbolic name. If there isn't any value associated with the name then
 	 * <code>null</code> is returned.
-	 * 
+	 *
 	 * The returned Image is managed by the workbench plugin's image registry.
 	 * Callers of this method must not dispose the returned image.
-	 * 
+	 *
 	 * This method is essentially a convenient short form of
 	 * WorkbenchImages.getImageRegistry.get(symbolicName).
+	 *
+	 * @param symbolicName symbolic name
+	 * @return Return the image
 	 */
 	public static Image getImage(String symbolicName) {
 		return getImageRegistry().get(symbolicName);
@@ -647,10 +682,13 @@ public class ReportPlatformUIImages {
 	 * Returns the image descriptor stored under the given symbolic name. If there
 	 * isn't any value associated with the name then <code>null
 	 * </code> is returned.
-	 * 
+	 *
 	 * The class also "caches" commonly used images in the image registry. If you
 	 * are looking for one of these common images it is recommended you use the
 	 * getImage() method instead.
+	 *
+	 * @param symbolicName symbolic name
+	 * @return Return the image description
 	 */
 	public static ImageDescriptor getImageDescriptor(String symbolicName) {
 		return imageRegistry.getDescriptor(symbolicName);
@@ -658,7 +696,7 @@ public class ReportPlatformUIImages {
 
 	/**
 	 * Gets the proper icon image for the given model
-	 * 
+	 *
 	 * @param model the given model
 	 * @return Returns the proper icon image for the given model, or null if no
 	 *         proper one exists
@@ -676,25 +714,14 @@ public class ReportPlatformUIImages {
 			VariableElementHandle variable = (VariableElementHandle) model;
 			if (DesignChoiceConstants.VARIABLE_TYPE_REPORT.equals(variable.getType())) {
 				return getImage(IReportGraphicConstants.ICON_ELEMENT_VARIABLE_REPORT);
-			} else {
-				return getImage(IReportGraphicConstants.ICON_ELEMENT_VARIABLE_PAGE);
 			}
+			return getImage(IReportGraphicConstants.ICON_ELEMENT_VARIABLE_PAGE);
 		} else if (model instanceof DesignElementHandle) {// the icon name for elements is just the same as the element
-															// name
-//			if ( isLinkImg( (DesignElementHandle) model ) == true )
-//			{
-//				image = getImage( ( (DesignElementHandle) model ).getElement( )
-//						.getDefn( )
-//						.getName( )
-//						+ "_" //$NON-NLS-1$
-//						+ IReportGraphicConstants.LINK );
-//			}
-//			else
 			{
 				image = getImage(((DesignElementHandle) model).getElement().getDefn().getName());
 			}
 		} else if (model instanceof CssStyleSheetHandle) {
-			if (isCSSLinkImg((CssStyleSheetHandle) model) == true) {
+			if (isCSSLinkImg((CssStyleSheetHandle) model)) {
 				image = getImage(IReportGraphicConstants.ICON_ELEMENT_CSS_STYLE_SHEET + "_" //$NON-NLS-1$
 						+ IReportGraphicConstants.LINK);
 			} else {
@@ -734,12 +761,11 @@ public class ReportPlatformUIImages {
 
 	/**
 	 * Gets the proper icon image descriptor for the given model
-	 * 
+	 *
 	 * @param model the given model
 	 * @return Returns the proper icon image descriptor for the given model, or null
 	 *         if no proper one exists
 	 */
-
 	public static ImageDescriptor getImageDescriptor(Object model) {
 		ImageDescriptor imageDescriptor = null;
 		if (model instanceof ExtendedItemHandle) {
@@ -758,7 +784,7 @@ public class ReportPlatformUIImages {
 				imageDescriptor = getImageDescriptor(((DesignElementHandle) model).getElement().getDefn().getName());
 			}
 		} else if (model instanceof CssStyleSheetHandle) {
-			if (isCSSLinkImg((CssStyleSheetHandle) model) == true) {
+			if (isCSSLinkImg((CssStyleSheetHandle) model)) {
 				imageDescriptor = getImageDescriptor(IReportGraphicConstants.ICON_ELEMENT_CSS_STYLE_SHEET + "_" //$NON-NLS-1$
 						+ IReportGraphicConstants.LINK);
 			} else {
@@ -770,6 +796,8 @@ public class ReportPlatformUIImages {
 
 	/**
 	 * Returns the ImageRegistry.
+	 *
+	 * @return Return the image registry
 	 */
 	public static ImageRegistry getImageRegistry() {
 		return imageRegistry;
@@ -780,17 +808,19 @@ public class ReportPlatformUIImages {
 	 * involves creating JFace image descriptors describing how to create/find the
 	 * image should it be needed. The image is not actually allocated until
 	 * requested.
-	 * 
+	 *
 	 * Prefix conventions Wizard Banners WIZBAN_ Preference Banners PREF_BAN_
 	 * Property Page Banners PROPBAN_ Enable toolbar ETOOL_ Disable toolbar DTOOL_
 	 * Local enabled toolbar ELCL_ Local Disable toolbar DLCL_ Object large OBJL_
 	 * Object small OBJS_ View VIEW_ Product images PROD_ Misc images MISC_
-	 * 
+	 *
 	 * Where are the images? The images (typically gifs) are found in the same
 	 * location as this plug-in class. This may mean the same package directory as
 	 * the package holding this class. The images are declared using this.getClass()
 	 * to ensure they are looked up via this plug-in class.
-	 * 
+	 *
+	 * @return Return the image registry
+	 *
 	 */
 	public static ImageRegistry initializeImageRegistry() {
 		imageRegistry = ReportPlugin.getDefault().getImageRegistry();
@@ -800,10 +830,10 @@ public class ReportPlatformUIImages {
 
 	/**
 	 * Gets the proper symbol name for the specified icon of the extended element
-	 * 
+	 *
 	 * @param extensionName the extension name of the element
 	 * @param attrbuteName  the name of the attribute which defines an icon
-	 * 
+	 *
 	 * @return Returns the symbol name generated
 	 */
 	public static String getIconSymbolName(String extensionName, String attrbuteName) {

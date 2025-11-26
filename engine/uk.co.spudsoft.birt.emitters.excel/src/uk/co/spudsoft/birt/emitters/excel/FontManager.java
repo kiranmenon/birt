@@ -1,12 +1,14 @@
 /*************************************************************************************
- * Copyright (c) 2011, 2012, 2013 James Talbut.
+ * Copyright (c) 2011, 2012, 2013, 2024 James Talbut and others
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -30,7 +32,7 @@ import org.w3c.dom.css.CSSValue;
 /**
  * FontManager is a cache of fonts to enable POI Fonts to be reused based upon
  * their BIRT styles.
- * 
+ *
  * @author Jim Talbut
  *
  */
@@ -38,7 +40,7 @@ public class FontManager {
 
 	/**
 	 * FontPair maintains the relationship between a BIRT style and a POI font.
-	 * 
+	 *
 	 * @author Jim Talbut
 	 *
 	 */
@@ -54,14 +56,15 @@ public class FontManager {
 
 	private Workbook workbook;
 	private StyleManagerUtils smu;
-	private List<FontPair> fonts = new ArrayList<FontPair>();
+	private List<FontPair> fonts = new ArrayList<>();
 	private Font defaultFont = null;
 	private CSSEngine cssEngine;
 
 	/**
-	 * @param workbook The workbook for which fonts are being tracked.
-	 * @param smu      The StyleManagerUtils instance that will be used in the
-	 *                 comparison of styles and manipulation of colours.
+	 * @param cssEngine CSS engine
+	 * @param workbook  The workbook for which fonts are being tracked.
+	 * @param smu       The StyleManagerUtils instance that will be used in the
+	 *                  comparison of styles and manipulation of colours.
 	 */
 	public FontManager(CSSEngine cssEngine, Workbook workbook, StyleManagerUtils smu) {
 		this.cssEngine = cssEngine;
@@ -78,7 +81,7 @@ public class FontManager {
 
 	/**
 	 * Remove quotes surrounding a string.
-	 * 
+	 *
 	 * @param family The string that may be surrounded by double quotes.
 	 * @return family, without any surrounding double quotes.
 	 */
@@ -108,14 +111,14 @@ public class FontManager {
 
 	static int COMPARE_CSS_PROPERTIES[] = { StyleConstants.STYLE_FONT_FAMILY, StyleConstants.STYLE_FONT_SIZE,
 			StyleConstants.STYLE_FONT_WEIGHT, StyleConstants.STYLE_FONT_STYLE, StyleConstants.STYLE_TEXT_UNDERLINE,
-			StyleConstants.STYLE_COLOR, };
+			StyleConstants.STYLE_COLOR, StyleConstants.STYLE_TEXT_HYPERLINK_STYLE };
 
 	/**
 	 * Test whether two BIRT styles are equivalent, as far as their font definitions
 	 * are concerned. <br/>
 	 * Every attribute tested in this method must be used in the construction of the
 	 * font in createFont.
-	 * 
+	 *
 	 * @param style1 The first BIRT style to be compared.
 	 * @param style2 The second BIRT style to be compared.
 	 * @return true if style1 and style2 would produce identical Fonts if passed to
@@ -136,7 +139,7 @@ public class FontManager {
 
 	/**
 	 * Create a new POI Font based upon a BIRT style.
-	 * 
+	 *
 	 * @param birtStyle The BIRT style to base the Font upon.
 	 * @return The Font whose attributes are described by the BIRT style.
 	 */
@@ -156,22 +159,25 @@ public class FontManager {
 			font.setFontHeightInPoints(fontSize);
 		}
 		// Weight
-		short fontWeight = smu
+		boolean fontWeight = smu
 				.poiFontWeightFromBirt(cleanupQuotes(birtStyle.getProperty(StyleConstants.STYLE_FONT_WEIGHT)));
-		if (fontWeight > 0) {
-			font.setBoldweight(fontWeight);
-		}
+		font.setBold(fontWeight);
 		// Style
 		String fontStyle = cleanupQuotes(birtStyle.getProperty(StyleConstants.STYLE_FONT_STYLE));
 		if (CSSConstants.CSS_ITALIC_VALUE.equals(fontStyle) || CSSConstants.CSS_OBLIQUE_VALUE.equals(fontStyle)) {
 			font.setItalic(true);
+		}
+		// Linethrough
+		String fontLineThrough = cleanupQuotes(birtStyle.getProperty(StyleConstants.STYLE_TEXT_LINETHROUGH));
+		if (CSSConstants.CSS_LINE_THROUGH_VALUE.equals(fontLineThrough)) {
+			font.setStrikeout(true);
 		}
 		// Underline
 		String fontUnderline = cleanupQuotes(birtStyle.getProperty(StyleConstants.STYLE_TEXT_UNDERLINE));
 		if (CSSConstants.CSS_UNDERLINE_VALUE.equals(fontUnderline)) {
 			font.setUnderline(FontUnderline.SINGLE.getByteValue());
 		}
-		// Colour
+		// Color
 		smu.addColourToFont(workbook, font, cleanupQuotes(birtStyle.getProperty(StyleConstants.STYLE_COLOR)));
 
 		fonts.add(new FontPair(birtStyle, font));
@@ -186,7 +192,7 @@ public class FontManager {
 	 * At this stage this is hardcoded to return Calibri 11pt, but it could be
 	 * changed to either pull a value from POI or to have a parameterised value set
 	 * from the emitter (via the constructor).
-	 * 
+	 *
 	 * @return A Font object representing the default to use when no other options
 	 *         are available.
 	 */
@@ -202,7 +208,7 @@ public class FontManager {
 	/**
 	 * Get a Font matching the BIRT style, either from the cache or by creating a
 	 * new one.
-	 * 
+	 *
 	 * @param birtStyle The BIRT style to base the Font upon.
 	 * @return A Font whose attributes are described by the BIRT style.
 	 */
@@ -242,7 +248,7 @@ public class FontManager {
 	/**
 	 * Return a POI font created by combining a POI font with a BIRT style, where
 	 * the BIRT style overrides the values in the POI font.
-	 * 
+	 *
 	 * @param source         The POI font that represents the base font.
 	 * @param birtExtraStyle The BIRT style to overlay on top of the POI style.
 	 * @return A POI font representing the combination of source and birtExtraStyle.
@@ -251,7 +257,7 @@ public class FontManager {
 
 		BirtStyle birtStyle = birtStyleFromFont(source);
 
-		for (int i = 0; i < IStyle.NUMBER_OF_STYLE; ++i) {
+		for (int i = 0; i < StyleConstants.NUMBER_OF_STYLE; ++i) {
 			CSSValue value = birtExtraStyle.getProperty(i);
 			if (value != null) {
 				birtStyle.setProperty(i, value);

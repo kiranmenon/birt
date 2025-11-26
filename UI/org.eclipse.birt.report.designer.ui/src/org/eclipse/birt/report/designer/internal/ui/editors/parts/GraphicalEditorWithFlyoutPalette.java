@@ -1,10 +1,13 @@
 /*************************************************************************************
  * Copyright (c) 2004 Actuate Corporation and others.
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ *
  * Contributors:
  * Actuate Corporation - Initial implementation.
  ************************************************************************************/
@@ -123,6 +126,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	// the last recored activated shell, then active the current active editor.
 	private ShellListener shellActiveListener = new ShellAdapter() {
 
+		@Override
 		public void shellActivated(ShellEvent e) {
 			if (!shellActiveFlag) {
 				shellActiveFlag = true;
@@ -130,11 +134,11 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 				final Shell siteShell = getSite().getShell();
 				Display.getCurrent().asyncExec(new Runnable() {
 
+					@Override
 					public void run() {
 						if (lastActiveShell == siteShell) {
 							// don't active the current active editor
 							shellActiveFlag = false;
-							return;
 						} else {
 							lastActiveShell = getSite().getShell();
 							IEditorPart editor = UIUtil.getActiveEditor(true);
@@ -158,7 +162,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	private List stackActionIDs = new ArrayList();
 	/**
 	 * the list of action ids that are editor actions
-	 * 
+	 *
 	 */
 	private List editorActionIDs = new ArrayList();
 
@@ -170,6 +174,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * @see GraphicalEditor#initializeGraphicalViewer()
 	 */
+	@Override
 	protected void initializeGraphicalViewer() {
 		splitter.hookDropTargetListener(getGraphicalViewer());
 		// createActions( );
@@ -181,21 +186,24 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#firePropertyChange(int)
 	 */
+	@Override
 	protected void firePropertyChange(int propertyId) {
 		super.firePropertyChange(propertyId);
 		updateActions(editorActionIDs);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (getBreadcrumbPreferenceKey().equals(event.getProperty())) {
 			fIsBreadcrumbVisible = isBreadcrumbShown();
 			if (fIsBreadcrumbVisible) {
 				showBreadcrumb();
 				List list = getModelList(this.getGraphicalViewer().getSelection());
-				if (list != null && list.size() == 1)
+				if (list != null && list.size() == 1) {
 					setBreadcrumbInput(list.get(0));
-				else
+				} else {
 					setBreadcrumbInput(null);
+				}
 			} else {
 				hideBreadcrumb();
 			}
@@ -204,10 +212,9 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	private List getModelList(ISelection selection) {
 		List list = new ArrayList();
-		if (selection == null)
+		if ((selection == null) || !(selection instanceof StructuredSelection)) {
 			return list;
-		if (!(selection instanceof StructuredSelection))
-			return list;
+		}
 
 		StructuredSelection structured = (StructuredSelection) selection;
 		if (structured.getFirstElement() instanceof ReportElementEditPart) {
@@ -233,6 +240,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	 */
 	private ISelectionListener selectionListener = new ISelectionListener() {
 
+		@Override
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 			updateActions(editPartActionIDs);
 		}
@@ -244,12 +252,13 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * Creates a PaletteViewerProvider that will be used to create palettes for the
 	 * view and the flyout.
-	 * 
+	 *
 	 * @return the palette provider
 	 */
 	protected PaletteViewerProvider createPaletteViewerProvider() {
 		return new PaletteViewerProvider(getEditDomain()) {
 
+			@Override
 			protected void configurePaletteViewer(final PaletteViewer viewer) {
 				super.configurePaletteViewer(viewer);
 
@@ -257,14 +266,16 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 				viewer.getControl().addMouseListener(new MouseListener() {
 
+					@Override
 					public void mouseDoubleClick(MouseEvent e) {
 						EditPart editPart = viewer.findObjectAt(new Point(e.x, e.y));
 						CombinedTemplateCreationEntry entry = null;
 						if (editPart != null && editPart.getModel() instanceof CombinedTemplateCreationEntry) {
 							entry = (CombinedTemplateCreationEntry) editPart.getModel();
 						}
-						if (entry == null)
+						if (entry == null) {
 							return;
+						}
 						ReportCreationTool tool = (ReportCreationTool) entry.createTool();
 
 						final EditDomain domain = UIUtil.getLayoutEditPartViewer().getEditDomain();
@@ -274,15 +285,18 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 						Display.getCurrent().asyncExec(new Runnable() {
 
+							@Override
 							public void run() {
 								domain.loadDefaultTool();
 							}
 						});
 					}
 
+					@Override
 					public void mouseDown(MouseEvent e) {
 					}
 
+					@Override
 					public void mouseUp(MouseEvent e) {
 					}
 				});
@@ -290,10 +304,11 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.gef.ui.palette.PaletteViewerProvider#createPaletteViewer
 			 * (org.eclipse.swt.widgets.Composite)
 			 */
+			@Override
 			public PaletteViewer createPaletteViewer(Composite parent) {
 				PaletteViewer pViewer = new PaletteViewer();
 
@@ -318,15 +333,17 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * Creates actions and registers them to the ActionRegistry.
 	 */
+	@Override
 	protected void createActions() {
 		// Fix bug 284633
 		addStackAction(new UndoAction(this) {
 
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.gef.ui.actions.UndoAction#init()
 			 */
+			@Override
 			protected void init() {
 				super.init();
 				setToolTipText(Messages.getString("GraphicalEditorWithFlyoutPalette_Undo.ToolTip0")); //$NON-NLS-1$
@@ -340,9 +357,10 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 			/*
 			 * (non-Javadoc)
-			 * 
+			 *
 			 * @see org.eclipse.gef.ui.actions.UndoAction#refresh()
 			 */
+			@Override
 			protected void refresh() {
 				super.refresh();
 				Command undoCmd = getCommandStack().getUndoCommand();
@@ -360,6 +378,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 		});
 		addStackAction(new RedoAction(this) {
 
+			@Override
 			protected void init() {
 				super.init();
 				setToolTipText(Messages.getString("GraphicalEditorWithFlyoutPalette_Redo.ToolTip0")); //$NON-NLS-1$
@@ -374,6 +393,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 			/**
 			 * Refreshes this action's text to use the last undone command's label.
 			 */
+			@Override
 			protected void refresh() {
 				super.refresh();
 				Command redoCmd = getCommandStack().getRedoCommand();
@@ -391,11 +411,11 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 		});
 		addEditPartAction(new DeleteAction((IWorkbenchPart) this) {
 
+			@Override
 			public Command createDeleteCommand(List objects) {
-				if (objects.isEmpty())
+				if (objects.isEmpty() || !(objects.get(0) instanceof EditPart)) {
 					return null;
-				if (!(objects.get(0) instanceof EditPart))
-					return null;
+				}
 
 				GroupRequest deleteReq = new GroupRequest(RequestConstants.REQ_DELETE);
 				deleteReq.setEditParts(objects);
@@ -411,8 +431,9 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 			@Override
 			public void run() {
-				if (UIUtil.canDelete(getSelectedObjects()))
+				if (UIUtil.canDelete(getSelectedObjects())) {
 					super.run();
+				}
 			}
 
 			@Override
@@ -446,6 +467,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * @see GraphicalEditor#createPartControl(Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
@@ -492,8 +514,9 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 		fBreadcrumb.setMenuManager(new SchematicContextMenuProvider(getGraphicalViewer(), getActionRegistry()));
 
 		fIsBreadcrumbVisible = isBreadcrumbShown();
-		if (fIsBreadcrumbVisible)
+		if (fIsBreadcrumbVisible) {
 			showBreadcrumb();
+		}
 
 		getPreferenceStore().addPropertyChangeListener(this);
 
@@ -509,13 +532,15 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	private void activateDesignerEditPart() {
 		IContextService contextService = (IContextService) PlatformUI.getWorkbench().getService(IContextService.class);
-		if (contextActivation == null)
+		if (contextActivation == null) {
 			contextActivation = contextService.activateContext(VIEW_CONTEXT_ID);
+		}
 	}
 
 	/**
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
+	@Override
 	public void dispose() {
 
 		if (getSite() != null && !getSite().getShell().isDisposed()) {
@@ -534,8 +559,9 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 		getSite().getWorkbenchWindow().getSelectionService().removeSelectionListener(getSelectionListener());
 		// dispose the ActionRegistry (will dispose all actions)
 		super.dispose();
-		if (splitter != null)
+		if (splitter != null) {
 			splitter.setExternalViewer(null);
+		}
 		splitter = null;
 		getSelectionActions().clear();
 		getActionRegistry().dispose();
@@ -568,6 +594,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
+	@Override
 	public Object getAdapter(Class type) {
 		if (type == PalettePage.class) {
 			if (splitter == null) {
@@ -599,6 +626,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#getGraphicalViewer()
 	 */
+	@Override
 	public GraphicalViewer getGraphicalViewer() {
 		return super.getGraphicalViewer();
 	}
@@ -611,7 +639,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Returns the PaletteRoot for the palette viewer.
-	 * 
+	 *
 	 * @return the palette root
 	 */
 	protected abstract PaletteRoot getPaletteRoot();
@@ -619,22 +647,24 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * Returns the palette viewer provider that is used to create palettes for the
 	 * view and the flyout. Creates one if it doesn't already exist.
-	 * 
+	 *
 	 * @return the PaletteViewerProvider that can be used to create PaletteViewers
 	 *         for this editor
 	 * @see #createPaletteViewerProvider()
 	 */
 	protected final PaletteViewerProvider getPaletteViewerProvider() {
-		if (provider == null)
+		if (provider == null) {
 			provider = createPaletteViewerProvider();
+		}
 		return provider;
 	}
 
 	/**
 	 * Sets the edit domain for this editor.
-	 * 
+	 *
 	 * @param ed The new EditDomain
 	 */
+	@Override
 	protected void setEditDomain(DefaultEditDomain ed) {
 		super.setEditDomain(ed);
 		getEditDomain().setPaletteRoot(getPaletteRoot());
@@ -642,9 +672,10 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Creates the GraphicalViewer on the specified <code>Composite</code>.
-	 * 
+	 *
 	 * @param parent the parent composite
 	 */
+	@Override
 	protected void createGraphicalViewer(Composite parent) {
 		DeferredGraphicalViewer viewer = new DeferredGraphicalViewer();
 		viewer.createControl(parent);
@@ -661,7 +692,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	 * PaletteViewers (one displayed in the editor and the other displayed in the
 	 * PaletteView) in sync when switching from one to the other (i.e., it helps
 	 * maintain state across the two viewers).
-	 * 
+	 *
 	 * @author Pratik Shah
 	 * @since 3.0
 	 */
@@ -669,7 +700,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 		/**
 		 * Constructor
-		 * 
+		 *
 		 * @param provider the provider used to create a PaletteViewer
 		 */
 		public CustomPalettePage(PaletteViewerProvider provider) {
@@ -679,18 +710,22 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 		/**
 		 * @see org.eclipse.ui.part.IPage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		public void createControl(Composite parent) {
 			super.createControl(parent);
-			if (splitter != null)
+			if (splitter != null) {
 				splitter.setExternalViewer(viewer);
+			}
 		}
 
 		/**
 		 * @see org.eclipse.ui.part.IPage#dispose()
 		 */
+		@Override
 		public void dispose() {
-			if (splitter != null)
+			if (splitter != null) {
 				splitter.setExternalViewer(null);
+			}
 			super.dispose();
 		}
 
@@ -719,7 +754,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Returns the selection listener.
-	 * 
+	 *
 	 * @return the <code>ISelectionListener</code>
 	 */
 	protected ISelectionListener getSelectionListener() {
@@ -729,7 +764,7 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	/**
 	 * Adds an action to this editor's <code>ActionRegistry</code>. (This is a
 	 * helper method.)
-	 * 
+	 *
 	 * @param action the action to add.
 	 */
 	protected void addAction(IAction action) {
@@ -738,10 +773,10 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Adds an editor action to this editor.
-	 * 
+	 *
 	 * <p>
 	 * <Editor actions are actions that depend and work on the editor.
-	 * 
+	 *
 	 * @param action the editor action
 	 */
 	protected void addEditorAction(EditorPartAction action) {
@@ -751,11 +786,11 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Adds an <code>EditPart</code> action to this editor.
-	 * 
+	 *
 	 * <p>
 	 * <code>EditPart</code> actions are actions that depend and work on the
 	 * selected <code>EditPart</code>s.
-	 * 
+	 *
 	 * @param action the <code>EditPart</code> action
 	 */
 	protected void addEditPartAction(SelectionAction action) {
@@ -770,11 +805,11 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Adds an <code>CommandStack</code> action to this editor.
-	 * 
+	 *
 	 * <p>
 	 * <code>CommandStack</code> actions are actions that depend and work on the
 	 * <code>CommandStack</code>.
-	 * 
+	 *
 	 * @param action the <code>CommandStack</code> action
 	 */
 	protected void addStackAction(StackAction action) {
@@ -784,30 +819,33 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 
 	/**
 	 * Updates the specified actions.
-	 * 
+	 *
 	 * @param actionIds the list of ids of actions to update
 	 */
+	@Override
 	protected void updateActions(List actionIds) {
 		for (Iterator ids = actionIds.iterator(); ids.hasNext();) {
 			IAction action = getActionRegistry().getAction(ids.next());
-			if (null != action && action instanceof UpdateAction)
+			if (action instanceof UpdateAction) {
 				((UpdateAction) action).update();
+			}
 		}
 	}
 
 	/**
 	 * @see org.eclipse.birt.report.designer.internal.ui.editors.parts.EditorSelectionProvider#updateStackActions()
 	 */
+	@Override
 	public void updateStackActions() {
 		updateActions(stackActionIDs);
 
 	}
 
+	@Override
 	public void setFocus() {
 		if (getGraphicalViewer() != null && getGraphicalViewer().getControl() != null) {
 			super.setFocus();
 		}
-		return;
 	}
 
 	protected EditorBreadcrumb createBreadcrumb() {
@@ -828,15 +866,21 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	private Composite fBreadcrumbComposite;
 
 	public String getBreadcrumbPreferenceKey() {
-		IPerspectiveDescriptor perspective = getSite().getPage().getPerspective();
-		if (perspective == null)
+		if (getSite() == null || getSite().getPage() == null) {
 			return null;
+		}
+
+		IPerspectiveDescriptor perspective = getSite().getPage().getPerspective();
+		if (perspective == null) {
+			return null;
+		}
 		return EDITOR_SHOW_BREADCRUMB + "." + perspective.getId(); //$NON-NLS-1$
 	}
 
 	private void showBreadcrumb() {
-		if (fBreadcrumb == null)
+		if (fBreadcrumb == null) {
 			return;
+		}
 
 		if (fBreadcrumbComposite.getChildren().length == 0) {
 			fBreadcrumb.createContent(fBreadcrumbComposite);
@@ -848,13 +892,12 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	}
 
 	protected void setBreadcrumbInput(Object element) {
-		if (!isBreadcrumbShown())
+		if (!isBreadcrumbShown() || (fBreadcrumb == null)) {
 			return;
-		if (fBreadcrumb == null)
-			return;
-		if (element != null)
+		}
+		if (element != null) {
 			fBreadcrumb.setInput(element);
-		else {
+		} else {
 			fBreadcrumb.setInput(new Object[0]);
 		}
 		((GridData) fBreadcrumbComposite.getLayoutData()).exclude = false;
@@ -867,8 +910,9 @@ public abstract class GraphicalEditorWithFlyoutPalette extends GraphicalEditor
 	}
 
 	private void hideBreadcrumb() {
-		if (fBreadcrumb == null)
+		if (fBreadcrumb == null) {
 			return;
+		}
 
 		((GridData) fBreadcrumbComposite.getLayoutData()).exclude = true;
 		fBreadcrumbComposite.setVisible(false);

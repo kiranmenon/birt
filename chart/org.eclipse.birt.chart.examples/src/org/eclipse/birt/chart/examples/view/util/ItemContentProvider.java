@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004, 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -21,9 +24,9 @@ import java.util.ArrayList;
 
 import org.eclipse.birt.chart.examples.ChartExamplesPlugin;
 import org.eclipse.birt.chart.examples.view.description.Messages;
+import org.eclipse.birt.core.internal.util.EclipseUtil;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 
 import com.ibm.icu.util.StringTokenizer;
@@ -59,7 +62,7 @@ public class ItemContentProvider {
 	/**
 	 * All category types are stored in a string array
 	 */
-	private static final String[] categoryTypes = new String[] { "SampleChartCategory.PrimitiveCharts", //$NON-NLS-1$
+	private static final String[] categoryTypes = { "SampleChartCategory.PrimitiveCharts", //$NON-NLS-1$
 			"SampleChartCategory.3DCharts", //$NON-NLS-1$
 			"SampleChartCategory.CombinationCharts", //$NON-NLS-1$
 			"SampleChartCategory.FormattedCharts", //$NON-NLS-1$
@@ -84,32 +87,28 @@ public class ItemContentProvider {
 
 	/**
 	 * Read the descriptor file from file system and stored it in a StringBuffer.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private static void openDescriptorFile() throws IOException {
-		Bundle bundle = Platform.getBundle(ChartExamplesPlugin.ID);
-		Path path = new Path("/src/org/eclipse/birt/chart/examples/view/util/description.txt"); //$NON-NLS-1$
-		URL fileURL = FileLocator.find(bundle, path, null);
+		Bundle bundle = EclipseUtil.getBundle(ChartExamplesPlugin.ID);
+		URL fileURL;
+		if (bundle != null) {
+			Path path = new Path("/src/org/eclipse/birt/chart/examples/view/util/description.txt"); //$NON-NLS-1$
+			fileURL = FileLocator.find(bundle, path, null);
+		} else {
+			fileURL = ItemContentProvider.class.getResource("description.txt");
+		}
 
 		if (fileURL != null) {
 			InputStream file = fileURL.openStream();
-
-			BufferedReader reader = null;
-			try {
-				reader = new BufferedReader(new InputStreamReader(new BufferedInputStream(file)));
-
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(new BufferedInputStream(file)))) {
 				while (true) {
 					String sTmp = reader.readLine();
 					if (sTmp == null) {
 						break;
-					} else {
-						dFile.append(sTmp.trim());
 					}
-				}
-			} finally {
-				if (reader != null) {
-					reader.close();
+					dFile.append(sTmp.trim());
 				}
 			}
 		}
@@ -117,7 +116,7 @@ public class ItemContentProvider {
 
 	/**
 	 * Retrieve all the item names belonging to a specific category from dFile.
-	 * 
+	 *
 	 * @param categoryName Category name
 	 */
 	private void parseItems(String categoryName) {
@@ -126,7 +125,7 @@ public class ItemContentProvider {
 		String endCategory = "/" + categoryName + ">"; //$NON-NLS-1$ //$NON-NLS-2$
 		StringTokenizer tokens = new StringTokenizer(sTmp, "<"); //$NON-NLS-1$
 		boolean bThisCategory = false;
-		iTypes = new ArrayList<String>();
+		iTypes = new ArrayList<>();
 		while (tokens.hasMoreTokens()) {
 			String token = tokens.nextToken();
 			if (startCategory.equals(token)) {
@@ -142,7 +141,7 @@ public class ItemContentProvider {
 
 	/**
 	 * Retrieve the exampe description according to the example display name.
-	 * 
+	 *
 	 * @param itemName Item name
 	 */
 	private void parseDescription(String itemName) {
@@ -151,7 +150,7 @@ public class ItemContentProvider {
 
 	/**
 	 * Retrieve the example class name according to the example display name.
-	 * 
+	 *
 	 * @param itemName Item name
 	 */
 	private void parseClassName(String itemName) {
@@ -168,12 +167,12 @@ public class ItemContentProvider {
 
 	/**
 	 * Retrieve the method name according to the example class name.
-	 * 
+	 *
 	 * @param className Class name
 	 */
 	private void parseMethodName(String className) {
 		if (className != null) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("create"); //$NON-NLS-1$
 			sb.append(className);
 			methodName = sb.toString();
@@ -182,11 +181,11 @@ public class ItemContentProvider {
 
 	/**
 	 * Retrieve the category names from the String array.
-	 * 
+	 *
 	 * @return Category names list
 	 */
 	public ArrayList<String> getCategoryTypes() {
-		cTypes = new ArrayList<String>();
+		cTypes = new ArrayList<>();
 		for (int iC = 0; iC < categoryTypes.length; iC++) {
 			cTypes.add(categoryTypes[iC]);
 		}
@@ -195,7 +194,7 @@ public class ItemContentProvider {
 
 	/**
 	 * @param categoryName Category name
-	 * 
+	 *
 	 * @return Example names list
 	 */
 	public ArrayList<String> getItemTypes(String categoryName) {
@@ -212,7 +211,7 @@ public class ItemContentProvider {
 
 	/**
 	 * @param itemName Item name
-	 * 
+	 *
 	 * @return Description
 	 */
 	public String getDescription(String itemName) {
@@ -226,7 +225,7 @@ public class ItemContentProvider {
 
 	/**
 	 * @param itemName Item name
-	 * 
+	 *
 	 * @return Example class name
 	 */
 	public String getClassName(String itemName) {
@@ -236,7 +235,7 @@ public class ItemContentProvider {
 
 	/**
 	 * @param className Example class name
-	 * 
+	 *
 	 * @return Chart generation method name
 	 */
 	public String getMethodName(String className) {

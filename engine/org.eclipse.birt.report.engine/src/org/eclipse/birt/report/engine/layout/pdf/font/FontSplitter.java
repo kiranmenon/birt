@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004,2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2008 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -18,6 +21,15 @@ import org.eclipse.birt.report.engine.layout.pdf.text.LineBreakChunk;
 
 import com.ibm.icu.text.Bidi;
 
+/**
+ * Font splitter to handle all used fonts of a given text. The text will be
+ * divided into different section according to the used/defined fonts. If a text
+ * contains character which cannot displayed with the defined font then it will
+ * be replaced though the standard character of missing characters
+ *
+ * @since 3.3
+ *
+ */
 public class FontSplitter implements ISplitter {
 	/**
 	 * If no font can display a character, replace the character with the
@@ -42,6 +54,15 @@ public class FontSplitter implements ISplitter {
 
 	private boolean replaceUnknownChar = true;
 
+	/**
+	 * Constructor 1
+	 *
+	 * @param fontManager        font manager
+	 * @param inputChunk         input chunk
+	 * @param textContent        text content
+	 * @param fontSubstitution   use font substitution
+	 * @param replaceUnknownChar use unknown character replacement
+	 */
 	public FontSplitter(FontMappingManager fontManager, Chunk inputChunk, ITextContent textContent,
 			boolean fontSubstitution, boolean replaceUnknownChar) {
 		this.fontSubstitution = fontSubstitution;
@@ -53,6 +74,14 @@ public class FontSplitter implements ISplitter {
 		this.replaceUnknownChar = replaceUnknownChar;
 	}
 
+	/**
+	 * Constructor 2
+	 *
+	 * @param fontManager      font manager
+	 * @param inputChunk       input chunk
+	 * @param textContent      text content
+	 * @param fontSubstitution use font substitution
+	 */
 	public FontSplitter(FontMappingManager fontManager, Chunk inputChunk, ITextContent textContent,
 			boolean fontSubstitution) {
 		this.fontSubstitution = fontSubstitution;
@@ -112,9 +141,8 @@ public class FontSplitter implements ISplitter {
 					baseOffset + chunkStartPos, baseLevel, runLevel, lastFontInfo);
 			chunkStartPos = currentPos + 1;
 			return c;
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	private Chunk processLineBreak(Chunk lineBreakChunk) {
@@ -153,10 +181,12 @@ public class FontSplitter implements ISplitter {
 		return null;
 	}
 
+	@Override
 	public boolean hasMore() {
 		return chunkText.length > chunkStartPos;
 	}
 
+	@Override
 	public Chunk getNext() {
 		return buildChunk();
 	}

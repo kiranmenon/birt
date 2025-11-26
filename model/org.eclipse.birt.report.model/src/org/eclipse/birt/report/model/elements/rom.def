@@ -143,6 +143,10 @@
     <Choice displayNameID="Choices.textLineThrough.none" name="none"/>
     <Choice displayNameID="Choices.textLineThrough.line-through" name="line-through"/>
   </ChoiceType>
+  <ChoiceType name="textDecoration">
+    <Choice displayNameID="Choices.textDecoration.normal" name="normal"/>
+    <Choice displayNameID="Choices.textDecoration.none" name="text-decoration-none"/>
+  </ChoiceType>
   <ChoiceType name="lineWidth">
     <Choice displayNameID="Choices.lineWidth.thin" name="thin"/>
     <Choice displayNameID="Choices.lineWidth.medium" name="medium"/>
@@ -428,6 +432,9 @@
   </ChoiceType>
   <ChoiceType name="dateTimeFormat">
     <Choice displayNameID="Choices.dateTimeFormat.unformatted" name="Unformatted"/>        
+	<Choice displayNameID="Choices.dateTimeFormat.datePicker.mediumDate" name="Date Picker"/>
+	<Choice displayNameID="Choices.dateTimeFormat.datePicker.shortTime"  name="Date Picker, Short Time"/>
+	<Choice displayNameID="Choices.dateTimeFormat.datePicker.mediumTime" name="Date Picker, Medium Time"/>
 	<Choice displayNameID="Choices.dateTimeFormat.generalDate" name="General Date"/>
     <Choice displayNameID="Choices.dateTimeFormat.longDate" name="Long Date"/>
     <Choice displayNameID="Choices.dateTimeFormat.mediumDate" name="Medium Date"/>
@@ -439,14 +446,17 @@
   </ChoiceType>
   <ChoiceType name="dateFormat">
     <Choice displayNameID="Choices.dateFormat.unformatted" name="Unformatted"/>        
+	<Choice displayNameID="Choices.dateFormat.datePicker.mediumDate" name="Date Picker"/>
 	<Choice displayNameID="Choices.dateFormat.generalDate" name="General Date"/>
     <Choice displayNameID="Choices.dateFormat.longDate" name="Long Date"/>
     <Choice displayNameID="Choices.dateFormat.mediumDate" name="Medium Date"/>
     <Choice displayNameID="Choices.dateFormat.shortDate" name="Short Date"/>		
-	<Choice displayNameID="Choices.dateFormat.custom" name="Custom"/>    
+	<Choice displayNameID="Choices.dateFormat.custom" name="Custom"/>
   </ChoiceType>
   <ChoiceType name="timeFormat">
     <Choice displayNameID="Choices.timeFormat.unformatted" name="Unformatted"/>        
+    <Choice displayNameID="Choices.timeFormat.timePicker.shortTime" name="Time Picker, Short Time"/>        
+    <Choice displayNameID="Choices.timeFormat.timePicker.mediumTime" name="Time Picker, Medium Time"/>        
 	<Choice displayNameID="Choices.timeFormat.longTime" name="Long Time"/>
     <Choice displayNameID="Choices.timeFormat.mediumTime" name="Medium Time"/>
     <Choice displayNameID="Choices.timeFormat.shortTime" name="Short Time"/>			
@@ -679,7 +689,35 @@
   	<Choice displayNameID="Choices.referenceDateType.fixedDate" name="fixedDate"/>
   	<Choice displayNameID="Choices.referenceDateType.endingDateInDimension" name="endingDateInDimension"/>
   </ChoiceType>
-  <Class displayNameID="Class.String" name="String" native="true" toolTipID="Class.String.toolTip">
+  <ChoiceType name="emitterPdfVersion">
+  	<Choice displayNameID="Choices.emitterPdfVersion.1.3" name="1.3"/>
+  	<Choice displayNameID="Choices.emitterPdfVersion.1.4" name="1.4"/>
+  	<Choice displayNameID="Choices.emitterPdfVersion.1.5" name="1.5"/>
+  	<Choice displayNameID="Choices.emitterPdfVersion.1.6" name="1.6"/>
+  	<Choice displayNameID="Choices.emitterPdfVersion.1.7" name="1.7"/>
+  	<Choice displayNameID="Choices.emitterPdfVersion.2.0" name="2.0"/>
+  </ChoiceType>
+  <ChoiceType name="emitterPdfConformance">
+  	<Choice displayNameID="Choices.emitterPdfConformance.X32002" name="PDF.X32002"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A1A" name="PDF.A1A"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A1B" name="PDF.A1B"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A2A" name="PDF.A2A"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A2B" name="PDF.A2B"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A3A" name="PDF.A3A"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A3B" name="PDF.A3B"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A3U" name="PDF.A3U"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.A4F" name="PDF.A4F"/>
+  	<Choice displayNameID="Choices.emitterPdfConformance.Standard" name="PDF.Standard"/>
+  </ChoiceType>
+  <ChoiceType name="emitterPdfUAConformance">
+  	<Choice displayNameID="Choices.emitterPdfUAConformance.UA1" name="PDF.UA-1"/>
+  	<Choice displayNameID="Choices.emitterPdfUAConformance.UA2" name="PDF.UA-2"/>
+  	<Choice displayNameID="Choices.emitterPdfUAConformance.none" name="none"/>
+  </ChoiceType>
+  <ChoiceType name="emitterPdfIccColorType">
+  	<Choice displayNameID="Choices.emitterPdfIccColorType.rgb" name="RGB"/>
+  	<Choice displayNameID="Choices.emitterPdfIccColorType.cmyk" name="CMYK"/>
+  </ChoiceType>  <Class displayNameID="Class.String" name="String" native="true" toolTipID="Class.String.toolTip">
     <Constructor displayNameID="Class.String.String" name="String" returnType="String" toolTipID="Class.String.String.toolTip">
       <Argument name="object" tagID="Class.String.String.object" type="Object"/>
     </Constructor>
@@ -747,8 +785,45 @@
     <Method displayNameID="Class.String.toLocaleLowerCase" name="toLocaleLowerCase" returnType="String" toolTipID="Class.String.toLocaleLowerCase.toolTip"/>
     <Method displayNameID="Class.String.toUpperCase" name="toUpperCase" returnType="String" toolTipID="Class.String.toUpperCase.toolTip"/>
     <Method displayNameID="Class.String.toLocaleUpperCase" name="toLocaleUpperCase" returnType="String" toolTipID="Class.String.toLocaleUpperCase.toolTip"/>
-    <Method displayNameID="Class.String.toString" name="toString" returnType="string" toolTipID="Class.String.toString.toolTip"/>
-    <Method displayNameID="Class.String.valueOf" name="valueOf" returnType="string" toolTipID="Class.String.valueOf.toolTip"/>
+    <Method displayNameID="Class.String.toString" name="toString" returnType="String" toolTipID="Class.String.toString.toolTip"/>
+    <Method displayNameID="Class.String.valueOf" name="valueOf" returnType="String" toolTipID="Class.String.valueOf.toolTip"/>
+    <Method displayNameID="Class.String.at" name="at" returnType="boolean" toolTipID="Class.String.at.toolTip">
+      <Argument name="index" tagID="Class.String.at.index" type="number"/>
+    </Method>
+    <Method displayNameID="Class.String.codePointAt" name="codePointAt" returnType="number" toolTipID="Class.String.codePointAt.toolTip">
+      <Argument name="position" tagID="Class.String.codePointAt.position" type="number"/>
+    </Method>
+    <Method displayNameID="Class.String.includes" name="includes" returnType="boolean" toolTipID="Class.String.includes.toolTip">
+      <Argument name="searchvalue" tagID="Class.String.includes.searchvalue" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.includes" name="includes" returnType="boolean" toolTipID="Class.String.includes.toolTip">
+      <Argument name="searchvalue" tagID="Class.String.includes.searchvalue" type="String"/>
+      <Argument name="start" tagID="Class.String.includes.start" type="number"/>
+    </Method>
+    <Method displayNameID="Class.String.endsWith" name="endsWith" returnType="boolean" toolTipID="Class.String.endsWith.toolTip">
+      <Argument name="value" tagID="Class.String.endsWith.value" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.startsWith" name="startsWith" returnType="boolean" toolTipID="Class.String.startsWith.toolTip">
+      <Argument name="value" tagID="Class.String.startsWith.value" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.repeat" name="repeat" returnType="String" toolTipID="Class.String.repeat.toolTip">
+      <Argument name="copies" tagID="Class.String.repeat.copies" type="number"/>
+    </Method>
+    <Method displayNameID="Class.String.replaceAll" name="replaceAll" returnType="String" toolTipID="Class.String.replaceAll.toolTip">
+      <Argument name="length" tagID="Class.String.replaceAll.RegExp" type="RegExp"/>
+      <Argument name="value" tagID="Class.String.replaceAll.replacement" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.padEnd" name="padEnd" returnType="String" toolTipID="Class.String.padEnd.toolTip">
+      <Argument name="length" tagID="Class.String.padEnd.length" type="number"/>
+      <Argument name="value" tagID="Class.String.padEnd.value" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.padStart" name="padStart" returnType="String" toolTipID="Class.String.padStart.toolTip">
+      <Argument name="length" tagID="Class.String.padStart.length" type="number"/>
+      <Argument name="value" tagID="Class.String.padStart.value" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.trim" name="trim" returnType="String" toolTipID="Class.String.trim.toolTip"/>
+    <Method displayNameID="Class.String.trimEnd" name="trimEnd" returnType="String" toolTipID="Class.String.trimEnd.toolTip"/>
+    <Method displayNameID="Class.String.trimStart" name="trimStart" returnType="String" toolTipID="Class.String.trimStart.toolTip"/>
   </Class>
   <Class displayNameID="Class.Date" name="Date" native="true" toolTipID="Class.Date.toolTip">
     <Constructor displayNameID="Class.Date.Date" name="Date" returnType="Date" toolTipID="Class.Date.Date.toolTip"/>
@@ -951,6 +1026,13 @@
     <Method displayNameID="Class.Array.concat" name="concat" returnType="Array" toolTipID="Class.Array.concat.toolTip">
       <Argument name="value" tagID="Class.Array.concat.value" type="Object"/>
       <Argument name="optionalArgument" tagID="Class.optionalArgument"/>
+    </Method>
+    <Method displayNameID="Class.Array.includes" name="includes" returnType="boolean" toolTipID="Class.Array.includes.toolTip">
+      <Argument name="searchvalue" tagID="Class.Array.includes.searchvalue" type="String"/>
+    </Method>
+    <Method displayNameID="Class.String.includes" name="includes" returnType="boolean" toolTipID="Class.String.includes.toolTip">
+      <Argument name="searchvalue" tagID="Class.Array.includes.searchvalue" type="String"/>
+      <Argument name="start" tagID="Class.Array.includes.start" type="number"/>
     </Method>
     <Method displayNameID="Class.Array.join" name="join" returnType="String" toolTipID="Class.Array.join.toolTip"/>
     <Method displayNameID="Class.Array.join" name="join" returnType="String" toolTipID="Class.Array.join.toolTip">
@@ -1837,6 +1919,118 @@
   	</Property>
   	<Property displayNameID="Element.ReportDesign.locale" name="locale" since="2.5" type="locale" />
   	<Property displayNameID="Element.ReportDesign.language" name="language" since="4.3" type="string" />
+    <PropertyGroup displayNameID="Element.ReportDesign.Emitter.pdf">
+      <Property detailType="emitterPdfVersion" canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.version" name="pdfVersion" runtimeSettable="false" since="4.17" type="choice" >
+        <Default>1.5</Default>
+      </Property>
+      <Property detailType="emitterPdfConformance" canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.conformance" name="pdfConformance" runtimeSettable="false" since="4.17" type="choice" >
+        <Default>PDF.Standard</Default>
+      </Property>
+      <Property detailType="emitterPdfUAConformance" canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.ua.conformance" name="pdfUAConformance" runtimeSettable="false" since="4.18" type="choice" >
+        <Default>none</Default>
+      </Property>
+      <Property detailType="emitterPdfIccColorType" canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.icc.color.type" name="pdfIccColorType" runtimeSettable="false" since="4.17" type="choice" >
+		<Default>RGB</Default>
+      </Property>
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.icc.profile.external" name="pdfIccProfileExternal" runtimeSettable="false" since="4.17" type="string" >
+      </Property>
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.document.prepend" name="pdfDocumentPrepend" runtimeSettable="false" since="4.17" type="string" >
+      </Property>
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdf.document.append" name="pdfDocumentAppend" runtimeSettable="false" since="4.17" type="string" >
+      </Property>
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdfa.font.fallback" name="pdfaFontFallback" runtimeSettable="false" since="4.17" type="string" >
+      </Property>
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdfa.font.cid.embed" name="pdfaFontCidEmbed" runtimeSettable="false" since="4.17" type="boolean" >
+		<Default>true</Default>
+      </Property>
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.pdfa.document.title.embed" name="pdfaDocumentTitleEmbed" runtimeSettable="false" since="4.17" type="boolean" >
+		<Default>false</Default>
+      </Property>
+	</PropertyGroup>
+    <PropertyGroup displayNameID="Element.ReportDesign.Emitter.excel">
+	  <!-- excel (Spudsoft): force the column width calculation	-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.forceAutoColWidths" name="excelForceAutoColWidths" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+	  <!-- excel (Spudsoft): include header in the column width calculation	-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.autoColWidthsIncludeHeader" name="excelAutoColWidthsIncludeTableHeader" runtimeSettable="false" since="4.19" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): include footer in the column width calculation	-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.autoColWidthsIncludeFooter" name="excelAutoColWidthsIncludeTableFooter" runtimeSettable="false" since="4.19" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): output of table as single sheet		-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.singleSheet" name="excelSingleSheet" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): disable the excel grouping				-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.disableGrouping" name="excelDisableGrouping" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): show/hide the excel gridlines			-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.displayGridlines" name="excelDisplayGridlines" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>true</Default>
+      </Property>
+      <!-- excel (Spudsoft): show/hide auto filter at header row	-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.autoFilter" name="excelAutoFilter" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): enable/disable the recalculation of formulas at excel start		-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.forceRecalculation" name="excelForceRecalculation" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): enable/disable the image scaling based on cell dimensions			-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.imageScalingToCellDimension" name="excelImageScalingToCellDimension" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): enable/disable single sheet with page break						-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.singleSheetWithPageBreaks" name="excelSingleSheetWithPageBreaks" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): enable/disable the XLSX creation based on data streaming			-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.streamingXlsx" name="excelStreamingXlsx" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): show/hide the header and footer on excel sheet						-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.structuredHeader" name="excelStructuredHeader" runtimeSettable="false" since="4.17" type="boolean" >
+        <Default>false</Default>
+      </Property>
+      <!-- excel (Spudsoft): set the page high to fit the printer page							-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.printPagesHigh" name="excelPrintPagesHigh" runtimeSettable="false" since="4.17" type="integer" >
+      </Property>
+      <!-- excel (Spudsoft): set the page wide to fit the printer page							-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.printPagesWide" name="excelPrintPagesWide" runtimeSettable="false" since="4.17" type="integer" >
+      </Property>
+      <!-- excel (Spudsoft): set the page scale													-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.printScale" name="excelPrintScale" runtimeSettable="false" since="4.17" type="integer" >
+      </Property>
+      <!-- excel (Spudsoft): set the excel template file (full qualified file path)				-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.excel.templateFile" name="excelTemplateFile" runtimeSettable="false" since="4.17" type="string" >
+      </Property>
+	</PropertyGroup>
+    <PropertyGroup displayNameID="Element.ReportDesign.Emitter.word">
+	  <!-- docx (wpml): combined indent calculation based on margin & padding					-->
+ 	  <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.word.combineMarginPadding" name="wordCombineMarginPadding" runtimeSettable="true" since="4.18" type="boolean" >
+		<Default>true</Default>
+      </Property>
+	  <!-- docx (wpml): add empty paragraph at the end of list table cell						-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.word.addEmptyParagraphForListCell" name="wordAddEmptyParagraphForListCell" runtimeSettable="true" since="4.18" type="boolean" >
+		<Default>true</Default>
+      </Property>
+	  <!-- docx (wpml): add empty paragraph at the end of table cell						-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.word.addEmptyParagraphForTableCell" name="wordAddEmptyParagraphForTableCell" runtimeSettable="true" since="4.19" type="boolean" >
+		<Default>true</Default>
+      </Property>
+	  <!-- docx (wpml): control the usage of layout-grid for (dynamic) text elements			-->
+      <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.word.wrappedTableForMarginPadding" name="wordWrappedTableForMarginPadding" runtimeSettable="true" since="4.18" type="boolean" >
+		<Default>false</Default>
+      </Property>
+	  <!-- docx (wpml): control the usage of layout-grid on page header & footer				-->
+	  <Property canInherit="false" displayNameID="Element.ReportDesign.Emitter.word.wrappedTableHeaderFooter" name="wordWrappedTableHeaderFooter" runtimeSettable="true" since="4.18" type="boolean" >
+		<Default>false</Default>
+	  </Property>
+	</PropertyGroup>
   	<Method context="client" displayNameID="Element.ReportDesign.clientInitialize" name="clientInitialize" since="1.0" toolTipID="Element.ReportDesign.clientInitialize.toolTip">
     </Method> 	
 	<Method context="startup" displayNameID="Element.ReportDesign.initialize" name="initialize" since="1.0" toolTipID="Element.ReportDesign.initialize.toolTip">
@@ -2267,6 +2461,9 @@
       <Property detailType="textLineThrough" displayNameID="Element.Style.font.textLineThrough" isStyleProperty="true" name="textLineThrough" since="1.0" type="choice">
         <Default>none</Default>
       </Property>
+      <Property detailType="textDecoration" displayNameID="Element.Style.font.textDecoration" isStyleProperty="true" name="textDecoration" since="4.17" type="choice">
+		<Default>normal</Default>
+      </Property>
     </PropertyGroup>
     <PropertyGroup displayNameID="Element.Style.background">
       <Property canInherit="false" detailType="backgroundAttachment" displayNameID="Element.Style.background.attachment" isStyleProperty="true" name="backgroundAttachment" since="reserved" type="choice">
@@ -2441,7 +2638,7 @@
     <Property detailType="MapRule" displayNameID="Element.Style.map.rules" isList="true" isStyleProperty="true" name="mapRules" since="1.0" type="structure"/>
     <Property canInherit="false" detailType="HighlightRule" displayNameID="Element.Style.highlight.rules" isList="true" isStyleProperty="true" name="highlightRules" since="1.0" type="structure"/>
     <Property canInherit="false" detailType="overflow" displayNameID="Element.Style.overflow" isStyleProperty="true" name="overflow" since="2.5.2" type="choice">
-        <Default>hidden</Default>
+        <Default>visible</Default>
     </Property>
     <Property canInherit="false" displayNameID="Element.Style.height" name="height" isStyleProperty="true" since="4.3" type="dimension" validator="NonNegativeValueValidator" />
     <Property canInherit="false" displayNameID="Element.Style.width" name="width" isStyleProperty="true" since="4.3" type="dimension" validator="NonNegativeValueValidator" />
@@ -2712,7 +2909,7 @@
     <Property displayNameID="Element.Label.helpText" name="helpText" runtimeSettable="false" since="1.0" type="string"/>
     <Property displayNameID="Element.Label.helpTextID" name="helpTextID" since="1.0" type="resourceKey"/>
     <Property displayNameID="Element.Label.tagType" name="tagType" since="4.3" type="string">
-    	<Default>p</Default>
+    	<Default>auto</Default>
     </Property>
     <Method context="startup" displayNameID="Element.Label.onPrepare" name="onPrepare" since="2.0" toolTipID="Element.Label.onPrepare.toolTip">
       <Argument name="this" tagID="Element.Label.onPrepare.this" type="org.eclipse.birt.report.engine.api.script.element.ILabel"/>
@@ -2781,6 +2978,7 @@
     <StyleProperty name="textUnderline"/>
     <StyleProperty name="textOverline"/>
     <StyleProperty name="textLineThrough"/>
+    <StyleProperty name="textDecoration"/>
     <StyleProperty name="textTransform"/>
     <StyleProperty name="verticalAlign"/>
     <StyleProperty name="whiteSpace"/>
@@ -2815,7 +3013,7 @@
     <Property displayNameID="Element.Data.helpTextID" name="helpTextID" since="1.0" type="resourceKey"/>
     <Property detailType="Action" displayNameID="Element.Data.action" isList="true" name="action" runtimeSettable="false" since="1.0" type="structure"/>
     <Property displayNameID="Element.Data.tagType" name="tagType" since="4.3" type="string">
-    	<Default>p</Default>
+    	<Default>auto</Default>
     </Property>
     <Method context="startup" displayNameID="Element.Data.onPrepare" name="onPrepare" since="2.0" toolTipID="Element.Data.onPrepare.toolTip">
       <Argument name="this" tagID="Element.Data.onPrepare.this" type="org.eclipse.birt.report.engine.api.script.element.IDataItem"/>
@@ -2886,6 +3084,7 @@
     <StyleProperty name="textUnderline"/>
     <StyleProperty name="textOverline"/>
     <StyleProperty name="textLineThrough"/>
+    <StyleProperty name="textDecoration"/>
     <StyleProperty name="textTransform"/>
     <StyleProperty name="verticalAlign"/>
     <StyleProperty name="whiteSpace"/>
@@ -2906,7 +3105,7 @@
     	<Default>true</Default>
     </Property>
     <Property displayNameID="Element.Text.tagType" name="tagType" since="4.3" type="string">
-    	<Default>p</Default>
+    	<Default>auto</Default>
     </Property>
     <Method context="startup" displayNameID="Element.Text.onPrepare" name="onPrepare" since="2.0" toolTipID="Element.Text.onPrepare.toolTip">
       <Argument name="this" tagID="Element.Text.onPrepare.this" type="org.eclipse.birt.report.engine.api.script.element.ITextItem"/>
@@ -3060,7 +3259,7 @@
   </Element>
   <Element allowsUserProperties="true" canExtend="true" displayNameID="Element.List" extends="Listing" hasStyle="true" isAbstract="false" isNameRequired="false" javaClass="org.eclipse.birt.report.model.elements.ListItem" name="List" selector="list" since="1.0" xmlName="list">
     <Property displayNameID="Element.List.tagType" name="tagType" since="4.3" type="string">
-    	<Default>sect</Default>
+    	<Default>Sect</Default>
     </Property>
     <Slot displayNameID="Element.List.slot.header" multipleCardinality="true" name="header" selector="list-header" since="1.0" xmlName="header">
       <Type name="FreeForm"/>
@@ -3176,7 +3375,7 @@
       <Default>false</Default>    	
     </Property>
      <Property displayNameID="Element.Table.tagType" name="tagType" since="4.3" type="string">
-    	<Default>table</Default>
+    	<Default>Table</Default>
     </Property>
     <Slot displayNameID="Element.Table.slot.header" multipleCardinality="true" name="header" selector="table-header" since="1.0" xmlName="header">
       <Type name="Row"/>
@@ -3319,7 +3518,7 @@
     	<Default>NoChange</Default>
     </Property>
     <Property displayNameID="Element.Row.tagType" name="tagType" since="4.3" type="string">
-    	<Default>tr</Default>
+    	<Default>auto</Default>
     </Property>
     <Property displayNameID="Element.Row.language" name="language" since="4.3" type="string"/>
     <Method context="startup" displayNameID="Element.Row.onPrepare" name="onPrepare" since="2.0" toolTipID="Element.Row.onPrepare.toolTip">
@@ -3375,17 +3574,17 @@
     	<Default>NoChange</Default>
     </Property>
     <Property displayNameID="Element.Cell.tagType" name="tagType" since="4.3" type="string">
-    	<Default>td</Default>
+    	<Default>auto</Default>
     </Property>
     <Property displayNameID="Element.Cell.language" name="language" since="4.3" type="string"/>
     <Property displayNameID="Element.Cell.altText" name="altText" since="4.3" type="expression"/>
     <Property displayNameID="Element.ReportItem.altTextID" name="altTextID" since="4.3" type="resourceKey"/>
     <PropertyGroup displayNameID="Element.Cell.diagonal">
     	<Property displayNameID="Element.Cell.diagonalNumber" name="diagonalNumber" runtimeSettable="false" since="2.3" type="integer" validator="NonNegativeValueValidator">
-    		<Default>0</Default>
+    		<Default>1</Default>
     	</Property>
     	<Property displayNameID="Element.Cell.antidiagonalNumber" name="antidiagonalNumber" runtimeSettable="false" since="2.3" type="integer" validator="NonNegativeValueValidator">
-    		<Default>0</Default>
+    		<Default>1</Default>
     	</Property>   
     	<Property detailType="lineWidth"  displayNameID="Element.Cell.diagonalThickness" name="diagonalThickness" runtimeSettable="false" since="3.2" type="dimension" validator="NonNegativeValueValidator">
     		<DefaultUnit>pt</DefaultUnit>
@@ -3424,10 +3623,6 @@
     <PropertyVisibility name="colSpan" visibility="readonly"/>        
     <PropertyVisibility name="rowSpan" visibility="readonly"/>
     <PropertyVisibility name="viewAction" visibility="hide"/>
-    <PropertyVisibility name="antidiagonalNumber" visibility="hide"/> 
-    <PropertyVisibility name="antidiagonalThickness" visibility="hide"/> 
-    <PropertyVisibility name="antidiagonalStyle" visibility="hide"/> 
-    <PropertyVisibility name="antidiagonalColor" visibility="hide"/>                    
     <Slot displayNameID="Element.Cell.slot.content" multipleCardinality="true" name="content" since="1.0">
       <Type name="Label"/>
       <Type name="Data"/>
@@ -3471,7 +3666,7 @@
 		<Default>false</Default>
 	</Property>
 	<Property displayNameID="Element.Image.tagType" name="tagType" since="4.3" type="string">
-    	<Default>figure</Default>
+    	<Default>Figure</Default>
     </Property>
 	<Method context="startup" displayNameID="Element.Image.onPrepare" name="onPrepare" since="2.0" toolTipID="Element.Image.onPrepare.toolTip">
       <Argument name="this" tagID="Element.Image.onPrepare.this" type="org.eclipse.birt.report.engine.api.script.element.IImage"/>
@@ -3537,7 +3732,7 @@
     <Property displayNameID="Element.Grid.captionID" name="captionID" since="2.3" type="resourceKey"/>
     <Property displayNameID="Element.Grid.summary" name="summary" runtimeSettable="false" since="2.3" type="string"/>
     <Property displayNameID="Element.Grid.tagType" name="tagType" since="4.3" type="string">
-    	<Default>sect</Default>
+    	<Default>Sect</Default>
     </Property>
     <Slot displayNameID="Element.Grid.slot.columns" multipleCardinality="true" name="columns" since="1.0">
       <Type name="Column"/>
@@ -3617,7 +3812,7 @@
     	<Default>true</Default>
     </Property>
     <Property displayNameID="Element.TextData.tagType" name="tagType" since="4.3" type="string">
-    	<Default>p</Default>
+    	<Default>auto</Default>
     </Property>
 	<Method context="startup" displayNameID="Element.TextData.onPrepare" name="onPrepare" since="2.0" toolTipID="Element.TextData.onPrepare.toolTip">
       <Argument name="this" tagID="Element.TextData.onPrepare.this" type="org.eclipse.birt.report.engine.api.script.element.IDynamicText"/>
@@ -3976,29 +4171,29 @@
     </Property>
   </Element>  
   <Style displayNameID="Style.Report" name="report" reference="Overall default" />
-  <Style displayNameID="Style.List" name="list" reference="List. Applies to all slots within the list" type="List"/>
-  <Style displayNameID="Style.ListHeader" name="list-header" reference="List Header" type="List"/>
-  <Style displayNameID="Style.ListFooter" name="list-footer" reference="List Footer" type="List" />
-  <Style displayNameID="Style.ListDetail" name="list-detail" reference="List Detail" type="List" />
-  <Style displayNameID="Style.Table" name="table" reference="Table Item" type="Table" />
-  <Style displayNameID="Style.TableHeader" name="table-header" reference="Table Header" type="Table" />
-  <Style displayNameID="Style.TableFooter" name="table-footer" reference="Table Footer" type="Table" />
-  <Style displayNameID="Style.TableDetail" name="table-detail" reference="Table Detail" type="Table" />
-  <Style displayNameID="Style.TableRow" name="table-row" reference="Table Row" type="Table" />
-  <Style displayNameID="Style.TableCell" name="table-cell" reference="Table Cell" type="Table" />
-  <Style displayNameID="Style.TableHeaderCell" name="table-header-cell" reference="Table Header Cell" type="Table" />
-  <Style displayNameID="Style.TableFooterCell" name="table-footer-cell" reference="Table Footer Cell" type="Table" />
-  <Style displayNameID="Style.TableDetailCell" name="table-detail-cell" reference="Table Detail Cell" type="Table" />
-  <Style displayNameID="Style.Label" name="label" reference="Label item" type="Label"/>
-  <Style displayNameID="Style.Text" name="text" reference="Text item" type="Text"/>
-  <Style displayNameID="Style.Grid" name="grid" reference="Grid item" type="Grid" />
-  <Style displayNameID="Style.GridRow" name="grid-row" reference="Grid Row" type="Grid" />
-  <Style displayNameID="Style.GridRowCell" name="grid-cell" reference="Grid Cell" type="Grid" />
-  <Style displayNameID="Style.Data" name="data" reference="Data item" type="Data"/>
-  <Style displayNameID="Style.Image" name="image" reference="Image item" type="Image"/>
-  <Style displayNameID="Style.TextData" name="text-data" reference="Text data item" type="TextData"/>
-  <Style displayNameID="Style.TableGroupHeaderCell" name="table-group-header-cell" reference="Table Group Header Cell" type="Table" />
-  <Style displayNameID="Style.TableGroupFooterCell" name="table-group-footer-cell" reference="Table Group Footer Cell" type="Table" />
+  <Style displayNameID="Style.List" name="list" reference="List. Applies to all slots within the list" />
+  <Style displayNameID="Style.ListHeader" name="list-header" reference="List Header" />
+  <Style displayNameID="Style.ListFooter" name="list-footer" reference="List Footer" />
+  <Style displayNameID="Style.ListDetail" name="list-detail" reference="List Detail" />
+  <Style displayNameID="Style.Table" name="table" reference="Table Item" />
+  <Style displayNameID="Style.TableHeader" name="table-header" reference="Table Header" />
+  <Style displayNameID="Style.TableFooter" name="table-footer" reference="Table Footer" />
+  <Style displayNameID="Style.TableDetail" name="table-detail" reference="Table Detail" />
+  <Style displayNameID="Style.TableRow" name="table-row" reference="Table Row" />
+  <Style displayNameID="Style.TableCell" name="table-cell" reference="Table Cell" />
+  <Style displayNameID="Style.TableHeaderCell" name="table-header-cell" reference="Table Header Cell" />
+  <Style displayNameID="Style.TableFooterCell" name="table-footer-cell" reference="Table Footer Cell" />
+  <Style displayNameID="Style.TableDetailCell" name="table-detail-cell" reference="Table Detail Cell" />
+  <Style displayNameID="Style.Label" name="label" reference="Label item" />
+  <Style displayNameID="Style.Text" name="text" reference="Text item" />
+  <Style displayNameID="Style.Grid" name="grid" reference="Grid item" />
+  <Style displayNameID="Style.GridRow" name="grid-row" reference="Grid Row" />
+  <Style displayNameID="Style.GridRowCell" name="grid-cell" reference="Grid Cell" />
+  <Style displayNameID="Style.Data" name="data" reference="Data item" />
+  <Style displayNameID="Style.Image" name="image" reference="Image item" />
+  <Style displayNameID="Style.TextData" name="text-data" reference="Text data item" />
+  <Style displayNameID="Style.TableGroupHeaderCell" name="table-group-header-cell" reference="Table Group Header Cell" />
+  <Style displayNameID="Style.TableGroupFooterCell" name="table-group-footer-cell" reference="Table Group Footer Cell" />
   <Style displayNameID="Style.TableGroupHeader1" name="table-group-header-1" reference="Table Group Header 1" />
   <Style displayNameID="Style.TableGroupHeader2" name="table-group-header-2" reference="Table Group Header 2" />
   <Style displayNameID="Style.TableGroupHeader3" name="table-group-header-3" reference="Table Group Header 3" />

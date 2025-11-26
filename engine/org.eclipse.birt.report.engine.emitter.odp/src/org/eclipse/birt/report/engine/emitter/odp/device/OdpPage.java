@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2010 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -21,7 +24,7 @@ import org.eclipse.birt.report.engine.emitter.odp.util.OdpUtil;
 import org.eclipse.birt.report.engine.layout.PDFConstants;
 import org.eclipse.birt.report.engine.layout.emitter.AbstractPage;
 import org.eclipse.birt.report.engine.layout.pdf.font.FontInfo;
-import org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo;
+import org.eclipse.birt.report.engine.nLayout.area.style.AreaConstants;
 import org.eclipse.birt.report.engine.nLayout.area.style.TextStyle;
 import org.eclipse.birt.report.engine.odf.OdfUtil;
 import org.eclipse.birt.report.engine.odf.pkg.ImageEntry;
@@ -30,10 +33,15 @@ import org.eclipse.birt.report.engine.odf.style.HyperlinkInfo;
 import org.eclipse.birt.report.engine.odf.style.StyleBuilder;
 import org.eclipse.birt.report.engine.odf.style.StyleConstant;
 import org.eclipse.birt.report.engine.odf.style.StyleEntry;
+import org.w3c.dom.css.CSSPrimitiveValue;
 
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
+import org.openpdf.text.Font;
+import org.openpdf.text.pdf.BaseFont;
 
+/**
+ * @since 3.3
+ *
+ */
 public class OdpPage extends AbstractPage {
 
 	private OdpWriter writer;
@@ -43,6 +51,13 @@ public class OdpPage extends AbstractPage {
 
 	private StyleEntry textFrameStyle;
 
+	/**
+	 * @param pageWidth
+	 * @param pageHeight
+	 * @param backgroundColor
+	 * @param writer
+	 * @param context
+	 */
 	public OdpPage(int pageWidth, int pageHeight, Color backgroundColor, OdpWriter writer, OdpContext context) {
 		super(pageWidth, pageHeight);
 		this.context = context;
@@ -58,12 +73,15 @@ public class OdpPage extends AbstractPage {
 		context.addStyle(textFrameStyle);
 	}
 
+	@Override
 	public void restoreState() {
 	}
 
+	@Override
 	public void saveState() {
 	}
 
+	@Override
 	public void dispose() {
 		if (!isDisposed) {
 			writer.endPage();
@@ -71,9 +89,11 @@ public class OdpPage extends AbstractPage {
 		}
 	}
 
+	@Override
 	protected void clip(float startX, float startY, float width, float height) {
 	}
 
+	@Override
 	protected void drawBackgroundColor(Color color, float x, float y, float width, float height) {
 		if (color == null) {
 			return;
@@ -108,6 +128,7 @@ public class OdpPage extends AbstractPage {
 				repeat);
 	}
 
+	@Override
 	protected void drawImage(String imageId, byte[] imageData, String extension, float imageX, float imageY,
 			float height, float width, String helpText, Map params) throws Exception {
 
@@ -120,6 +141,7 @@ public class OdpPage extends AbstractPage {
 
 	}
 
+	@Override
 	protected void drawImage(String imageId, String extension, float imageX, float imageY, float height, float width,
 			String helpText, Map params) throws Exception {
 		if (imageId == null) {
@@ -130,9 +152,10 @@ public class OdpPage extends AbstractPage {
 		writer.drawImage(imageId, null, entry.getUri(), extension, imageX, imageY, height, width, helpText, link);
 	}
 
+	@Override
 	protected void drawLine(float startX, float startY, float endX, float endY, float width, Color color,
 			int lineStyle) {
-		if (null == color || 0f == width || lineStyle == BorderInfo.BORDER_STYLE_NONE) {
+		if (null == color || 0f == width || lineStyle == AreaConstants.BORDER_STYLE_NONE) {
 			return;
 		}
 
@@ -140,11 +163,11 @@ public class OdpPage extends AbstractPage {
 		entry.setProperty(StyleConstant.COLOR_PROP, OdpUtil.getColorString(color));
 		entry.setProperty(StyleConstant.GRAPHIC_STROKE_WIDTH, width / OdfUtil.INCH_PT);
 
-		if (lineStyle == BorderInfo.BORDER_STYLE_DASHED || lineStyle == BorderInfo.BORDER_STYLE_DOTTED) {
-			entry.setProperty(StyleConstant.GRAPHIC_STROKE, "dash");
+		if (lineStyle == AreaConstants.BORDER_STYLE_DASHED || lineStyle == AreaConstants.BORDER_STYLE_DOTTED) {
+			entry.setProperty(StyleConstant.GRAPHIC_STROKE, "dash"); //$NON-NLS-1$
 			// TODO: dash style, which is quite complex to implement
 		} else {
-			entry.setProperty(StyleConstant.GRAPHIC_STROKE, "solid");
+			entry.setProperty(StyleConstant.GRAPHIC_STROKE, "solid"); //$NON-NLS-1$
 		}
 
 		context.addStyle(entry);
@@ -152,6 +175,7 @@ public class OdpPage extends AbstractPage {
 		writer.drawLine(startX, startY, endX, endY, entry);
 	}
 
+	@Override
 	public void drawText(String text, int textX, int textY, int textWidth, int textHeight, TextStyle textStyle) {
 		float x = convertToPoint(textX);
 		float y = convertToPoint(textY);
@@ -162,6 +186,7 @@ public class OdpPage extends AbstractPage {
 		drawText(text, x, y, baseline, width, height, textStyle);
 	}
 
+	@Override
 	protected void drawText(String text, float textX, float textY, float baseline, float width, float height,
 			TextStyle textStyle) {
 		// width of text is enlarged by 1 point because the text will be
@@ -173,8 +198,8 @@ public class OdpPage extends AbstractPage {
 		StyleEntry style = StyleBuilder.createEmptyStyleEntry(StyleConstant.TYPE_TEXT);
 		style.setProperty(StyleConstant.DIRECTION_PROP, textStyle.getDirection());
 		style.setProperty(StyleConstant.COLOR_PROP, OdpUtil.getColorString(textStyle.getColor()));
-		style.setProperty(StyleConstant.LETTER_SPACING,
-				new FloatValue(FloatValue.CSS_PT, textStyle.getLetterSpacing() / PDFConstants.LAYOUT_TO_PDF_RATIO));
+		style.setProperty(StyleConstant.LETTER_SPACING, new FloatValue(CSSPrimitiveValue.CSS_PT,
+				textStyle.getLetterSpacing() / PDFConstants.LAYOUT_TO_PDF_RATIO));
 
 		if (fontInfo != null) {
 			BaseFont baseFont = fontInfo.getBaseFont();
@@ -184,11 +209,11 @@ public class OdpPage extends AbstractPage {
 			style.setProperty(StyleConstant.FONT_SIZE_PROP, Double.valueOf(fontInfo.getFontSize()));
 
 			if ((fontInfo.getFontStyle() & Font.BOLD) != 0) {
-				style.setProperty(StyleConstant.FONT_WEIGHT_PROP, "bold");
+				style.setProperty(StyleConstant.FONT_WEIGHT_PROP, "bold"); //$NON-NLS-1$
 			}
 
 			if ((fontInfo.getFontStyle() & Font.ITALIC) != 0) {
-				style.setProperty(StyleConstant.FONT_STYLE_PROP, "italic");
+				style.setProperty(StyleConstant.FONT_STYLE_PROP, "italic"); //$NON-NLS-1$
 			}
 
 			if (textStyle.isLinethrough()) {
@@ -210,10 +235,14 @@ public class OdpPage extends AbstractPage {
 		writer.drawText(text, textX, textY, width, height + descend * 0.6f, textFrameStyle, style, link);
 	}
 
+	/**
+	 * @param link
+	 */
 	public void setLink(HyperlinkInfo link) {
 		this.link = link;
 	}
 
+	@Override
 	protected void drawBackgroundImage(float x, float y, float width, float height, float imageWidth, float imageHeight,
 			int repeat, String imageUrl, byte[] imageData, float absPosX, float absPosY) throws IOException {
 		drawBackgroundImage(x, y, width, height, imageWidth, imageHeight, repeat, imageUrl, absPosX, absPosY);

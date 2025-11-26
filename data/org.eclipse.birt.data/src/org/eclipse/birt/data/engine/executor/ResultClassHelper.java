@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -39,20 +42,21 @@ class ResultClassHelper {
 	}
 
 	/**
-	 * 
+	 *
 	 * @throws DataException
 	 */
 	private void initIndex() throws DataException {
-		ArrayList clobIndexList = new ArrayList();
-		ArrayList blobIndexList = new ArrayList();
+		ArrayList<Integer> clobIndexList = new ArrayList<>();
+		ArrayList<Integer> blobIndexList = new ArrayList<>();
 		for (int i = 0; i < resultClass.getFieldCount(); i++) {
 			Class valueClass = resultClass.getFieldValueClass(i + 1);
 			assert valueClass != null;
-			if (valueClass.isAssignableFrom(IClob.class))
+			if (valueClass.isAssignableFrom(IClob.class)) {
 				clobIndexList.add(Integer.valueOf(i));
-			else if (valueClass.isAssignableFrom(IBlob.class))
+			} else if (valueClass.isAssignableFrom(IBlob.class)) {
 				blobIndexList.add(Integer.valueOf(i));
-			;
+			}
+
 		}
 		clobIndex = toIntArray(clobIndexList);
 		blobIndex = toIntArray(blobIndexList);
@@ -60,20 +64,20 @@ class ResultClassHelper {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param integerList
 	 * @return
 	 */
-	private int[] toIntArray(List integerList) {
+	private int[] toIntArray(List<Integer> integerList) {
 		int[] reArray = new int[integerList.size()];
 		for (int i = 0; i < reArray.length; i++) {
-			reArray[i] = ((Integer) (integerList.get(i))).intValue();
+			reArray[i] = integerList.get(i);
 		}
 		return reArray;
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	boolean hasClobOrBlob() {
@@ -81,7 +85,7 @@ class ResultClassHelper {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	int[] getClobIndexArray() {
@@ -89,7 +93,7 @@ class ResultClassHelper {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	int[] getBlobIndexArray() {

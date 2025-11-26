@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -41,7 +44,7 @@ import org.eclipse.birt.report.engine.internal.document.DocumentExtension;
 
 /**
  * read the content from the content stream.
- * 
+ *
  */
 public class ReportContentReaderV2 {
 
@@ -81,7 +84,7 @@ public class ReportContentReaderV2 {
 
 	/**
 	 * read the content object from the input stream.
-	 * 
+	 *
 	 * @param oi the input stream.
 	 * @return the object read out.
 	 * @throws IOException
@@ -168,9 +171,9 @@ public class ReportContentReaderV2 {
 	 * read the content object out from the input stream in the curretn offset.
 	 * After call this method, the user can use getContent(), getContentOffset()
 	 * getParentOffset() to access the object.
-	 * 
+	 *
 	 * @return the object read out.
-	 * 
+	 *
 	 */
 	public IContent readContent() throws IOException {
 		if (offset >= stream.length()) {
@@ -209,7 +212,7 @@ public class ReportContentReaderV2 {
 	 * read the content object from the reader at offset. After this action, the
 	 * current offset will not be changed. The user can use getContent,
 	 * getContentOffset, getParentOffset to access the object just read out.
-	 * 
+	 *
 	 * @param offset
 	 * @return
 	 */
@@ -241,9 +244,9 @@ public class ReportContentReaderV2 {
 
 	/**
 	 * get the current offset.
-	 * 
+	 *
 	 * The current offset is changed by set of readContent.
-	 * 
+	 *
 	 * @return
 	 */
 	public long getOffset() {
@@ -252,7 +255,7 @@ public class ReportContentReaderV2 {
 
 	/**
 	 * set the current offset. The offset must pints to a valid content.
-	 * 
+	 *
 	 * @param offset
 	 */
 	public void setOffset(long offset) {

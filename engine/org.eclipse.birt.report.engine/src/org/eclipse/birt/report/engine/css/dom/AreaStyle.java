@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 package org.eclipse.birt.report.engine.css.dom;
 
 import org.eclipse.birt.report.engine.content.IStyle;
@@ -18,6 +30,7 @@ public class AreaStyle extends AbstractStyle {
 		super(engine);
 	}
 
+	@Override
 	public CSSValue getProperty(int index) {
 		if (!resolveFlags[index]) {
 			if (parent != null) {
@@ -29,11 +42,13 @@ public class AreaStyle extends AbstractStyle {
 
 	}
 
+	@Override
 	public void setProperty(int index, CSSValue value) {
 		values[index] = value;
 		resolveFlags[index] = true;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return false;
 	}

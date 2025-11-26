@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
 <site>
    <feature id="org.eclipse.birt">
       <category name="Birt"/>
@@ -15,9 +29,6 @@
    <feature id="org.eclipse.birt.doc.isv">
       <category name="Birt"/>
    </feature>
-   <feature id="org.eclipse.birt.source">
-      <category name="Birt"/>
-   </feature>
    <feature id="org.eclipse.birt.chart">
       <category name="Chart"/>
    </feature>
@@ -25,9 +36,6 @@
       <category name="Chart"/>
    </feature>
    <feature id="org.eclipse.birt.chart.doc.isv">
-      <category name="Chart"/>
-   </feature>
-   <feature id="org.eclipse.birt.chart.source">
       <category name="Chart"/>
    </feature>
    <feature id="org.eclipse.birt.engine.runtime">
@@ -42,25 +50,16 @@
    <feature id="org.eclipse.birt.chart.integration.wtp">
       <category name="wtpIntegration"/>
    </feature>
-   <feature id="org.eclipse.birt.chart.integration.wtp.source">
+   <feature id="org.eclipse.birt.integration.wtp.sdk">
       <category name="wtpIntegration"/>
    </feature>
    <feature id="org.eclipse.birt.integration.wtp">
       <category name="wtpIntegration"/>
    </feature>
-   <feature id="org.eclipse.birt.integration.wtp.source">
-      <category name="wtpIntegration"/>
-   </feature>
    <feature id="org.eclipse.birt.testhelper">
       <category name="BirtTest"/>
    </feature>
-   <feature id="org.eclipse.birt.testhelper.source">
-      <category name="BirtTest"/>
-   </feature>
    <feature id="org.eclipse.birt.tests">
-      <category name="BirtTest"/>
-   </feature>
-   <feature id="org.eclipse.birt.tests.source">
       <category name="BirtTest"/>
    </feature>
    <feature id="org.eclipse.birt.nl">
@@ -72,10 +71,74 @@
    <feature id="org.eclipse.birt.rcp.nl">
       <category name="BirtNL"/>
    </feature>
-   <category-def name="Birt" label="BIRT Reporting SDK"/>
+   <feature id="org.eclipse.birt.rcp">
+      <category name="BirtRcp"/>
+   </feature>
+
+   <category-def name="Birt" label="BIRT Reporting DK"/>
    <category-def name="Chart" label="BIRT Charting SDK"/>
    <category-def name="OSGi" label="BIRT Engine OSGi Runtime SDK"/>
-   <category-def name="wtpIntegration" label="BIRT WTP Integration SDK"/>
-   <category-def name="BirtTest" label="Birt Unit Test"/>
+   <category-def name="wtpIntegration" label="BIRT Web Tools Integration SDK"/>
+   <category-def name="BirtTest" label="BIRT Unit Test"/>
    <category-def name="BirtNL" label="BIRT Language Package"/>
+   <category-def name="BirtRcp" label="BIRT RCP - Do not install in your IDE">
+      <description>
+         Contains the RCP bundle for the Designer product. Do not install in your IDE!
+      </description>
+   </category-def>
+
+   <category-def name="BirtAllInOne" label="BIRT Report Designer All-In-One Product- Do not install in your IDE!">
+      <description>
+         BIRT Report Designer All-In-One Product. Do not install in your IDE!
+      </description>
+   </category-def>
+ 
+   <iu>
+     <category name="BirtAllInOne"/>
+     <query>
+       <expression type="match">id=="org.eclipse.birt.report.designer.all"</expression>
+     </query>
+   </iu>
+
+   <!-- These are plugins and features required as install roots by the org.eclipse.birt.report.designer.all product that are not otherwise in the update site. -->
+
+   <feature id="org.eclipse.datatools.common.doc.user"/>
+   <feature id="org.eclipse.datatools.connectivity.doc.user"/>
+   <feature id="org.eclipse.datatools.enablement.apache.derby.feature"/>
+   <feature id="org.eclipse.datatools.enablement.feature"/>
+   <feature id="org.eclipse.datatools.enablement.hsqldb.feature"/>
+   <feature id="org.eclipse.datatools.enablement.ibm.feature"/>
+   <feature id="org.eclipse.datatools.enablement.ingres.feature"/>
+   <feature id="org.eclipse.datatools.enablement.jdt.feature"/>
+   <feature id="org.eclipse.datatools.enablement.msft.feature"/>
+   <feature id="org.eclipse.datatools.enablement.mysql.feature"/>
+   <feature id="org.eclipse.datatools.enablement.oda.designer.feature"/>
+   <feature id="org.eclipse.datatools.enablement.oracle.feature"/>
+   <feature id="org.eclipse.datatools.enablement.postgresql.feature"/>
+   <feature id="org.eclipse.datatools.enablement.sap.feature"/>
+   <feature id="org.eclipse.datatools.enablement.sqlite.feature"/>
+   <feature id="org.eclipse.datatools.enablement.sybase.feature"/>
+   <feature id="org.eclipse.datatools.intro"/>
+   <feature id="org.eclipse.datatools.sqldevtools.data.feature"/>
+   <feature id="org.eclipse.datatools.sqldevtools.ddl.feature"/>
+   <feature id="org.eclipse.datatools.sqldevtools.ddlgen.feature"/>
+   <feature id="org.eclipse.datatools.sqldevtools.feature"/>
+   <feature id="org.eclipse.datatools.sqldevtools.schemaobjecteditor.feature"/>
+   <feature id="org.eclipse.datatools.sqltools.doc.user"/>
+   <feature id="org.eclipse.e4.rcp"/>
+   <feature id="org.eclipse.equinox.p2.core.feature"/>
+   <feature id="org.eclipse.equinox.p2.extras.feature"/>
+   <feature id="org.eclipse.equinox.p2.rcp.feature"/>
+   <feature id="org.eclipse.equinox.p2.user.ui"/>
+   <feature id="org.eclipse.help"/>
+   <feature id="org.eclipse.platform"/>
+   <feature id="org.eclipse.rcp"/>
+   <feature id="org.eclipse.wst.common_core.feature"/>
+   <feature id="org.eclipse.wst.common_ui.feature"/>
+   <feature id="org.eclipse.wst.xml_core.feature"/>
+   <feature id="org.eclipse.wst.xml_ui.feature"/>
+   <feature id="org.eclipse.wst.xml_userdoc.feature"/>
+   <feature id="org.eclipse.xsd"/>
+   <feature id="org.eclipse.xsd.edit"/>
+
 </site>

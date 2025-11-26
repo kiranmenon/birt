@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,90 +31,465 @@ import org.w3c.dom.css.CSSValue;
 
 /**
  * Provides the interfaces for the ROM style
- * 
+ *
  * the properties must be string as the user may change them in script.
- * 
+ *
  */
 public interface IStyle extends CSSStyleDeclaration, StyleConstants, CSS2Properties, CSSConstants, CSSValueConstants,
 		BIRTConstants, BIRTValueConstants {
 
-	public String getBackgroundPositionX();
+	/**
+	 * Get the background position X
+	 *
+	 * @return Return the background position X
+	 */
+	String getBackgroundPositionX();
 
-	public String getBackgroundPositionY();
+	/**
+	 * Get the background position Y
+	 *
+	 * @return Return the background position Y
+	 */
+	String getBackgroundPositionY();
 
-	public String getTextUnderline();
+	/**
+	 * Get the text underline
+	 *
+	 * @return Return the text underline
+	 */
+	String getTextUnderline();
 
-	public String getTextOverline();
+	/**
+	 * Get the text overline
+	 *
+	 * @return Return the text overline
+	 */
+	String getTextOverline();
 
-	public String getTextLineThrough();
+	/**
+	 * Get the text line through
+	 *
+	 * @return Return the text line through
+	 */
+	String getTextLineThrough();
 
-	public String getMasterPage();
+	/**
+	 * Get the text hyperlink style
+	 *
+	 * @return Return the text hyperlink style
+	 */
+	String getTextHyperlinkStyle();
 
-	public String getShowIfBlank();
+	/**
+	 * Get the master page
+	 *
+	 * @return Return the master page
+	 */
+	String getMasterPage();
 
-	public String getCanShrink();
+	/**
+	 * Get the option show if blank
+	 *
+	 * @return Return the option show if blank
+	 */
+	String getShowIfBlank();
 
-	public String getStringFormat();
+	/**
+	 * Get the option can shrink
+	 *
+	 * @return Return the option can shrink
+	 */
+	String getCanShrink();
 
-	public String getNumberFormat();
+	/**
+	 * Get the string format
+	 *
+	 * @return Return the string format
+	 */
+	String getStringFormat();
 
-	public String getDateFormat();
+	/**
+	 * Get the number format
+	 *
+	 * @return Return the number format
+	 */
+	String getNumberFormat();
 
-	public String getDateTimeFormat();
+	/**
+	 * Get the date format
+	 *
+	 * @return Return the date format
+	 */
+	String getDateFormat();
 
-	public String getTimeFormat();
+	/**
+	 * Get the date time format
+	 *
+	 * @return Return the date time format
+	 */
+	String getDateTimeFormat();
 
-	public String getNumberAlign();
+	/**
+	 * Get the time format
+	 *
+	 * @return Return the time format
+	 */
+	String getTimeFormat();
 
-	public String getVisibleFormat();
+	/**
+	 * Get the number align
+	 *
+	 * @return Return the number align
+	 */
+	String getNumberAlign();
 
-	public void setBackgroundPositionX(String x) throws DOMException;
+	/**
+	 * Get the visible format
+	 *
+	 * @return Return the visible format
+	 */
+	String getVisibleFormat();
 
-	public void setBackgroundPositionY(String y) throws DOMException;
+	/**
+	 * Set the background position X
+	 *
+	 * @param x
+	 * @throws DOMException
+	 */
+	void setBackgroundPositionX(String x) throws DOMException;
 
-	public void setTextUnderline(String underline) throws DOMException;
+	/**
+	 * Set the background position Y
+	 *
+	 * @param y
+	 * @throws DOMException
+	 */
+	void setBackgroundPositionY(String y) throws DOMException;
 
-	public void setTextOverline(String overline) throws DOMException;
+	/**
+	 * Set the text underline
+	 *
+	 * @param underline
+	 * @throws DOMException
+	 */
+	void setTextUnderline(String underline) throws DOMException;
 
-	public void setTextLineThrough(String through) throws DOMException;
+	/**
+	 * Set the text overline
+	 *
+	 * @param overline
+	 * @throws DOMException
+	 */
+	void setTextOverline(String overline) throws DOMException;
 
-	public void setMasterPage(String page) throws DOMException;
+	/**
+	 * Set the text line through
+	 *
+	 * @param through
+	 * @throws DOMException
+	 */
+	void setTextLineThrough(String through) throws DOMException;
 
-	public void setShowIfBlank(String blank) throws DOMException;
+	/**
+	 * Set the text hyperlink style
+	 *
+	 * @param hyperlinkStyle
+	 * @throws DOMException
+	 */
+	void setTextHyperlinkStyle(String hyperlinkStyle) throws DOMException;
 
-	public void setCanShrink(String shrink) throws DOMException;
+	/**
+	 * Set the master page
+	 *
+	 * @param page
+	 * @throws DOMException
+	 */
+	void setMasterPage(String page) throws DOMException;
 
-	public void setStringFormat(String format) throws DOMException;
+	/**
+	 * Set the show if blank
+	 *
+	 * @param blank
+	 * @throws DOMException
+	 */
+	void setShowIfBlank(String blank) throws DOMException;
 
-	public void setNumberFormat(String format) throws DOMException;
+	/**
+	 * Set the option can shrink
+	 *
+	 * @param shrink
+	 * @throws DOMException
+	 */
+	void setCanShrink(String shrink) throws DOMException;
 
-	public void setDateFormat(String format) throws DOMException;
+	/**
+	 * Set the string format
+	 *
+	 * @param format
+	 * @throws DOMException
+	 */
+	void setStringFormat(String format) throws DOMException;
 
-	public void setNumberAlign(String align) throws DOMException;
+	/**
+	 * Set the number format
+	 *
+	 * @param format
+	 * @throws DOMException
+	 */
+	void setNumberFormat(String format) throws DOMException;
 
-	public void setVisibleFormat(String visibility) throws DOMException;
+	/**
+	 * Set the date format
+	 *
+	 * @param format
+	 * @throws DOMException
+	 */
+	void setDateFormat(String format) throws DOMException;
 
-	public CSSValue getProperty(int index);
+	/**
+	 * Set the number align
+	 *
+	 * @param align
+	 * @throws DOMException
+	 */
+	void setNumberAlign(String align) throws DOMException;
 
-	public void setProperty(int index, CSSValue value);
+	/**
+	 * Set visible format
+	 *
+	 * @param visibility
+	 * @throws DOMException
+	 */
+	void setVisibleFormat(String visibility) throws DOMException;
 
-	public void setProperties(IStyle style);
+	/**
+	 * Get the property value
+	 *
+	 * @param index
+	 * @return Return the property value
+	 */
+	CSSValue getProperty(int index);
 
-	public String getCssText(int index);
+	/**
+	 * Set the property value
+	 *
+	 * @param index
+	 * @param value
+	 */
+	void setProperty(int index, CSSValue value);
 
-	public void setCssText(int index, String value) throws DOMException;
+	/**
+	 * Set the properties style based
+	 *
+	 * @param style
+	 */
+	void setProperties(IStyle style);
 
+	/**
+	 * Get the CSS text
+	 *
+	 * @param index
+	 * @return Return the CSS text
+	 */
+	String getCssText(int index);
+
+	/**
+	 * Set the CSS text
+	 *
+	 * @param index
+	 * @param value
+	 * @throws DOMException
+	 */
+	void setCssText(int index, String value) throws DOMException;
+
+	/**
+	 * Is empty
+	 *
+	 * @return true, is empty
+	 */
 	boolean isEmpty();
 
+	/**
+	 * Write the report ROM stream
+	 *
+	 * @param out
+	 * @throws IOException
+	 */
 	void write(DataOutputStream out) throws IOException;
 
+	/**
+	 * Read the report ROM stream
+	 *
+	 * @param in
+	 * @throws IOException
+	 */
 	void read(DataInputStream in) throws IOException;
 
-	public String getBackgroundHeight();
+	/**
+	 * Get the background image height
+	 *
+	 * @return Return the background image height
+	 */
+	String getBackgroundHeight();
 
-	public String getBackgroundWidth();
+	/**
+	 * Get the background image width
+	 *
+	 * @return Return the background image width
+	 */
+	String getBackgroundWidth();
 
-	public DataFormatValue getDataFormat();
+	/**
+	 * Get the date format
+	 *
+	 * @return Return the date format
+	 */
+	DataFormatValue getDataFormat();
 
-	public void setDataFormat(DataFormatValue value);
+	/**
+	 * Set the date format
+	 *
+	 * @param value
+	 */
+	void setDataFormat(DataFormatValue value);
+
+	/**
+	 * Get the background image source type
+	 *
+	 * @return Return the background image source type
+	 */
+	String getBackgroundImageType();
+
+	/**
+	 * Set the image background type
+	 *
+	 * @param imageType
+	 */
+	void setBackgroundImageType(String imageType);
+
+	/**
+	 * Set the image background height
+	 *
+	 * @param height background image height
+	 */
+	void setBackgroundHeight(String height);
+
+	/**
+	 * Set the image background width
+	 *
+	 * @param width background image width
+	 */
+	void setBackgroundWidth(String width);
+
+  /**
+	 * Get the diagonal line number
+	 *
+	 * @return Return the diagonal line number
+	 */
+	int getDiagonalNumber();
+
+	/**
+	 * Set the diagonal line number
+	 *
+	 * @param number
+	 */
+	void setDiagonalNumber(Integer number);
+
+	/**
+	 * Get the diagonal style
+	 *
+	 * @return Return the diagonal style
+	 */
+	String getDiagonalStyle();
+
+	/**
+	 * Set the diagonal style
+	 *
+	 * @param style
+	 */
+	void setDiagonalStyle(String style);
+
+	/**
+	 * Get the diagonal width
+	 *
+	 * @return Return the diagonal width
+	 */
+	String getDiagonalWidth();
+
+	/**
+	 * Set the diagonal width
+	 *
+	 * @param width
+	 */
+	void setDiagonalWidth(String width);
+
+	/**
+	 * Get the diagonal color
+	 *
+	 * @return Return the diagonal color
+	 */
+	String getDiagonalColor();
+
+	/**
+	 * Set the diagonal color
+	 *
+	 * @param color
+	 */
+	void setDiagonalColor(String color);
+
+	/**
+	 * Get the antidiagonal line number
+	 *
+	 * @return Return the antidiagonal line number
+	 */
+	int getAntidiagonalNumber();
+
+	/**
+	 * Set the antidiagonal line number
+	 *
+	 * @param number
+	 */
+	void setAntidiagonalNumber(Integer number);
+
+	/**
+	 * Get the antidiagonal style
+	 *
+	 * @return Return the antidiagonal style
+	 */
+	String getAntidiagonalStyle();
+
+	/**
+	 * Set the antidiagonal style
+	 *
+	 * @param style
+	 */
+	void setAntidiagonalStyle(String style);
+
+	/**
+	 * Get the antidiagonal width
+	 *
+	 * @return Return the diagonal width
+	 */
+	String getAntidiagonalWidth();
+
+	/**
+	 * Set the antidiagonal width
+	 *
+	 * @param width
+	 */
+	void setAntidiagonalWidth(String width);
+
+	/**
+	 * Get the antidiagonal color
+	 *
+	 * @return Return the diagonal color
+	 */
+	String getAntidiagonalColor();
+
+	/**
+	 * Set the antidiagonal color
+	 *
+	 * @param color
+	 */
+	void setAntidiagonalColor(String color);
 }

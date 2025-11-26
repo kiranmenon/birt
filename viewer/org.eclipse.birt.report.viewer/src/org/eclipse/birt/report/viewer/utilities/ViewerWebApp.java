@@ -1,69 +1,114 @@
 /*******************************************************************************
  * Copyright (c) 2013 Actuate Corporation.
- * All rights reserved.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *******************************************************************************/
 package org.eclipse.birt.report.viewer.utilities;
 
-import java.io.IOException;
+import java.io.File;
+import java.net.URI;
 import java.net.URL;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.nio.file.Files;
 
+import javax.servlet.ServletContext;
+
+import org.apache.tomcat.InstanceManager;
+import org.apache.tomcat.SimpleInstanceManager;
+import org.eclipse.birt.report.IBirtConstants;
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.jetty.osgi.boot.OSGiServerConstants;
-import org.eclipse.jetty.osgi.boot.OSGiWebappConstants;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.core.runtime.URIUtil;
+import org.eclipse.jetty.ee8.webapp.WebAppClassLoader;
+import org.eclipse.jetty.ee8.webapp.WebAppContext;
+import org.eclipse.jetty.ee8.webapp.WebXmlConfiguration;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceRegistration;
 
 /**
- * 
+ *
  */
 
 public class ViewerWebApp {
-
-	private ServiceRegistration<ContextHandler> serviceRegister;
 	private Bundle bundle;
 	private String webAppPath;
 	private String contextPath;
 	private String encoding;
+	private Server server;
+	private WebAppContext webAppContext;
 
-	ViewerWebApp(Bundle bundle, String webAppPath, String contextPath, String encoding) {
+	ViewerWebApp(Server server, Bundle bundle, String webAppPath, String contextPath, String encoding) {
+		this.server = server;
 		this.bundle = bundle;
 		this.webAppPath = webAppPath;
 		this.contextPath = contextPath;
 		this.encoding = encoding;
 	}
 
-	public void start() throws IOException {
-		WebAppContext webapp = new WebAppContext();
-		Dictionary<String, Object> props = new Hashtable<String, Object>();
-		props.put(OSGiWebappConstants.RFC66_WEB_CONTEXTPATH, contextPath);
-		props.put(OSGiWebappConstants.JETTY_WAR_FOLDER_PATH, getWebAppPath(bundle, webAppPath));
-		props.put(OSGiServerConstants.MANAGED_JETTY_SERVER_NAME, ViewerWebServer.VIEWER_WEB_SERVER_ID);
+	public void start() throws Exception {
+		this.webAppContext = new WebAppContext();
+		this.webAppContext.setContextPath(this.contextPath);
+		WebXmlConfiguration servletsConfiguration = new WebXmlConfiguration();
+
+		this.webAppContext.addConfiguration(servletsConfiguration);
+
+		this.webAppContext.setAttribute(InstanceManager.class.getName(), new SimpleInstanceManager());
+
+		URL webAppUrl = bundle.getEntry(webAppPath);
+		URL webDescriptorUrl = bundle.getEntry(webAppPath + "/WEB-INF/web-viewer.xml");
+		if (webAppUrl != null && webDescriptorUrl != null) {
+			URI resolvedWebAppUrl = URIUtil.toURI(FileLocator.resolve(webAppUrl)).normalize();
+			URI resolvedWebDescriptorUrl = URIUtil.toURI(FileLocator.resolve(webDescriptorUrl)).normalize();
+			this.webAppContext.setBaseResourceAsString(resolvedWebAppUrl.toString());
+			this.webAppContext.setDescriptor(resolvedWebDescriptorUrl.toString());
+			String workingPath = System.getProperty(IBirtConstants.SYS_PROP_WORKING_PATH);
+			File scratchDir;
+			if (workingPath == null) {
+				scratchDir = Files.createTempDirectory("birt-web-viewer-").toFile();
+				scratchDir.deleteOnExit();
+			} else {
+				scratchDir = new File(workingPath);
+			}
+			this.webAppContext.setAttribute(ServletContext.TEMPDIR, scratchDir);
+		}
+
 		if (encoding != null) {
 			// Jetty need those property to change the request encoding
 			// the setting may changed with different jetty version
-			System.setProperty("org.eclipse.jetty.util.UrlEncoding.charset", encoding);
-			System.setProperty("org.eclipse.jetty.util.URI.charset", encoding);
+			System.setProperty("org.eclipse.jetty.util.UrlEncoding.charset", encoding); //$NON-NLS-1$
+			System.setProperty("org.eclipse.jetty.util.URI.charset", encoding); //$NON-NLS-1$
 		}
-		bundle.getBundleContext().registerService(ContextHandler.class, webapp, props);
+		Handler handler = this.server.getHandler();
+		if (handler instanceof ContextHandlerCollection) {
+			ContextHandlerCollection contextHandlerCollection = (ContextHandlerCollection) handler;
+			contextHandlerCollection.addHandler(this.webAppContext);
+		}
+
+		this.webAppContext.setClassLoader(ViewerWebServer.class.getClassLoader());
+
+		WebAppClassLoader.runWithServerClassAccess(() -> {
+			this.webAppContext.start();
+			return null;
+		});
+
 	}
 
-	public void stop() {
-		if (serviceRegister != null) {
-			serviceRegister.unregister();
-			serviceRegister = null;
-		}
-	}
+	public void stop() throws Exception {
+		if (this.webAppContext != null) {
+			this.webAppContext.stop();
 
-	private String getWebAppPath(Bundle bundle, String path) throws IOException {
-		URL url = bundle.getEntry(path);
-		if (url != null) {
-			URL fileUrl = FileLocator.toFileURL(url);
-			return fileUrl.getFile();
+			Handler handler = this.server.getHandler();
+			if (handler instanceof ContextHandlerCollection) {
+				ContextHandlerCollection contextHandlerCollection = (ContextHandlerCollection) handler;
+				contextHandlerCollection.removeHandler(this.webAppContext.get());
+			}
+
+			this.webAppContext = null;
 		}
-		return path;
 	}
 }

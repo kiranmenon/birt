@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,8 +16,8 @@ package org.eclipse.birt.report.designer.internal.ui.views.attributes.page;
 
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.provider.UnitPropertyDescriptorProvider;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.ComplexUnitSection;
-import org.eclipse.birt.report.model.api.StyleHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
+import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -22,12 +25,13 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class CellPaddingPage extends ResetAttributePage {
 
+	@Override
 	public void buildUI(Composite parent) {
 		super.buildUI(parent);
-		container.setLayout(WidgetUtil.createGridLayout(5, 15));
+		container.setLayout(org.eclipse.birt.report.designer.internal.ui.util.WidgetUtil.createGridLayout(5, 15));
 
-		String[] padProperties = { StyleHandle.PADDING_TOP_PROP, StyleHandle.PADDING_BOTTOM_PROP,
-				StyleHandle.PADDING_LEFT_PROP, StyleHandle.PADDING_RIGHT_PROP };
+		String[] padProperties = { IStyleModel.PADDING_TOP_PROP, IStyleModel.PADDING_BOTTOM_PROP,
+				IStyleModel.PADDING_LEFT_PROP, IStyleModel.PADDING_RIGHT_PROP };
 
 		String[] sectionKeys = { PageSectionId.CELLPADDING_TOP, // $NON-NLS-1$
 				PageSectionId.CELLPADDING_BOTTOM, // $NON-NLS-1$

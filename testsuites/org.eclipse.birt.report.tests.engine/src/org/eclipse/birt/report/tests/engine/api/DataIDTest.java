@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.tests.engine.api;
 
@@ -25,17 +37,20 @@ public class DataIDTest extends EngineCase {
 
 	/**
 	 * Test DataID methods with input report design
-	 * 
+	 *
 	 * @throws EngineException
 	 * @throws IOException
 	 */
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		removeResource();
 		copyResource_INPUT(INPUT, INPUT);
 	}
 
-	public void tearDown() {
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
 		removeResource();
 	}
 
@@ -62,7 +77,7 @@ public class DataIDTest extends EngineCase {
 		Matcher matcher = typePattern.matcher(content);
 		String strIid = null;
 		while (matcher.find()) {
-			String tmp_type = null;
+			String tmp_type;
 			tmp_type = matcher.group(0);
 			strIid = tmp_type.substring(tmp_type.indexOf("iid"));
 			strIid = strIid.substring(5, strIid.indexOf("\"", 6));
@@ -71,7 +86,7 @@ public class DataIDTest extends EngineCase {
 		typePattern = DataExtractionTaskTest.buildPattern("LIST");
 		matcher = typePattern.matcher(content);
 		while (matcher.find()) {
-			String tmp_type = null;
+			String tmp_type;
 			tmp_type = matcher.group(0);
 			strIid = tmp_type.substring(tmp_type.indexOf("iid"));
 			strIid = strIid.substring(5, strIid.indexOf("\"", 6));

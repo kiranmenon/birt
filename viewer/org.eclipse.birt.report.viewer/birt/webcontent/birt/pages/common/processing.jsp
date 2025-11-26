@@ -1,9 +1,9 @@
 <%-----------------------------------------------------------------------------
-	Copyright (c) 2004 Actuate Corporation and others.
+	Copyright (c) 2004, 2025 Actuate Corporation and others.
 	All rights reserved. This program and the accompanying materials 
-	are made available under the terms of the Eclipse Public License v1.0
+	are made available under the terms of the Eclipse Public License v2.0
 	which accompanies this distribution, and is available at
-	http://www.eclipse.org/legal/epl-v10.html
+	http://www.eclipse.org/legal/epl-2.0.html
 	
 	Contributors:
 		Actuate Corporation - Initial implementation.
@@ -23,13 +23,13 @@
 		rtl = Boolean.getBoolean(rtlParam);
 	}
 %>
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html>
 <HTML>
 	<HEAD>
 		<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 		<LINK REL="stylesheet" HREF="<%= request.getContextPath( ) + "/webcontent/birt/styles/style.css" %>" TYPE="text/css">
 	</HEAD>
-	<BODY STYLE="background-color: #ECE9D8;">
+	<BODY">
 		<DIV ID="progressBar" ALIGN="center">
 			<TABLE WIDTH="250px" CLASS="birtviewer_progresspage" CELLSPACING="10px">
 				<TR>

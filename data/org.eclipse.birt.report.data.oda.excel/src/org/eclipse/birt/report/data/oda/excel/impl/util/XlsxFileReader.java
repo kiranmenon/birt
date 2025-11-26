@@ -1,9 +1,9 @@
 /*******************************************************************************
   * Copyright (c) 2012 Megha Nidhi Dahal and others.
   * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
+  * are made available under the terms of the Eclipse Public License v2.0
   * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
+  * http://www.eclipse.org/legal/epl-2.0.html
   *
   * Contributors:
   *    Megha Nidhi Dahal - initial API and implementation and/or initial documentation
@@ -21,15 +21,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.util.XMLHelper;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
-import org.apache.poi.xssf.model.SharedStringsTable;
+import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.eclipse.birt.report.data.oda.excel.ExcelODAConstants;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -37,12 +39,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.ibm.icu.text.SimpleDateFormat;
 
 public class XlsxFileReader {
-	final static String PARSER_CLASS_NAME = "org.apache.xerces.parsers.SAXParser"; //$NON-NLS-1$
 	final static String ROW_LIMIT_REACHED_EX_MSG = "Row Limit Reached"; //$NON-NLS-1$
 
 	final private XSSFReader reader;
@@ -58,48 +58,42 @@ public class XlsxFileReader {
 
 	public LinkedHashMap<String, String> getSheetNames() throws InvalidFormatException, IOException, SAXException {
 		BufferedInputStream wbData = new BufferedInputStream(reader.getWorkbookData());
-		LinkedHashMap<String, String> sheetMap = new LinkedHashMap<String, String>();
+		LinkedHashMap<String, String> sheetMap = new LinkedHashMap<>();
 		try {
 			InputSource wbSource = new InputSource(wbData);
 			XMLReader parser = fetchWorkbookParser(sheetMap);
 			parser.parse(wbSource);
 		} finally {
-			if (wbData != null)
+			if (wbData != null) {
 				wbData.close();
+			}
 		}
 		return sheetMap;
 	}
 
 	public void processSheet(String rid, XlsxRowCallBack callback, int xlsxRowsToRead)
 			throws InvalidFormatException, IOException, SAXException {
-		SharedStringsTable sst = reader.getSharedStringsTable();
+		SharedStrings sst = reader.getSharedStringsTable();
 		StylesTable st = reader.getStylesTable();
 
 		XMLReader parser = fetchSheetParser(st, sst, callback, xlsxRowsToRead);
 		BufferedInputStream sheet = new BufferedInputStream(reader.getSheet(rid));
-		try {
+		try (sheet) {
 			InputSource sheetSource = new InputSource(sheet);
 			parser.parse(sheetSource);
-		} finally {
-			if (sheet != null)
-				sheet.close();
 		}
 	}
 
 	private XMLReader getXMLReader() throws SAXException {
 		try {
-			return XMLReaderFactory.createXMLReader();
-		} catch (SAXException e) {
-			try {
-				return (XMLReader) Class.forName(PARSER_CLASS_NAME).newInstance();
-			} catch (Exception e1) {
-				throw e;
-			}
+			return XMLHelper.newXMLReader();
+		} catch (ParserConfigurationException e) {
+			throw new SAXException(e);
 		}
 	}
 
-	private XMLReader fetchSheetParser(StylesTable st, SharedStringsTable sst, XlsxRowCallBack callback,
-			int xlsxRowsToRead) throws SAXException {
+	private XMLReader fetchSheetParser(StylesTable st, SharedStrings sst, XlsxRowCallBack callback, int xlsxRowsToRead)
+			throws SAXException {
 		XMLReader parser = getXMLReader();
 		ContentHandler handler = new SheetHandler(st, sst, callback, xlsxRowsToRead);
 		parser.setContentHandler(handler);
@@ -121,7 +115,7 @@ public class XlsxFileReader {
 
 		private cDataType cellDataType;
 		private int columnCount = 1;
-		final private SharedStringsTable sst;
+		final private SharedStrings sst;
 		final private StylesTable st;
 		final private XlsxRowCallBack callback;
 		private String lastContents;
@@ -131,46 +125,49 @@ public class XlsxFileReader {
 		private int currentXlsxRowNumber = 0;
 		private SimpleDateFormat sdf;
 
-		private SheetHandler(StylesTable st, SharedStringsTable sst, XlsxRowCallBack callback, int xlsxRowsToRead) {
+		private SheetHandler(StylesTable st, SharedStrings sst, XlsxRowCallBack callback, int xlsxRowsToRead) {
 			this.sst = sst;
 			this.st = st;
 			this.callback = callback;
-			values = new ArrayList<Object>();
+			values = new ArrayList<>();
 			this.cellDataType = cDataType.NUMBER;
 			this.xlsxRowsToRead = xlsxRowsToRead;
 			sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");// ISO date format
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 			if (qName.equals("c")) {
 				String vCellType = attributes.getValue("t");
 				String cellS = attributes.getValue("s");
-				if ("b".equals(vCellType))
+				if ("b".equals(vCellType)) {
 					cellDataType = cDataType.BOOL;
-				else if ("e".equals(vCellType))
+				} else if ("e".equals(vCellType)) {
 					cellDataType = cDataType.FORMULA;
-				else if ("s".equals(vCellType))
+				} else if ("s".equals(vCellType)) {
 					cellDataType = cDataType.SSTINDEX;
-				else if ("str".equals(vCellType))
+				} else if ("str".equals(vCellType)) {
 					cellDataType = cDataType.STATIC;
-				else if (cellS != null) {
+				} else if (cellS != null) {
 					// number with formatting or date
 					int styleIndex = Integer.parseInt(cellS);
 					XSSFCellStyle style = st.getStyleAt(styleIndex);
 					short formatIndex = style.getDataFormat();
 					String formatString = style.getDataFormatString();
 
-					if (formatString == null)
+					if (formatString == null) {
 						formatString = BuiltinFormats.getBuiltinFormat(formatIndex);
+					}
 
 					if (org.apache.poi.ss.usermodel.DateUtil.isADateFormat(formatIndex, formatString)) {
 						cellDataType = cDataType.DATETIME;
 					} else {
 						cellDataType = cDataType.NUMBER;
 					}
-				} else
+				} else {
 					cellDataType = cDataType.NUMBER;
+				}
 
 				String r = attributes.getValue("r");
 
@@ -200,6 +197,7 @@ public class XlsxFileReader {
 			lastContents = ExcelODAConstants.EMPTY_STRING;
 		}
 
+		@Override
 		public void endElement(String uri, String localName, String name) throws SAXException {
 			if (name.equals("row")) {
 				callback.handleRow(values);
@@ -211,10 +209,8 @@ public class XlsxFileReader {
 						throw new SAXException(ROW_LIMIT_REACHED_EX_MSG);
 					}
 				}
-				return;
 			} else if (name.equals("c")) {
 				cellDataType = cDataType.NUMBER;
-				return;
 			} else if (name.equals("v")) {
 
 				String val = ExcelODAConstants.EMPTY_STRING;
@@ -224,7 +220,7 @@ public class XlsxFileReader {
 				if (cellDataType == cDataType.SSTINDEX) {
 					int idx;
 					idx = Integer.parseInt(lastContents);
-					val = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
+					val = sst.getItemAt(idx).toString();
 				} else if (cellDataType == cDataType.STATIC || cellDataType == cDataType.NUMBER) {
 					val = lastContents;
 				} else if (cellDataType == cDataType.DATETIME || cellDataType == cDataType.DATE
@@ -235,11 +231,11 @@ public class XlsxFileReader {
 					val = sdf.format(myjavadate);
 				} else if (cellDataType == cDataType.BOOL) {
 					if (lastContents.compareTo("1") == 0) {
-						Boolean mybool = new Boolean(true);
-						val = mybool.toString();
+						boolean mybool = true;
+						val = Boolean.toString(mybool);
 					} else if (lastContents.compareTo("0") == 0) {
-						Boolean mybool = new Boolean(false);
-						val = mybool.toString();
+						boolean mybool = false;
+						val = Boolean.toString(mybool);
 					}
 				}
 
@@ -253,6 +249,7 @@ public class XlsxFileReader {
 			}
 		}
 
+		@Override
 		public void characters(char[] ch, int start, int length) throws SAXException {
 			lastContents += new String(ch, start, length);
 		}
@@ -287,6 +284,7 @@ public class XlsxFileReader {
 			this.sheetMap = sheetMap;
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes)
 				throws SAXException {
 			// <sheet r:id="rId1" name="Sheet1" />

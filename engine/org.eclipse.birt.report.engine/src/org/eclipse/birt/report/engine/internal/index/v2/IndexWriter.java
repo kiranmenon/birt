@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -46,7 +49,7 @@ public class IndexWriter implements IndexConstants {
 	void add(String key, long value) throws IOException {
 		if (inlineMap == null) {
 			type = BTreeMap.LONG_VALUE;
-			inlineMap = new HashMap<String, Object>();
+			inlineMap = new HashMap<>();
 		}
 		if (inlineMap.size() >= MAX_INLINE_INDEX_ENTRY) {
 			flushBtree();
@@ -61,7 +64,7 @@ public class IndexWriter implements IndexConstants {
 	void add(String bookmark, BookmarkContent info) throws IOException {
 		if (inlineMap == null) {
 			type = BTreeMap.BOOKMARK_VALUE;
-			inlineMap = new HashMap<String, Object>();
+			inlineMap = new HashMap<>();
 		}
 		if (inlineMap.size() >= MAX_INLINE_INDEX_ENTRY) {
 			flushBtree();
@@ -76,7 +79,7 @@ public class IndexWriter implements IndexConstants {
 	void close() throws IOException {
 		if (btree == null) {
 			RAOutputStream stream = archive.createOutputStream(name);
-			try {
+			try (stream) {
 				DataOutputStream output = new DataOutputStream(stream);
 				if (type == BTreeMap.LONG_VALUE) {
 					IOUtil.writeInt(output, VERSION_0);
@@ -96,8 +99,6 @@ public class IndexWriter implements IndexConstants {
 					}
 				}
 				inlineMap.clear();
-			} finally {
-				stream.close();
 			}
 		}
 		if (btree != null) {
@@ -110,13 +111,8 @@ public class IndexWriter implements IndexConstants {
 		if (btree == null) {
 			btree = BTreeMap.createTreeMap(archive, name, type);
 		}
-		ArrayList<Map.Entry<String, Object>> entries = new ArrayList<Map.Entry<String, Object>>(inlineMap.entrySet());
-		Collections.sort(entries, new Comparator<Map.Entry<String, Object>>() {
-
-			public int compare(Entry<String, Object> o1, Entry<String, Object> o2) {
-				return o1.getKey().compareTo(o2.getKey());
-			}
-		});
+		ArrayList<Map.Entry<String, Object>> entries = new ArrayList<>(inlineMap.entrySet());
+		Collections.sort(entries, Comparator.comparing(Entry::getKey));
 
 		for (Map.Entry<String, Object> entry : entries) {
 			btree.insert(entry.getKey(), entry.getValue());

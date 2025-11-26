@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -27,10 +30,10 @@ import org.eclipse.birt.report.engine.layout.area.IImageArea;
 import org.eclipse.birt.report.engine.layout.pdf.font.FontInfo;
 
 /**
- * 
+ *
  * area factory. create area object by content or area FIXME support
  * backgroud-image offset
- * 
+ *
  */
 public class AreaFactory {
 
@@ -53,6 +56,7 @@ public class AreaFactory {
 	 * @param fi
 	 * @return
 	 */
+	@Deprecated
 	public static IArea createTextArea(ITextContent content, String text, FontInfo fi) {
 		return new TextArea(content, text, fi);
 	}
@@ -73,7 +77,7 @@ public class AreaFactory {
 
 	/**
 	 * create block container area by content
-	 * 
+	 *
 	 * @param content
 	 * @return
 	 */
@@ -83,7 +87,7 @@ public class AreaFactory {
 
 	/**
 	 * create lobic container area by content
-	 * 
+	 *
 	 * @param content
 	 * @return
 	 */
@@ -93,7 +97,7 @@ public class AreaFactory {
 
 	/**
 	 * create cell area by cell content
-	 * 
+	 *
 	 * @param cell
 	 * @return
 	 */
@@ -103,7 +107,7 @@ public class AreaFactory {
 
 	/**
 	 * create page area by page content
-	 * 
+	 *
 	 * @param pageContent
 	 * @return
 	 */
@@ -113,7 +117,7 @@ public class AreaFactory {
 
 	/**
 	 * create table area by table content
-	 * 
+	 *
 	 * @param table
 	 * @return
 	 */
@@ -123,7 +127,7 @@ public class AreaFactory {
 
 	/**
 	 * create row area by row content
-	 * 
+	 *
 	 * @param row
 	 * @return
 	 */
@@ -141,7 +145,7 @@ public class AreaFactory {
 
 	/**
 	 * create inline container area by content
-	 * 
+	 *
 	 * @param content the content object
 	 * @param isFirst if this area is the first area of the content
 	 * @param isLast  if this area is the last area of the content

@@ -3,10 +3,13 @@ package org.eclipse.birt.report.engine.layout.pdf;
 
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -44,6 +47,7 @@ public class PDFTextBlockContainerLM extends PDFBlockContainerLM implements IBlo
 		orphans = getOrphans();
 	}
 
+	@Override
 	protected boolean traverseChildren() throws BirtException {
 		// To support widows/orphans, we need cache all lines.
 		if (!finished) {
@@ -78,10 +82,12 @@ public class PDFTextBlockContainerLM extends PDFBlockContainerLM implements IBlo
 		return false;
 	}
 
+	@Override
 	protected void closeExecutor() {
 
 	}
 
+	@Override
 	public boolean addArea(IArea area, boolean keepWithPrevious, boolean keepWithNext) {
 		lines.add(area);
 		size++;
@@ -127,12 +133,10 @@ public class PDFTextBlockContainerLM extends PDFBlockContainerLM implements IBlo
 				} else {
 					return getAreas(widows, size - orphans, heightHint, maxHeight);
 				}
+			} else if (size <= orphans) {
+				return getAreas(orphans, orphans, heightHint, maxHeight);
 			} else {
-				if (size <= orphans) {
-					return getAreas(orphans, orphans, heightHint, maxHeight);
-				} else {
-					return getAreas(1, size - orphans, heightHint, maxHeight);
-				}
+				return getAreas(1, size - orphans, heightHint, maxHeight);
 			}
 
 		}

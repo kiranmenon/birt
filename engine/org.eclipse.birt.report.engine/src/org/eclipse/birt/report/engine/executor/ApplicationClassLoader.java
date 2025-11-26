@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c)2008, 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -12,8 +15,6 @@
 package org.eclipse.birt.report.engine.executor;
 
 import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,7 +30,7 @@ import org.eclipse.birt.report.model.api.ScriptLibHandle;
 
 /**
  * The application class loader.
- * 
+ *
  * The class loader first try to the load the class as following sequence:
  * <li>1. standard java class loader,
  * <li>2. classloader setted through the appContext.
@@ -109,7 +110,7 @@ public class ApplicationClassLoader extends ClassLoader {
 
 	/**
 	 * create the class loader used by the design.
-	 * 
+	 *
 	 * the method should be synchronized as the class loader of a document may be
 	 * used by multiple tasks.
 	 */
@@ -117,7 +118,7 @@ public class ApplicationClassLoader extends ClassLoader {
 		if (designClassLoader != null) {
 			return;
 		}
-		ArrayList<URL> urls = new ArrayList<URL>();
+		ArrayList<URL> urls = new ArrayList<>();
 		if (runnable != null) {
 			ModuleHandle module = (ModuleHandle) runnable.getDesignHandle();
 			Iterator iter = module.scriptLibsIterator();
@@ -137,21 +138,9 @@ public class ApplicationClassLoader extends ClassLoader {
 		}
 		final URL[] jarUrls = urls.toArray(new URL[] {});
 		if (engine != null) {
-			designClassLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-
-				@Override
-				public URLClassLoader run() {
-					return new URLClassLoader(jarUrls, engine.getEngineClassLoader());
-				}
-			});
+			designClassLoader = new URLClassLoader(jarUrls, engine.getEngineClassLoader());
 		} else {
-			designClassLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
-
-				@Override
-				public URLClassLoader run() {
-					return new URLClassLoader(jarUrls);
-				}
-			});
+			designClassLoader = new URLClassLoader(jarUrls);
 		}
 	}
 }

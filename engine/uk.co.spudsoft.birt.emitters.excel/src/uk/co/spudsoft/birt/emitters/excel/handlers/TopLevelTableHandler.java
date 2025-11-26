@@ -1,12 +1,14 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -40,7 +42,7 @@ public class TopLevelTableHandler extends AbstractRealTableHandler {
 	public void startTable(HandlerState state, ITableContent table) throws BirtException {
 		state.colNum = 0;
 		super.startTable(state, table);
-		String name = table.getName();
+		String name = state.correctSheetName(table.getName());
 		if ((name != null) && !name.isEmpty()) {
 			state.sheetName = name;
 		}
@@ -62,10 +64,18 @@ public class TopLevelTableHandler extends AbstractRealTableHandler {
 		boolean autoFilter = EmitterServices.booleanOption(state.getRenderOptions(), table, ExcelEmitter.AUTO_FILTER,
 				false);
 		if (autoFilter) {
-			log.debug("Applying auto filter to [", this.startRow, ",", this.startCol, "] - [", this.endDetailsRow, ",",
-					state.colNum - 1, "]");
-			CellRangeAddress wholeTable = new CellRangeAddress(startRow, endDetailsRow, startCol, state.colNum - 1);
-			state.currentSheet.setAutoFilter(wholeTable);
+
+			int autoEndRow = endDetailsRow;
+			int autoEndCol = (state.colNum - 1);
+			if (autoEndRow < this.startRow)
+				autoEndRow = this.startRow;
+			if (autoEndCol < this.startCol)
+				autoEndCol = this.startCol;
+
+			log.debug("Applying auto filter to [", this.startRow, ",", this.startCol, "] - [", autoEndRow, ",",
+					autoEndCol, "]");
+			CellRangeAddress wholeTable = new CellRangeAddress(startRow, autoEndRow, startCol, autoEndCol);
+				state.currentSheet.setAutoFilter(wholeTable);
 		}
 
 		boolean blankRowAfterTopLevelTable = EmitterServices.booleanOption(state.getRenderOptions(), table,
@@ -87,7 +97,7 @@ public class TopLevelTableHandler extends AbstractRealTableHandler {
 	public void startTableGroup(HandlerState state, ITableGroupContent group) throws BirtException {
 		log.debug("startTableGroup @" + state.rowNum + " called " + group.getBookmark());
 		if (groupStarts == null) {
-			groupStarts = new Stack<Integer>();
+			groupStarts = new Stack<>();
 		}
 		groupStarts.push(state.rowNum);
 
@@ -101,7 +111,7 @@ public class TopLevelTableHandler extends AbstractRealTableHandler {
 					|| DesignChoiceConstants.PAGE_BREAK_AFTER_ALWAYS_EXCLUDING_LAST
 							.equals(groupDesign.getPageBreakAfter())) {
 				if (group.getTOC() != null) {
-					state.sheetName = group.getTOC().toString();
+					state.sheetName = state.correctSheetName(group.getTOC().toString());
 				}
 			}
 		}

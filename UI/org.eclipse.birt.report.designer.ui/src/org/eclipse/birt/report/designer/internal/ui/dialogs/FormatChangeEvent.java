@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -42,12 +45,13 @@ public class FormatChangeEvent extends EventObject {
 
 	/**
 	 * Creates a new format change event.
-	 * 
+	 *
 	 * @param source      the object whose format has changed
 	 * @param name        the format that has changed (must not be
 	 *                    <code>null</code>)
 	 * @param newCategory the new category of the format
 	 * @param newPattern  the new pattern of the format
+	 * @param newLocale
 	 */
 	public FormatChangeEvent(Object source, String name, String newCategory, String newPattern, String newLocale) {
 		super(source);
@@ -58,13 +62,18 @@ public class FormatChangeEvent extends EventObject {
 		this.locale = newLocale;
 	}
 
+	/**
+	 * Get the locale
+	 *
+	 * @return Return the locale
+	 */
 	public String getLocale() {
 		return locale;
 	}
 
 	/**
 	 * Returns the format name.
-	 * 
+	 *
 	 * @return Returns the formatName.
 	 */
 	public String getName() {
@@ -73,7 +82,7 @@ public class FormatChangeEvent extends EventObject {
 
 	/**
 	 * Returns the format category.
-	 * 
+	 *
 	 * @return Returns the category.
 	 */
 	public String getCategory() {
@@ -82,7 +91,7 @@ public class FormatChangeEvent extends EventObject {
 
 	/**
 	 * Returns the format pattern.
-	 * 
+	 *
 	 * @return Returns the pattern.
 	 */
 	public String getPattern() {

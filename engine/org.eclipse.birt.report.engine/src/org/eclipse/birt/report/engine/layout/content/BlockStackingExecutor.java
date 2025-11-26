@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 package org.eclipse.birt.report.engine.layout.content;
 
 import org.eclipse.birt.core.exception.BirtException;
@@ -19,14 +31,17 @@ public class BlockStackingExecutor extends ReportItemExecutorBase {
 		this.executor = executor;
 	}
 
+	@Override
 	public void close() throws BirtException {
 		executor.close();
 	}
 
+	@Override
 	public IContent execute() {
 		return content;
 	}
 
+	@Override
 	public IReportItemExecutor getNextChild() throws BirtException {
 		IReportItemExecutor ret = null;
 		if (childContent != null) {
@@ -50,6 +65,7 @@ public class BlockStackingExecutor extends ReportItemExecutorBase {
 		return ret;
 	}
 
+	@Override
 	public boolean hasNextChild() throws BirtException {
 		if (needUpdate) {
 			if (childContent != null) {

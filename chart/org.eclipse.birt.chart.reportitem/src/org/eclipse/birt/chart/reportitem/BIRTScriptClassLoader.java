@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,8 +18,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,20 +48,27 @@ public class BIRTScriptClassLoader extends ScriptClassLoaderAdapter {
 
 	private ClassLoader classLoader;
 
+	/**
+	 * Constructor
+	 *
+	 * @param classLoader
+	 */
 	public BIRTScriptClassLoader(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.chart.script.IScriptClassLoader#loadClass(java.lang.String,
 	 * java.lang.ClassLoader)
 	 */
+	@Override
 	public Class<?> loadClass(String className, ClassLoader parentLoader) throws ClassNotFoundException {
-		if (className == null)
+		if (className == null) {
 			return null;
+		}
 
 		Class<?> c = null;
 		ClassNotFoundException ex = null;
@@ -110,23 +118,23 @@ public class BIRTScriptClassLoader extends ScriptClassLoaderAdapter {
 		return c;
 	}
 
-	private static Class<?> getClassUsingCustomClassPath(final String className, final String classPathKey,
+	private static Class<?> getClassUsingCustomClassPath(final String className,
+			final String classPathKey,
 			final ClassLoader parentLoader) {
-		return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
-
-			public Class<?> run() {
+		Class<?> c = null;
 				String classPath = System.getProperty(classPathKey);
-				if (classPath == null || classPath.length() == 0 || className == null)
+				if (classPath == null || classPath.length() == 0 || className == null) {
 					return null;
+				}
 				String[] classPathArray = classPath.split(EngineConstants.PROPERTYSEPARATOR, -1);
 				URL[] urls = null;
 				if (classPathArray.length != 0) {
-					List<URL> l = new ArrayList<URL>();
+					List<URL> l = new ArrayList<>();
 					for (int i = 0; i < classPathArray.length; i++) {
 						String cpValue = classPathArray[i];
 						File file = new File(cpValue);
 						try {
-							l.add(file.toURL());
+							l.add(file.toURI().toURL());
 						} catch (MalformedURLException e) {
 							e.printStackTrace();
 						}
@@ -139,7 +147,7 @@ public class BIRTScriptClassLoader extends ScriptClassLoaderAdapter {
 							IReportEngine.class.getClassLoader());
 					ClassLoader cl = new URLClassLoader(urls, cmLoader);
 					try {
-						return cl.loadClass(className);
+						c = cl.loadClass(className);
 						// Note: If the class can
 						// not even be loadded by this
 						// loader either, null will be returned
@@ -147,10 +155,7 @@ public class BIRTScriptClassLoader extends ScriptClassLoaderAdapter {
 						// Ignore
 					}
 				}
-				return null;
-			}
-		});
-
+				return c;
 	}
 
 }

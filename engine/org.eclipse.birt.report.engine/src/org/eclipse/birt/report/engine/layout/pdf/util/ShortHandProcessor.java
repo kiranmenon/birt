@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,19 +22,26 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.css.engine.CSSEngine;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.css.engine.value.IdentifierManager;
+import org.eclipse.birt.report.engine.css.engine.value.birt.BIRTConstants;
 import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
 import org.w3c.css.sac.CSSException;
 import org.w3c.css.sac.InputSource;
 import org.w3c.css.sac.LexicalUnit;
 
+/**
+ * Short hand processor
+ *
+ * @since 3.3
+ *
+ */
 public abstract class ShortHandProcessor {
 
 	abstract void process(StringBuffer buffer, String value, CSSEngine engine);
 
-	private static Map<String, ShortHandProcessor> processorMap = new HashMap<String, ShortHandProcessor>();
+	private static Map<String, ShortHandProcessor> processorMap = new HashMap<>();
 
 	static String EMPTY_VALUE = "";
 	static String COLON = ":";
@@ -41,15 +51,16 @@ public abstract class ShortHandProcessor {
 		processorMap.put("text-decoration", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						for (int i = 0; i < vs.length; i++) {
 							if (CSSConstants.CSS_UNDERLINE_VALUE.equals(vs[i])) {
-								appendStyle(buffer, IStyle.BIRT_TEXT_UNDERLINE_PROPERTY, "true");
+								appendStyle(buffer, BIRTConstants.BIRT_TEXT_UNDERLINE_PROPERTY, "true");
 							} else if (CSSConstants.CSS_LINE_THROUGH_VALUE.equals(vs[i])) {
-								appendStyle(buffer, IStyle.BIRT_TEXT_LINETHROUGH_PROPERTY, "true");
+								appendStyle(buffer, BIRTConstants.BIRT_TEXT_LINETHROUGH_PROPERTY, "true");
 							} else if (CSSConstants.CSS_OVERLINE_VALUE.equals(vs[i])) {
-								appendStyle(buffer, IStyle.BIRT_TEXT_OVERLINE_PROPERTY, "true");
+								appendStyle(buffer, BIRTConstants.BIRT_TEXT_OVERLINE_PROPERTY, "true");
 							}
 
 						}
@@ -58,6 +69,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("margin", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						switch (vs.length) {
@@ -79,6 +91,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("padding", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						switch (vs.length) {
@@ -100,6 +113,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						buildBorder(buffer, getBorderWidth(vs, engine), getBorderColor(vs, engine),
@@ -109,6 +123,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-style", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						buildBorder(buffer, null, null, value);
 					}
@@ -116,6 +131,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-width", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						buildBorder(buffer, value, null, null);
 					}
@@ -123,6 +139,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-color", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						buildBorder(buffer, null, value, null);
 					}
@@ -130,6 +147,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-left", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						buildLeftBorder(buffer, getBorderWidth(vs, engine), getBorderColor(vs, engine),
@@ -139,6 +157,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-right", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						buildRightBorder(buffer, getBorderWidth(vs, engine), getBorderColor(vs, engine),
@@ -148,6 +167,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-top", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						buildTopBorder(buffer, getBorderWidth(vs, engine), getBorderColor(vs, engine),
@@ -158,6 +178,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("border-bottom", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						buildBottomBorder(buffer, getBorderWidth(vs, engine), getBorderColor(vs, engine),
@@ -168,6 +189,7 @@ public abstract class ShortHandProcessor {
 		processorMap.put("background", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
 						String[] vs = value.split(" ");
 						String url = getBackgroundImage(vs, engine);
@@ -185,8 +207,9 @@ public abstract class ShortHandProcessor {
 		processorMap.put("font", //$NON-NLS-1$
 				new ShortHandProcessor() {
 
+					@Override
 					public void process(StringBuffer buffer, String value, CSSEngine engine) {
-						ArrayList<String> vl = new ArrayList<String>();
+						ArrayList<String> vl = new ArrayList<>();
 						Pattern pattern = Pattern.compile(
 								"((?:(?:\"[^\",]+\")|(?:[^\",\\s]+))(?:,\\s*(?:(?:\"[^\",]+\")|(?:[^\",\\s]+)))*)");
 						Matcher matcher = pattern.matcher(value);
@@ -234,13 +257,12 @@ public abstract class ShortHandProcessor {
 			LexicalUnit u = getUnit(vs[i], engine);
 			if (u != null) {
 				if (u.getLexicalUnitType() == LexicalUnit.SAC_IDENT) {
-					if (isIdentifier(vs[i], IStyle.STYLE_FONT_STYLE, engine)) {
+					if (isIdentifier(vs[i], StyleConstants.STYLE_FONT_STYLE, engine)) {
 						appendStyle(buffer, CSSConstants.CSS_FONT_STYLE_PROPERTY, vs[i]);
 						continue;
 					}
-					if (isIdentifier(vs[i], IStyle.STYLE_FONT_WEIGHT, engine)) {
+					if (isIdentifier(vs[i], StyleConstants.STYLE_FONT_WEIGHT, engine)) {
 						appendStyle(buffer, CSSConstants.CSS_FONT_WEIGHT_PROPERTY, vs[i]);
-						continue;
 					}
 				} else if (u.getLexicalUnitType() == LexicalUnit.SAC_INTEGER) {
 					if (CSSConstants.CSS_100_VALUE.equals(vs[i]) || CSSConstants.CSS_200_VALUE.equals(vs[i])
@@ -249,7 +271,6 @@ public abstract class ShortHandProcessor {
 							|| CSSConstants.CSS_700_VALUE.equals(vs[i]) || CSSConstants.CSS_800_VALUE.equals(vs[i])
 							|| CSSConstants.CSS_900_VALUE.equals(vs[i])) {
 						appendStyle(buffer, CSSConstants.CSS_FONT_WEIGHT_PROPERTY, vs[i]);
-						continue;
 					}
 				}
 
@@ -257,6 +278,7 @@ public abstract class ShortHandProcessor {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	protected void buildFontSize(StringBuffer buffer, String value, CSSEngine engine) {
 		if (value != null && value.length() > 0) {
 			String[] ss = value.split("/");
@@ -273,9 +295,7 @@ public abstract class ShortHandProcessor {
 		LexicalUnit u = null;
 		try {
 			u = engine.getParser().parsePropertyValue(new InputSource(new StringReader(value)));
-		} catch (CSSException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (CSSException | IOException e) {
 			e.printStackTrace();
 		}
 		return u;
@@ -288,7 +308,7 @@ public abstract class ShortHandProcessor {
 				if (u.getLexicalUnitType() == LexicalUnit.SAC_RGBCOLOR) {
 					return values[i];
 				} else if (u.getLexicalUnitType() == LexicalUnit.SAC_IDENT) {
-					if (isIdentifier(values[i], IStyle.STYLE_COLOR, engine)) {
+					if (isIdentifier(values[i], StyleConstants.STYLE_COLOR, engine)) {
 						return values[i];
 					}
 				}
@@ -298,16 +318,16 @@ public abstract class ShortHandProcessor {
 	}
 
 	protected String[] getBackgroundRepeat(String[] values, CSSEngine engine) {
-		String[] result = new String[] { CSSConstants.CSS_REPEAT_VALUE, CSSConstants.CSS_REPEAT_VALUE };
+		String[] result = { CSSConstants.CSS_REPEAT_VALUE, CSSConstants.CSS_REPEAT_VALUE };
 		for (int i = 0; i < values.length; i++) {
 			LexicalUnit u = getUnit(values[i], engine);
 			if (u != null && u.getLexicalUnitType() == LexicalUnit.SAC_IDENT) {
-				if (isIdentifier(values[i], IStyle.STYLE_BACKGROUND_REPEAT, engine)) {
+				if (isIdentifier(values[i], StyleConstants.STYLE_BACKGROUND_REPEAT, engine)) {
 					result[0] = values[i];
 					if (i < values.length - 1) {
 						u = getUnit(values[i + 1], engine);
 						if (u != null && u.getLexicalUnitType() == LexicalUnit.SAC_IDENT) {
-							if (isIdentifier(values[i + 1], IStyle.STYLE_BACKGROUND_REPEAT, engine)) {
+							if (isIdentifier(values[i + 1], StyleConstants.STYLE_BACKGROUND_REPEAT, engine)) {
 								result[1] = values[i + 1];
 								return result;
 							}
@@ -346,7 +366,7 @@ public abstract class ShortHandProcessor {
 			LexicalUnit u = getUnit(values[i], engine);
 
 			if (u != null && u.getLexicalUnitType() == LexicalUnit.SAC_IDENT) {
-				if (isIdentifier(values[i], IStyle.STYLE_BORDER_TOP_STYLE, engine)) {
+				if (isIdentifier(values[i], StyleConstants.STYLE_BORDER_TOP_STYLE, engine)) {
 					return values[i];
 				}
 			}
@@ -361,7 +381,7 @@ public abstract class ShortHandProcessor {
 				if (u.getLexicalUnitType() == LexicalUnit.SAC_RGBCOLOR) {
 					return values[i];
 				} else if (u.getLexicalUnitType() == LexicalUnit.SAC_IDENT) {
-					if (isIdentifier(values[i], IStyle.STYLE_COLOR, engine)) {
+					if (isIdentifier(values[i], StyleConstants.STYLE_COLOR, engine)) {
 						return values[i];
 					}
 				}
@@ -389,6 +409,12 @@ public abstract class ShortHandProcessor {
 		return CSSConstants.CSS_MEDIUM_VALUE;
 	}
 
+	/**
+	 * Get the processor
+	 *
+	 * @param name processor name
+	 * @return the processor
+	 */
 	public ShortHandProcessor getProcessor(String name) {
 		return processorMap.get(name);
 	}
@@ -459,6 +485,14 @@ public abstract class ShortHandProcessor {
 		buildRightBorder(buffer, width, color, style);
 	}
 
+	/**
+	 * Process of styles
+	 *
+	 * @param buffer content buffer
+	 * @param name   style name
+	 * @param value  style value
+	 * @param engine CSS engine
+	 */
 	public static void process(StringBuffer buffer, String name, String value, CSSEngine engine) {
 		ShortHandProcessor p = processorMap.get(name);
 		if (p != null) {

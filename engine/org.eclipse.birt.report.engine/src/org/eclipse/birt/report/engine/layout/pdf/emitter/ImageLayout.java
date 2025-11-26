@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -40,12 +43,20 @@ import org.eclipse.birt.report.engine.layout.area.impl.ImageArea;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
 import org.eclipse.birt.report.engine.util.FlashFile;
 
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Image;
+import org.openpdf.text.BadElementException;
+import org.openpdf.text.Image;
 
+/**
+ * Image layout hanlder
+ *
+ * @since 3.3
+ *
+ */
 public class ImageLayout extends Layout {
 
+	/** property: image object */
 	public static final int TYPE_IMAGE_OBJECT = 0;
+	/** property: flash object */
 	public static final int TYPE_FLASH_OBJECT = 1;
 
 	private Layout layout = null;
@@ -54,32 +65,42 @@ public class ImageLayout extends Layout {
 	private int objectType = TYPE_IMAGE_OBJECT;
 	private boolean withFlashVars = false;
 
-	private static HashMap<Integer, ArrayList<String>> unsupportedFormats = new HashMap<Integer, ArrayList<String>>();
+	private static HashMap<Integer, ArrayList<String>> unsupportedFormats = new HashMap<>();
 
 	static {
-		ArrayList<String> flashUnsupportedFormatList = new ArrayList<String>();
+		ArrayList<String> flashUnsupportedFormatList = new ArrayList<>();
 		flashUnsupportedFormatList.add("postscript");
 		flashUnsupportedFormatList.add("ppt");
 		unsupportedFormats.put(TYPE_FLASH_OBJECT, flashUnsupportedFormatList);
-	};
+	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param context       image context layout
+	 * @param parentContext parent context
+	 * @param content       content
+	 */
 	public ImageLayout(LayoutEngineContext context, ContainerLayout parentContext, IContent content) {
 		super(context, parentContext, content);
 		parentLayout = parentContext;
 	}
 
+	@Override
 	public void layout() throws BirtException {
 		if (layout != null) {
 			layout.layout();
 		}
 	}
 
+	@Override
 	protected void closeLayout() throws BirtException {
 		if (layout != null) {
 			layout.closeLayout();
 		}
 	}
 
+	@Override
 	protected void initialize() throws BirtException {
 		checkObjectType();
 		// choose the layout manager
@@ -134,9 +155,8 @@ public class ImageLayout extends Layout {
 		ArrayList<String> formats = unsupportedFormats.get(type);
 		if (formats != null && formats.contains(context.getFormat().toLowerCase())) {
 			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 }
 
@@ -176,10 +196,9 @@ class ConcreteImageLayout extends Layout {
 	}
 
 	/**
-	 * get intrinsic dimension of image in pixels. Now only support png, bmp, jpg,
-	 * gif.
-	 * 
-	 * @return
+	 * Get intrinsic dimension of image in pixels, supported png, bmp, jpg, gif.
+	 *
+	 * @return intrinsic dimension of image in pixels
 	 * @throws IOException
 	 * @throws MalformedURLException
 	 * @throws BadElementException
@@ -241,24 +260,23 @@ class ConcreteImageLayout extends Layout {
 					dim.setDimension(intrinsic.getWidth(), intrinsic.getHeight());
 				}
 			}
-		} else {
-			if (specifiedWidth > 0) {
-				if (specifiedHeight > 0) {
-					dim.setDimension(specifiedWidth, specifiedHeight);
-				} else {
-					dim.setDimension(specifiedWidth, intrinsic.getHeight());
-				}
+		} else if (specifiedWidth > 0) {
+			if (specifiedHeight > 0) {
+				dim.setDimension(specifiedWidth, specifiedHeight);
 			} else {
-				if (specifiedHeight > 0) {
-					dim.setDimension(intrinsic.getWidth(), specifiedHeight);
-				} else {
-					dim.setDimension(intrinsic.getWidth(), intrinsic.getHeight());
-				}
+				dim.setDimension(specifiedWidth, intrinsic.getHeight());
+			}
+		} else {
+			if (specifiedHeight > 0) {
+				dim.setDimension(intrinsic.getWidth(), specifiedHeight);
+			} else {
+				dim.setDimension(intrinsic.getWidth(), intrinsic.getHeight());
 			}
 		}
 		return dim;
 	}
 
+	@Override
 	public void layout() throws BirtException {
 		init();
 		// For inline image, the hierarchy is
@@ -278,12 +296,10 @@ class ConcreteImageLayout extends Layout {
 				} else {
 					scale();
 					parent.addToRoot(root, 0);
-					return;
 				}
 			} else {
 				scale();
 				parent.addToRoot(root, 0);
-				return;
 			}
 		} else {
 			if (parent.isPageEmpty()) {
@@ -291,7 +307,6 @@ class ConcreteImageLayout extends Layout {
 			}
 			boolean succeed = parent.addArea(root, 0);
 			if (succeed) {
-				return;
 			} else {
 				if (!parent.isPageEmpty()) {
 					parent.autoPageBreak();
@@ -369,7 +384,7 @@ class ConcreteImageLayout extends Layout {
 
 	/**
 	 * Creates legend for chart.
-	 * 
+	 *
 	 * @param imageContent the image content of the chart.
 	 * @param imageArea    the imageArea of the chart.
 	 */
@@ -419,7 +434,7 @@ class ConcreteImageLayout extends Layout {
 	/**
 	 * Creates an image map container, which is an empty container with an hyper
 	 * link.
-	 * 
+	 *
 	 * @param x      x coordinate of lower left corner of the container.
 	 * @param y      y coordinate of lower left corner of the container.
 	 * @param width  width of the container.
@@ -440,10 +455,10 @@ class ConcreteImageLayout extends Layout {
 	/**
 	 * Calculates the absolute positions of image map when given the position of
 	 * image. The image map position is relative to the left up corner of the image.
-	 * 
+	 *
 	 * The argument and returned value are both 4 length integer area, the four
 	 * value of which are x, y of up left corner, width and height respectively.
-	 * 
+	 *
 	 * @param area      rectangle area of a image map.
 	 * @param imageArea image area of the image in which the image map is.
 	 * @return absolute position of the image map.
@@ -482,7 +497,7 @@ class ConcreteImageLayout extends Layout {
 
 	/**
 	 * Check if a url is of an internal bookmark.
-	 * 
+	 *
 	 * @param url the url string.
 	 * @return true if and only if the url is of an internal bookmark.
 	 */
@@ -492,7 +507,7 @@ class ConcreteImageLayout extends Layout {
 
 	/**
 	 * Parses out bookmark name from a url for interanl bookmark.
-	 * 
+	 *
 	 * @param url the url string
 	 * @return the bookmark name.
 	 */
@@ -505,11 +520,11 @@ class ConcreteImageLayout extends Layout {
 	/**
 	 * Parse the image map position from a string which is of format "x1, y1, x2,
 	 * y2".
-	 * 
+	 *
 	 * @param string the position string.
 	 * @return a array which contains the x, y coordinate of left up corner, width
 	 *         and height in sequence.
-	 * 
+	 *
 	 */
 	private int[] getArea(String string) {
 		String[] rawDatas = string.split(",");
@@ -521,16 +536,19 @@ class ConcreteImageLayout extends Layout {
 		return area;
 	}
 
+	@Override
 	protected void closeLayout() {
-		if (!PropertyUtil.isInlineElement(image))
+		if (!PropertyUtil.isInlineElement(image)) {
 			// We align inline elements (here - inline container parenting the
 			// inline image) in LineLayout, but not block-level image.
 			// Invoke it here, since it should not be done by ContainerLayout
 			// always.
 			// TODO: Check if this can be done in a neater way.
 			parent.align(root);
+		}
 	}
 
+	@Override
 	protected void initialize() {
 		// TODO Auto-generated method stub
 

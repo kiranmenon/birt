@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.designer.internal.ui.views.attributes.widget;
 
@@ -9,7 +21,6 @@ import org.eclipse.birt.report.designer.internal.ui.swt.custom.FormWidgetFactory
 import org.eclipse.birt.report.designer.internal.ui.swt.custom.IComboProvider;
 import org.eclipse.birt.report.designer.internal.ui.swt.custom.StyleCombo;
 import org.eclipse.birt.report.designer.internal.ui.util.UIUtil;
-import org.eclipse.birt.report.designer.internal.ui.views.attributes.page.WidgetUtil;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.provider.BorderColorDescriptorProvider;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.provider.BorderStyleDescriptorProvider;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.provider.BorderToggleDescriptorProvider;
@@ -23,11 +34,10 @@ import org.eclipse.birt.report.designer.ui.util.ExceptionUtil;
 import org.eclipse.birt.report.designer.ui.views.attributes.IPropertyDescriptor;
 import org.eclipse.birt.report.model.api.CommandStack;
 import org.eclipse.birt.report.model.api.DesignElementHandle;
-import org.eclipse.birt.report.model.api.StyleHandle;
 import org.eclipse.birt.report.model.api.activity.NotificationEvent;
-import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.util.ColorUtil;
+import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.Accessible;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
@@ -44,16 +54,28 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 
+/**
+ * Border property descriptor
+ *
+ * @since 3.3
+ *
+ */
 public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsumerProcessor, Listener {
 
 	private boolean isFormStyle;
 
 	private BorderInfomation restoreInfo;
 
+	/**
+	 * Constructor
+	 *
+	 * @param isFormStyle is form style
+	 */
 	public BorderPropertyDescriptor(boolean isFormStyle) {
 		this.isFormStyle = isFormStyle;
 	}
 
+	@Override
 	public Control createControl(Composite parent) {
 		content = new Composite(parent, SWT.NONE);
 		GridLayout layout = UIUtil.createGridLayoutWithoutMargin(2, false);
@@ -67,7 +89,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		GridData data = new GridData(GridData.FILL_BOTH);
 
 		choices.setLayoutData(data);
-		layout = WidgetUtil.createGridLayout(2);
+		layout = org.eclipse.birt.report.designer.internal.ui.util.WidgetUtil.createGridLayout(2);
 		layout.marginHeight = 1;
 		layout.marginWidth = 2;
 		choices.setLayout(layout);
@@ -77,9 +99,9 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		styleLabel.setLayoutData(new GridData());
 
 		if (isFormStyle) {
-			styleCombo = FormWidgetFactory.getInstance().createStyleCombo(choices, (IComboProvider) styleProvider);
+			styleCombo = FormWidgetFactory.getInstance().createStyleCombo(choices, styleProvider);
 		} else {
-			styleCombo = new StyleCombo(choices, style, (IComboProvider) styleProvider);
+			styleCombo = new StyleCombo(choices, style, styleProvider);
 		}
 		data = new GridData();
 		data.widthHint = 200;
@@ -104,9 +126,9 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		widthLabel.setLayoutData(new GridData());
 
 		if (isFormStyle) {
-			widthCombo = FormWidgetFactory.getInstance().createStyleCombo(choices, (IComboProvider) widthProvider);
+			widthCombo = FormWidgetFactory.getInstance().createStyleCombo(choices, widthProvider);
 		} else {
-			widthCombo = new StyleCombo(choices, style, (IComboProvider) widthProvider);
+			widthCombo = new StyleCombo(choices, style, widthProvider);
 		}
 		data = new GridData();
 		data.widthHint = 200;
@@ -133,6 +155,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 			final BorderToggleDescriptorProvider provider = toggleProviders[i];
 			button.addSelectionListener(new SelectionAdapter() {
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					Button button = ((Button) e.widget);
 					if (button.getSelection()) {
@@ -146,6 +169,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 			});
 			button.setData(provider);
 			button.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+				@Override
 				public void getName(AccessibleEvent e) {
 					Accessible accessible = (Accessible) e.getSource();
 					Button item = (Button) accessible.getControl();
@@ -160,6 +184,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		allButton.setImage(ReportPlatformUIImages.getImage(IReportGraphicConstants.ICON_ATTRIBUTE_BORDER_FRAME));
 		allButton.setToolTipText(Messages.getString("BordersPage.Tooltip.All")); //$NON-NLS-1$
 		allButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				Accessible accessible = (Accessible) e.getSource();
 				Button item = (Button) accessible.getControl();
@@ -171,6 +196,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		allButton.setLayoutData(new GridData());
 		allButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				RGB selectedColor = null;
 				RGB oldColor = null;
@@ -184,6 +210,11 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 					// }
 					for (int i = 0; i < toggleProviders.length; i++) {
 						BorderInfomation oldInfo = (BorderInfomation) toggleProviders[i].load();
+
+						if (oldInfo.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)
+								|| oldInfo.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+							continue;
+						}
 						BorderInfomation information = new BorderInfomation();
 						information.setPosition(toggleProviders[i].getPosition());
 						information.setColor(selectedColor);
@@ -213,6 +244,11 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 					boolean reset = true;
 					for (int i = 0; i < toggleProviders.length; i++) {
 						BorderInfomation info = (BorderInfomation) toggleProviders[i].load();
+						if (info.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)
+								|| info.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+							continue;
+						}
+
 						oldColor = info.getOriginColor();
 						selectedColor = builder.getRGB();
 						// if ( oldColor == null )
@@ -224,11 +260,11 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 						// selectedColor = autoColor;
 						// }
 						if (!(info.getOriginStyle()
-								.equals((String) styleProvider.getItems()[styleCombo.getSelectionIndex()]))
+								.equals(styleProvider.getItems()[styleCombo.getSelectionIndex()]))
 								|| !((oldColor == null && selectedColor == null)
 										|| (oldColor != null && oldColor.equals(selectedColor)))
 								|| !(resolveEmptyWidth(info)
-										.equals((String) widthProvider.getItems()[widthCombo.getSelectionIndex()]))) {
+										.equals(widthProvider.getItems()[widthCombo.getSelectionIndex()]))) {
 							reset = false;
 							break;
 						}
@@ -253,6 +289,10 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 
 						for (int i = 0; i < toggleProviders.length; i++) {
 							BorderInfomation oldInfo = (BorderInfomation) toggleProviders[i].load();
+							if (oldInfo.getPosition().equals(BorderInfomation.BORDER_DIAGONAL)
+									|| oldInfo.getPosition().equals(BorderInfomation.BORDER_ANTIDIAGONAL)) {
+								continue;
+							}
 							BorderInfomation information = new BorderInfomation();
 							information.setPosition(toggleProviders[i].getPosition());
 							information.setColor(builder.getRGB());
@@ -285,6 +325,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		noneButton.setImage(ReportPlatformUIImages.getImage(IReportGraphicConstants.ICON_ATTRIBUTE_BORDER_NONE));
 		noneButton.setToolTipText(Messages.getString("BordersPage.Tooltip.None")); //$NON-NLS-1$
 		noneButton.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			@Override
 			public void getName(AccessibleEvent e) {
 				Accessible accessible = (Accessible) e.getSource();
 				Button item = (Button) accessible.getControl();
@@ -296,6 +337,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		noneButton.setLayoutData(new GridData());
 		noneButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				CommandStack stack = SessionHandleAdapter.getInstance().getCommandStack();
 				stack.startTrans(Messages.getString("BordersPage.Trans.SelectAllborders")); //$NON-NLS-1$
@@ -352,6 +394,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		return content;
 	}
 
+	@Override
 	public Control getControl() {
 		// TODO Auto-generated method stub
 		return content;
@@ -359,6 +402,7 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 
 	protected Object input;
 
+	@Override
 	public void setInput(Object input) {
 		this.input = input;
 		styleProvider.setInput(input);
@@ -377,6 +421,11 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		widthCombo.setSelectedItem(value);
 	}
 
+	/**
+	 * Refresh border property color
+	 *
+	 * @param rgb RGB color
+	 */
 	public void refreshColor(RGB rgb) {
 		if (rgb != null) {
 			builder.setColorValue(
@@ -384,16 +433,18 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		}
 	}
 
+	@Override
 	public void load() {
-		// for ( int i = toggleProviders.length - 1; i >= 0; i-- )
 		for (int i = 0; i < toggleProviders.length; i++) {
 			BorderInfomation info = (BorderInfomation) toggleProviders[i].load();
 			previewCanvas.setBorderInfomation(info);
-			if (!info.getStyle().equals("") && !DesignChoiceConstants.LINE_STYLE_NONE.equals(info.getStyle())) //$NON-NLS-1$
-			{
-				toggles[i].setSelection(true);
-			} else {
-				toggles[i].setSelection(false);
+			if (info.getStyle() != null) {
+				if (!info.getStyle().equals("") && !DesignChoiceConstants.LINE_STYLE_NONE.equals(info.getStyle())) //$NON-NLS-1$
+				{
+					toggles[i].setSelection(true);
+				} else {
+					toggles[i].setSelection(false);
+				}
 			}
 		}
 		previewCanvas.redraw();
@@ -413,64 +464,110 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		} else {
 			refreshStyle(restoreInfo.getStyle());
 			refreshWidth(restoreInfo.getWidth());
-			if (restoreInfo.getOriginColor() == null)
+			if (restoreInfo.getOriginColor() == null) {
 				refreshColor((RGB) null);
-			else
+			} else {
 				refreshColor(restoreInfo.getColor());
+			}
 		}
 		checkToggleButtons();
 	}
 
+	/**
+	 * Refresh border property color
+	 *
+	 * @param value color
+	 */
 	public void refreshColor(String value) {
 
 		boolean stateFlag = ((value == null) == builder.getEnabled());
-		if (stateFlag)
+		if (stateFlag) {
 			builder.setEnabled(value != null);
+		}
 		builder.setColorValue(value);
 	}
 
-	public void save(Object obj) throws SemanticException {
+	@Override
+	public void save(Object obj) {
 
 	}
 
 	private BorderStyleDescriptorProvider styleProvider = null;
 
+	/**
+	 * Set style provider
+	 *
+	 * @param provider descriptor provider
+	 */
 	public void setStyleProvider(IDescriptorProvider provider) {
-		if (provider instanceof BorderStyleDescriptorProvider)
+		if (provider instanceof BorderStyleDescriptorProvider) {
 			this.styleProvider = (BorderStyleDescriptorProvider) provider;
+		}
 	}
 
 	private BorderColorDescriptorProvider colorProvider = null;
 
+	/**
+	 * Set color provider
+	 *
+	 * @param provider descriptor provider
+	 */
 	public void setColorProvider(IDescriptorProvider provider) {
-		if (provider instanceof BorderColorDescriptorProvider)
+		if (provider instanceof BorderColorDescriptorProvider) {
 			this.colorProvider = (BorderColorDescriptorProvider) provider;
+		}
 	}
 
 	private BorderWidthDescriptorProvider widthProvider = null;
 	private Composite content;
 
+	/**
+	 * Set width provider
+	 *
+	 * @param provider descriptor provider
+	 */
 	public void setWidthProvider(IDescriptorProvider provider) {
-		if (provider instanceof BorderWidthDescriptorProvider)
+		if (provider instanceof BorderWidthDescriptorProvider) {
 			this.widthProvider = (BorderWidthDescriptorProvider) provider;
+		}
 	}
 
 	private int style = SWT.BORDER;
 	private StyleCombo styleCombo;
 	private StyleCombo widthCombo;
 
+	/**
+	 * Get the border style
+	 *
+	 * @return Return the border style
+	 */
 	public int getStyle() {
 		return style;
 	}
 
+	/**
+	 * Set the border style
+	 *
+	 * @param style style number
+	 */
 	public void setStyle(int style) {
 		this.style = style;
 	}
 
+	/**
+	 * Set the hidden flag
+	 *
+	 * @param isHidden is hidden flag
+	 */
 	public void setHidden(boolean isHidden) {
-		WidgetUtil.setExcludeGridData(content, isHidden);
+		org.eclipse.birt.report.designer.internal.ui.util.WidgetUtil.setExcludeGridData(content, isHidden);
 	}
 
+	/**
+	 * Set the visible flag
+	 *
+	 * @param isVisible is visible flag
+	 */
 	public void setVisible(boolean isVisible) {
 		content.setVisible(isVisible);
 	}
@@ -481,10 +578,20 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 	private BorderCanvas previewCanvas;
 	private Button allButton;
 
+	/**
+	 * Get toggle provider overview
+	 *
+	 * @return Return the toggle provider overview
+	 */
 	public IToggleDescriptorProvider[] getToggleProviders() {
 		return toggleProviders;
 	}
 
+	/**
+	 * Set the toggle provider
+	 *
+	 * @param toggleProviders array of all toggle providers
+	 */
 	public void setToggleProviders(BorderToggleDescriptorProvider[] toggleProviders) {
 		this.toggleProviders = toggleProviders;
 	}
@@ -497,10 +604,11 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 				break;
 			}
 		}
-		if (allSelected)
+		if (allSelected) {
 			allButton.setSelection(true);
-		else
+		} else {
 			allButton.setSelection(false);
+		}
 	}
 
 	// public void elementChanged( DesignElementHandle focus, NotificationEvent
@@ -531,22 +639,27 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 	// }
 	// }
 
+	@Override
 	public void addElementEvent(DesignElementHandle focus, NotificationEvent ev) {
 
 	}
 
+	@Override
 	public void clear() {
 
 	}
 
+	@Override
 	public boolean isOverdued() {
 		return content == null || content.isDisposed();
 	}
 
+	@Override
 	public void postElementEvent() {
 		load();
 	}
 
+	@Override
 	public Object getAdapter(Class adapter) {
 		return null;
 	}
@@ -592,11 +705,11 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		// {
 		// selectedColor = autoColor;
 		// }
-		if (!(oldInfo.getOriginStyle().equals((String) styleProvider.getItems()[styleCombo.getSelectionIndex()]))
+		if (!(oldInfo.getOriginStyle().equals(styleProvider.getItems()[styleCombo.getSelectionIndex()]))
 				|| !((oldColor == null && selectedColor == null)
 						|| (oldColor != null && oldColor.equals(selectedColor)))
 				|| !(resolveEmptyWidth(oldInfo)
-						.equals((String) widthProvider.getItems()[widthCombo.getSelectionIndex()]))) {
+						.equals(widthProvider.getItems()[widthCombo.getSelectionIndex()]))) {
 			CommandStack stack = SessionHandleAdapter.getInstance().getCommandStack();
 			stack.startTrans(Messages.getString("BordersPage.Trans.SelectBorder")); //$NON-NLS-1$
 
@@ -626,8 +739,9 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 			stack.startTrans(Messages.getString("BordersPage.Trans.UnSelectBorder")); //$NON-NLS-1$
 
 			previewCanvas.removeBorderInfomation(provider.getPosition());
-			if (allButton.getSelection())
+			if (allButton.getSelection()) {
 				allButton.setSelection(false);
+			}
 			try {
 				provider.reset();
 			} catch (Exception e1) {
@@ -637,28 +751,29 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 		}
 	}
 
+	@Override
 	public void handleEvent(Event event) {
 		String property = null;
 		switch (event.detail) {
 		case SWT.TOP:
-			property = StyleHandle.BORDER_TOP_STYLE_PROP;
+			property = IStyleModel.BORDER_TOP_STYLE_PROP;
 			break;
 		case SWT.BOTTOM:
-			property = StyleHandle.BORDER_BOTTOM_STYLE_PROP;
+			property = IStyleModel.BORDER_BOTTOM_STYLE_PROP;
 			break;
 		case SWT.LEFT:
-			property = StyleHandle.BORDER_LEFT_STYLE_PROP;
+			property = IStyleModel.BORDER_LEFT_STYLE_PROP;
 			break;
 		case SWT.RIGHT:
-			property = StyleHandle.BORDER_RIGHT_STYLE_PROP;
+			property = IStyleModel.BORDER_RIGHT_STYLE_PROP;
 			break;
 		}
 		for (int i = 0; i < toggleProviders.length; i++) {
 			if (toggleProviders[i].getProperty().equals(property)) {
-				BorderToggleDescriptorProvider provider = (BorderToggleDescriptorProvider) toggleProviders[i];
+				BorderToggleDescriptorProvider provider = toggleProviders[i];
 				for (int j = 0; j < toggles.length; j++) {
 					if (toggles[j].getData() != null && toggles[j].getData() == provider) {
-						Button button = (Button) toggles[j];
+						Button button = toggles[j];
 						if (button.getSelection()) {
 							button.setSelection(false);
 							handleBorderDeselection(provider, button);
@@ -672,9 +787,9 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 				}
 			}
 		}
-		;
 	}
 
+	@Override
 	public void reset() {
 		for (int i = 0; i < toggleProviders.length; i++) {
 			if (toggleProviders[i] != null && toggleProviders[i].canReset()) {
@@ -689,8 +804,9 @@ public class BorderPropertyDescriptor implements IPropertyDescriptor, IFastConsu
 
 	private String resolveEmptyWidth(BorderInfomation info) {
 		String width = info.getOriginWidth();
-		if ("".equals(width))
+		if ("".equals(width)) {
 			return DesignChoiceConstants.LINE_WIDTH_MEDIUM;
+		}
 		return width;
 	}
 }

@@ -1,10 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2001, 2006 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -40,7 +42,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 
 /**
  * A FormToolkit customized for use by tabbed property sheet page.
- * 
+ *
  * @author Anthony Hunter
  */
 public class FormWidgetFactory extends FormToolkit {
@@ -54,6 +56,11 @@ public class FormWidgetFactory extends FormToolkit {
 
 	private static FormWidgetFactory factory;
 
+	/**
+	 * Get an Instance of the form widget factory
+	 *
+	 * @return Return the form widget factory
+	 */
 	public synchronized static FormWidgetFactory getInstance() {
 		if (factory == null) {
 			factory = new FormWidgetFactory();
@@ -62,6 +69,9 @@ public class FormWidgetFactory extends FormToolkit {
 		return factory;
 	}
 
+	/**
+	 * Close the form widget factory
+	 */
 	public synchronized static void close() {
 		if (factory != null) {
 			factory.dispose();
@@ -70,7 +80,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates the tab folder as a part of the form.
-	 * 
+	 *
 	 * @param parent the composite parent.
 	 * @param style  the tab folder style.
 	 * @return the tab folder
@@ -82,7 +92,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates the tab item as a part of the tab folder.
-	 * 
+	 *
 	 * @param tabFolder the parent.
 	 * @param style     the tab folder style.
 	 * @return the tab item.
@@ -94,7 +104,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates the list as a part of the form.
-	 * 
+	 *
 	 * @param parent the composite parent.
 	 * @param style  the list style.
 	 * @return the list.
@@ -104,82 +114,145 @@ public class FormWidgetFactory extends FormToolkit {
 		return list;
 	}
 
+	@Override
 	public Composite createComposite(Composite parent, int style) {
 		Composite c = super.createComposite(parent, style);
 		paintBordersFor(c);
 		return c;
 	}
 
+	@Override
 	public Composite createComposite(Composite parent) {
 		Composite c = createComposite(parent, SWT.NONE);
 		return c;
 	}
 
+	/**
+	 * Create button
+	 *
+	 * @param parent      parent component
+	 * @param style       style
+	 * @param isFormStyle is form style
+	 * @return Return a button
+	 */
 	public Button createButton(Composite parent, int style, boolean isFormStyle) {
 		Button b;
-		if (isFormStyle)
+		if (isFormStyle) {
 			b = super.createButton(parent, "", style); //$NON-NLS-1$
-		else
+		} else {
 			b = new Button(parent, style);
+		}
 		return b;
 	}
 
+	/**
+	 * Create menu button
+	 *
+	 * @param parent parent component
+	 * @param text   button text
+	 * @param style  style
+	 * @return Return a menu button
+	 */
 	public MenuButton createMenuButton(Composite parent, String text, int style) {
 		MenuButton button = new MenuButton(parent, style | SWT.FLAT);
-		if (text != null)
+		if (text != null) {
 			button.setText(text);
+		}
 		button.setBackground(parent.getBackground());
 		return button;
 	}
 
+	/**
+	 * Create split button
+	 *
+	 * @param parent      parent component
+	 * @param style       button style
+	 * @param isFormStyle is form style
+	 * @return Return a split button
+	 */
 	public MenuButton createSplitButton(Composite parent, int style, boolean isFormStyle) {
 		MenuButton b;
-		if (isFormStyle)
+		if (isFormStyle) {
 			b = createMenuButton(parent, "", style); //$NON-NLS-1$
-		else
+		} else {
 			b = new MenuButton(parent, style);
+		}
 		return b;
 	}
 
+	/**
+	 * Create label
+	 *
+	 * @param parent      parent component
+	 * @param style       button style
+	 * @param isFormStyle is form style
+	 * @return Return a label
+	 */
 	public Label createLabel(Composite parent, int style, boolean isFormStyle) {
 		Label l;
-		if (isFormStyle)
+		if (isFormStyle) {
 			l = super.createLabel(parent, "", style); //$NON-NLS-1$
-		else
+		} else {
 			l = new Label(parent, style);
+		}
 		return l;
 	}
 
+	/**
+	 * Create label
+	 *
+	 * @param parent      parent component
+	 * @param isFormStyle is form style
+	 * @return Return a label
+	 */
 	public Label createLabel(Composite parent, boolean isFormStyle) {
 		Label l;
-		if (isFormStyle)
+		if (isFormStyle) {
 			l = super.createLabel(parent, "", SWT.NONE); //$NON-NLS-1$
-		else
+		} else {
 			l = new Label(parent, SWT.NONE);
+		}
 		return l;
 	}
 
+	/**
+	 * Create Clabel
+	 *
+	 * @param parent      parent component
+	 * @param style       button style
+	 * @param isFormStyle is form style
+	 * @return Return a label
+	 */
 	public CLabel createCLabel(Composite parent, int style, boolean isFormStyle) {
 		CLabel l;
-		if (isFormStyle)
+		if (isFormStyle) {
 			l = createCLabel(parent, "", style); //$NON-NLS-1$
-		else
+		} else {
 			l = new CLabel(parent, style);
+		}
 		return l;
 	}
 
+	/**
+	 * Create Clabel
+	 *
+	 * @param parent      parent component
+	 * @param isFormStyle is form style
+	 * @return Return a label
+	 */
 	public CLabel createCLabel(Composite parent, boolean isFormStyle) {
 		CLabel l;
-		if (isFormStyle)
+		if (isFormStyle) {
 			l = createCLabel(parent, "", SWT.NONE); //$NON-NLS-1$
-		else
+		} else {
 			l = new CLabel(parent, SWT.NONE);
+		}
 		return l;
 	}
 
 	/**
 	 * Creates a plain composite as a part of the form.
-	 * 
+	 *
 	 * @param parent the composite parent.
 	 * @param style  the composite style.
 	 * @return the composite.
@@ -193,16 +266,24 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a scrolled composite as a part of the form.
-	 * 
+	 *
 	 * @param parent the composite parent.
 	 * @param style  the composite style.
-	 * @return the composite.
+	 * @return Return the composite.
 	 */
 	public ScrolledComposite createScrolledComposite(Composite parent, int style) {
 		ScrolledComposite scrolledComposite = new ScrolledComposite(parent, style);
 		return scrolledComposite;
 	}
 
+	/**
+	 * Create a styled combo box
+	 *
+	 * @param parent     parent composite
+	 * @param comboStyle combo style
+	 * @param provider   combo provider
+	 * @return Return a style combo box
+	 */
 	public StyleCombo createStyleCombo(Composite parent, int comboStyle, IComboProvider provider) {
 		StyleCombo combo = new StyleCombo(parent, comboStyle, provider);
 		adapt(combo, true, false);
@@ -211,28 +292,55 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a combo box as a part of the form.
-	 * 
-	 * @param parent the combo box parent.
-	 * @return the combo box.
+	 *
+	 * @param parent   parent composite
+	 * @param provider combo provider
+	 * @return Return a combo box.
 	 */
 	public StyleCombo createStyleCombo(Composite parent, IComboProvider provider) {
 		return createStyleCombo(parent, SWT.FLAT, provider);
 	}
 
+	/**
+	 * Create spinner
+	 *
+	 * @param parent parent composite
+	 * @return Return a spinner
+	 */
 	public Spinner createSpinner(Composite parent) {
 		return createSpinner(parent, SWT.FLAT);
 	}
 
+	/**
+	 * Create spinner
+	 *
+	 * @param parent       parent composite
+	 * @param spinnerStyle spinner style
+	 * @return Return a spinner
+	 */
 	public Spinner createSpinner(Composite parent, int spinnerStyle) {
 		Spinner spinner = new Spinner(parent, spinnerStyle);
 		adapt(spinner, true, false);
 		return spinner;
 	}
 
+	/**
+	 * Create CSpinner
+	 *
+	 * @param parent parent composite
+	 * @return Return a CSpinner
+	 */
 	public CSpinner createCSpinner(Composite parent) {
 		return createCSpinner(parent, SWT.FLAT);
 	}
 
+	/**
+	 * Create CSpinner
+	 *
+	 * @param parent       parent composite
+	 * @param spinnerStyle spinner style
+	 * @return Return a CSpinner
+	 */
 	public CSpinner createCSpinner(Composite parent, int spinnerStyle) {
 		CSpinner spinner = new CSpinner(parent, spinnerStyle);
 		adapt(spinner, true, false);
@@ -241,7 +349,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a combo box as a part of the form.
-	 * 
+	 *
 	 * @param parent     the combo box parent.
 	 * @param comboStyle the combo box style.
 	 * @return the combo box.
@@ -255,7 +363,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a combo box as a part of the form.
-	 * 
+	 *
 	 * @param parent the combo box parent.
 	 * @return the combo box.
 	 */
@@ -263,13 +371,27 @@ public class FormWidgetFactory extends FormToolkit {
 		return createCCombo(parent, SWT.FLAT | SWT.READ_ONLY);
 	}
 
+	/**
+	 * Create CCombo box
+	 *
+	 * @param parent     parent composite
+	 * @param isReadOnly read only flag
+	 * @return Return a CCombo box
+	 */
 	public CCombo createCCombo(Composite parent, boolean isReadOnly) {
-		if (isReadOnly)
+		if (isReadOnly) {
 			return createCCombo(parent, SWT.FLAT | SWT.READ_ONLY);
-		else
-			return createCCombo(parent, SWT.FLAT);
+		}
+		return createCCombo(parent, SWT.FLAT);
 	}
 
+	/**
+	 * Create Birt CCombo box
+	 *
+	 * @param parent     parent composite
+	 * @param comboStyle combo box style
+	 * @return Return a Birt CCombo box
+	 */
 	public org.eclipse.birt.report.designer.internal.ui.swt.custom.CCombo createBirtCCombo(Composite parent,
 			int comboStyle) {
 		org.eclipse.birt.report.designer.internal.ui.swt.custom.CCombo combo = new org.eclipse.birt.report.designer.internal.ui.swt.custom.CCombo(
@@ -280,7 +402,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a combo box as a part of the form.
-	 * 
+	 *
 	 * @param parent the combo box parent.
 	 * @return the combo box.
 	 */
@@ -288,17 +410,24 @@ public class FormWidgetFactory extends FormToolkit {
 		return createBirtCCombo(parent, SWT.FLAT | SWT.READ_ONLY);
 	}
 
+	/**
+	 * Creates a combo box as a part of the form.
+	 *
+	 * @param parent     the combo box parent.
+	 * @param isReadOnly read only flag
+	 * @return Return the combo box.
+	 */
 	public org.eclipse.birt.report.designer.internal.ui.swt.custom.CCombo createBirtCCombo(Composite parent,
 			boolean isReadOnly) {
-		if (isReadOnly)
+		if (isReadOnly) {
 			return createBirtCCombo(parent, SWT.FLAT | SWT.READ_ONLY);
-		else
-			return createBirtCCombo(parent, SWT.FLAT);
+		}
+		return createBirtCCombo(parent, SWT.FLAT);
 	}
 
 	/**
 	 * Creates a group as a part of the form.
-	 * 
+	 *
 	 * @param parent the group parent.
 	 * @param text   the group title.
 	 * @return the composite.
@@ -313,7 +442,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a flat form composite as a part of the form.
-	 * 
+	 *
 	 * @param parent the composite parent.
 	 * @return the composite.
 	 */
@@ -329,7 +458,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a label as a part of the form.
-	 * 
+	 *
 	 * @param parent the label parent.
 	 * @param text   the label text.
 	 * @return the label.
@@ -340,7 +469,7 @@ public class FormWidgetFactory extends FormToolkit {
 
 	/**
 	 * Creates a label as a part of the form.
-	 * 
+	 *
 	 * @param parent the label parent.
 	 * @param text   the label text.
 	 * @param style  the label style.
@@ -353,14 +482,21 @@ public class FormWidgetFactory extends FormToolkit {
 		return label;
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		factory = null;
 	}
 
+	/**
+	 * Paint the form style
+	 *
+	 * @param composite composite elements
+	 */
 	public void paintFormStyle(Composite composite) {
-		if (composite instanceof TabbedPropertyTitle)
+		if (composite instanceof TabbedPropertyTitle) {
 			return;
+		}
 		if (composite instanceof Table) {
 			adapt(composite);
 			return;
@@ -378,37 +514,41 @@ public class FormWidgetFactory extends FormToolkit {
 
 	private class BorderPainter implements PaintListener {
 
+		@Override
 		public void paintControl(PaintEvent event) {
 			Composite composite = (Composite) event.widget;
 			Control[] children = composite.getChildren();
 			for (int i = 0; i < children.length; i++) {
 				Control c = children[i];
-				if (c instanceof BorderCanvas || c instanceof FormText || c instanceof CLabel)
+				if (c instanceof BorderCanvas || c instanceof FormText || c instanceof CLabel) {
 					continue;
+				}
 				boolean inactiveBorder = false;
 				boolean textBorder = false;
-				if (!c.isVisible())
-					continue;
 				/*
 				 * if (c.getEnabled() == false && !(c instanceof CCombo)) continue;
 				 */
-				if (c instanceof Hyperlink)
+				if (!c.isVisible() || (c instanceof Hyperlink)) {
 					continue;
+				}
 				Object flag = c.getData(KEY_DRAW_BORDER);
 				if (flag != null) {
-					if (flag.equals(Boolean.FALSE))
+					if (flag.equals(Boolean.FALSE)) {
 						continue;
-					if (flag.equals(TREE_BORDER))
+					}
+					if (flag.equals(TREE_BORDER)) {
 						inactiveBorder = true;
-					else if (flag.equals(TEXT_BORDER))
+					} else if (flag.equals(TEXT_BORDER)) {
 						textBorder = true;
+					}
 				}
 				if (getBorderStyle() == SWT.BORDER) {
 					if (!inactiveBorder && !textBorder) {
 						continue;
 					}
-					if (c instanceof Text || c instanceof Table || c instanceof Tree)
+					if (c instanceof Text || c instanceof Table || c instanceof Tree) {
 						continue;
+					}
 				}
 				if (!inactiveBorder && (c instanceof Text || c instanceof CCombo || textBorder
 						|| c instanceof org.eclipse.birt.report.designer.internal.ui.swt.custom.CCombo
@@ -424,10 +564,11 @@ public class FormWidgetFactory extends FormToolkit {
 					if (c instanceof CCombo
 							|| c instanceof org.eclipse.birt.report.designer.internal.ui.swt.custom.CCombo
 							|| c instanceof StyleCombo || c instanceof ComplexUnit || c instanceof Spinner
-							|| c instanceof CSpinner)
+							|| c instanceof CSpinner) {
 						gc.drawRectangle(b.x - 2, b.y - 1, b.width + 2, b.height + 1);
-					else
+					} else {
 						gc.drawRectangle(b.x - 2, b.y - 2, b.width + 2, b.height + 3);
+					}
 				} else if (inactiveBorder || c instanceof Table || c instanceof Tree || c instanceof Canvas
 						|| c instanceof List || c instanceof AccordionSubComposite) {
 					Rectangle b = c.getBounds();
@@ -441,15 +582,23 @@ public class FormWidgetFactory extends FormToolkit {
 
 	private BorderPainter borderPainter;
 
+	@Override
 	public void paintBordersFor(Composite parent) {
 		// if (borderStyle == SWT.BORDER)
 		// return;
-		if (borderPainter == null)
+		if (borderPainter == null) {
 			borderPainter = new BorderPainter();
+		}
 		parent.removePaintListener(borderPainter);
 		parent.addPaintListener(borderPainter);
 	}
 
+	/**
+	 * Create complex unit
+	 *
+	 * @param parent parent composite
+	 * @return Return the complex unit
+	 */
 	public ComplexUnit createComplexUnit(Composite parent) {
 		return createComplexUnit(parent, SWT.FLAT);
 	}

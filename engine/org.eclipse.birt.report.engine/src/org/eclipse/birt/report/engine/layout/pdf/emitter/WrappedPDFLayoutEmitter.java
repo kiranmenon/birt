@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -48,18 +51,22 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 //		layoutEmitter.context.setCachedHeaderMap( cachedTableHeaders, cachedGroupHeaders );
 //	}
 
+	@Override
 	public void initialize(IEmitterServices service) throws BirtException {
 		layoutEmitter.initialize(service);
 	}
 
+	@Override
 	public String getOutputFormat() {
 		return layoutEmitter.getOutputFormat();
 	}
 
+	@Override
 	public void start(IReportContent report) throws BirtException {
 		layoutEmitter.start(report);
 	}
 
+	@Override
 	public void end(IReportContent report) throws BirtException {
 		layoutEmitter.end(report);
 	}
@@ -68,6 +75,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		layoutEmitter.resolveTotalPage(emitter);
 	}
 
+	@Override
 	public void startContainer(IContainerContent container) throws BirtException {
 		layoutEmitter.startContainer(container);
 		if (isInHeader()) {
@@ -75,6 +83,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endContainer(IContainerContent container) throws BirtException {
 		layoutEmitter.endContainer(container);
 		if (isInHeader()) {
@@ -82,6 +91,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startContent(IContent content) throws BirtException {
 		layoutEmitter.startContent(content);
 		if (isInHeader()) {
@@ -94,6 +104,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endContent(IContent content) {
 		layoutEmitter.endContent(content);
 		if (isInHeader()) {
@@ -103,6 +114,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startTable(ITableContent table) throws BirtException {
 		layoutEmitter.startTable(table);
 		if (isInHeader()) {
@@ -110,6 +122,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endTable(ITableContent table) throws BirtException {
 		layoutEmitter.endTable(table);
 		InstanceID tableID = table.getInstanceID();
@@ -120,6 +133,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 
 	}
 
+	@Override
 	public void startListBand(IListBandContent listBand) {
 		layoutEmitter.startListBand(listBand);
 		if (isInHeader()) {
@@ -127,6 +141,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endListBand(IListBandContent listBand) {
 		layoutEmitter.endListBand(listBand);
 		if (isInHeader()) {
@@ -134,6 +149,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startListGroup(IListGroupContent listGroup) throws BirtException {
 		layoutEmitter.startListGroup(listGroup);
 		if (isInHeader()) {
@@ -148,14 +164,17 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startPage(IPageContent page) throws BirtException {
 		layoutEmitter.startPage(page);
 	}
 
+	@Override
 	public void outputPage(IPageContent page) throws BirtException {
 		layoutEmitter.outputPage(page);
 	}
 
+	@Override
 	public void endPage(IPageContent page) throws BirtException {
 		layoutEmitter.endPage(page);
 	}
@@ -168,7 +187,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 //			constructClonedContent( container );
 //		}
 //	}
-//	
+//
 //	protected void endTableContainer(IContainerContent container)
 //	{
 //		layoutEmitter.endTableContainer( container );
@@ -183,6 +202,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 //		}
 //	}
 
+	@Override
 	public void startRow(IRowContent row) throws BirtException {
 		layoutEmitter.startRow(row);
 		if (isInHeader()) {
@@ -190,6 +210,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endRow(IRowContent row) throws BirtException {
 		layoutEmitter.endRow(row);
 		if (isInHeader()) {
@@ -197,6 +218,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startTableBand(ITableBandContent band) throws BirtException {
 		layoutEmitter.startTableBand(band);
 
@@ -222,6 +244,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 
 	}
 
+	@Override
 	public void endTableBand(ITableBandContent band) throws BirtException {
 		layoutEmitter.endTableBand(band);
 		if (isInHeader()) {
@@ -235,6 +258,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startTableGroup(ITableGroupContent group) throws BirtException {
 		layoutEmitter.startTableGroup(group);
 		if (isInHeader()) {
@@ -242,6 +266,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endTableGroup(ITableGroupContent group) throws BirtException {
 		layoutEmitter.endTableGroup(group);
 		removeCachedGroupHeader(group.getInstanceID());
@@ -250,6 +275,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void startCell(ICellContent cell) throws BirtException {
 		layoutEmitter.startCell(cell);
 		if (isInHeader()) {
@@ -257,6 +283,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public void endCell(ICellContent cell) throws BirtException {
 		layoutEmitter.endCell(cell);
 		if (isInHeader()) {
@@ -269,6 +296,7 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 //		layoutEmitter.visitContent( content, emitter );
 //	}
 
+	@Override
 	public void startForeign(IForeignContent foreign) throws BirtException {
 		layoutEmitter.startForeign(foreign);
 		if (isInHeader()) {
@@ -277,10 +305,12 @@ public class WrappedPDFLayoutEmitter extends LayoutEmitterAdapter implements ICo
 		}
 	}
 
+	@Override
 	public ILayoutPageHandler getPageHandler() {
 		return layoutEmitter.getPageHandler();
 	}
 
+	@Override
 	public void setPageHandler(ILayoutPageHandler pageHandler) {
 		layoutEmitter.setPageHandler(pageHandler);
 	}

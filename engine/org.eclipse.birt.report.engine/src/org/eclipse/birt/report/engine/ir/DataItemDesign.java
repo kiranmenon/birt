@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,9 +16,9 @@ package org.eclipse.birt.report.engine.ir;
 
 /**
  * DataItem.
- * 
+ *
  * reference to report design schema.
- * 
+ *
  */
 public class DataItemDesign extends ReportItemDesign {
 
@@ -51,20 +54,21 @@ public class DataItemDesign extends ReportItemDesign {
 	/**
 	 * set the binding column of the item. the value expression will be setted
 	 * either.
-	 * 
+	 *
 	 * @param column
 	 */
 	public void setBindingColumn(String column) {
 		this.bindingColumn = column;
 	}
 
+	@Override
 	public Object accept(IReportItemVisitor visitor, Object value) {
 		return visitor.visitDataItem(this, value);
 	}
 
 	/**
 	 * set the help info.
-	 * 
+	 *
 	 * @param key  resource key
 	 * @param text text content
 	 */
@@ -75,7 +79,7 @@ public class DataItemDesign extends ReportItemDesign {
 
 	/**
 	 * get the help text property.
-	 * 
+	 *
 	 * @return help text
 	 */
 	public String getHelpText() {
@@ -84,7 +88,7 @@ public class DataItemDesign extends ReportItemDesign {
 
 	/**
 	 * get the help text resource key property.
-	 * 
+	 *
 	 * @return resource key of the help text
 	 */
 	public String getHelpTextKey() {

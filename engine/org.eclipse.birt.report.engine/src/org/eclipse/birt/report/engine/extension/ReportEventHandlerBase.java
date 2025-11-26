@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -16,13 +19,15 @@ import org.eclipse.birt.core.exception.BirtException;
 /*
  * A sample implementation of IReportEventHandler. Customer could over-write onPrepare, onCreate,
  * onRender to process java scripts for extended items
- * 
+ *
  */
 public class ReportEventHandlerBase implements IReportEventHandler {
 
+	@Override
 	public void handle(IReportEvent event) throws BirtException {
-		if (event == null)
+		if (event == null) {
 			return;
+		}
 
 		int eventType = event.getEventType();
 		switch (eventType) {

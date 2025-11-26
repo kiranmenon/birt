@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 /**
  * TOC.java
  *
@@ -7,6 +19,12 @@
 
 package org.eclipse.birt.report.soapengine.api;
 
+/**
+ * Class for TOC (table of content)
+ *
+ * @since 3.3
+ *
+ */
 public class TOC implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 	private java.lang.String id;
@@ -16,9 +34,22 @@ public class TOC implements java.io.Serializable {
 	private java.lang.Boolean isLeaf;
 	private org.eclipse.birt.report.soapengine.api.TOC[] child;
 
+	/**
+	 * Constructor
+	 */
 	public TOC() {
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param id
+	 * @param displayName
+	 * @param bookmark
+	 * @param style
+	 * @param isLeaf
+	 * @param child
+	 */
 	public TOC(java.lang.String id, java.lang.String displayName, java.lang.String bookmark, java.lang.String style,
 			java.lang.Boolean isLeaf, org.eclipse.birt.report.soapengine.api.TOC[] child) {
 		this.id = id;
@@ -31,7 +62,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Gets the id value for this TOC.
-	 * 
+	 *
 	 * @return id
 	 */
 	public java.lang.String getId() {
@@ -40,7 +71,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Sets the id value for this TOC.
-	 * 
+	 *
 	 * @param id
 	 */
 	public void setId(java.lang.String id) {
@@ -49,7 +80,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Gets the displayName value for this TOC.
-	 * 
+	 *
 	 * @return displayName
 	 */
 	public java.lang.String getDisplayName() {
@@ -58,7 +89,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Sets the displayName value for this TOC.
-	 * 
+	 *
 	 * @param displayName
 	 */
 	public void setDisplayName(java.lang.String displayName) {
@@ -67,7 +98,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Gets the bookmark value for this TOC.
-	 * 
+	 *
 	 * @return bookmark
 	 */
 	public java.lang.String getBookmark() {
@@ -76,7 +107,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Sets the bookmark value for this TOC.
-	 * 
+	 *
 	 * @param bookmark
 	 */
 	public void setBookmark(java.lang.String bookmark) {
@@ -85,7 +116,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Gets the style value for this TOC.
-	 * 
+	 *
 	 * @return style
 	 */
 	public java.lang.String getStyle() {
@@ -94,7 +125,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Sets the style value for this TOC.
-	 * 
+	 *
 	 * @param style
 	 */
 	public void setStyle(java.lang.String style) {
@@ -103,7 +134,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Gets the isLeaf value for this TOC.
-	 * 
+	 *
 	 * @return isLeaf
 	 */
 	public java.lang.Boolean getIsLeaf() {
@@ -112,7 +143,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Sets the isLeaf value for this TOC.
-	 * 
+	 *
 	 * @param isLeaf
 	 */
 	public void setIsLeaf(java.lang.Boolean isLeaf) {
@@ -121,7 +152,7 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Gets the child value for this TOC.
-	 * 
+	 *
 	 * @return child
 	 */
 	public org.eclipse.birt.report.soapengine.api.TOC[] getChild() {
@@ -130,31 +161,47 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Sets the child value for this TOC.
-	 * 
+	 *
 	 * @param child
 	 */
 	public void setChild(org.eclipse.birt.report.soapengine.api.TOC[] child) {
 		this.child = child;
 	}
 
+	/**
+	 * Get the child
+	 *
+	 * @param i child index
+	 * @return Return the child
+	 */
 	public org.eclipse.birt.report.soapengine.api.TOC getChild(int i) {
 		return this.child[i];
 	}
 
+	/**
+	 * Set the value of child
+	 *
+	 * @param i      index of child
+	 * @param _value value for child
+	 */
 	public void setChild(int i, org.eclipse.birt.report.soapengine.api.TOC _value) {
 		this.child[i] = _value;
 	}
 
 	private java.lang.Object __equalsCalc = null;
 
+	@Override
 	public synchronized boolean equals(java.lang.Object obj) {
-		if (!(obj instanceof TOC))
+		if (!(obj instanceof TOC)) {
 			return false;
+		}
 		TOC other = (TOC) obj;
-		if (obj == null)
+		if (obj == null) {
 			return false;
-		if (this == obj)
+		}
+		if (this == obj) {
 			return true;
+		}
 		if (__equalsCalc != null) {
 			return (__equalsCalc == obj);
 		}
@@ -178,6 +225,7 @@ public class TOC implements java.io.Serializable {
 
 	private boolean __hashCodeCalc = false;
 
+	@Override
 	public synchronized int hashCode() {
 		if (__hashCodeCalc) {
 			return 0;
@@ -264,13 +312,20 @@ public class TOC implements java.io.Serializable {
 
 	/**
 	 * Return type metadata object
+	 *
+	 * @return Return type metadata object
 	 */
 	public static org.apache.axis.description.TypeDesc getTypeDesc() {
 		return typeDesc;
 	}
 
 	/**
-	 * Get Custom Serializer
+	 * Get custom serializer
+	 *
+	 * @param mechType
+	 * @param _javaType
+	 * @param _xmlType
+	 * @return Return the custom serializer
 	 */
 	public static org.apache.axis.encoding.Serializer getSerializer(java.lang.String mechType,
 			java.lang.Class _javaType, javax.xml.namespace.QName _xmlType) {
@@ -278,7 +333,12 @@ public class TOC implements java.io.Serializable {
 	}
 
 	/**
-	 * Get Custom Deserializer
+	 * Get custom deserializer
+	 *
+	 * @param mechType
+	 * @param _javaType
+	 * @param _xmlType
+	 * @return Return the custom deserializer
 	 */
 	public static org.apache.axis.encoding.Deserializer getDeserializer(java.lang.String mechType,
 			java.lang.Class _javaType, javax.xml.namespace.QName _xmlType) {

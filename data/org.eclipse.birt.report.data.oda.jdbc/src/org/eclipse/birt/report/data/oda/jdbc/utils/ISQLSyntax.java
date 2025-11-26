@@ -1,25 +1,30 @@
 /*******************************************************************************
- * Copyright (c) 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2005 Actuate Corporation, 2024
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
+ *  Thomas Gutmann       - enhance the syntax highlighting
  *******************************************************************************/
 
 package org.eclipse.birt.report.data.oda.jdbc.utils;
 
 /**
- * TODO: Please document
- * 
+ * Reserved SQL phrases, keywords and data types
+ *
  * @version $Revision: 1.2 $ $Date: 2007/02/01 10:58:58 $
  */
 
 public interface ISQLSyntax {
 
-	public static final String[] reservedwords = { "absolute", //$NON-NLS-1$
+	/** property: reserved SQL words */
+	String[] reservedwords = { "absolute", //$NON-NLS-1$
 			"acquire", //$NON-NLS-1$
 			"action", //$NON-NLS-1$
 			"add", //$NON-NLS-1$
@@ -38,6 +43,11 @@ public interface ISQLSyntax {
 			"avg", //$NON-NLS-1$
 			"begin", //$NON-NLS-1$
 			"between", //$NON-NLS-1$
+			"bfile", //$NON-NLS-1$
+			"binary", //$NON-NLS-1$
+			"binary_double", //$NON-NLS-1$
+			"binary_float", //$NON-NLS-1$
+			"bit", //$NON-NLS-1$
 			"bit_length", //$NON-NLS-1$
 			"both", //$NON-NLS-1$
 			"bufferpool", //$NON-NLS-1$
@@ -84,12 +94,16 @@ public interface ISQLSyntax {
 			"cursor", //$NON-NLS-1$
 			"database", //$NON-NLS-1$
 			"date", //$NON-NLS-1$
+			"datetime", //$NON-NLS-1$
+			"datetime2", //$NON-NLS-1$
 			"day", //$NON-NLS-1$
 			"days", //$NON-NLS-1$
 			"dba", //$NON-NLS-1$
+			"dbo", //$NON-NLS-1$
 			"dbspace", //$NON-NLS-1$
 			"deallocate", //$NON-NLS-1$
 			"dec", //$NON-NLS-1$
+			"decfloat", //$NON-NLS-1$
 			"decimal", //$NON-NLS-1$
 			"declare", //$NON-NLS-1$
 			"default", //$NON-NLS-1$
@@ -137,6 +151,7 @@ public interface ISQLSyntax {
 			"graphic", //$NON-NLS-1$
 			"group", //$NON-NLS-1$
 			"having", //$NON-NLS-1$
+			"hierarchyid", //$NON-NLS-1$
 			"hour", //$NON-NLS-1$
 			"hours", //$NON-NLS-1$
 			"identified", //$NON-NLS-1$
@@ -157,7 +172,8 @@ public interface ISQLSyntax {
 			"into", //$NON-NLS-1$
 			"is", //$NON-NLS-1$
 			"isolation", //$NON-NLS-1$
-			"join", //$NON-NLS-1$
+			"json", //$NON-NLS-1$
+			"jsonb", //$NON-NLS-1$
 			"join", //$NON-NLS-1$
 			"key", //$NON-NLS-1$
 			"label", //$NON-NLS-1$
@@ -172,6 +188,7 @@ public interface ISQLSyntax {
 			"lock", //$NON-NLS-1$
 			"locksize", //$NON-NLS-1$
 			"long", //$NON-NLS-1$
+			"long raw", //$NON-NLS-1$
 			"lower", //$NON-NLS-1$
 			"match", //$NON-NLS-1$
 			"max", //$NON-NLS-1$
@@ -182,6 +199,7 @@ public interface ISQLSyntax {
 			"minutes", //$NON-NLS-1$
 			"mode", //$NON-NLS-1$
 			"module", //$NON-NLS-1$
+			"money", //$NON-NLS-1$
 			"month", //$NON-NLS-1$
 			"months", //$NON-NLS-1$
 			"named", //$NON-NLS-1$
@@ -189,14 +207,18 @@ public interface ISQLSyntax {
 			"national", //$NON-NLS-1$
 			"natural", //$NON-NLS-1$
 			"nchar", //$NON-NLS-1$
+			"nclob", //$NON-NLS-1$
 			"next", //$NON-NLS-1$
 			"nheader", //$NON-NLS-1$
 			"no", //$NON-NLS-1$
 			"not", //$NON-NLS-1$
 			"null", //$NON-NLS-1$
 			"nullif", //$NON-NLS-1$
+			"number", //$NON-NLS-1$
 			"numeric", //$NON-NLS-1$
 			"numparts", //$NON-NLS-1$
+			"nvarchar", //$NON-NLS-1$
+			"nvarchar2", //$NON-NLS-1$
 			"obid", //$NON-NLS-1$
 			"octet_length", //$NON-NLS-1$
 			"of", //$NON-NLS-1$
@@ -210,6 +232,7 @@ public interface ISQLSyntax {
 			"out", //$NON-NLS-1$
 			"outer", //$NON-NLS-1$
 			"output", //$NON-NLS-1$
+			"over", // $NON-NLS-2$
 			"overlaps", //$NON-NLS-1$
 			"package", //$NON-NLS-1$
 			"pad", //$NON-NLS-1$
@@ -217,6 +240,7 @@ public interface ISQLSyntax {
 			"pages", //$NON-NLS-1$
 			"part", //$NON-NLS-1$
 			"partial", //$NON-NLS-1$
+			"partition by", //$NON-NLS-1$
 			"pctfree", //$NON-NLS-1$
 			"pctindex", //$NON-NLS-1$
 			"plan", //$NON-NLS-1$
@@ -232,7 +256,7 @@ public interface ISQLSyntax {
 			"procedure", //$NON-NLS-1$
 			"program", //$NON-NLS-1$
 			"public", //$NON-NLS-1$
-			"read", //$NON-NLS-1$
+			"raw", //$NON-NLS-1$
 			"real", //$NON-NLS-1$
 			"references", //$NON-NLS-1$
 			"relative", //$NON-NLS-1$
@@ -244,7 +268,9 @@ public interface ISQLSyntax {
 			"right", //$NON-NLS-1$
 			"rollback", //$NON-NLS-1$
 			"row", //$NON-NLS-1$
+			"rowid", //$NON-NLS-1$
 			"rows", //$NON-NLS-1$
+			"rowversion", //$NON-NLS-1$
 			"rrn", //$NON-NLS-1$
 			"run", //$NON-NLS-1$
 			"schedule", //$NON-NLS-1$
@@ -261,13 +287,16 @@ public interface ISQLSyntax {
 			"share", //$NON-NLS-1$
 			"simple", //$NON-NLS-1$
 			"size", //$NON-NLS-1$
+			"smalldatetime", //$NON-NLS-1$
 			"smallint", //$NON-NLS-1$
+			"smallmoney", //$NON-NLS-1$
 			"some", //$NON-NLS-1$
 			"space", //$NON-NLS-1$
 			"sql", //$NON-NLS-1$
 			"sqlcode", //$NON-NLS-1$
 			"sqlerror", //$NON-NLS-1$
 			"sqlstate", //$NON-NLS-1$
+			"sql_variant", //$NON-NLS-1$
 			"statistics", //$NON-NLS-1$
 			"stogroup", //$NON-NLS-1$
 			"storpool", //$NON-NLS-1$
@@ -279,9 +308,13 @@ public interface ISQLSyntax {
 			"table", //$NON-NLS-1$
 			"tablespace", //$NON-NLS-1$
 			"temporary", //$NON-NLS-1$
+			"text", //$NON-NLS-1$
 			"then", //$NON-NLS-1$
 			"timezone_hour", //$NON-NLS-1$
 			"timezone_minute", //$NON-NLS-1$
+			"timezone_region", //$NON-NLS-1$
+			"timezone_abbr", //$NON-NLS-1$
+			"tinyint", //$NON-NLS-1$
 			"to", //$NON-NLS-1$
 			"trailing", //$NON-NLS-1$
 			"transaction", //$NON-NLS-1$
@@ -289,9 +322,11 @@ public interface ISQLSyntax {
 			"trim", //$NON-NLS-1$
 			"union", //$NON-NLS-1$
 			"unique", //$NON-NLS-1$
+			"uniqueidentifier", //$NON-NLS-1$
 			"unknown", //$NON-NLS-1$
 			"update", //$NON-NLS-1$
 			"upper", //$NON-NLS-1$
+			"urowid", //$NON-NLS-1$
 			"usage", //$NON-NLS-1$
 			"user", //$NON-NLS-1$
 			"using", //$NON-NLS-1$
@@ -299,6 +334,8 @@ public interface ISQLSyntax {
 			"value", //$NON-NLS-1$
 			"values", //$NON-NLS-1$
 			"varchar", //$NON-NLS-1$
+			"varchar2", //$NON-NLS-1$
+			"varbinary", //$NON-NLS-1$
 			"variable", //$NON-NLS-1$
 			"varying", //$NON-NLS-1$
 			"vcat", //$NON-NLS-1$
@@ -310,6 +347,7 @@ public interface ISQLSyntax {
 			"with", //$NON-NLS-1$
 			"work", //$NON-NLS-1$
 			"write", //$NON-NLS-1$
+			"xml", //$NON-NLS-1$
 			"year", //$NON-NLS-1$
 			"years", //$NON-NLS-1$
 			"zone", //$NON-NLS-1$
@@ -317,12 +355,14 @@ public interface ISQLSyntax {
 			"true" //$NON-NLS-1$
 	};
 
-	public static final String[] predicates = { "< >", //$NON-NLS-1$
+	/** property: SQL predicates */
+	String[] predicates = { "< >", //$NON-NLS-1$
 			"=", //$NON-NLS-1$
 			"<", //$NON-NLS-1$
 			">", //$NON-NLS-1$
 			"<=", //$NON-NLS-1$
 			">=", //$NON-NLS-1$
+			"!=", //$NON-NLS-1$
 			"+", //$NON-NLS-1$
 			"-", //$NON-NLS-1$
 			"*", //$NON-NLS-1$
@@ -351,29 +391,73 @@ public interface ISQLSyntax {
 			"exists" //$NON-NLS-1$
 	};
 
-	public static final String[] types = { "integer", //$NON-NLS-1$
-			"smallinteger", //$NON-NLS-1$
+	/** property: SQL types */
+	String[] types = { "bfile", //$NON-NLS-1$
 			"bigint", //$NON-NLS-1$
+			"binary", //$NON-NLS-1$
+			"binary_double", //$NON-NLS-1$
+			"binary_float", //$NON-NLS-1$
+			"bit", //$NON-NLS-1$
+			"blob", //$NON-NLS-1$
+			"boolean", //$NON-NLS-1$
+			"char", //$NON-NLS-1$
+			"clob", //$NON-NLS-1$
+			"cursor", //$NON-NLS-1$
+			"datalink", //$NON-NLS-1$
+			"date", //$NON-NLS-1$
+			"datetime", //$NON-NLS-1$
+			"datetime2", //$NON-NLS-1$
+			"dbclob", //$NON-NLS-1$
+			"decfloat", //$NON-NLS-1$
 			"decimal", //$NON-NLS-1$
 			"double", //$NON-NLS-1$
+			"float", //$NON-NLS-1$
+			"graphic", //$NON-NLS-1$
+			"hierarchyid", //$NON-NLS-1$
+			"int", //$NON-NLS-1$
+			"integer", //$NON-NLS-1$
+			"interval", //$NON-NLS-1$
+			"json", //$NON-NLS-1$
+			"jsonb", //$NON-NLS-1$
+			"long raw", //$NON-NLS-1$
+			"long", //$NON-NLS-1$
+			"money", //$NON-NLS-1$
+			"nchar", //$NON-NLS-1$
+			"nclob", //$NON-NLS-1$
+			"ntext", //$NON-NLS-1$
+			"number", //$NON-NLS-1$
+			"numeric", //$NON-NLS-1$
+			"nvarchar", //$NON-NLS-1$
+			"nvarchar2", //$NON-NLS-1$
+			"raw", //$NON-NLS-1$
 			"real", //$NON-NLS-1$
+			"rowid", //$NON-NLS-1$
+			"rowversion", //$NON-NLS-1$
+			"smalldatetime", //$NON-NLS-1$
+			"smallint", //$NON-NLS-1$
+			"smallinteger", //$NON-NLS-1$
+			"smallmoney", //$NON-NLS-1$
+			"sql_variant", //$NON-NLS-1$
+			"table", //$NON-NLS-1$
+			"text", //$NON-NLS-1$
 			"time", //$NON-NLS-1$
 			"timestamp", //$NON-NLS-1$
-			"date", //$NON-NLS-1$
-			"datalink", //$NON-NLS-1$
-			"char", //$NON-NLS-1$
+			"tinyint", //$NON-NLS-1$
+			"uniqueidentifier", //$NON-NLS-1$
+			"urowid", //$NON-NLS-1$
+			"varbinary", //$NON-NLS-1$
 			"varchar", //$NON-NLS-1$
-			"blob", //$NON-NLS-1$
-			"clob", //$NON-NLS-1$
-			"graphic", //$NON-NLS-1$
+			"varchar2", //$NON-NLS-1$
 			"vargraphic", //$NON-NLS-1$
-			"dbclob" //$NON-NLS-1$
+			"xml" //$NON-NLS-1$
 	};
 
-	public static final String[] constants = { "false", "true", "null" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	/** property: SQL constants */
+	String[] constants = { "false", "true", "null" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	};
 
-	public static final String[] functions = { "abs", //$NON-NLS-1$
+	/** property: SQL functions */
+	String[] functions = { "abs", //$NON-NLS-1$
 			"absval", //$NON-NLS-1$
 			"acos", //$NON-NLS-1$
 			"ascii", //$NON-NLS-1$
@@ -426,6 +510,7 @@ public interface ISQLSyntax {
 			"hex", //$NON-NLS-1$
 			"hour", //$NON-NLS-1$
 			"insert", //$NON-NLS-1$
+			"int", //$NON-NLS-1$
 			"integer", //$NON-NLS-1$
 			"julian_day", //$NON-NLS-1$
 			"lcase", //$NON-NLS-1$
@@ -438,7 +523,6 @@ public interface ISQLSyntax {
 			"log10", //$NON-NLS-1$
 			"long_varchar", //$NON-NLS-1$
 			"long_vargraphic", //$NON-NLS-1$
-			"ltrim", //$NON-NLS-1$
 			"ltrim", //$NON-NLS-1$
 			"max", //$NON-NLS-1$
 			"microsecond", //$NON-NLS-1$
@@ -463,11 +547,9 @@ public interface ISQLSyntax {
 			"right", //$NON-NLS-1$
 			"round", //$NON-NLS-1$
 			"rtrim", //$NON-NLS-1$
-			"rtrim", //$NON-NLS-1$
 			"second", //$NON-NLS-1$
 			"sign", //$NON-NLS-1$
 			"sin", //$NON-NLS-1$
-			"smallint", //$NON-NLS-1$
 			"soundex", //$NON-NLS-1$
 			"space", //$NON-NLS-1$
 			"sqlcache_snapshot", //$NON-NLS-1$
@@ -483,6 +565,7 @@ public interface ISQLSyntax {
 			"timestamp_iso", //$NON-NLS-1$
 			"timestampdiff", //$NON-NLS-1$
 			"translate", //$NON-NLS-1$
+			"trim", //$NON-NLS-1$
 			"truncate", //$NON-NLS-1$
 			"trunc", //$NON-NLS-1$
 			"type_id", //$NON-NLS-1$

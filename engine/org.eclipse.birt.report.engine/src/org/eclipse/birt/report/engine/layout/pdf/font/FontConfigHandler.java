@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2008, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -18,46 +21,82 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * Font configuration handler
+ *
+ * @since 3.3
+ *
+ */
 public class FontConfigHandler extends DefaultHandler {
 
 	private FontMappingConfig config;
 
-	private Stack states = new Stack();
+	private Stack<ParseState> states = new Stack<ParseState>();
 
+	/**
+	 * Constructor
+	 *
+	 * @param config font mapping configuration
+	 */
 	public FontConfigHandler(FontMappingConfig config) {
 		this.config = config;
 		this.states.push(new RootState());
 	}
 
+	/**
+	 * @throws SAXException
+	 */
+	@Override
 	public void startElement(String uri, String localName, String rawName, Attributes attrs) throws SAXException {
-		ParseState state = (ParseState) states.peek();
+		ParseState state = states.peek();
 		state = state.startElement(rawName);
 		state.parseAttrs(attrs);
 		states.push(state);
 	}
 
+	/**
+	 * @throws SAXException
+	 */
+	@Override
 	public void endElement(String uri, String localName, String rawName) throws SAXException {
-		ParseState elementState = (ParseState) states.pop();
+		ParseState elementState = states.pop();
 		elementState.end();
-		ParseState state = (ParseState) states.peek();
+		ParseState state = states.peek();
 		state.endElement(elementState);
 	}
 
 	private static class ParseState {
 
+		/**
+		 * Parse element attribute
+		 *
+		 * @param attrs attribute
+		 */
 		public void parseAttrs(Attributes attrs) {
 		}
 
+		/**
+		 * Handle the start of element
+		 *
+		 * @param tagName tag name
+		 * @return parsed element instance
+		 */
 		public ParseState startElement(String tagName) {
 			return AnyElementState.instance;
 		}
 
+		/**
+		 * Handle the end of element
+		 *
+		 * @param state parsed element instance
+		 */
 		public void endElement(ParseState state) {
 		}
 
@@ -68,6 +107,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 			private static AnyElementState instance = new AnyElementState();
 
+			@Override
 			public ParseState startElement(String tagName) {
 				return instance;
 			}
@@ -105,8 +145,12 @@ public class FontConfigHandler extends DefaultHandler {
 	private final static String TAG_CHARACTER = "character"; //$NON-NLS-1$
 	private final static String ATTR_VALUE = "value"; //$NON-NLS-1$
 
+	private final static String TAG_FONT_KERNING_AND_LIGATURES = "kerning-and-ligatures"; //$NON-NLS-1$
+	private final static String ATTR_KERNING_AND_LIGATURES_ENABLED = "enabled"; //$NON-NLS-1$
+
 	private class RootState extends ParseState {
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_FONT.equals(tagValue)) {
@@ -118,6 +162,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 	private class FontState extends ParseState {
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_FONT_PATHS.equals(tagValue)) {
@@ -138,12 +183,16 @@ public class FontConfigHandler extends DefaultHandler {
 			if (TAG_COMPOSITE_FONT.equals(tagValue)) {
 				return new CompositeFontState();
 			}
+			if (TAG_FONT_KERNING_AND_LIGATURES.equals(tagValue)) {
+				return new FontKerningAndLigaturesState();
+			}
 			return super.startElement(tagName);
 		}
 	}
 
 	private class FontPathsState extends ParseState {
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_PATH.equals(tagValue)) {
@@ -154,6 +203,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 		class PathState extends ParseState {
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				String path = getStringValue(attrs, ATTR_PATH);
 				if (path != null) {
@@ -163,8 +213,20 @@ public class FontConfigHandler extends DefaultHandler {
 		}
 	}
 
+	private class FontKerningAndLigaturesState extends ParseState {
+
+		@Override
+		public void parseAttrs(Attributes attrs) {
+			String configKerningLigatures = getStringValue(attrs, ATTR_KERNING_AND_LIGATURES_ENABLED);
+			if (configKerningLigatures != null) {
+				config.setFontKerningAndLigatures(Boolean.valueOf(configKerningLigatures));
+			}
+		}
+	}
+
 	private class FontAliasesState extends ParseState {
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_MAPPING.equals(tagValue)) {
@@ -175,6 +237,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 		class AliasState extends ParseState {
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				String fontName = getStringValue(attrs, ATTR_NAME);
 				String fontFamily = getStringValue(attrs, ATTR_FONT_FAMILY);
@@ -187,6 +250,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 	private class FontEncodingsState extends ParseState {
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_ENCODING.equals(tagValue)) {
@@ -197,6 +261,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 		class EncodingState extends ParseState {
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				String fontFamily = getStringValue(attrs, ATTR_FONT_FAMILY);
 				String fontEncoding = getStringValue(attrs, ATTR_ENCODING);
@@ -209,12 +274,13 @@ public class FontConfigHandler extends DefaultHandler {
 
 	private class SearchSequencesState extends ParseState {
 
-		private HashMap sequences;
+		private HashMap<String, String[]> sequences;
 
-		SearchSequencesState(HashMap sequences) {
+		SearchSequencesState(HashMap<String, String[]> sequences) {
 			this.sequences = sequences;
 		}
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_SEQUENCE.equals(tagValue)) {
@@ -226,12 +292,14 @@ public class FontConfigHandler extends DefaultHandler {
 		class SequenceState extends ParseState {
 
 			private String locale;
-			private ArrayList catalogs = new ArrayList();
+			private ArrayList<String> catalogs = new ArrayList<String>();
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				locale = getStringValue(attrs, ATTR_LOCALE);
 			}
 
+			@Override
 			public ParseState startElement(String tagName) {
 				String tagValue = tagName.toLowerCase();
 				if (TAG_CATALOG.equals(tagValue)) {
@@ -240,6 +308,7 @@ public class FontConfigHandler extends DefaultHandler {
 				return super.startElement(tagName);
 			}
 
+			@Override
 			public void end() {
 				if (locale != null && !catalogs.isEmpty()) {
 					sequences.put(locale, catalogs.toArray(new String[] {}));
@@ -248,6 +317,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 			class CatalogState extends ParseState {
 
+				@Override
 				public void parseAttrs(Attributes attrs) {
 					String name = getStringValue(attrs, ATTR_NAME);
 					if (name != null) {
@@ -262,30 +332,30 @@ public class FontConfigHandler extends DefaultHandler {
 
 	private class AllFontState extends ParseState {
 
-		LinkedHashMap fonts = new LinkedHashMap();
+		LinkedHashMap<String, LinkedHashMap<String, ArrayList<CharSegment>>> fonts = new LinkedHashMap<String, LinkedHashMap<String, ArrayList<CharSegment>>>();
 
 		void addComponent(String fontName, int start, int end, String fontFamily) {
-			LinkedHashMap font = (LinkedHashMap) fonts.get(fontName);
+			LinkedHashMap<String, ArrayList<CharSegment>> font = fonts.get(fontName);
 			if (font == null) {
-				font = new LinkedHashMap();
+				font = new LinkedHashMap<String, ArrayList<CharSegment>>();
 				fonts.put(fontName, font);
 			}
-			ArrayList charSegs = (ArrayList) font.get(fontFamily);
+			ArrayList<CharSegment> charSegs = font.get(fontFamily);
 			if (charSegs == null) {
-				charSegs = new ArrayList();
+				charSegs = new ArrayList<CharSegment>();
 				font.put(fontFamily, charSegs);
 			}
 			charSegs.add(new CharSegment(start, end, fontFamily));
 		}
 
-		CompositeFontConfig createCompositeFont(String name, Map fonts) {
+		CompositeFontConfig createCompositeFont(String name, Map<String, ArrayList<CharSegment>> fonts) {
 			CompositeFontConfig config = new CompositeFontConfig(name);
-			Iterator iter = fonts.entrySet().iterator();
+			Iterator<Entry<String, ArrayList<CharSegment>>> iter = fonts.entrySet().iterator();
 			while (iter.hasNext()) {
-				Map.Entry entry = (Map.Entry) iter.next();
-				String fontName = (String) entry.getKey();
-				Collection charSegs = (Collection) entry.getValue();
-				CharSegment[] segment = (CharSegment[]) charSegs.toArray(new CharSegment[] {});
+				Map.Entry<String, ArrayList<CharSegment>> entry = iter.next();
+				String fontName = entry.getKey();
+				Collection<CharSegment> charSegs = entry.getValue();
+				CharSegment[] segment = charSegs.toArray(new CharSegment[] {});
 				CharSegment.sort(segment);
 				config.addFont(fontName, null);
 				config.addCharSegment(fontName, segment);
@@ -293,12 +363,14 @@ public class FontConfigHandler extends DefaultHandler {
 			return config;
 		}
 
+		@Override
 		public void end() {
-			Iterator iter = fonts.entrySet().iterator();
+			Iterator<Entry<String, LinkedHashMap<String, ArrayList<CharSegment>>>> iter = fonts.entrySet().iterator();
 			while (iter.hasNext()) {
-				Map.Entry entry = (Map.Entry) iter.next();
-				String fontName = (String) entry.getKey();
-				Map fonts = (Map) entry.getValue();
+				Entry<String, LinkedHashMap<String, ArrayList<CharSegment>>> entry = iter.next();
+				String fontName = entry.getKey();
+				LinkedHashMap<String, ArrayList<CharSegment>> fonts = entry
+						.getValue();
 				CompositeFontConfig fontConfig = createCompositeFont(fontName, fonts);
 				if (!fontConfig.getAllFonts().isEmpty()) {
 					config.addCompositeFont(fontConfig);
@@ -307,6 +379,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 		}
 
+		@Override
 		public ParseState startElement(String tagName) {
 			String tagValue = tagName.toLowerCase();
 			if (TAG_BLOCK.equals(tagValue)) {
@@ -320,11 +393,13 @@ public class FontConfigHandler extends DefaultHandler {
 			int rangeStart;
 			int rangeEnd;
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				rangeStart = getHexValue(attrs, ATTR_RANGE_START, -1);
 				rangeEnd = getHexValue(attrs, ATTR_RANGE_END, -1);
 			}
 
+			@Override
 			public ParseState startElement(String tagName) {
 				if (rangeStart != -1 && rangeEnd != -1) {
 					String tagValue = tagName.toLowerCase();
@@ -337,6 +412,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 			class MappingState extends ParseState {
 
+				@Override
 				public void parseAttrs(Attributes attrs) {
 					String name = getStringValue(attrs, ATTR_NAME);
 					String fontFamily = getStringValue(attrs, ATTR_FONT_FAMILY);
@@ -352,10 +428,10 @@ public class FontConfigHandler extends DefaultHandler {
 
 		private String fontName;
 		private String defaultFont;
-		private LinkedHashSet allFonts = new LinkedHashSet();
-		private HashMap fontCatalogs = new HashMap();;
-		private HashMap fontCharacters = new HashMap();
-		private LinkedHashMap fontBlocks = new LinkedHashMap();
+		private LinkedHashSet<String> allFonts = new LinkedHashSet<String>();
+		private HashMap<String, String> fontCatalogs = new HashMap<String, String>();
+		private HashMap<Integer, String> fontCharacters = new HashMap<Integer, String>();
+		private LinkedHashMap<String, ArrayList<CharSegment>> fontBlocks = new LinkedHashMap<String, ArrayList<CharSegment>>();
 
 		private void addCharacter(String fontFamily, int ch) {
 			fontCharacters.put(Integer.valueOf(ch), fontFamily);
@@ -363,9 +439,9 @@ public class FontConfigHandler extends DefaultHandler {
 
 		private void addBlock(String fontFamily, int start, int end) {
 			allFonts.add(fontFamily);
-			ArrayList list = (ArrayList) fontBlocks.get(fontFamily);
+			ArrayList<CharSegment> list = fontBlocks.get(fontFamily);
 			if (list == null) {
-				list = new ArrayList();
+				list = new ArrayList<CharSegment>();
 				fontBlocks.put(fontFamily, list);
 			}
 			list.add(new CharSegment(start, end, fontFamily));
@@ -381,16 +457,16 @@ public class FontConfigHandler extends DefaultHandler {
 				CompositeFontConfig fontConfig = new CompositeFontConfig(fontName);
 				fontConfig.setDefaultFont(defaultFont);
 				// the character always has the highest priority
-				ArrayList characters = new ArrayList();
-				Iterator iter = fontCharacters.entrySet().iterator();
-				while (iter.hasNext()) {
-					Map.Entry entry = (Map.Entry) iter.next();
-					int ch = ((Integer) entry.getKey()).intValue();
-					String fontFamily = (String) entry.getValue();
+				ArrayList<CharSegment> characters = new ArrayList<CharSegment>();
+				Iterator<Entry<Integer, String>> iterChars = fontCharacters.entrySet().iterator();
+				while (iterChars.hasNext()) {
+					Entry<Integer, String> entry = iterChars.next();
+					int ch = entry.getKey().intValue();
+					String fontFamily = entry.getValue();
 					characters.add(new CharSegment(ch, ch, fontFamily));
 				}
 				if (!characters.isEmpty()) {
-					CharSegment[] seg = (CharSegment[]) characters.toArray(new CharSegment[] {});
+					CharSegment[] seg = characters.toArray(new CharSegment[] {});
 					CharSegment.sort(seg);
 					fontConfig.setSpecialCharacters(seg);
 				}
@@ -399,12 +475,12 @@ public class FontConfigHandler extends DefaultHandler {
 				// add the font catalog
 				fontConfig.fontCatalogs.putAll(fontCatalogs);
 				// append the font indexes
-				iter = fontBlocks.entrySet().iterator();
-				while (iter.hasNext()) {
-					Map.Entry entry = (Map.Entry) iter.next();
-					String fontFamily = (String) entry.getKey();
-					Collection blocks = (Collection) entry.getValue();
-					CharSegment[] seg = (CharSegment[]) blocks.toArray(new CharSegment[] {});
+				Iterator<Entry<String, ArrayList<CharSegment>>> iterBlocks = fontBlocks.entrySet().iterator();
+				while (iterBlocks.hasNext()) {
+					Entry<String, ArrayList<CharSegment>> entry = iterBlocks.next();
+					String fontFamily = entry.getKey();
+					Collection<CharSegment> blocks = entry.getValue();
+					CharSegment[] seg = blocks.toArray(new CharSegment[] {});
 					CharSegment.normalize(seg);
 					fontConfig.addCharSegment(fontFamily, seg);
 				}
@@ -413,6 +489,7 @@ public class FontConfigHandler extends DefaultHandler {
 			return null;
 		}
 
+		@Override
 		public void parseAttrs(Attributes attrs) {
 			fontName = getStringValue(attrs, ATTR_NAME);
 			if (fontName != null) {
@@ -420,6 +497,7 @@ public class FontConfigHandler extends DefaultHandler {
 			}
 		}
 
+		@Override
 		public void end() {
 			CompositeFontConfig fontConfig = createCompositeFont();
 			if (fontConfig != null) {
@@ -427,6 +505,7 @@ public class FontConfigHandler extends DefaultHandler {
 			}
 		}
 
+		@Override
 		public ParseState startElement(String tagName) {
 			if (fontName != null) {
 				String tagValue = tagName.toLowerCase();
@@ -448,6 +527,7 @@ public class FontConfigHandler extends DefaultHandler {
 			private String fontFamily;
 			private String catalog;
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				fontFamily = getStringValue(attrs, ATTR_FONT_FAMILY);
 				catalog = getStringValue(attrs, ATTR_CATALOG);
@@ -456,6 +536,7 @@ public class FontConfigHandler extends DefaultHandler {
 				}
 			}
 
+			@Override
 			public ParseState startElement(String tagName) {
 				if (fontFamily != null) {
 					String tagValue = tagName.toLowerCase();
@@ -468,6 +549,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 			private class BlockState extends ParseState {
 
+				@Override
 				public void parseAttrs(Attributes attrs) {
 					int start = getIntValue(attrs, ATTR_START, -1);
 					int end = getIntValue(attrs, ATTR_END, start);
@@ -480,6 +562,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 		private class BlockState extends ParseState {
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				String fontFamily = getStringValue(attrs, ATTR_FONT_FAMILY);
 				if (fontFamily != null) {
@@ -501,6 +584,7 @@ public class FontConfigHandler extends DefaultHandler {
 
 		private class CharacterState extends ParseState {
 
+			@Override
 			public void parseAttrs(Attributes attrs) {
 				String fontFamily = getStringValue(attrs, ATTR_FONT_FAMILY);
 				if (fontFamily != null) {

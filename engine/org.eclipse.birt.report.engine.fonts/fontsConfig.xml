@@ -1,7 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <!--
+ *******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
+<!--
+	Location of fonts configuration files
+	
+	The font configuration files are located at different locations dependent at the runtime version of BIRT which is used.
+	a. BIRT runtime
+		- location:	.../lib/org.eclipse.birt.runtime_<version>.jar
+		- the configuration files fontsConfg*.xml located into the jar file
+		- the processing is:
+			1. unzip the jar file
+			2. change the fonts.Config.xml settings
+			3. pack the jar file with the changed configuration
+	b. BIRT runtime OSGi
+		- location: .../WEB-INF/platform/plugins/org.eclipse.birt.report.engine.fonts_<version>
+		- the configuration can be entered into the xml files
+			
+	
+	Handling of fonts configuration files:
+	
 	The priority of fonts configuration file is as following:
 	Two major levels of configuration files:
 	1. Configuration files without format in name are divided into three sub-levels:
@@ -34,6 +64,9 @@
 	currently "Times-Roman", to denote a place of missing character. 
 -->
 <font>
+	<!-- font advanced kerning ligatures will be used, enabled: false/unused (default), true/used -->
+	<kerning-and-ligatures enabled="false" />
+
 <!--
 	In <font-aliases> section, you can:
 	a. Define a mapping from a generic family to a font family.

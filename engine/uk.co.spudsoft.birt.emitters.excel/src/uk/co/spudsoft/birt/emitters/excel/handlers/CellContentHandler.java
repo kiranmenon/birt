@@ -1,28 +1,35 @@
 /*************************************************************************************
- * Copyright (c) 2011, 2012, 2013 James Talbut.
+ * Copyright (c) 2011, 2012, 2013, 2024, 2025 James Talbut and others
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
 
 package uk.co.spudsoft.birt.emitters.excel.handlers;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -36,8 +43,10 @@ import org.eclipse.birt.report.engine.api.IHTMLActionHandler;
 import org.eclipse.birt.report.engine.api.impl.Action;
 import org.eclipse.birt.report.engine.content.ICellContent;
 import org.eclipse.birt.report.engine.content.IContent;
+import org.eclipse.birt.report.engine.content.IForeignContent;
 import org.eclipse.birt.report.engine.content.IHyperlinkAction;
 import org.eclipse.birt.report.engine.content.IImageContent;
+import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.css.engine.value.StringValue;
 import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
@@ -45,6 +54,8 @@ import org.eclipse.birt.report.engine.emitter.IContentEmitter;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.engine.layout.emitter.Image;
 import org.eclipse.birt.report.engine.presentation.ContentEmitterVisitor;
+import org.eclipse.birt.report.engine.util.SvgFile;
+import org.w3c.dom.css.CSSPrimitiveValue;
 import org.w3c.dom.css.CSSValue;
 
 import uk.co.spudsoft.birt.emitters.excel.Area;
@@ -61,6 +72,12 @@ import uk.co.spudsoft.birt.emitters.excel.StyleManager;
 import uk.co.spudsoft.birt.emitters.excel.StyleManagerUtils;
 import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
 
+/**
+ * Cell content handler
+ *
+ * @since 3.3
+ *
+ */
 public class CellContentHandler extends AbstractHandler {
 
 	/**
@@ -73,6 +90,10 @@ public class CellContentHandler extends AbstractHandler {
 	 * The last value added to a cell
 	 */
 	protected Object lastValue;
+	/**
+	 * The last value added to a cell
+	 */
+	protected String lastFormula;
 	/**
 	 * The BIRT element that provided the lastValue
 	 */
@@ -113,12 +134,32 @@ public class CellContentHandler extends AbstractHandler {
 	 */
 	protected String hyperlinkBookmark;
 
+	private static final String URL_IMAGE_TYPE_SVG = "image/svg+xml";
+	private static final String URL_PROTOCOL_TYPE_FILE = "file:";
+	private static final String URL_PROTOCOL_TYPE_DATA = "data:";
+	private static final String URL_PROTOCOL_TYPE_DATA_BASE = ";base64,";
+	private static final String URL_PROTOCOL_TYPE_DATA_UTF8 = ";utf8,";
+	private static final String URL_PROTOCOL_URL_ENCODED_SPACE = "%20";
+
+	private static final String STYLE_OVERLAY_DEFAULT_UNIT = "mm";
+
+	private static final double DOTS_PER_INCH = 96.0;
+
+	/**
+	 * Constructor
+	 *
+	 * @param emitter content emitter
+	 * @param log     log object
+	 * @param parent  parent handler
+	 * @param cell    cell content
+	 */
 	public CellContentHandler(IContentEmitter emitter, Logger log, IHandler parent, ICellContent cell) {
 		super(log, parent, cell);
 		contentVisitor = new ContentEmitterVisitor(emitter);
 		colSpan = 1;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void startCell(HandlerState state, ICellContent cell) throws BirtException {
 		if (cell.getBookmark() != null) {
@@ -128,7 +169,7 @@ public class CellContentHandler extends AbstractHandler {
 
 	/**
 	 * Finish processing for the current (real) cell.
-	 * 
+	 *
 	 * @param element The element that signifies the end of the cell (this may not
 	 *                be an ICellContent object if the cell is created for a label
 	 *                or text outside of a table).
@@ -136,8 +177,9 @@ public class CellContentHandler extends AbstractHandler {
 	protected void endCellContent(HandlerState state, ICellContent birtCell, IContent element, Cell cell, Area area) {
 		StyleManager sm = state.getSm();
 		StyleManagerUtils smu = state.getSmu();
-
 		BirtStyle birtCellStyle = null;
+		boolean isStyleExactCopy = false;
+
 		if (birtCell != null) {
 			birtCellStyle = new BirtStyle(birtCell);
 			if (element != null) {
@@ -146,6 +188,7 @@ public class CellContentHandler extends AbstractHandler {
 			}
 		} else if (element != null) {
 			birtCellStyle = new BirtStyle(element);
+			isStyleExactCopy = true;
 		} else {
 			birtCellStyle = new BirtStyle(state.getSm().getCssEngine());
 		}
@@ -157,16 +200,42 @@ public class CellContentHandler extends AbstractHandler {
 				birtCellStyle.setProperty(StyleConstants.STYLE_BACKGROUND_COLOR, parent.getBackgroundColour());
 			}
 		}
+		birtCellStyle.setTextIndentInUse(EmitterServices.booleanOption(state.getRenderOptions(), element,
+				ExcelEmitter.DISPLAY_TEXT_INDENT, true));
+		birtCellStyle.setTextIndentMode(EmitterServices.stringOption(state.getRenderOptions(), element,
+				ExcelEmitter.TEXT_INDENT_MODE, ExcelEmitter.TEXT_INDENT_MODE_SPACING_ALL));
+
 		if (hyperlinkUrl != null) {
-			Hyperlink hyperlink = cell.getSheet().getWorkbook().getCreationHelper().createHyperlink(Hyperlink.LINK_URL);
+			Hyperlink hyperlink = cell.getSheet().getWorkbook().getCreationHelper()
+					.createHyperlink(HyperlinkType.URL);
 			hyperlink.setAddress(hyperlinkUrl);
 			cell.setHyperlink(hyperlink);
+			// styling of hyperlink (text decoration: blue and underline)
+			if (birtCellStyle.getProperty(StyleConstants.STYLE_TEXT_HYPERLINK_STYLE).getCssText()
+					.equals(CSSConstants.CSS_TEXT_HYPERLINK_DECORATION_VALUE)) {
+				birtCellStyle.setProperty(StyleConstants.STYLE_COLOR,
+						new StringValue(CSSPrimitiveValue.CSS_STRING, CSSConstants.CSS_BLUE_VALUE));
+				birtCellStyle.setProperty(StyleConstants.STYLE_TEXT_UNDERLINE,
+						new StringValue(CSSPrimitiveValue.CSS_STRING, CSSConstants.CSS_UNDERLINE_VALUE));
+			}
 		}
 		if (hyperlinkBookmark != null) {
 			Hyperlink hyperlink = cell.getSheet().getWorkbook().getCreationHelper()
-					.createHyperlink(Hyperlink.LINK_DOCUMENT);
+					.createHyperlink(HyperlinkType.DOCUMENT);
 			hyperlink.setAddress(prepareName(hyperlinkBookmark));
 			cell.setHyperlink(hyperlink);
+			// styling of hyperlink (text decoration: blue and underline)
+			if (birtCellStyle.getProperty(StyleConstants.STYLE_TEXT_HYPERLINK_STYLE).getCssText()
+					.equals(CSSConstants.CSS_TEXT_HYPERLINK_DECORATION_VALUE)) {
+				birtCellStyle.setProperty(StyleConstants.STYLE_COLOR,
+						new StringValue(CSSPrimitiveValue.CSS_STRING, CSSConstants.CSS_BLUE_VALUE));
+				birtCellStyle.setProperty(StyleConstants.STYLE_TEXT_UNDERLINE,
+						new StringValue(CSSPrimitiveValue.CSS_STRING, CSSConstants.CSS_UNDERLINE_VALUE));
+			}
+		}
+
+		if ((lastFormula != null) && (lastValue == null)) {
+			setCellContents(cell, null, lastFormula);
 		}
 
 		if (lastValue != null) {
@@ -197,49 +266,81 @@ public class CellContentHandler extends AbstractHandler {
 					log.debug("Finalising with ", runStart, " - ", lastString.length());
 					rich.applyFont(runStart, lastString.length(), lastFont);
 
-					setCellContents(cell, rich);
+					setCellContents(cell, rich, lastFormula);
 				} else {
-					setCellContents(cell, lastString);
+					setCellContents(cell, lastString, lastFormula);
 				}
 
-				if (lastString.contains("\n")) {
-					if (!CSSConstants.CSS_NOWRAP_VALUE.equals(lastElement.getStyle().getWhiteSpace())) {
-						birtCellStyle.setProperty(StyleConstants.STYLE_WHITE_SPACE,
-								new StringValue(StringValue.CSS_STRING, CSSConstants.CSS_PRE_VALUE));
+				if (birtCell != null) {
+					if (lastString.contains("\n")) {
+						if (!CSSConstants.CSS_NOWRAP_VALUE.equals(lastElement.getStyle().getWhiteSpace())) {
+							birtCellStyle.setProperty(StyleConstants.STYLE_WHITE_SPACE,
+									new StringValue(CSSPrimitiveValue.CSS_STRING, CSSConstants.CSS_PRE_VALUE));
+						}
+					}
+					if (preferredAlignment != null) {
+						birtCellStyle.setProperty(StyleConstants.STYLE_TEXT_ALIGN, preferredAlignment);
 					}
 				}
-				if (!richTextRuns.isEmpty()) {
-					birtCellStyle.setProperty(StyleConstants.STYLE_VERTICAL_ALIGN,
-							new StringValue(StringValue.CSS_STRING, CSSConstants.CSS_TOP_VALUE));
-				}
-				if (preferredAlignment != null) {
-					birtCellStyle.setProperty(StyleConstants.STYLE_TEXT_ALIGN, preferredAlignment);
-				}
-
 			} else {
-				setCellContents(cell, lastValue);
+				setCellContents(cell, lastValue, lastFormula);
 			}
 		}
 
+		if (birtCell != null && birtCell.getDiagonalNumber() >= 1
+				&& !"none".equalsIgnoreCase(birtCell.getDiagonalStyle())) {
+			String diagonalWidth = null;
+			if (birtCell.getDiagonalWidth() != null) {
+				diagonalWidth = birtCell.getDiagonalWidth().toString();
+			}
+			birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_DIAGONAL_WIDTH,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, diagonalWidth));
+			birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_DIAGONAL_COLOR,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, birtCell.getDiagonalColor()));
+			birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_DIAGONAL_STYLE,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, birtCell.getDiagonalStyle()));
+		}
+
+		if (birtCell != null && birtCell.getAntidiagonalNumber() >= 1
+				&& !"none".equalsIgnoreCase(birtCell.getAntidiagonalStyle())) {
+			String antidiagonalWidth = null;
+			if (birtCell.getAntidiagonalWidth() != null) {
+				antidiagonalWidth = birtCell.getAntidiagonalWidth().toString();
+			}
+			birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_WIDTH,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, antidiagonalWidth));
+			birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_COLOR,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, birtCell.getAntidiagonalColor()));
+			birtCellStyle.setProperty(StyleConstants.STYLE_BORDER_ANTIDIAGONAL_STYLE,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, birtCell.getAntidiagonalStyle()));
+
+		}
+
 		int colIndex = cell.getColumnIndex();
-		state.getSmu().applyAreaBordersToCell(state.areaBorders, cell, birtCellStyle, state.rowNum, colIndex);
+
+		if (birtCellStyle != null) {
+			state.getSmu().applyAreaBordersToCell(state.areaBorders, cell, birtCellStyle, state.rowNum, colIndex);
+		}
 
 		if ((birtCell != null) && ((birtCell.getColSpan() > 1) || (birtCell.getRowSpan() > 1))) {
 			AreaBorders mergedRegionBorders = AreaBorders.createForMergedCells(state.rowNum + birtCell.getRowSpan() - 1,
-					colIndex, colIndex + birtCell.getColSpan() - 1, state.rowNum, birtCellStyle);
+					colIndex, colIndex + birtCell.getColSpan() - 1, state.rowNum, 1, 1, birtCellStyle);
 			if (mergedRegionBorders != null) {
 				state.insertBorderOverload(mergedRegionBorders);
 			}
 		}
 
-		String customNumberFormat = EmitterServices.stringOption(state.getRenderOptions(), element,
-				ExcelEmitter.CUSTOM_NUMBER_FORMAT, null);
-		if (customNumberFormat != null) {
-			StyleManagerUtils.setNumberFormat(birtCellStyle, ExcelEmitter.CUSTOM_NUMBER_FORMAT + customNumberFormat,
-					null);
-		}
+		if (birtCellStyle != null) {
+			String customNumberFormat = EmitterServices.stringOption(state.getRenderOptions(), element,
+					ExcelEmitter.CUSTOM_NUMBER_FORMAT, null);
+			if (customNumberFormat != null) {
+				StyleManagerUtils.setNumberFormat(birtCellStyle, ExcelEmitter.CUSTOM_NUMBER_FORMAT + customNumberFormat,
+						null);
+			}
 
-		setCellStyle(sm, cell, birtCellStyle, lastValue);
+			overlayBirtCellStyleSpacing(smu, birtCellStyle, element, isStyleExactCopy);
+			setCellStyle(sm, cell, birtCellStyle, lastValue);
+		}
 
 		// Excel auto calculates the row height (if it isn't specified) as long as the
 		// cell isn't merged - if it is merged I have to do it
@@ -251,7 +352,7 @@ public class CellContentHandler extends AbstractHandler {
 			double cellWidth = spanWidthMillimetres(state.currentSheet, cell.getColumnIndex(),
 					cell.getColumnIndex() + colSpan - 1);
 			float cellDesiredHeight = smu.calculateTextHeightPoints(cell.getStringCellValue(), defaultFont, cellWidth,
-					richTextRuns);
+					richTextRuns, cell.getCellStyle().getWrapText());
 			if (cellDesiredHeight > state.requiredRowHeightInPoints) {
 				int rowSpan = birtCell.getRowSpan();
 				if (rowSpan < 2) {
@@ -285,13 +386,127 @@ public class CellContentHandler extends AbstractHandler {
 		}
 
 		lastValue = null;
+		lastFormula = null;
 		lastElement = null;
 		richTextRuns.clear();
 	}
 
+	/*
+	 * Overlay to set the margin and padding spacing for the BirtStyle of the excel
+	 * cell
+	 */
+	private BirtStyle overlayBirtCellStyleSpacing(StyleManagerUtils smu, BirtStyle birtCellStyle, IContent element,
+			boolean isStyleExactCopy) {
+
+		// Overlay of spacing
+		if (element != null && element.getStyle() != null) {
+			IStyle elemStyle = element.getStyle();
+			IContent fc = null;
+			double paddingLeftValueElementContent = 0.0;
+			double paddingRightValueElementContent = 0.0;
+
+			// Computed style: values of html-typed elements won't be inherited
+			// Foreign content: original container of the html-elements
+			try {
+				fc = (IContent) element.getParent().getParent();
+			} catch (Exception e) {
+				/* do nothing */
+			}
+			if (fc != null && fc instanceof IForeignContent && fc.getStyle() != null) {
+				elemStyle = fc.getStyle();
+			}
+
+			// Padding calculation: cell content and element content
+
+			// Avoid the element usage if the birtCellStyle is a copy of the element
+			if (!isStyleExactCopy) {
+
+				// Element content: padding left/right of the cell
+				String paddingLeftElementContent = (elemStyle.getProperty(StyleConstants.STYLE_PADDING_LEFT) != null)
+						? elemStyle.getProperty(StyleConstants.STYLE_PADDING_LEFT).getCssText()
+						: ("0" + STYLE_OVERLAY_DEFAULT_UNIT);
+				String paddingRightElementContent = (elemStyle.getProperty(StyleConstants.STYLE_PADDING_RIGHT) != null)
+						? elemStyle.getProperty(StyleConstants.STYLE_PADDING_RIGHT).getCssText()
+						: ("0" + STYLE_OVERLAY_DEFAULT_UNIT);
+
+				// Element padding values
+				paddingLeftValueElementContent = smu
+						.convertDimensionToMillimetres(DimensionType.parserUnit(paddingLeftElementContent));
+				paddingRightValueElementContent = smu
+						.convertDimensionToMillimetres(DimensionType.parserUnit(paddingRightElementContent));
+			}
+			// Element content: margin left/right of the element
+			CSSValue marginLeftElementContent = elemStyle.getProperty(StyleConstants.STYLE_MARGIN_LEFT);
+			CSSValue marginRightElementContent = elemStyle.getProperty(StyleConstants.STYLE_MARGIN_RIGHT);
+
+			// Calculation the sum of the cell & element padding
+
+			// Cell content: padding left/right of the cell
+			String paddingLeftCellContent = (birtCellStyle.getProperty(StyleConstants.STYLE_PADDING_LEFT) != null)
+					? birtCellStyle.getProperty(StyleConstants.STYLE_PADDING_LEFT).getCssText()
+					: ("0" + STYLE_OVERLAY_DEFAULT_UNIT);
+			String paddingRightCellContent = (birtCellStyle.getProperty(StyleConstants.STYLE_PADDING_RIGHT) != null)
+					? birtCellStyle.getProperty(StyleConstants.STYLE_PADDING_RIGHT).getCssText()
+					: ("0" + STYLE_OVERLAY_DEFAULT_UNIT);
+
+			// Cell padding values
+			double paddingLeftValueCellContent = smu.convertDimensionToMillimetres(DimensionType
+					.parserUnit(paddingLeftCellContent));
+			double paddingRightValueCellContent = smu.convertDimensionToMillimetres(DimensionType
+					.parserUnit(paddingRightCellContent));
+
+			// Validation of the text indent mode
+			if (birtCellStyle.getTextIndentMode().equals(ExcelEmitter.TEXT_INDENT_MODE_SPACING_CELL)) {
+
+				// use cell padding to calculate the indent (reset element spacing)
+				marginLeftElementContent = new StringValue(CSSPrimitiveValue.CSS_STRING,
+						"0" + STYLE_OVERLAY_DEFAULT_UNIT);
+				marginRightElementContent = new StringValue(CSSPrimitiveValue.CSS_STRING,
+						"0" + STYLE_OVERLAY_DEFAULT_UNIT);
+
+				paddingLeftValueElementContent = 0.0;
+				paddingRightValueElementContent = 0.0;
+
+			} else if (birtCellStyle.getTextIndentMode().equals(ExcelEmitter.TEXT_INDENT_MODE_SPACING_ELEMENT)) {
+				// use element padding & margin to calculate the indent (reset cell spacing)
+				paddingLeftValueCellContent = 0.0;
+				paddingRightValueCellContent = 0.0;
+
+			} else {
+				// use cell padding & element padding & element margin to calculate the indent
+			}
+
+			// Sum of padding values rounded based on 4 decimals
+			double paddingLeftValueNew = Math
+					.round((paddingLeftValueElementContent + paddingLeftValueCellContent) * 1000.0) / 1000.0;
+			double paddingRightValueNew = Math
+					.round((paddingRightValueElementContent + paddingRightValueCellContent) * 1000.0) / 1000.0;
+
+			// Set the margin and padding for the finalized cell style
+			birtCellStyle.setProperty(StyleConstants.STYLE_MARGIN_LEFT, marginLeftElementContent);
+			birtCellStyle.setProperty(StyleConstants.STYLE_MARGIN_RIGHT, marginRightElementContent);
+			birtCellStyle.setProperty(StyleConstants.STYLE_PADDING_LEFT,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, paddingLeftValueNew + STYLE_OVERLAY_DEFAULT_UNIT));
+			birtCellStyle.setProperty(StyleConstants.STYLE_PADDING_RIGHT,
+					new StringValue(CSSPrimitiveValue.CSS_STRING, paddingRightValueNew + STYLE_OVERLAY_DEFAULT_UNIT));
+
+			// Override based on the original color content values
+			if (elemStyle.getProperty(StyleConstants.STYLE_BACKGROUND_COLOR) != null) {
+				birtCellStyle.setProperty(StyleConstants.STYLE_BACKGROUND_COLOR,
+						elemStyle.getProperty(StyleConstants.STYLE_BACKGROUND_COLOR));
+			}
+			if (elemStyle.getProperty(StyleConstants.STYLE_COLOR) != null) {
+				birtCellStyle.setProperty(StyleConstants.STYLE_COLOR,
+						elemStyle.getProperty(StyleConstants.STYLE_COLOR));
+			}
+		}
+
+		return birtCellStyle;
+	}
+
 	/**
 	 * Calculate the width of a set of columns, in millimetres.
-	 * 
+	 *
 	 * @param startCol The first column to consider (inclusive).
 	 * @param endCol   The last column to consider (inclusive).
 	 * @return The sum of the widths of all columns between startCol and endCol
@@ -308,56 +523,70 @@ public class CellContentHandler extends AbstractHandler {
 	/**
 	 * Set the contents of an empty cell. This should now be the only way in which a
 	 * cell value is set (cells should not be modified).
-	 * 
+	 *
 	 * @param value   The value to set.
 	 * @param element The BIRT element supplying the value, used to set the style of
 	 *                the cell.
 	 */
-	private <T> void setCellContents(Cell cell, Object value) {
+	private <T> void setCellContents(Cell cell, Object value, String formula) {
 		log.debug("Setting cell[", cell.getRow().getRowNum(), ",", cell.getColumnIndex(), "] value to ", value);
-		if (value instanceof Double) {
-			// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-			cell.setCellValue((Double) value);
-			lastValue = value;
-		} else if (value instanceof Integer) {
-			// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-			cell.setCellValue((Integer) value);
-			lastValue = value;
-		} else if (value instanceof Long) {
-			// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-			cell.setCellValue((Long) value);
-			lastValue = value;
-		} else if (value instanceof Date) {
-			// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-			cell.setCellValue((Date) value);
-			lastValue = value;
-		} else if (value instanceof Boolean) {
-			// cell.setCellType(Cell.CELL_TYPE_BOOLEAN);
-			cell.setCellValue(((Boolean) value).booleanValue());
-			lastValue = value;
-		} else if (value instanceof BigDecimal) {
-			// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
-			cell.setCellValue(((BigDecimal) value).doubleValue());
-			lastValue = value;
-		} else if (value instanceof String) {
-			// cell.setCellType(Cell.CELL_TYPE_STRING);
-			cell.setCellValue((String) value);
-			lastValue = value;
-		} else if (value instanceof RichTextString) {
-			// cell.setCellType(Cell.CELL_TYPE_STRING);
-			cell.setCellValue((RichTextString) value);
-			lastValue = value;
-		} else if (value != null) {
-			log.debug("Unhandled data: ", (value == null ? "<null>" : value));
-			// cell.setCellType(Cell.CELL_TYPE_STRING);
-			cell.setCellValue(value.toString());
-			lastValue = value;
+
+		if (formula != null) {
+			formula = formula.trim();
+			if (formula.startsWith("=")) {
+				formula = formula.substring(1).trim();
+				cell.setCellFormula(formula);
+			} else {
+				value = formula;
+				formula = null;
+			}
+		}
+
+		if (value != null) {
+			if (value instanceof Double) {
+				// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+				cell.setCellValue((Double) value);
+				lastValue = value;
+			} else if (value instanceof Integer) {
+				// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+				cell.setCellValue((Integer) value);
+				lastValue = value;
+			} else if (value instanceof Long) {
+				// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+				cell.setCellValue((Long) value);
+				lastValue = value;
+			} else if (value instanceof Date) {
+				// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+				cell.setCellValue((Date) value);
+				lastValue = value;
+			} else if (value instanceof Boolean) {
+				// cell.setCellType(Cell.CELL_TYPE_BOOLEAN);
+				cell.setCellValue(((Boolean) value).booleanValue());
+				lastValue = value;
+			} else if (value instanceof BigDecimal) {
+				// cell.setCellType(Cell.CELL_TYPE_NUMERIC);
+				cell.setCellValue(((BigDecimal) value).doubleValue());
+				lastValue = value;
+			} else if (value instanceof String) {
+				// cell.setCellType(Cell.CELL_TYPE_STRING);
+				cell.setCellValue((String) value);
+				lastValue = value;
+			} else if (value instanceof RichTextString) {
+				// cell.setCellType(Cell.CELL_TYPE_STRING);
+				cell.setCellValue((RichTextString) value);
+				lastValue = value;
+			} else if (value != null) {
+				log.debug("Unhandled data: ", (value == null ? "<null>" : value));
+				// cell.setCellType(Cell.CELL_TYPE_STRING);
+				cell.setCellValue(value.toString());
+				lastValue = value;
+			}
 		}
 	}
 
 	/**
 	 * Set the style of the current cell based on the style of a BIRT element.
-	 * 
+	 *
 	 * @param element The BIRT element to take the style from.
 	 */
 	@SuppressWarnings("deprecation")
@@ -388,7 +617,7 @@ public class CellContentHandler extends AbstractHandler {
 	private CSSValue preferredAlignment(BirtStyle elementStyle) {
 		CSSValue newAlign = elementStyle.getProperty(StyleConstants.STYLE_TEXT_ALIGN);
 		if (newAlign == null) {
-			newAlign = new StringValue(StringValue.CSS_STRING, CSSConstants.CSS_LEFT_VALUE);
+			newAlign = new StringValue(CSSPrimitiveValue.CSS_STRING, CSSConstants.CSS_LEFT_VALUE);
 		}
 		if (preferredAlignment == null) {
 			return newAlign;
@@ -396,21 +625,19 @@ public class CellContentHandler extends AbstractHandler {
 		if (CSSConstants.CSS_LEFT_VALUE.equals(newAlign.getCssText())) {
 			return newAlign;
 		} else if (CSSConstants.CSS_RIGHT_VALUE.equals(newAlign.getCssText())) {
-			if (CSSConstants.CSS_CENTER_VALUE.equals(preferredAlignment)) {
+			if (CSSConstants.CSS_CENTER_VALUE.equals(preferredAlignment.getCssText())) {
 				return newAlign;
-			} else {
-				return preferredAlignment;
 			}
-		} else {
 			return preferredAlignment;
 		}
+		return preferredAlignment;
 	}
 
 	/**
 	 * Set the contents of the current cell. If the current cell is empty this will
 	 * format the cell optimally for the new value, if the current cell already has
 	 * some contents this will simply append the text value to the current contents.
-	 * 
+	 *
 	 * @param value The value to put into the current cell.
 	 */
 	protected void emitContent(HandlerState state, IContent element, Object value, boolean asBlock) {
@@ -422,8 +649,21 @@ public class CellContentHandler extends AbstractHandler {
 					state.colNum);
 		}
 
-		if (lastValue == null) {
-			lastValue = value;
+		String formula = EmitterServices.stringOption(null, element, ExcelEmitter.FORMULA, null);
+		if ((formula == null) && EmitterServices.booleanOption(null, element, ExcelEmitter.VALUE_AS_FORMULA, false)) {
+			formula = value != null ? value.toString() : null;
+			value = null;
+		}
+		if (lastFormula == null && formula != null) {
+			lastFormula = formula;
+		}
+
+		if (value == null && formula == null) {
+			return;
+		}
+
+		if ((lastValue == null) && (value != null || formula != null)) {
+			lastValue = (value != null) ? value : formula;
 			lastElement = element;
 			lastCellContentsWasBlock = asBlock;
 
@@ -453,34 +693,57 @@ public class CellContentHandler extends AbstractHandler {
 
 		StyleManager sm = state.getSm();
 
-		// Both to be improved to include formatting
-		String oldValue = lastValue.toString();
-		String newComponent = value.toString();
+		if (lastValue != null && (value != null || formula != null)) {
 
-		if (lastCellContentsWasBlock && !newComponent.startsWith("\n") && !oldValue.endsWith("\n")) {
-			oldValue = oldValue + "\n";
-			lastCellContentsWasBlock = false;
-		}
-		if (lastCellContentsRequiresSpace && !newComponent.startsWith("\n") && !oldValue.endsWith("\n")) {
-			oldValue = oldValue + " ";
-			lastCellContentsRequiresSpace = false;
-		}
+			value = (value != null) ? value : formula;
 
-		String newValue = oldValue + newComponent;
-		lastValue = newValue;
+			// Both to be improved to include formatting
+			String oldValue = lastValue.toString();
+			String newComponent = value.toString();
 
-		if (element != null) {
-			BirtStyle elementStyle = new BirtStyle(element);
-			Font newFont = sm.getFontManager().getFont(elementStyle);
-			richTextRuns.add(new RichTextRun(oldValue.length(), newFont));
+			if (lastCellContentsWasBlock && !newComponent.startsWith("\n") && !oldValue.endsWith("\n")) {
+				oldValue = oldValue + "\n";
+				lastCellContentsWasBlock = false;
+			}
+			if (lastCellContentsRequiresSpace && !newComponent.startsWith("\n") && !oldValue.endsWith("\n")) {
+				oldValue = oldValue + " ";
+				lastCellContentsRequiresSpace = false;
+			}
 
-			preferredAlignment = preferredAlignment(elementStyle);
+			String newValue = oldValue + newComponent;
+			lastValue = newValue;
+
+			String oldformula = (lastFormula != null) ? lastFormula.toString() : lastFormula;
+			String newFormula = (formula != null) ? formula.toString() : formula;
+			if (oldformula != null) {
+				lastFormula = oldformula + "\n";
+			}
+			if (newFormula != null) {
+				lastFormula += newFormula;
+			}
+
+			if (element != null) {
+				BirtStyle elementStyle = new BirtStyle(element);
+				Font newFont = sm.getFontManager().getFont(elementStyle);
+				richTextRuns.add(new RichTextRun(oldValue.length(), newFont));
+
+				preferredAlignment = preferredAlignment(elementStyle);
+			}
 		}
 
 		lastCellContentsWasBlock = asBlock;
 		hyperlinkUrl = null;
 	}
 
+	/**
+	 * Record image
+	 *
+	 * @param state       handler state
+	 * @param location    location coordinate
+	 * @param image       image content
+	 * @param spanColumns columns are spanned
+	 * @throws BirtException
+	 */
 	public void recordImage(HandlerState state, Coordinate location, IImageContent image, boolean spanColumns)
 			throws BirtException {
 		byte[] data = image.getData();
@@ -490,9 +753,64 @@ public class CellContentHandler extends AbstractHandler {
 		StyleManagerUtils smu = state.getSmu();
 		Workbook wb = state.getWb();
 		String mimeType = image.getMIMEType();
-		if ((data == null) && (image.getURI() != null)) {
+		String stringURI = image.getURI();
+
+		if (stringURI != null
+				&& (stringURI.toLowerCase().endsWith(".svg") || stringURI.toLowerCase().contains(URL_IMAGE_TYPE_SVG))
+				|| mimeType != null && mimeType.toLowerCase().equals(URL_IMAGE_TYPE_SVG)) {
+
 			try {
-				URL imageUrl = new URL(image.getURI());
+				String encodedImg = null;
+				String decodedImg = null;
+				if (stringURI != null && stringURI.toLowerCase().contains(URL_IMAGE_TYPE_SVG)) {
+					// svg: url stream image
+					String svgSplitter = "svg\\+xml,";
+					if (stringURI.contains(URL_IMAGE_TYPE_SVG + URL_PROTOCOL_TYPE_DATA_UTF8)) {
+						svgSplitter = "svg\\+xml;utf8,";
+					} else if (stringURI.contains(URL_IMAGE_TYPE_SVG + URL_PROTOCOL_TYPE_DATA_BASE)) {
+						svgSplitter = "svg\\+xml;base64,";
+					}
+					String[] uriParts = stringURI.split(svgSplitter);
+					if (uriParts.length >= 2) {
+						encodedImg = uriParts[1];
+						decodedImg = encodedImg;
+						if (stringURI.contains(URL_PROTOCOL_TYPE_DATA_BASE)) {
+							decodedImg = new String(
+									Base64.getDecoder().decode(encodedImg.getBytes(StandardCharsets.UTF_8)));
+						}
+					}
+				} else {
+					// svg: url file load
+					if (data == null && stringURI != null) {
+						String uri = this.verifyURI(stringURI); // URL(this.id);
+						URL imageUrl = new URL(uri);
+						URLConnection conn = imageUrl.openConnection();
+						conn.connect();
+						data = smu.downloadImage(conn);
+						image.setData(data);
+					}
+					decodedImg = new String(image.getData());
+				}
+				try {
+					decodedImg = java.net.URLDecoder.decode(decodedImg, StandardCharsets.UTF_8);
+				} catch (IllegalArgumentException iae) {
+					// do nothing
+				}
+				data = SvgFile.transSvgToArray(new ByteArrayInputStream(decodedImg.getBytes()));
+
+			} catch (Exception e) {
+				// invalid svg image, default handling
+			}
+
+		} else if (stringURI != null && stringURI.startsWith(URL_PROTOCOL_TYPE_DATA)
+				&& stringURI.contains(URL_PROTOCOL_TYPE_DATA_BASE)) {
+			String base64[] = image.getURI().toString().split(URL_PROTOCOL_TYPE_DATA_BASE);
+			if (base64.length >= 2) {
+				data = Base64.getDecoder().decode(base64[1]);
+			}
+		} else if ((data == null) && (image.getURI() != null)) {
+			try {
+				URL imageUrl = new URL(this.verifyURI(image.getURI()));
 				URLConnection conn = imageUrl.openConnection();
 				conn.connect();
 				mimeType = conn.getContentType();
@@ -501,10 +819,8 @@ public class CellContentHandler extends AbstractHandler {
 					log.debug("Unrecognised/unhandled image MIME type: " + mimeType);
 				} else {
 					data = smu.downloadImage(conn);
+					image.setData(data);
 				}
-			} catch (MalformedURLException ex) {
-				log.debug(ex.getClass(), ": ", ex.getMessage());
-				ex.printStackTrace();
 			} catch (IOException ex) {
 				log.debug(ex.getClass(), ": ", ex.getMessage());
 				ex.printStackTrace();
@@ -525,23 +841,46 @@ public class CellContentHandler extends AbstractHandler {
 							+ birtImage.getPhysicalWidthDpi() + "dpi=" + birtImage.getPhysicalWidthInch() + "in) x "
 							+ birtImage.getHeight() + " (@" + birtImage.getPhysicalHeightDpi() + "dpi="
 							+ birtImage.getPhysicalHeightInch() + "in)");
+
 					if (image.getWidth() == null) {
-						DimensionType Width = new DimensionType(
-								(birtImage.getPhysicalWidthInch() > 0) ? birtImage.getPhysicalWidthInch()
-										: birtImage.getWidth() / 96.0,
-								"in");
+						// calculate the width based on the given height and the physical dimensions
+						DimensionType Width;
+						if (image.getHeight() != null) {
+							double factor = birtImage.getWidth() * 1.0 / birtImage.getHeight() * 1.0;
+							double imgWidth = image.getHeight().getMeasure() * factor;
+							Width = new DimensionType(imgWidth, image.getHeight().getUnits());
+						} else {
+							Width = new DimensionType(
+									(birtImage.getPhysicalWidthInch() > 0) ? birtImage.getPhysicalWidthInch()
+											: birtImage.getWidth() / DOTS_PER_INCH,
+									"in");
+						}
 						image.setWidth(Width);
 					}
-					if (image.getHeight() == null) {
-						DimensionType Height = new DimensionType(
-								(birtImage.getPhysicalHeightInch() > 0) ? birtImage.getPhysicalHeightInch()
-										: birtImage.getHeight() / 96.0,
-								"in");
+					if (image.getHeight() == null && birtImage.getWidth() > 0 && birtImage.getHeight() > 0) {
+
+						// calculate the height based on the given width and the physical dimensions
+						DimensionType Height;
+						if (image.getWidth() != null) {
+							double factor = birtImage.getHeight() * 1.0 / birtImage.getWidth() * 1.0;
+							double imgHeight = image.getWidth().getMeasure() * factor;
+							Height = new DimensionType(imgHeight, image.getWidth().getUnits());
+						} else {
+							Height = new DimensionType(
+									(birtImage.getPhysicalHeightInch() > 0) ? birtImage.getPhysicalHeightInch()
+											: birtImage.getHeight() / DOTS_PER_INCH,
+									"in");
+						}
 						image.setHeight(Height);
 					}
 				}
 
-				state.images.add(new CellImage(location, imageIdx, image, spanColumns));
+				if (element != null)
+					state.images.add(new CellImage(location, imageIdx, image, spanColumns,
+						element.getComputedStyle().getTextAlign(), element.getComputedStyle().getVerticalAlign()));
+				else
+					state.images.add(new CellImage(location, imageIdx, image, spanColumns));
+
 				lastElement = image;
 			}
 		}
@@ -563,6 +902,27 @@ public class CellContentHandler extends AbstractHandler {
 				iter.remove();
 			}
 		}
+	}
+
+	/**
+	 * Check the URL to be valid and fall back try it like file-URL
+	 */
+	private String verifyURI(String uri) {
+		if (uri != null && !uri.toLowerCase().startsWith(URL_PROTOCOL_TYPE_DATA)) {
+			String tmpUrl = uri.replaceAll(" ", URL_PROTOCOL_URL_ENCODED_SPACE);
+			try {
+				new URL(tmpUrl).toURI();
+			} catch (MalformedURLException | URISyntaxException excUrl) {
+				// invalid URI try it like "file:///"
+				try {
+					tmpUrl = URL_PROTOCOL_TYPE_FILE + "///" + uri;
+					new URL(tmpUrl).toURI();
+					uri = tmpUrl;
+				} catch (MalformedURLException | URISyntaxException excFile) {
+				}
+			}
+		}
+		return uri;
 	}
 
 }

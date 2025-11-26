@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - modification of Batik's StringMap.java to support BIRT's CSS rules
@@ -14,7 +17,7 @@ package org.eclipse.birt.report.engine.css.engine.value;
 /**
  * A simple hashtable, not synchronized, with fixed load factor and with
  * equality test made with '=='.
- * 
+ *
  */
 public class StringMap {
 
@@ -42,7 +45,7 @@ public class StringMap {
 
 	/**
 	 * Creates a copy of the given StringMap object.
-	 * 
+	 *
 	 * @param t The table to copy.
 	 */
 	public StringMap(StringMap t) {
@@ -66,7 +69,9 @@ public class StringMap {
 
 	/**
 	 * Gets the value corresponding to the given string.
-	 * 
+	 *
+	 * @param key string key
+	 *
 	 * @return the value or null
 	 */
 	public Object get(String key) {
@@ -83,7 +88,10 @@ public class StringMap {
 
 	/**
 	 * Sets a new value for the given variable
-	 * 
+	 *
+	 * @param key   string key
+	 * @param value
+	 *
 	 * @return the old value or null
 	 */
 	public Object put(String key, Object value) {
@@ -157,6 +165,11 @@ public class StringMap {
 
 		/**
 		 * Creates a new entry
+		 *
+		 * @param hash  hash value
+		 * @param key   string key
+		 * @param value object value
+		 * @param next  next entry
 		 */
 		public Entry(int hash, String key, Object value, Entry next) {
 			this.hash = hash;

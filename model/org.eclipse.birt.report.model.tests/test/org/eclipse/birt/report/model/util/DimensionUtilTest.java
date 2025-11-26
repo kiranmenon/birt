@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,11 +16,11 @@ package org.eclipse.birt.report.model.util;
 
 import javax.print.attribute.ResolutionSyntax;
 
-import junit.framework.TestCase;
-
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
+
+import junit.framework.TestCase;
 
 /**
  * Test the method in <code>DimensionUtil</code>.
@@ -63,6 +66,9 @@ public class DimensionUtilTest extends TestCase {
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PT, DesignChoiceConstants.UNITS_IN);
 		assertEquals(1.39, value.getMeasure(), 0.01);
 
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PX, DesignChoiceConstants.UNITS_IN);
+		assertEquals(1.04, value.getMeasure(), 0.01);
+
 		// * => cm
 
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_CM, DesignChoiceConstants.UNITS_CM);
@@ -79,6 +85,9 @@ public class DimensionUtilTest extends TestCase {
 
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PC, DesignChoiceConstants.UNITS_CM);
 		assertEquals(42.33, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PX, DesignChoiceConstants.UNITS_CM);
+		assertEquals(2.64, value.getMeasure(), 0.01);
 
 		// * => mm
 
@@ -97,6 +106,9 @@ public class DimensionUtilTest extends TestCase {
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PC, DesignChoiceConstants.UNITS_MM);
 		assertEquals(423.33, value.getMeasure(), 0.01);
 
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PX, DesignChoiceConstants.UNITS_MM);
+		assertEquals(26.45, value.getMeasure(), 0.01);
+
 		// * => pt
 
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_CM, DesignChoiceConstants.UNITS_PT);
@@ -114,6 +126,9 @@ public class DimensionUtilTest extends TestCase {
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PC, DesignChoiceConstants.UNITS_PT);
 		assertEquals(1200, value.getMeasure(), 0.01);
 
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PX, DesignChoiceConstants.UNITS_PT);
+		assertEquals(75.00, value.getMeasure(), 0.01);
+
 		// * => pc
 
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_CM, DesignChoiceConstants.UNITS_PC);
@@ -129,6 +144,29 @@ public class DimensionUtilTest extends TestCase {
 		assertEquals(8.33, value.getMeasure(), 0.01);
 
 		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PC, DesignChoiceConstants.UNITS_PC);
+		assertEquals(100, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PX, DesignChoiceConstants.UNITS_PC);
+		assertEquals(6.25, value.getMeasure(), 0.01);
+
+		// * => px
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_CM, DesignChoiceConstants.UNITS_PX);
+		assertEquals(3779.52, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_MM, DesignChoiceConstants.UNITS_PX);
+		assertEquals(377.95, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_IN, DesignChoiceConstants.UNITS_PX);
+		assertEquals(9600, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PT, DesignChoiceConstants.UNITS_PX);
+		assertEquals(133.33, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PC, DesignChoiceConstants.UNITS_PX);
+		assertEquals(1600, value.getMeasure(), 0.01);
+
+		value = DimensionUtil.convertTo(100, DesignChoiceConstants.UNITS_PX, DesignChoiceConstants.UNITS_PX);
 		assertEquals(100, value.getMeasure(), 0.01);
 
 	}

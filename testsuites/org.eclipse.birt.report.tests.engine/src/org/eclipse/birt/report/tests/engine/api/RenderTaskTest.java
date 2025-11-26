@@ -1,17 +1,27 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.tests.engine.api;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.file.FileSystems;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.birt.core.archive.FileArchiveWriter;
 import org.eclipse.birt.core.archive.IDocArchiveWriter;
@@ -27,6 +37,9 @@ import org.eclipse.birt.report.engine.api.InstanceID;
 import org.eclipse.birt.report.engine.api.TOCNode;
 import org.eclipse.birt.report.tests.engine.EngineCase;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  * <b>IRenderTask test</b>
  * <p>
@@ -38,7 +51,7 @@ public class RenderTaskTest extends EngineCase {
 	private String report_document;
 	private IReportDocument reportDoc;
 	private String outputFileName;
-	private String separator = System.getProperty("file.separator");
+	private String separator = FileSystems.getDefault().getSeparator();
 	private List errors = null;
 
 	protected String path = this.getInputResourceFolder() + File.separator + getFullQualifiedClassName() // $NON-NLS-1$
@@ -57,13 +70,16 @@ public class RenderTaskTest extends EngineCase {
 		return new TestSuite(RenderTaskTest.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		removeResource();
 		engine.getConfig().setLogConfig(this.genOutputFolder() + "/", Level.WARNING);
 	}
 
-	public void tearDown() {
+	@Override
+	public void tearDown() throws Exception {
+		super.tearDown();
 		removeResource();
 	}
 
@@ -533,6 +549,7 @@ public class RenderTaskTest extends EngineCase {
 
 				// render html output
 				outputFileName = outputPath + fileName + "/html/page" + pageRange + ".html";
+				System.out.println("HTML output filename = " + outputFileName);
 				removeFile(outputFileName);
 				htmlRenderOptions.setOutputFileName(outputFileName);
 				task = engine.createRenderTask(reportDoc);
@@ -541,8 +558,9 @@ public class RenderTaskTest extends EngineCase {
 				task.setRenderOption(htmlRenderOptions);
 				task.setPageRange(pageRange);
 				task.render();
-				if (task.getErrors().size() > 0)
+				if (task.getErrors().size() > 0) {
 					return task.getErrors();
+				}
 				task.close();
 
 				File htmlFile = new File(outputFileName);
@@ -554,6 +572,7 @@ public class RenderTaskTest extends EngineCase {
 				}
 				// render pdf output
 				outputFileName = outputPath + fileName + "/pdf/page" + pageRange + ".pdf";
+				System.out.println("PDF output filename = " + outputFileName);
 				removeFile(outputFileName);
 				pdfRenderOptions.setOutputFileName(outputFileName);
 
@@ -563,16 +582,19 @@ public class RenderTaskTest extends EngineCase {
 				task.setRenderOption(pdfRenderOptions);
 				task.setPageRange(pageRange);
 				task.render();
-				if (task.getErrors().size() > 0)
+				System.out.println("PDF error count = " + task.getErrors().size());
+				if (task.getErrors().size() > 0) {
 					return task.getErrors();
+				}
 				task.close();
 
 				File pdfFile = new File(outputFileName);
 				if (pageRange != null && (pageRange.equals("0") || pageRange.equals("abc"))) {
 					assertFalse(pdfFile.exists());
 				} else {
-					assertTrue("Render " + fileName + " to pdf failed. " + pageRange, pdfFile.exists());
-					assertTrue("Render " + fileName + " to pdf failed. " + pageRange, pdfFile.length() != 0);
+					assertTrue("Render " + fileName + " to pdf - file does not exist. " + pageRange, pdfFile.exists());
+					assertTrue("Render " + fileName + " to pdf - file has zero length. " + pageRange,
+							pdfFile.length() != 0);
 				}
 			}
 			return null;
@@ -648,7 +670,7 @@ public class RenderTaskTest extends EngineCase {
 
 	/**
 	 * create the report document.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	protected void createReportDocument(String reportdesign, String reportdocument) throws Exception {
@@ -664,8 +686,9 @@ public class RenderTaskTest extends EngineCase {
 		runTask.run(archive);
 
 		int i = runTask.getErrors().size();
-		if (i > 0)
+		if (i > 0) {
 			System.out.println("error is " + runTask.getErrors().get(0).toString());
+		}
 		assertEquals("Exception when generate document from " + reportdesign, 0, i);
 
 		// close the task, release the resource.

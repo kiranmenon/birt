@@ -1,6 +1,20 @@
 <?xml version="1.0"?>
+<!--
+ *******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
 <project basedir=".">
-  <property name="BIRT_VERSION" value="4.9.0"/>
+  <property name="BIRT_VERSION" value="4.22.0"/>
   <property name="RUNTIME_DIR" location="../birt-runtime-osgi/target/package"/>
   <property name="ROOT_DIR" location="../../.."/>
   <property name="TARGET_DIR" location="./target"/>
@@ -66,7 +80,7 @@
     </copy>
     <!-- create org.eclipse.birt.runtime.jar -->
     <buildJar basedir="${TARGET_DIR}/org.eclipse.birt.runtime"
-              output="${STAGE_DIR}/ReportEngine/lib/tmp.birt.runtime.jar">
+              output="${STAGE_DIR}/ReportEngine/lib/org.eclipse.birt.runtime_${BIRT_VERSION}.jar">
       <manifest>
         <attribute name="Bundle-Version" value="${BIRT_VERSION}"/>
         <attribute name="Bundle-Name" value="BIRT Runtime SDK"/>
@@ -75,12 +89,6 @@
         <attribute name="Manifest-Version" value="1.0"/>
       </manifest>
     </buildJar>
-    <!-- it's surprisingly hard to keep eclipse-jarsigner-plugin off jars -->
-    <zip destfile="${STAGE_DIR}/ReportEngine/lib/org.eclipse.birt.runtime_${BIRT_VERSION}.jar">
-        <zipfileset src="${STAGE_DIR}/ReportEngine/lib/tmp.birt.runtime.jar"
-                    excludes="META-INF/ECLIPSE_.*"/>
-    </zip>
-    <delete file="${STAGE_DIR}/ReportEngine/lib/tmp.birt.runtime.jar"/>
   </target>
   <target name="build-webviewer">
     <copy todir="${STAGE_DIR}/WebViewerExample/WEB-INF/lib">

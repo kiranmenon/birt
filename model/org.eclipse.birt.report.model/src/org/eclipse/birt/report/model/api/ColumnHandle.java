@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -17,6 +20,7 @@ import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
+import org.eclipse.birt.report.model.api.util.StringUtil;
 import org.eclipse.birt.report.model.core.DesignElement;
 import org.eclipse.birt.report.model.core.Module;
 import org.eclipse.birt.report.model.elements.interfaces.ITableColumnModel;
@@ -26,8 +30,8 @@ import org.eclipse.birt.report.model.elements.interfaces.ITableRowModel;
  * Represents a column within a table. The application generally does not create
  * column handles directly. Instead, it uses one of the navigation methods
  * available on other element handles like: <code>TableHandle</code>.
- * 
- * 
+ *
+ *
  * @see TableHandle#getColumns()
  * @see org.eclipse.birt.report.model.elements.TableColumn
  */
@@ -38,7 +42,7 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 	 * Constructs a handle for the given design and a column element. The
 	 * application generally does not create handles directly. Instead, it uses one
 	 * of the navigation methods available on other element handles.
-	 * 
+	 *
 	 * @param module  the module
 	 * @param element the column element
 	 */
@@ -52,7 +56,7 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 	 * contiguous table or grid columns described by this column definition. It
 	 * simplifies the design because one column definition can describe a group of
 	 * adjacent columns.
-	 * 
+	 *
 	 * @return the number of contiguous columns described by this column definition
 	 */
 
@@ -62,12 +66,12 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 
 	/**
 	 * Sets the repeat count for this column.
-	 * 
+	 *
 	 * @param count the number of contiguous columns described by this column
 	 *              definition
-	 * 
+	 *
 	 * @throws SemanticException if the property is locked.
-	 * 
+	 *
 	 * @see #getRepeatCount()
 	 */
 
@@ -77,7 +81,7 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 
 	/**
 	 * Gets the column width as a dimension handle.
-	 * 
+	 *
 	 * @return a dimension handle to for the column width.
 	 */
 
@@ -87,31 +91,33 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 
 	/**
 	 * Gets the column alignment.
-	 * 
+	 *
 	 * @return the column alignment
-	 * 
+	 *
 	 * @deprecated by the {@link StyleHandle#getTextAlign()}
 	 */
 
+	@Deprecated
 	public String getAlignment() {
 		return ""; //$NON-NLS-1$
 	}
 
 	/**
 	 * Sets the column alignment.
-	 * 
+	 *
 	 * @param alignment the alignment to set
 	 * @throws SemanticException if the value is not in choice.
-	 * 
+	 *
 	 * @deprecated by the {@link StyleHandle#setTextAlign(String)}
 	 */
 
+	@Deprecated
 	public void setAlignment(String alignment) throws SemanticException {
 	}
 
 	/**
 	 * Get the suppress duplicates property of this column.
-	 * 
+	 *
 	 * @return a boolean value which indicates if this column is suppress
 	 *         duplicates.
 	 */
@@ -122,7 +128,7 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 
 	/**
 	 * Set the suppress duplicates property of this column.
-	 * 
+	 *
 	 * @param suppressDuplicates the suppress duplicates value.
 	 */
 	public void setSuppressDuplicates(boolean suppressDuplicates) {
@@ -137,9 +143,9 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 	 * Returns visibility rules defined on the table column. The element in the
 	 * iterator is the corresponding <code>StructureHandle</code> that deal with a
 	 * <code>HideRuleHandle</code> in the list.
-	 * 
+	 *
 	 * @return the iterator for visibility rules.
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.model.api.elements.structures.HideRule
 	 */
 
@@ -151,7 +157,7 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 
 	/**
 	 * Converts width of the column to an absolute value if possible.
-	 * 
+	 *
 	 * @throws SemanticException
 	 */
 	public void convertWidthToAbsoluteValue() throws SemanticException {
@@ -171,4 +177,27 @@ public class ColumnHandle extends ReportElementHandle implements ITableColumnMod
 			}
 		}
 	}
+
+	/**
+	 * Set the column width based on unit string without locale handling
+	 *
+	 * @param width column width
+	 *
+	 * @throws SemanticException
+	 */
+	public void setWidth(String width) throws SemanticException {
+		setProperty(ITableColumnModel.WIDTH_PROP, StringUtil.parse(width));
+	}
+
+	/**
+	 * Set the column width based on dimension value
+	 *
+	 * @param width column width
+	 *
+	 * @throws SemanticException
+	 */
+	public void setWidth(DimensionValue width) throws SemanticException {
+		setProperty(ITableColumnModel.WIDTH_PROP, width);
+	}
+
 }

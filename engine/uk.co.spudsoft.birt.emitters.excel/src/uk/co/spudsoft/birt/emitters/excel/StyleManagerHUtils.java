@@ -1,12 +1,14 @@
 /*************************************************************************************
- * Copyright (c) 2011, 2012, 2013 James Talbut.
+ * Copyright (c) 2011, 2012, 2013, 2024 James Talbut and others
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -19,8 +21,11 @@ import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.PageMargin;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -29,6 +34,7 @@ import org.eclipse.birt.report.engine.content.IPageContent;
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.css.dom.AreaStyle;
 import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.model.api.util.ColorUtil;
 import org.w3c.dom.css.CSSValue;
@@ -38,7 +44,7 @@ import uk.co.spudsoft.birt.emitters.excel.framework.Logger;
 /**
  * StyleManagerHUtils is an extension of the StyleManagerUtils to provide
  * HSSFWorkbook specific functionality.
- * 
+ *
  * @author Jim Talbut
  *
  */
@@ -47,11 +53,17 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 	private static short minPaletteIndex = 40;
 
 	private static Factory factory = new StyleManagerUtils.Factory() {
+		@Override
 		public StyleManagerUtils create(Logger log) {
 			return new StyleManagerHUtils(log);
 		}
 	};
 
+	/**
+	 * Get factory object
+	 *
+	 * @return Return a factory object
+	 */
 	public static Factory getFactory() {
 		return factory;
 	}
@@ -71,14 +83,14 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 	/**
 	 * Converts a BIRT border style into a POI border style (short constant defined
 	 * in CellStyle).
-	 * 
+	 *
 	 * @param birtBorder The BIRT border style.
 	 * @param width      The width of the border as understood by BIRT.
 	 * @return One of the CellStyle BORDER constants.
 	 */
-	private short poiBorderStyleFromBirt(String birtBorder, String width) {
+	private BorderStyle poiBorderStyleFromBirt(String birtBorder, String width) {
 		if ("none".equals(birtBorder)) {
-			return CellStyle.BORDER_NONE;
+			return BorderStyle.NONE; // CellStyle.BORDER_NONE;
 		}
 		DimensionType dim = DimensionType.parserUnit(width);
 		double pxWidth = 3.0;
@@ -87,34 +99,33 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 		}
 		if ("solid".equals(birtBorder)) {
 			if (pxWidth < 2.9) {
-				return CellStyle.BORDER_THIN;
+				return BorderStyle.THIN; // CellStyle.BORDER_THIN;
 			} else if (pxWidth < 3.1) {
-				return CellStyle.BORDER_MEDIUM;
+				return BorderStyle.MEDIUM; // CellStyle.BORDER_MEDIUM;
 			} else {
-				return CellStyle.BORDER_THICK;
+				return BorderStyle.THICK; // CellStyle.BORDER_THICK;
 			}
 		} else if ("dashed".equals(birtBorder)) {
 			if (pxWidth < 2.9) {
-				return CellStyle.BORDER_DASHED;
-			} else {
-				return CellStyle.BORDER_MEDIUM_DASHED;
+				return BorderStyle.DASHED; // CellStyle.BORDER_DASHED;
 			}
+			return BorderStyle.MEDIUM_DASHED; // CellStyle.BORDER_MEDIUM_DASHED;
 		} else if ("dotted".equals(birtBorder)) {
-			return CellStyle.BORDER_DOTTED;
+			return BorderStyle.DOTTED; // CellStyle.BORDER_DOTTED;
 		} else if ("double".equals(birtBorder)) {
-			return CellStyle.BORDER_DOUBLE;
+			return BorderStyle.DOUBLE; // CellStyle.BORDER_DOUBLE;
 		} else if ("none".equals(birtBorder)) {
-			return CellStyle.BORDER_NONE;
+			return BorderStyle.NONE; // CellStyle.BORDER_NONE;
 		}
 
 		log.debug("Border style \"", birtBorder, "\" is not recognised");
-		return CellStyle.BORDER_NONE;
+		return BorderStyle.NONE; // CellStyle.BORDER_NONE;
 	}
 
 	/**
 	 * Get an HSSFPalette index for a workbook that closely approximates the passed
 	 * in colour.
-	 * 
+	 *
 	 * @param workbook The workbook for which the colour is being sought.
 	 * @param colour   The colour, in the form "rgb(<i>r</i>, <i>g</i>, <i>b</i>)".
 	 * @return The index into the HSSFPallete for the workbook for a colour that
@@ -126,7 +137,7 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 			return 0;
 		}
 
-		byte[] rgbByte = new byte[] { (byte) rgbInt[0], (byte) rgbInt[1], (byte) rgbInt[2] };
+		byte[] rgbByte = { (byte) rgbInt[0], (byte) rgbInt[1], (byte) rgbInt[2] };
 		HSSFPalette palette = workbook.getCustomPalette();
 
 		HSSFColor result = palette.findColor(rgbByte[0], rgbByte[1], rgbByte[2]);
@@ -135,11 +146,16 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 				--paletteIndex;
 				palette.setColorAtIndex(paletteIndex, rgbByte[0], rgbByte[1], rgbByte[2]);
 				return paletteIndex;
-			} else {
-				result = palette.findSimilarColor(rgbByte[0], rgbByte[1], rgbByte[2]);
 			}
+			result = palette.findSimilarColor(rgbByte[0], rgbByte[1], rgbByte[2]);
 		}
 		return result.getIndex();
+	}
+
+	@Override
+	public void applyBorderStyle(Workbook workbook, CellStyle style, BirtStyle birtStyle) {
+		// TODO: implements the border apply at once to the cell object based on
+		// birtStyle
 	}
 
 	@Override
@@ -153,10 +169,10 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 			if (style instanceof HSSFCellStyle) {
 				HSSFCellStyle hStyle = (HSSFCellStyle) style;
 
-				short hBorderStyle = poiBorderStyleFromBirt(borderStyleString, widthString);
+				BorderStyle hBorderStyle = poiBorderStyleFromBirt(borderStyleString, widthString);
 				short colourIndex = getHColour((HSSFWorkbook) workbook, colourString);
 				if (colourIndex > 0) {
-					if (hBorderStyle != CellStyle.BORDER_NONE) {
+					if (!BorderStyle.NONE /* CellStyle.BORDER_NONE */.equals(hBorderStyle)) {
 						switch (side) {
 						case TOP:
 							hStyle.setBorderTop(hBorderStyle);
@@ -182,6 +198,12 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 							// log.debug( "Bottom border: " + xStyle.getBorderBottom() + " / " +
 							// xStyle.getBottomBorderXSSFColor().getARGBHex() );
 							break;
+						case DIAGONAL:
+							throw new UnsupportedOperationException("Border Style " + side + " is unsupported");
+						case HORIZONTAL:
+							throw new UnsupportedOperationException("Border Style " + side + " is unsupported");
+						case VERTICAL:
+							throw new UnsupportedOperationException("Border Style " + side + " is unsupported");
 						}
 					}
 				}
@@ -191,10 +213,8 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 
 	@Override
 	public void addColourToFont(Workbook workbook, Font font, String colour) {
-		if (colour == null) {
-			return;
-		}
-		if (IStyle.TRANSPARENT_VALUE.equals(colour)) {
+		// if (IStyle.TRANSPARENT_VALUE.equals(colour)) {
+		if ((colour == null) || CSSValueConstants.TRANSPARENT_VALUE.getCssText().equals(colour)) {
 			return;
 		}
 		if (font instanceof HSSFFont) {
@@ -208,10 +228,7 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 
 	@Override
 	public void addBackgroundColourToStyle(Workbook workbook, CellStyle style, String colour) {
-		if (colour == null) {
-			return;
-		}
-		if (IStyle.TRANSPARENT_VALUE.equals(colour)) {
+		if ((colour == null) || CSSValueConstants.TRANSPARENT_VALUE.equals(colour)) {
 			return;
 		}
 		if (style instanceof HSSFCellStyle) {
@@ -219,7 +236,8 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 			short colourIndex = getHColour((HSSFWorkbook) workbook, colour);
 			if (colourIndex > 0) {
 				cellStyle.setFillForegroundColor(colourIndex);
-				cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				// cellStyle.setFillPattern(CellStyle.SOLID_FOREGROUND);
+				cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			}
 		}
 	}
@@ -231,7 +249,8 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 		CSSValue bgColour = birtStyle.getProperty(StyleConstants.STYLE_BACKGROUND_COLOR);
 		int bgRgb[] = parseColour(bgColour == null ? null : bgColour.getCssText(), "white");
 
-		short fgRgb[] = HSSFColor.BLACK.triplet;
+		// short fgRgb[] = HSSFColor.BLACK.triplet;
+		short fgRgb[] = HSSFColor.HSSFColorPredefined.BLACK.getTriplet();
 		if ((font != null) && (font.getColor() != Short.MAX_VALUE)) {
 			fgRgb = palette.getColor(font.getColor()).getTriplet();
 		}
@@ -247,9 +266,8 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 			addedStyle.setColor(contrastColour(bgRgb));
 
 			return fm.getFontWithExtraStyle(font, addedStyle);
-		} else {
-			return font;
 		}
+		return font;
 	}
 
 	@Override
@@ -275,17 +293,20 @@ public class StyleManagerHUtils extends StyleManagerUtils {
 			sheet.getPrintSetup().setFooterMargin(footerHeight);
 		}
 		if ((page.getMarginBottom() != null) && isAbsolute(page.getMarginBottom())) {
-			sheet.setMargin(Sheet.BottomMargin,
+			sheet.setMargin(PageMargin.getByShortValue(Sheet.BottomMargin),
 					footerHeight + page.getMarginBottom().convertTo(DimensionType.UNITS_IN));
 		}
 		if ((page.getMarginLeft() != null) && isAbsolute(page.getMarginLeft())) {
-			sheet.setMargin(Sheet.LeftMargin, page.getMarginLeft().convertTo(DimensionType.UNITS_IN));
+			sheet.setMargin(PageMargin.getByShortValue(Sheet.LeftMargin),
+					page.getMarginLeft().convertTo(DimensionType.UNITS_IN));
 		}
 		if ((page.getMarginRight() != null) && isAbsolute(page.getMarginRight())) {
-			sheet.setMargin(Sheet.RightMargin, page.getMarginRight().convertTo(DimensionType.UNITS_IN));
+			sheet.setMargin(PageMargin.getByShortValue(Sheet.RightMargin),
+					page.getMarginRight().convertTo(DimensionType.UNITS_IN));
 		}
 		if ((page.getMarginTop() != null) && isAbsolute(page.getMarginTop())) {
-			sheet.setMargin(Sheet.TopMargin, headerHeight + page.getMarginTop().convertTo(DimensionType.UNITS_IN));
+			sheet.setMargin(PageMargin.getByShortValue(Sheet.TopMargin),
+					headerHeight + page.getMarginTop().convertTo(DimensionType.UNITS_IN));
 		}
 	}
 

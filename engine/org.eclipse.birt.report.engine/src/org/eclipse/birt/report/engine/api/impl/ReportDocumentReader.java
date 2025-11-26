@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -16,8 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -78,9 +79,9 @@ import com.ibm.icu.util.ULocale;
 
 /**
  * core stream format TAG DOCUMENT VERSION
- * 
+ *
  * TAG CORE_VERSION_0 DOCUMENT_VERSION TAG
- * 
+ *
  * CORE_VERSION_1 DOCUMENT_VERSION MAP
  */
 public class ReportDocumentReader implements IReportletDocument, ReportDocumentConstants, IReportDocumentHelper {
@@ -159,14 +160,17 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		loadCoreStreamHeader();
 	}
 
+	@Override
 	public IDocArchiveReader getArchive() {
 		return this.archive;
 	}
 
+	@Override
 	public String getVersion() {
 		return (String) properties.get(BIRT_ENGINE_VERSION_KEY);
 	}
 
+	@Override
 	public String getProperty(String key) {
 		return (String) properties.get(key);
 	}
@@ -188,7 +192,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 			try {
 				synchronized (lock) {
 					RAInputStream in = archive.getStream(CORE_STREAM);
-					try {
+					try (in) {
 						DataInputStream di = new DataInputStream(in);
 
 						// check the document version and core stream version
@@ -197,8 +201,6 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 						// load the stream header, check point, system id and
 						// page count
 						loadCoreStreamHeader(di);
-					} finally {
-						in.close();
 					}
 				}
 			} finally {
@@ -238,12 +240,12 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/**
 	 * read the core stream header which has version UNKNOWN and V0.
-	 * 
+	 *
 	 * The core stream header contains 3 field:
 	 * <li>check point</li>
 	 * <li>page count</li>
 	 * <li>system id</li>
-	 * 
+	 *
 	 * @param coreStream   the core stream. The version has been loaded from the
 	 *                     stream.
 	 * @param documentInfo the loaded information is saved into this object.
@@ -262,14 +264,10 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 			}
 		} else {
 			RAInputStream in = archive.getStream(CHECKPOINT_STREAM);
-			try {
+			try (in) {
 				DataInputStream di = new DataInputStream(in);
 				documentInfo.checkpoint = IOUtil.readInt(di);
 				documentInfo.pageCount = IOUtil.readLong(di);
-			} finally {
-				if (in != null) {
-					in.close();
-				}
 			}
 		}
 		// load the report design name
@@ -278,13 +276,13 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/**
 	 * load the core stream header for stream with version V1 and V2
-	 * 
+	 *
 	 * the core stream header contains 3 field:
-	 * 
+	 *
 	 * <li>check point</li>
 	 * <li>page count</li>
 	 * <li>system id</li>
-	 * 
+	 *
 	 * @param di           core stream, the version has been loaded from this
 	 *                     stream.
 	 * @param documentInfo the header is saved into this object.
@@ -315,6 +313,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	synchronized public void refresh() {
 		try {
 			loadCoreStream();
@@ -328,7 +327,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		try {
 			synchronized (lock) {
 				RAInputStream in = archive.getStream(CORE_STREAM);
-				try {
+				try (in) {
 					DataInputStream di = new DataInputStream(in);
 
 					// check the document version and core stream version
@@ -337,8 +336,6 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 					loadCoreStream(di);
 
 					coreStreamLoaded = true;
-				} finally {
-					in.close();
 				}
 			}
 		} finally {
@@ -361,20 +358,16 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		if (checkpoint == CHECKPOINT_END) {
 			if (indexReader == null) {
 				indexReader = documentInfo.indexReader;
-			} else {
-				if (documentInfo.indexReader != null) {
-					documentInfo.indexReader.close();
-				}
+			} else if (documentInfo.indexReader != null) {
+				documentInfo.indexReader.close();
 			}
 			if (tocReader == null) {
 				tocReader = documentInfo.tocReader;
 				if (tocReader != null) {
 					cachedTreeV0 = (TreeNode) tocReader.readTree();
 				}
-			} else {
-				if (documentInfo.tocReader != null) {
-					documentInfo.tocReader.close();
-				}
+			} else if (documentInfo.tocReader != null) {
+				documentInfo.tocReader.close();
 			}
 		}
 	}
@@ -435,7 +428,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	}
 
 	private HashMap<String, Long> readMap(DataInputStream di) throws IOException {
-		HashMap<String, Long> map = new HashMap<String, Long>();
+		HashMap<String, Long> map = new HashMap<>();
 		long count = IOUtil.readLong(di);
 		for (long i = 0; i < count; i++) {
 			String bookmark = IOUtil.readString(di);
@@ -521,7 +514,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 			throw new IOException("unknown core stream version" + tag);//$NON-NLS-1$
 		}
 
-		String[] supportedVersions = new String[] { REPORT_DOCUMENT_VERSION_1_0_0, REPORT_DOCUMENT_VERSION_2_1_0,
+		String[] supportedVersions = { REPORT_DOCUMENT_VERSION_1_0_0, REPORT_DOCUMENT_VERSION_2_1_0,
 				REPORT_DOCUMENT_VERSION_2_1_3 };
 		boolean supportedVersion = false;
 		for (int i = 0; i < supportedVersions.length; i++) {
@@ -530,7 +523,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 				break;
 			}
 		}
-		if (supportedVersion == false) {
+		if (!supportedVersion) {
 			throw new IOException("unsupport report document version " + docVersion); //$NON-NLS-1$
 		}
 
@@ -573,6 +566,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	public void close() {
 		if (tocReader != null) {
 			try {
@@ -651,6 +645,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	public InputStream getDesignStream() {
 		try {
 			if (archive.exists(ORIGINAL_DESIGN_STREAM)) {
@@ -668,7 +663,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		try {
 			if (archive.exists(streamName)) {
 				InputStream stream = archive.getStream(streamName);
-				try {
+				try (stream) {
 					String name = systemId;
 					if (name == null) {
 						name = archive.getName();
@@ -676,8 +671,6 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 					ReportRunnable reportRunnable = (ReportRunnable) engine.openReportDesign(name, stream,
 							moduleOptions);
 					return reportRunnable;
-				} finally {
-					stream.close();
 				}
 			}
 		} catch (Exception ex) {
@@ -686,6 +679,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public synchronized IReportRunnable getReportRunnable() {
 		if (reportRunnable == null) {
 			reportRunnable = loadReportRunnable(systemId, ORIGINAL_DESIGN_STREAM);
@@ -701,6 +695,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public synchronized IReportRunnable getPreparedRunnable() {
 		ReportRunnable runnable = getOnPreparedRunnable();
 		if (runnable != null) {
@@ -709,10 +704,12 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public synchronized IReportRunnable getDocumentRunnable() {
 		return getOnPreparedRunnable();
 	}
 
+	@Override
 	public ReportRunnable getOnPreparedRunnable() {
 		if (preparedRunnable == null) {
 			preparedRunnable = loadReportRunnable(systemId, DESIGN_STREAM);
@@ -726,6 +723,8 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public Map getParameterValues() {
 		loadCoreStreamLazily();
 		loadVariableLazily();
@@ -777,6 +776,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	public Map<String, ParameterAttribute> loadParameters(ClassLoader loader) throws EngineException {
 		loadCoreStreamLazily();
 		if (bodyData == null) {
@@ -784,7 +784,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 		try {
 			DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(bodyData));
-			;
+
 			Map parameters = IOUtil.readMap(dataStream, loader);
 			return convertToCompatibleParameter(parameters);
 		} catch (IOException ee) {
@@ -792,6 +792,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	public Map loadVariables(ClassLoader loader) throws EngineException {
 		loadCoreStreamLazily();
 		if (bodyData == null) {
@@ -799,7 +800,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 		try {
 			DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(bodyData));
-			;
+
 			// skip the parameters
 			IOUtil.readMap(dataStream, loader);
 			// load the persistence object
@@ -809,6 +810,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	public Map getParameterDisplayTexts() {
 		loadCoreStreamLazily();
 		loadVariableLazily();
@@ -825,6 +827,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return result;
 	}
 
+	@Override
 	public long getPageCount() {
 		return pageCount;
 	}
@@ -843,10 +846,11 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#getPageNumber(java
 	 * .lang.String)
 	 */
+	@Override
 	public long getPageNumber(String bookmark) {
 		if (!isComplete()) {
 			return -1;
@@ -865,9 +869,10 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#getBookmarks()
 	 */
+	@Override
 	public List<String> getBookmarks() {
 		if (!isComplete()) {
 			return null;
@@ -900,11 +905,12 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public List<IBookmarkInfo> getBookmarkInfos(Locale locale) throws EngineException {
 		if (!isComplete()) {
 			return null;
 		}
-		ArrayList<IBookmarkInfo> results = new ArrayList<IBookmarkInfo>();
+		ArrayList<IBookmarkInfo> results = new ArrayList<>();
 
 		loadCoreStreamLazily();
 		if (indexReader != null) {
@@ -923,8 +929,9 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 					}
 					long designId = bookmark.getElementId();
 					DesignElementHandle handle = report.getElementByID(designId);
-					if (handle == null)
+					if (handle == null) {
 						continue;
+					}
 					String elementType = handle.getDefn().getName();
 					String displayName = null;
 					if (handle instanceof ReportItemHandle) {
@@ -970,6 +977,8 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public ITOCTree getTOCTree(String format, ULocale locale) {
 		return getTOCTree(format, locale, TimeZone.getDefault());
 	}
@@ -977,6 +986,8 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public ITOCTree getTOCTree(String format, ULocale locale, TimeZone timeZone) {
 		try {
 			ITreeNode root = getTOCTree();
@@ -992,13 +1003,15 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#findTOC(java.lang.
 	 * String)
 	 */
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public TOCNode findTOC(String tocNodeId) {
 		ITOCTree tree = getTOCTree("viewer", ULocale.getDefault());
 		if (tree != null) {
@@ -1009,13 +1022,15 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#findTOCByName(java
 	 * .lang.String)
 	 */
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public List findTOCByName(String tocName) {
 		ITOCTree tree = getTOCTree("viewer", ULocale.getDefault());
 		if (tree != null) {
@@ -1026,13 +1041,15 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#getChildren(java.lang
 	 * .String)
 	 */
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public List getChildren(String tocNodeId) {
 		TOCNode node = findTOC(tocNodeId);
 		if (node != null) {
@@ -1059,27 +1076,31 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#getName()
 	 */
+	@Override
 	public String getName() {
 		return archive.getName();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#getGlobalVariables()
 	 */
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public Map getGlobalVariables(String option) {
 		loadCoreStreamLazily();
 		loadVariableLazily();
 		return globalVariables;
 	}
 
+	@Override
 	public long getPageNumber(InstanceID iid) {
 		if (!isComplete()) {
 			return -1;
@@ -1149,11 +1170,9 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return -1;
 	}
 
+	@Override
 	public long getInstanceOffset(InstanceID iid) {
-		if (!isComplete()) {
-			return -1l;
-		}
-		if (iid == null) {
+		if (!isComplete() || (iid == null)) {
 			return -1l;
 		}
 		loadCoreStreamLazily();
@@ -1172,6 +1191,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return -1L;
 	}
 
+	@Override
 	public long getBookmarkOffset(String bookmark) {
 		if (!isComplete()) {
 			return -1;
@@ -1194,19 +1214,16 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public ClassLoader getClassLoader() {
 		if (applicationClassLoader != null) {
 			return applicationClassLoader;
 		}
 		synchronized (this) {
 			if (applicationClassLoader == null) {
-				applicationClassLoader = AccessController.doPrivileged(new PrivilegedAction<ApplicationClassLoader>() {
-
-					public ApplicationClassLoader run() {
-						return new ApplicationClassLoader(engine, getOnPreparedRunnable(),
-								engine.getConfig().getAppContext());
-					}
-				});
+				applicationClassLoader = new ApplicationClassLoader(engine, getOnPreparedRunnable(),
+						engine.getConfig().getAppContext());
 			}
 		}
 		return applicationClassLoader;
@@ -1214,13 +1231,15 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportDocument#isComplete()
 	 */
+	@Override
 	public boolean isComplete() {
 		return checkpoint == CHECKPOINT_END;
 	}
 
+	@Override
 	public ReportDesignHandle getReportDesign() {
 		IReportRunnable reportRunnable = getReportRunnable();
 		if (reportRunnable != null) {
@@ -1229,6 +1248,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public Report getReportIR(ReportDesignHandle designHandle) {
 		InputStream stream = null;
 		try {
@@ -1270,6 +1290,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public InstanceID getBookmarkInstance(String bookmark) {
 		if (bookmark == null || bookmark.length() == 0) {
 			return null;
@@ -1277,12 +1298,13 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 
 		long offset = getBookmarkOffset(bookmark);
 
-		if (offset < 0)
+		if (offset < 0) {
 			return null;
+		}
 
 		try {
 			RAInputStream is = archive.getStream(CONTENT_STREAM);
-			try {
+			try (is) {
 				ReportContentReaderV3 reader = new ReportContentReaderV3(new ReportContent(), is,
 						applicationClassLoader);
 				try {
@@ -1290,8 +1312,6 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 				} finally {
 					reader.close();
 				}
-			} finally {
-				is.close();
 			}
 		} catch (IOException ioe) {
 			logger.log(Level.FINE, "Failed to get the instance ID of the bookmark: " + bookmark, ioe);
@@ -1303,10 +1323,12 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	private String reportletBookmark;
 	private String reportletInstanceID;
 
+	@Override
 	public boolean isReporltetDocument() throws IOException {
 		return loadReportletStream();
 	}
 
+	@Override
 	public String getReportletBookmark() throws IOException {
 		if (loadReportletStream()) {
 			return reportletBookmark;
@@ -1314,6 +1336,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return null;
 	}
 
+	@Override
 	public InstanceID getReportletInstanceID() throws IOException {
 		if (loadReportletStream()) {
 			return InstanceID.parse(reportletInstanceID);
@@ -1325,7 +1348,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		if (isReportlet == null) {
 			if (archive.exists(REPORTLET_DOCUMENT_STREAM)) {
 				RAInputStream in = archive.getInputStream(REPORTLET_DOCUMENT_STREAM);
-				try {
+				try (in) {
 					int version = in.readInt();
 					if (version != REPORTLET_DOCUMENT_VERSION_0) {
 						throw new IOException("unsupported reportlet document " + version);
@@ -1337,8 +1360,6 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 					reportletBookmark = IOUtil.readString(s);
 					reportletInstanceID = IOUtil.readString(s);
 					isReportlet = Boolean.TRUE;
-				} finally {
-					in.close();
 				}
 			} else {
 				isReportlet = Boolean.FALSE;
@@ -1347,8 +1368,9 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		return isReportlet.booleanValue();
 	}
 
-	HashMap<String, IReportDocumentExtension> extensions = new HashMap<String, IReportDocumentExtension>();
+	HashMap<String, IReportDocumentExtension> extensions = new HashMap<>();
 
+	@Override
 	synchronized public IReportDocumentExtension getDocumentExtension(String name) throws EngineException {
 		IReportDocumentExtension extension = extensions.get(name);
 		if (extension == null) {
@@ -1364,6 +1386,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	synchronized public ITreeNode getTOCTree() throws EngineException {
 		if (!isComplete()) {
 			return null;
@@ -1379,6 +1402,7 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		}
 	}
 
+	@Override
 	public ITOCReader getTOCReader(ClassLoader loader) throws EngineException {
 		loadCoreStreamLazily();
 		if (cachedTreeV0 != null) {
@@ -1396,10 +1420,12 @@ public class ReportDocumentReader implements IReportletDocument, ReportDocumentC
 		this.engineCacheEntry = entry;
 	}
 
+	@Override
 	public String getSystemId() {
 		return systemId;
 	}
 
+	@Override
 	public List<String> getDocumentErrors() {
 		RunStatusReader statusReader = new RunStatusReader(this);
 		try {

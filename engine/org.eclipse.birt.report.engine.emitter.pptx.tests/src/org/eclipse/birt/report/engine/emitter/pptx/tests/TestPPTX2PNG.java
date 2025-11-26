@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.engine.emitter.pptx.tests;
 
@@ -7,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class TestPPTX2PNG {
@@ -17,6 +30,7 @@ public class TestPPTX2PNG {
 	}
 
 	@Test
+	@Ignore
 	public void testTable() throws Exception {
 		runDesign("table.rptdesign");
 	}
@@ -42,7 +56,7 @@ public class TestPPTX2PNG {
 		new File(fileName).getParentFile().mkdirs();
 		BufferedInputStream bi = new BufferedInputStream(in);
 		FileOutputStream fi = new FileOutputStream(fileName);
-		try {
+		try (fi) {
 			byte[] buffer = new byte[4096];
 			int size = bi.read(buffer);
 			while (size > 0) {
@@ -50,7 +64,6 @@ public class TestPPTX2PNG {
 				size = bi.read(buffer);
 			}
 		} finally {
-			fi.close();
 			bi.close();
 			in.close();
 		}

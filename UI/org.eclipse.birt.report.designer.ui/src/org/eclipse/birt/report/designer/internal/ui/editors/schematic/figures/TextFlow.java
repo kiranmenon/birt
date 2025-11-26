@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -41,7 +44,7 @@ import org.eclipse.swt.widgets.Display;
 /**
  * An enhanced TextFlow inherited from org.eclipse.draw2d.text.TextFlow. Adds
  * supports for horizontal-alignment, line-through, underline styles.
- * 
+ *
  */
 public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
@@ -116,13 +119,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 			ellipsis.setAccessible(true);
 
 			ELLIPSIS = (String) ellipsis.get(new org.eclipse.draw2d.text.TextFlow());
-		} catch (SecurityException e) {
-			ExceptionHandler.handle(e);
-		} catch (NoSuchFieldException e) {
-			ExceptionHandler.handle(e);
-		} catch (IllegalArgumentException e) {
-			ExceptionHandler.handle(e);
-		} catch (IllegalAccessException e) {
+		} catch (SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
 			ExceptionHandler.handle(e);
 		}
 
@@ -133,9 +130,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 			 */
 			TRUNCATED = TextFragmentBox.class.getDeclaredField("truncated"); //$NON-NLS-1$
 			TRUNCATED.setAccessible(true);
-		} catch (SecurityException e) {
-			ExceptionHandler.handle(e);
-		} catch (NoSuchFieldException e) {
+		} catch (SecurityException | NoSuchFieldException e) {
 			ExceptionHandler.handle(e);
 		}
 
@@ -147,9 +142,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 			 */
 			LINE_ROOT = ContentBox.class.getDeclaredField("lineRoot"); //$NON-NLS-1$
 			LINE_ROOT.setAccessible(true);
-		} catch (SecurityException e) {
-			ExceptionHandler.handle(e);
-		} catch (NoSuchFieldException e) {
+		} catch (SecurityException | NoSuchFieldException e) {
 			ExceptionHandler.handle(e);
 		}
 		// bidi_hcg end
@@ -157,7 +150,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Paints self to specified graphics with given translating point.
-	 * 
+	 *
 	 * @param g
 	 * @param translationPoint
 	 */
@@ -167,13 +160,13 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Paints self to specified graphics with given X,Y offsets.
-	 * 
-	 * @param g
-	 * @param xoff
-	 * @param yoff
+	 *
+	 * @param g    graphic
+	 * @param xoff x offset
+	 * @param yoff y offset
 	 */
 	public void paintTo(Graphics g, int xoff, int yoff) {
-		List fragments = this.getFragments();
+		List<? extends TextFragmentBox> fragments = this.getFragments();
 		assert this.getFont().getFontData().length > 0;
 
 		/**
@@ -194,9 +187,16 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 	}
 
 	// bidi_hcg: rename and leave an old method for now.
+	/**
+	 * Paints self to specified graphics with given X,Y offsets.
+	 *
+	 * @param g    graphic
+	 * @param xoff x offset
+	 * @param yoff y offset
+	 */
 	public void paintTo_old(Graphics g, int xoff, int yoff) {
 		TextFragmentBox frag;
-		List fragments = this.getFragments();
+		List<? extends TextFragmentBox> fragments = this.getFragments();
 		assert this.getFont().getFontData().length > 0;
 
 		/**
@@ -208,14 +208,11 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 		 */
 		int totalHeight = 0;
 		for (int i = 0; i < fragments.size(); i++) {
-			// FlowBoxWrapper wrapper = new FlowBoxWrapper( (FlowBox) fragments
-			// .get( i ) );
-			totalHeight += ((TextFragmentBox) fragments.get(i)).getAscent()
-					+ ((TextFragmentBox) fragments.get(i)).getDescent();
+			totalHeight += fragments.get(i).getAscent() + fragments.get(i).getDescent();
 		}
 
 		for (int i = 0; i < fragments.size(); i++) {
-			frag = (TextFragmentBox) fragments.get(i);
+			frag = fragments.get(i);
 
 			// FlowBoxWrapper wrapper = new FlowBoxWrapper( frag );
 			String draw = null;
@@ -229,9 +226,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 				} else {
 					draw = getText().substring(frag.offset, frag.offset + frag.length);
 				}
-			} catch (IllegalArgumentException e) {
-				ExceptionHandler.handle(e);
-			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException | IllegalAccessException e) {
 				ExceptionHandler.handle(e);
 			}
 
@@ -318,27 +313,29 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Paints self to specified graphics with given X,Y offsets.
-	 * 
+	 *
 	 * @param g
 	 * @param xoff
 	 * @param yoff
-	 * 
+	 *
 	 * @return Next fragment index or -1 if there is no more fragments to process
 	 */
 	private int paintLineTo(Graphics g, int xoff, int yoff, int lineWidth, int fragIndex, boolean isMirrored) {
-		List fragments = this.getFragments();
-		if (fragments == null)
+		List<? extends TextFragmentBox> fragments = this.getFragments();
+		if (fragments == null) {
 			return -1;
+		}
 
 		int nFragments = fragments.size();
-		if (nFragments < 1 || fragIndex >= nFragments)
+		if (nFragments < 1 || fragIndex >= nFragments) {
 			return -1;
+		}
 
 		/**
 		 * Get the total fragments height first
 		 */
 		// bidi_hcg start
-		TextFragmentBox frag = (TextFragmentBox) fragments.get(fragIndex);
+		TextFragmentBox frag = fragments.get(fragIndex);
 		int totalHeight = frag.getAscent() + frag.getDescent();
 		int totalWidth = 0;
 		String[] draws = new String[nFragments - fragIndex];
@@ -346,9 +343,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 		try {
 			lineRoot = prevLineRoot = (LineRoot) LINE_ROOT.get(frag);
-		} catch (IllegalArgumentException e) {
-			ExceptionHandler.handle(e);
-		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 			ExceptionHandler.handle(e);
 		}
 
@@ -367,9 +362,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 				} else {
 					draw = getText().substring(frag.offset, frag.offset + frag.length);
 				}
-			} catch (IllegalArgumentException e) {
-				ExceptionHandler.handle(e);
-			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException | IllegalAccessException e) {
 				ExceptionHandler.handle(e);
 			}
 
@@ -388,18 +381,17 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 			totalWidth += linew;
 			draws[i - fragIndex] = draw;
 
-			if (++i >= nFragments)
+			if (++i >= nFragments) {
 				break;
+			}
 
-			frag = (TextFragmentBox) fragments.get(i);
+			frag = fragments.get(i);
 
 			prevLineRoot = lineRoot;
 
 			try {
 				lineRoot = (LineRoot) LINE_ROOT.get(frag);
-			} catch (IllegalArgumentException iare) {
-				ExceptionHandler.handle(iare);
-			} catch (IllegalAccessException iace) {
+			} catch (IllegalArgumentException | IllegalAccessException iace) {
 				ExceptionHandler.handle(iace);
 			}
 			// bidi_hcg end
@@ -411,7 +403,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 		// bidi_hcg end
 
 		for (i = fragIndex; i < retIndex; i++) {
-			frag = (TextFragmentBox) fragments.get(i);
+			frag = fragments.get(i);
 
 			int fragAscent = frag.getAscent();
 
@@ -485,10 +477,11 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 			TextLayout textLayout = BidiUIUtils.INSTANCE.getTextLayout(SWT.LEFT_TO_RIGHT);
 			textLayout.setFont(g.getFont());
 
-			if (firstBox && specialPREFIX.length() != 0 && text.indexOf(specialPREFIX) == 0)
+			if (firstBox && specialPREFIX.length() != 0 && text.indexOf(specialPREFIX) == 0) {
 				textLayout.setText(text.substring(specialPREFIX.length()));
-			else
+			} else {
 				textLayout.setText(text);
+			}
 
 			textLayout.setStyle(new TextStyle(g.getFont(), g.getForegroundColor(), TRANSPARENT_COLOR), 0,
 					text.length());
@@ -519,35 +512,34 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 			g.setForegroundColor(c);
 
 			// bidi_hcg start
-			if (image != null)
+			if (image != null) {
 				g.drawImage(image, x + with, y);
-			else
-				// bidi_hcg end
-
+			} else {
 				g.drawString(text.substring(specialPREFIX.length()), x + with, y);
+			}
+		} else // bidi_hcg start
+		if (image != null) {
+			g.drawImage(image, x, y);
 		} else {
-			// bidi_hcg start
-			if (image != null)
-				g.drawImage(image, x, y);
-			else
-				// bidi_hcg end
-
-				g.drawString(text, x, y);
+			g.drawString(text, x, y);
 		}
 		// bidi_hcg start
-		if (gc != null)
+		if (gc != null) {
 			gc.dispose();
-		if (image != null)
+		}
+		if (image != null) {
 			image.dispose();
-		// bidi_hcg end
+			// bidi_hcg end
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.draw2d.text.TextFlow#paintFigure(org.eclipse.draw2d.Graphics)
 	 */
+	@Override
 	protected void paintFigure(Graphics g) {
 		paintTo(g, 0, 0);
 	}
@@ -555,10 +547,11 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 	/**
 	 * Calculates the left coordinate by given container width, text width and
 	 * horizontal alignment style.
-	 * 
+	 *
 	 * @param compWidth Container width.
 	 * @param textWidth Text width.
-	 * @return
+	 * @return the left coordinate by given container width, text width and
+	 *         horizontal alignment style.
 	 */
 	protected int calculateLeft(int compWidth, int textWidth) {
 		int rlt = 0;
@@ -578,11 +571,11 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 	/**
 	 * Calculates the spacing by given container width, text width and horizontal
 	 * alignment style.
-	 * 
+	 *
 	 * @param compWidth Container width.
 	 * @param textWidth Text width.
 	 * @return
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	private int calculateSpacing(int compWidth, int textWidth, boolean isMirrored) {
@@ -605,10 +598,11 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 	/**
 	 * Calculates the top coordinate by given container height, text height and
 	 * vertical alignment style.
-	 * 
+	 *
 	 * @param compHeight Container height.
 	 * @param textHeight text height.
-	 * @return
+	 * @return the top coordinate by given container height, text height and
+	 *         vertical alignment style.
 	 */
 	protected int calculateTop(int compHeight, int textHeight) {
 		int rlt = 0;
@@ -627,7 +621,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Sets the horizontal text alignment style.
-	 * 
+	 *
 	 * @param textAlign The textAlign to set.
 	 */
 	public void setTextAlign(String textAlign) {
@@ -636,8 +630,8 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Gets the horizontal text alignment style.
-	 * 
-	 * @return
+	 *
+	 * @return the horizontal text alignment style.
 	 */
 	public String getTextAlign() {
 		return textAlign;
@@ -645,7 +639,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Sets the over-line style of the text.
-	 * 
+	 *
 	 * @param textOverline The textOverLine to set.
 	 */
 	public void setTextOverline(String textOverline) {
@@ -654,7 +648,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Sets the line-through style of the text.
-	 * 
+	 *
 	 * @param textLineThrough The textLineThrough to set.
 	 */
 	public void setTextLineThrough(String textLineThrough) {
@@ -663,7 +657,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Sets the underline style of the text.
-	 * 
+	 *
 	 * @param textUnderline The textUnderline to set.
 	 */
 	public void setTextUnderline(String textUnderline) {
@@ -672,7 +666,7 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Sets the vertical text alignment style.
-	 * 
+	 *
 	 * @param verticalAlign The verticalAlign to set.
 	 */
 	public void setVerticalAlign(String verticalAlign) {
@@ -692,9 +686,9 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Sets the text direction style.
-	 * 
+	 *
 	 * @param direction The direction to set.
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	public void setDirection(String direction) {
@@ -708,9 +702,9 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Gets the text direction style.
-	 * 
+	 *
 	 * @return The direction style.
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	public String getDirection() {
@@ -719,9 +713,9 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Determines whether the text is Right-To-Left.
-	 * 
+	 *
 	 * @return Boolean indicating whether the text is Right-To-Left or not.
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	private boolean isRtl() {
@@ -730,9 +724,9 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/**
 	 * Resolves the text direction style.
-	 * 
+	 *
 	 * @return The direction style.
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	private String resolveDirection(String direction) {
@@ -751,12 +745,13 @@ public class TextFlow extends org.eclipse.draw2d.text.TextFlow {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.draw2d.text.TextFlow#contributeBidi(org.eclipse.draw2d.text
 	 * .BidiProcessor)
-	 * 
+	 *
 	 * @bidi_hcg
 	 */
+	@Override
 	protected void contributeBidi(BidiProcessor proc) {
 		proc.setOrientation(isRtl() ? SWT.RIGHT_TO_LEFT : SWT.LEFT_TO_RIGHT);
 		super.contributeBidi(proc);

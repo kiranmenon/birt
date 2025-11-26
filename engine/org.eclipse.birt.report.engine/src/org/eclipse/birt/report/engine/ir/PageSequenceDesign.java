@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -25,7 +28,7 @@ public class PageSequenceDesign extends ReportElementDesign {
 	/**
 	 * add a page into the page sequence. role should be one of the following
 	 * values: 1) first 2) body 3) even 4) odd
-	 * 
+	 *
 	 * @param role rule name
 	 * @param page page
 	 */
@@ -37,7 +40,7 @@ public class PageSequenceDesign extends ReportElementDesign {
 
 	/**
 	 * get the master page of role.
-	 * 
+	 *
 	 * @param role role name
 	 * @return master page, null if not defined.
 	 */

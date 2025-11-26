@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,7 +16,7 @@ package org.eclipse.birt.report.engine.ir;
 
 /**
  * Master Page
- * 
+ *
  */
 abstract public class MasterPageDesign extends StyledElementDesign {
 
@@ -64,9 +67,9 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * set the marign.
-	 * 
+	 *
 	 * margin must be described in absoluted units.
-	 * 
+	 *
 	 * @param top    top margin
 	 * @param left   left margin
 	 * @param bottom bottom margin
@@ -81,7 +84,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get left margin
-	 * 
+	 *
 	 * @return left margin(mm)
 	 */
 	public DimensionType getLeftMargin() {
@@ -90,7 +93,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get rigth margin
-	 * 
+	 *
 	 * @return right margin(mm)
 	 */
 	public DimensionType getRightMargin() {
@@ -99,7 +102,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get top margin
-	 * 
+	 *
 	 * @return top margin in mm
 	 */
 	public DimensionType getTopMargin() {
@@ -108,7 +111,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get bottom margin in mm
-	 * 
+	 *
 	 * @return bottom margin
 	 */
 	public DimensionType getBottomMargin() {
@@ -117,7 +120,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get the page type. page type can be A4 or CUSTOM.
-	 * 
+	 *
 	 * @return page type.
 	 */
 	public String getPageType() {
@@ -127,17 +130,16 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 	/**
 	 * set the page type. if page type is not custom type, set the width&height to
 	 * the corresponse value.
-	 * 
+	 *
 	 * @param pageType
 	 */
 	public void setPageType(String pageType) {
 		this.pageType = pageType;
-		return;
 	}
 
 	/**
 	 * set the page size
-	 * 
+	 *
 	 * @param width  width of the page(mm)
 	 * @param height height of the page(mm)
 	 */
@@ -148,7 +150,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get page width
-	 * 
+	 *
 	 * @return page width in mm
 	 */
 	public DimensionType getPageWidth() {
@@ -157,7 +159,7 @@ abstract public class MasterPageDesign extends StyledElementDesign {
 
 	/**
 	 * get page height
-	 * 
+	 *
 	 * @return page height in mm
 	 */
 	public DimensionType getPageHeight() {

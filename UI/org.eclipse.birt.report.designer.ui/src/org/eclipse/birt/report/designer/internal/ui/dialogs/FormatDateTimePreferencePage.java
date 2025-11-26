@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -39,7 +42,7 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 
 	/**
 	 * Constructs a format datetime preference page.
-	 * 
+	 *
 	 * @param model The model
 	 */
 	public FormatDateTimePreferencePage(Object model) {
@@ -50,10 +53,11 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.jface.preference.FieldEditorPreferencePage#adjustGridLayout()
 	 */
+	@Override
 	protected void adjustGridLayout() {
 		((GridLayout) getFieldEditorParent().getLayout()).numColumns = 1;
 	}
@@ -67,6 +71,8 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 
 	/**
 	 * Gets the preference name.
+	 *
+	 * @return Return the preference name
 	 */
 	public String getPreferenceName() {
 		return name;
@@ -74,11 +80,12 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.designer.internal.ui.dialogs.BaseStylePreferencePage
 	 * #createFieldEditors()
 	 */
+	@Override
 	protected void createFieldEditors() {
 		super.createFieldEditors();
 		final Composite parent = getFieldEditorParent();
@@ -95,16 +102,16 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 		String pattern = ((StylePreferenceStore) getPreferenceStore()).getDateTimeFormat();
 		ULocale locale = ((StylePreferenceStore) getPreferenceStore()).getDateTimeFormatLocale();
 		formatPage.setInput(category, pattern, locale);
-		return;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.designer.internal.ui.dialogs.BaseStylePreferencePage
 	 * #performOk()
 	 */
+	@Override
 	public boolean performOk() {
 		IPreferenceStore ps = getPreferenceStore();
 		if (ps instanceof StylePreferenceStore) {
@@ -119,8 +126,8 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 
 	/**
 	 * Stores the result pattern string into Preference Store.
-	 * 
-	 * @return
+	 *
+	 * @return Return the result pattern string into Preference Store.
 	 */
 	protected boolean doStore() {
 		if (formatPage == null || !formatPage.isFormatModified() || !formatPage.isDirty()) {
@@ -137,12 +144,14 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 		}
 	}
 
+	@Override
 	protected String[] getPreferenceNames() {
 		return new String[] { IStyleModel.DATE_TIME_FORMAT_PROP };
 	}
 
 	private FormatChangeEvent event = null;
 
+	@Override
 	public void formatChange(FormatChangeEvent event) {
 		if (getBuilder() != null) {
 			this.event = event;
@@ -152,6 +161,7 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 
 	private boolean firstCheck = false;
 
+	@Override
 	public boolean hasLocaleProperties() {
 		if (!firstCheck) {
 			firstCheck = true;
@@ -167,10 +177,8 @@ public class FormatDateTimePreferencePage extends BaseStylePreferencePage implem
 					}
 				}
 			}
-		} else {
-			if (event != null) {
-				hasLocaleProperty = true;
-			}
+		} else if (event != null) {
+			hasLocaleProperty = true;
 		}
 		return hasLocaleProperty;
 	}

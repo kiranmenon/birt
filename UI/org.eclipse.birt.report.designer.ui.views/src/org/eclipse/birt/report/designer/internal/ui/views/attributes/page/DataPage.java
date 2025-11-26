@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -44,12 +47,16 @@ import org.eclipse.swt.SWT;
  */
 public class DataPage extends GeneralPage {
 
+	private static final int SECTION_WIDTH_LEFT = 216;
+	private static final int SECTION_WIDTH_RIGHT = 200;
+
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seeorg.eclipse.birt.report.designer.internal.ui.views.attributes.page.
 	 * GeneralPage#buildContent()
 	 */
+	@Override
 	protected void buildContent() {
 		// Defines providers.
 
@@ -109,13 +116,13 @@ public class DataPage extends GeneralPage {
 
 		// Sets widths.
 
-		nameSection.setWidth(200);
-		fontFamilySection.setWidth(200);
-		fontSizeSection.setWidth(200);
-		colorSection.setWidth(200);
-		bgColorSection.setWidth(200);
+		nameSection.setWidth(SECTION_WIDTH_LEFT);
+		fontFamilySection.setWidth(SECTION_WIDTH_LEFT);
+		colorSection.setWidth(SECTION_WIDTH_LEFT);
+		styleSection.setWidth(SECTION_WIDTH_LEFT);
+		fontSizeSection.setWidth(SECTION_WIDTH_RIGHT);
+		bgColorSection.setWidth(SECTION_WIDTH_RIGHT);
 		// fontStyleSection.setWidth( 200 );
-		styleSection.setWidth(200);
 
 		// Sets layout num.
 
@@ -142,7 +149,7 @@ public class DataPage extends GeneralPage {
 		ElementIdDescriptorProvider elementIdProvider = new ElementIdDescriptorProvider();
 		TextSection elementIdSection = new TextSection(elementIdProvider.getDisplayName(), container, true);
 		elementIdSection.setProvider(elementIdProvider);
-		elementIdSection.setWidth(200);
+		elementIdSection.setWidth(SECTION_WIDTH_RIGHT);
 		elementIdSection.setLayoutNum(2);
 		addSection(PageSectionId.DATA_ELEMENT_ID, elementIdSection);
 
@@ -153,7 +160,7 @@ public class DataPage extends GeneralPage {
 		displaySection.setProvider(displayProvider);
 		displaySection.setLayoutNum(4);
 		displaySection.setGridPlaceholder(2, true);
-		displaySection.setWidth(200);
+		displaySection.setWidth(SECTION_WIDTH_RIGHT);
 
 		ComboPropertyDescriptorProvider wordwrapProvider = new ComboPropertyDescriptorProvider(
 				StyleHandle.WHITE_SPACE_PROP, ReportDesignConstants.STYLE_ELEMENT);
@@ -177,17 +184,12 @@ public class DataPage extends GeneralPage {
 
 	/**
 	 * Creates provider's array for font style controls.
-	 * 
+	 *
 	 * @return the provider's array(elements are instances of
 	 *         <code>IDescriptorProvider</code>).
 	 */
 	private IDescriptorProvider[] createFontStyleProviders() {
-		IDescriptorProvider[] providers = new IDescriptorProvider[] {
-				// Creates providers with StyleHandle.FONT_WEIGHT_PROP,
-				// StyleHandle.FONT_STYLE_PROP, StyleHandle.TEXT_UNDERLINE_PROP,
-				// StyleHandle.TEXT_LINE_THROUGH_PROP and
-				// StyleHandle.TEXT_ALIGN_PROP.
-
+		IDescriptorProvider[] providers = {
 				new FontStylePropertyDescriptorProvider(StyleHandle.FONT_WEIGHT_PROP,
 						ReportDesignConstants.STYLE_ELEMENT),
 
@@ -200,16 +202,21 @@ public class DataPage extends GeneralPage {
 				new FontStylePropertyDescriptorProvider(StyleHandle.TEXT_LINE_THROUGH_PROP,
 						ReportDesignConstants.STYLE_ELEMENT),
 
+				new FontStylePropertyDescriptorProvider(StyleHandle.TEXT_HYPERLINK_STYLE_PROP,
+						ReportDesignConstants.STYLE_ELEMENT),
+
 				new PropertyDescriptorProvider(StyleHandle.TEXT_ALIGN_PROP, ReportDesignConstants.STYLE_ELEMENT) };
 
 		for (int i = 0; i < providers.length; i++) {
-			if (providers[i] instanceof PropertyDescriptorProvider)
+			if (providers[i] instanceof PropertyDescriptorProvider) {
 				((PropertyDescriptorProvider) providers[i]).enableReset(true);
+			}
 		}
 
 		return providers;
 	}
 
+	@Override
 	protected void applyCustomSections() {
 		Object[] helperProviders = ElementAdapterManager.getAdapters(this, ISectionHelperProvider.class);
 		if (helperProviders != null) {
@@ -220,8 +227,9 @@ public class DataPage extends GeneralPage {
 					if (helper != null) {
 						Section section = helper.createSection(container, DataItemHandle.THEME_PROP,
 								ReportDesignConstants.DATA_ITEM, true);
-						if (section instanceof SimpleComboSection)
+						if (section instanceof SimpleComboSection) {
 							((SimpleComboSection) section).setWidth(200);
+						}
 						section.setLayoutNum(6);
 						section.setGridPlaceholder(4, true);
 						addSectionAfter(PageSectionId.DATA_THEME, section, PageSectionId.DATA_DISPLAY);

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -21,15 +24,21 @@ import java.util.List;
 import org.eclipse.birt.core.framework.IConfigurationElement;
 import org.eclipse.birt.core.framework.IExtension;
 import org.eclipse.birt.core.framework.Platform;
+import org.eclipse.birt.core.internal.util.EclipseUtil;
 import org.eclipse.birt.core.script.functionservice.impl.FunctionProviderBaseImpl;
 import org.osgi.framework.Bundle;
 
 /**
- * 
+ * Provider of functions
+ *
+ * @since 3.3
+ *
  */
-
 public class FunctionProviderImpl extends FunctionProviderBaseImpl {
 
+	/**
+	 * Constructor
+	 */
 	public FunctionProviderImpl() {
 		super(Platform.getExtensionRegistry().getExtensionPoint(EXTENSION_POINT));
 	}
@@ -37,16 +46,17 @@ public class FunctionProviderImpl extends FunctionProviderBaseImpl {
 	/**
 	 * Populate library resources. The library resources includes .js script lib and
 	 * .jar java lib.
-	 * 
+	 *
 	 * @param libs
 	 * @param suffix
 	 * @param confElement
 	 */
+	@Override
 	protected void populateResources(List<URL> libs, String suffix, IConfigurationElement confElement) {
 		String source = confElement.getAttribute(ATTRIBUTE_LOCATION);
 		IExtension extension = confElement.getDeclaringExtension();
 		String namespace = extension.getNamespace();
-		Bundle bundle = org.eclipse.core.runtime.Platform.getBundle(namespace);
+		Bundle bundle = EclipseUtil.getBundle(namespace);
 		// available on OSGi platform
 		if (bundle != null) {
 			Enumeration<String> files = bundle.getEntryPaths(source);
@@ -62,13 +72,11 @@ public class FunctionProviderImpl extends FunctionProviderBaseImpl {
 						}
 					}
 				}
-			} else {
-				// the bundle denotes to a file.
-				if (source.toLowerCase().endsWith(suffix)) {
-					URL url = bundle.getEntry(source);
-					if (url != null) {
-						libs.add(url);
-					}
+			} else // the bundle denotes to a file.
+			if (source.toLowerCase().endsWith(suffix)) {
+				URL url = bundle.getEntry(source);
+				if (url != null) {
+					libs.add(url);
 				}
 			}
 		}
@@ -77,25 +85,24 @@ public class FunctionProviderImpl extends FunctionProviderBaseImpl {
 			File file = new File(source);
 			if (file.exists() && file.isDirectory()) {
 				libs.addAll(findFileList(file, suffix));
-			} else {
-				if (source.toLowerCase().endsWith(suffix))
-					try {
-						libs.add(new URL(source));
-					} catch (MalformedURLException e) {
-						// ignore it
-					}
+			} else if (source.toLowerCase().endsWith(suffix)) {
+				try {
+					libs.add(new URL(source));
+				} catch (MalformedURLException e) {
+					// ignore it
+				}
 			}
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @param file
 	 * @param suffix
 	 * @return
 	 */
 	private static List<URL> findFileList(File file, String suffix) {
-		List<URL> fileList = new ArrayList<URL>();
+		List<URL> fileList = new ArrayList<>();
 		for (File f : file.listFiles()) {
 			if (f.isFile() && f.getName().endsWith(suffix)) {
 				try {

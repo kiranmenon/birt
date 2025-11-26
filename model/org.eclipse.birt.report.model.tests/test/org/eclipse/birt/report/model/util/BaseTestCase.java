@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -53,7 +56,7 @@ import junit.framework.TestCase;
  * This class is abstract class used for tests, which contains the design file
  * name and report design handle, and provides the basic design file reading
  * methods.
- * 
+ *
  * This class performs mainly the following functionalities:
  * <p>
  * <ul>
@@ -75,7 +78,7 @@ import junit.framework.TestCase;
  * name; but, when printing out the error list, to make the file name appear in
  * the message, you can call 'design.setfileName( fileName )' in the child test
  * case.</li>
- * 
+ *
  */
 public abstract class BaseTestCase extends TestCase {
 
@@ -143,12 +146,13 @@ public abstract class BaseTestCase extends TestCase {
 		ThreadResources.setLocale(ULocale.ENGLISH);
 
 		if (engine == null) {
+			MetaDataDictionary.reset(); // will force MetaDataDictionary to initialize
 			engine = new DesignEngine(new DesignConfig());
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 */
 
 	protected void resetMetadata() {
@@ -158,30 +162,34 @@ public abstract class BaseTestCase extends TestCase {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see junit.framework.TestCase#teardown()
 	 */
 
 	@Override
 	protected void tearDown() throws Exception {
-		if (beforeSerializedDesignHandle != null)
+		if (beforeSerializedDesignHandle != null) {
 			designHandle = beforeSerializedDesignHandle;
+		}
 
-		if (designHandle != null)
+		if (designHandle != null) {
 			designHandle.close();
+		}
 
-		if (libraryHandle != null)
+		if (libraryHandle != null) {
 			libraryHandle.close();
+		}
 
-		if (os != null)
+		if (os != null) {
 			os.close();
+		}
 
 		super.tearDown();
 	}
 
 	/**
 	 * Creates a new report.
-	 * 
+	 *
 	 * @return the handle for new report
 	 */
 
@@ -191,7 +199,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Creates a new report with given locale.
-	 * 
+	 *
 	 * @param locale the user locale
 	 * @return the handle for new report
 	 */
@@ -224,7 +232,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Creates a new library with default locale.
-	 * 
+	 *
 	 * @return the handle for new library
 	 */
 
@@ -234,7 +242,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Creates library with given locale.
-	 * 
+	 *
 	 * @param locale the user locale
 	 * @return the handle for new library
 	 */
@@ -252,7 +260,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens design file with default locale.
-	 * 
+	 *
 	 * @param fileName design file name
 	 * @throws DesignFileException if any exception
 	 */
@@ -263,7 +271,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens design file with default locale.
-	 * 
+	 *
 	 * @param fileName        design file name
 	 * @param inSingleJarMode <code>true</code> if open the design that is in the
 	 *                        single jar. Otherwise <code>false</code>.
@@ -276,7 +284,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens design file providing the file name and the locale.
-	 * 
+	 *
 	 * @param fileName        the design file to be opened
 	 * @param locale          the user locale
 	 * @param inSingleJarMode <code>true</code> if open the design that is in the
@@ -285,8 +293,9 @@ public abstract class BaseTestCase extends TestCase {
 	 */
 
 	protected void openDesign(String fileName, ULocale locale, boolean inSingleJarMode) throws DesignFileException {
-		if (inSingleJarMode)
+		if (inSingleJarMode) {
 			fileName = INPUT_FOLDER + fileName;
+		}
 
 		if (engine == null) {
 			engine = new DesignEngine(new DesignConfig());
@@ -295,17 +304,26 @@ public abstract class BaseTestCase extends TestCase {
 		sessionHandle = engine.newSessionHandle(locale);
 		assertNotNull(sessionHandle);
 
-		if (inSingleJarMode)
-			designHandle = sessionHandle.openDesign(getResource(fileName).toString());
-		else
+		if (inSingleJarMode) {
+			String name = null;
+			try {
+				name = getResource(fileName).toString();
+				designHandle = sessionHandle.openDesign(name);
+			} catch (Exception e) {
+				System.out.println("WIM - " + name);
+				e.printStackTrace();
+				throw e;
+			}
+		} else {
 			designHandle = sessionHandle.openDesign(fileName);
+		}
 
 		design = (ReportDesign) designHandle.getModule();
 	}
 
 	/**
 	 * Opens design file providing the file name and the locale.
-	 * 
+	 *
 	 * @param fileName        the design file to be opened
 	 * @param locale          the user locale
 	 * @param inSingleJarMode <code>true</code> if open the design that is in the
@@ -319,7 +337,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens library file with given file name.
-	 * 
+	 *
 	 * @param fileName the library file name
 	 * @throws DesignFileException if any exception
 	 */
@@ -330,7 +348,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens library file with given file name.
-	 * 
+	 *
 	 * @param fileName        the library file name
 	 * @param inSingleJarMode <code>true</code> if open the design that is in the
 	 *                        single jar. Otherwise <code>false</code>.
@@ -343,7 +361,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens library file with given file name and locale.
-	 * 
+	 *
 	 * @param fileName the library file name
 	 * @param locale   the user locale
 	 * @throws DesignFileException if any exception
@@ -355,7 +373,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens library file with given file name and locale.
-	 * 
+	 *
 	 * @param fileName        the library file name
 	 * @param locale          the user locale
 	 * @param inSingleJarMode <code>true</code> if open the design that is in the
@@ -364,8 +382,9 @@ public abstract class BaseTestCase extends TestCase {
 	 */
 
 	protected void openLibrary(String fileName, ULocale locale, boolean inSingleJarMode) throws DesignFileException {
-		if (inSingleJarMode)
+		if (inSingleJarMode) {
 			fileName = INPUT_FOLDER + fileName;
+		}
 
 		if (engine == null) {
 			engine = new DesignEngine(new DesignConfig());
@@ -374,15 +393,16 @@ public abstract class BaseTestCase extends TestCase {
 		sessionHandle = engine.newSessionHandle(locale);
 		assertNotNull(sessionHandle);
 
-		if (inSingleJarMode)
+		if (inSingleJarMode) {
 			libraryHandle = sessionHandle.openLibrary(getResource(fileName).toString(), getResourceAStream(fileName));
-		else
+		} else {
 			libraryHandle = sessionHandle.openLibrary(fileName);
+		}
 	}
 
 	/**
 	 * Opens a module file with given file name.
-	 * 
+	 *
 	 * @param fileName the module file name
 	 * @throws DesignFileException if any exception
 	 */
@@ -393,7 +413,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opend a module given file name and locale.
-	 * 
+	 *
 	 * @param fileName the module file name
 	 * @param locale   the user locale
 	 * @throws DesignFileException
@@ -413,7 +433,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Reads design file as InputStream.
-	 * 
+	 *
 	 * @param fileName Design file name
 	 * @param is       InputStream of this design file
 	 * @throws DesignFileException if any exception.
@@ -425,7 +445,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Opens a design file.
-	 * 
+	 *
 	 * @param fileName the design file name
 	 * @param is       the input stream of the design file.
 	 * @param locale   the user locale.
@@ -444,7 +464,7 @@ public abstract class BaseTestCase extends TestCase {
 	/**
 	 * Compares two text file. The comparison will ignore the line containing
 	 * "modificationDate".
-	 * 
+	 *
 	 * @param goldenFileName the 1st file name to be compared.
 	 * @param outputFileName the 2nd file name to be compared.
 	 * @return true if two text files are same line by line
@@ -454,7 +474,7 @@ public abstract class BaseTestCase extends TestCase {
 		Reader readerA = null;
 		FileReader readerB = null;
 		boolean same = true;
-		StringBuffer errorText = new StringBuffer();
+		StringBuilder errorText = new StringBuilder();
 
 		try {
 			goldenFileName = GOLDEN_FOLDER + goldenFileName;
@@ -470,10 +490,12 @@ public abstract class BaseTestCase extends TestCase {
 			e.printStackTrace();
 		} finally {
 			try {
-				if (readerA != null)
+				if (readerA != null) {
 					readerA.close();
-				if (readerB != null)
+				}
+				if (readerB != null) {
 					readerB.close();
+				}
 			} catch (Exception e) {
 				readerA = null;
 				readerB = null;
@@ -490,7 +512,7 @@ public abstract class BaseTestCase extends TestCase {
 	/**
 	 * Compares two text file. The comparison will ignore the line containing
 	 * "modificationDate".
-	 * 
+	 *
 	 * @param goldenFileName the 1st file name to be compared.
 	 * @param os             the 2nd output stream to be compared.
 	 * @return true if two text files are same char by char
@@ -500,8 +522,9 @@ public abstract class BaseTestCase extends TestCase {
 		String tmpGoldenFileName = GOLDEN_FOLDER + goldenFileName;
 
 		InputStream streamA = getResourceAStream(tmpGoldenFileName);
-		if (os == null)
+		if (os == null) {
 			return false;
+		}
 
 		String outContent = os.toString("utf-8"); //$NON-NLS-1$
 
@@ -513,7 +536,7 @@ public abstract class BaseTestCase extends TestCase {
 		try {
 			ok = compareFile(readerA, readerB);
 		} catch (Exception e) {
-			String outFileName = goldenFileName.replaceAll("golden", "out");
+			String outFileName = goldenFileName.replace("golden", "out");
 			saveOutputFile(outFileName, outContent);
 
 			throw e;
@@ -535,7 +558,7 @@ public abstract class BaseTestCase extends TestCase {
 	protected boolean compareDesignModel(String goldenFileName, String[] ignoredAttrs) throws Exception {
 		InputStream goldenFileStream = getGoldenFileAsStream(GOLDEN_FOLDER + goldenFileName);
 		InputStream designFileStream = getTestDesignFileAsStream(os);
-		HashSet<String> ignoredSet = new HashSet<String>();
+		HashSet<String> ignoredSet = new HashSet<>();
 		for (String s : ignoredAttrs) {
 			ignoredSet.add(s);
 		}
@@ -548,11 +571,11 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * test two line to see if they are same.
-	 * 
+	 *
 	 * the compare ignore id and versions as:
-	 * 
+	 *
 	 * version="99.99" id="999"
-	 * 
+	 *
 	 * @param line1
 	 * @param line2
 	 * @return
@@ -579,7 +602,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	private String[] readLines(Reader r1) throws IOException {
 		BufferedReader br = new BufferedReader(r1);
-		ArrayList<String> lines = new ArrayList<String>();
+		ArrayList<String> lines = new ArrayList<>();
 		String line = br.readLine();
 		while (line != null) {
 			lines.add(line.trim());
@@ -598,7 +621,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Compares the two text files.
-	 * 
+	 *
 	 * @param goldenReader the reader for golden file
 	 * @param outputReader the reader for output file
 	 * @return true if two text files are same.
@@ -638,7 +661,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Compare the golden file with the os.
-	 * 
+	 *
 	 * @param goldenFileName
 	 * @param os
 	 * @return
@@ -648,8 +671,9 @@ public abstract class BaseTestCase extends TestCase {
 		String tmpGoldenFileName = GOLDEN_FOLDER + goldenFileName;
 
 		InputStream streamA = getResourceAStream(tmpGoldenFileName);
-		if (os == null)
+		if (os == null) {
 			return false;
+		}
 
 		String outContent = os.toString("utf-8"); //$NON-NLS-1$
 
@@ -661,7 +685,7 @@ public abstract class BaseTestCase extends TestCase {
 		try {
 			ok = compareFile(readerA, readerB);
 		} catch (Exception e) {
-			String outFileName = goldenFileName.replaceAll("golden", "out");
+			String outFileName = goldenFileName.replace("golden", "out");
 			saveOutputFile(outFileName, outContent);
 
 			throw e;
@@ -682,30 +706,32 @@ public abstract class BaseTestCase extends TestCase {
 	/**
 	 * Prints out all semantic errors stored in the error list during parsing the
 	 * design file.
-	 * 
+	 *
 	 * @param design report design
 	 */
 
 	protected void printSemanticError(ReportDesign design) {
-		if (design != null)
+		if (design != null) {
 			printErrorList(design.getAllErrors());
+		}
 	}
 
 	/**
 	 * Prints out all syntax errors stored in the error list during parsing the
 	 * design file.
-	 * 
+	 *
 	 * @param e <code>DesignFileException</code> containing syntax error list.
 	 */
 
 	protected void printSyntaxError(DesignFileException e) {
-		if (e != null)
+		if (e != null) {
 			printErrorList(e.getErrorList());
+		}
 	}
 
 	/**
 	 * Prints error list.
-	 * 
+	 *
 	 * @param errors error list
 	 */
 	private void printErrorList(List errors) {
@@ -719,7 +745,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Dumps the parsing errors into a text file.
-	 * 
+	 *
 	 * @param filename the file name into which the error will be dumped.
 	 * @throws Exception if any exception.
 	 */
@@ -732,8 +758,9 @@ public abstract class BaseTestCase extends TestCase {
 		}
 		filename = outputFolder + filename;
 
-		if (design == null)
+		if (design == null) {
 			return;
+		}
 		PrintWriter writer = new PrintWriter(new FileOutputStream(filename));
 		List errors = design.getAllErrors();
 		ErrorDetail ex = null;
@@ -749,7 +776,7 @@ public abstract class BaseTestCase extends TestCase {
 	 * Eventually, this method will call
 	 * {@link ReportDesignHandle#serialize(java.io.OutputStream)}to save the output
 	 * file of some unit test.
-	 * 
+	 *
 	 * @param filename the test output file to be saved.
 	 * @throws IOException if error occurs while saving the file.
 	 */
@@ -762,21 +789,22 @@ public abstract class BaseTestCase extends TestCase {
 	 * Eventually, this method will call
 	 * {@link ReportDesignHandle#serialize(java.io.OutputStream)}to save the output
 	 * file of some unit test.
-	 * 
+	 *
 	 * @param moduleHandle the module to save, either a report design or a library
 	 * @throws IOException if error occurs while saving the file.
 	 */
 
 	protected void save(ModuleHandle moduleHandle) throws IOException {
 		os = new ByteArrayOutputStream();
-		if (moduleHandle != null)
+		if (moduleHandle != null) {
 			moduleHandle.serialize(os);
+		}
 		os.close();
 	}
 
 	/**
 	 * Saves library as the given file name.
-	 * 
+	 *
 	 * @param filename the file name for saving
 	 * @throws IOException if any exception
 	 */
@@ -787,14 +815,15 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Gets the temp folder of this class.
-	 * 
+	 *
 	 * @return temp folder of this class
 	 */
 
 	protected String getTempFolder() {
 		String tempDir = System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
-		if (!tempDir.endsWith(File.separator))
+		if (!tempDir.endsWith(File.separator)) {
 			tempDir += File.separator;
+		}
 
 		String outputPath = tempDir + "org.eclipse.birt.report.model" //$NON-NLS-1$
 				+ getFullQualifiedClassName();
@@ -811,7 +840,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * gets the url of the resource.
-	 * 
+	 *
 	 * @param name name of the resource
 	 * @return the url of the resource
 	 */
@@ -823,7 +852,7 @@ public abstract class BaseTestCase extends TestCase {
 	/**
 	 * Returns the full qualified class name. For example,
 	 * "/org/eclipse/birt/report/model".
-	 * 
+	 *
 	 * @return the full qualified class name
 	 */
 
@@ -838,7 +867,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Checks the platform.
-	 * 
+	 *
 	 * @return <code>true</code> if the platform is windows. Otherwise
 	 *         <code>false</code>.
 	 */
@@ -850,7 +879,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Copies the file to the temporary folder.
-	 * 
+	 *
 	 * @param resourceName the resource name. Based on the class folder.
 	 * @return the file path on the disk
 	 * @throws Exception
@@ -871,8 +900,9 @@ public abstract class BaseTestCase extends TestCase {
 		folder = folder + "/" + INPUT_FOLDER; //$NON-NLS-1$
 
 		File tmpFolder = new File(folder);
-		if (!tmpFolder.exists())
+		if (!tmpFolder.exists()) {
 			tmpFolder.mkdirs();
+		}
 
 		String filename = ""; //$NON-NLS-1$
 		int lastSlash = resourceName.lastIndexOf("/"); //$NON-NLS-1$
@@ -895,7 +925,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Saves the output stream into the output file.
-	 * 
+	 *
 	 * @param fileName the resource name. Based on the class folder.
 	 * @throws Exception
 	 */
@@ -907,7 +937,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Saves the output stream into the output file.
-	 * 
+	 *
 	 * @param fileName the resource name. Based on the class folder.
 	 * @throws Exception
 	 */
@@ -915,8 +945,9 @@ public abstract class BaseTestCase extends TestCase {
 	protected void saveOutputFile(String fileName, String content) throws Exception {
 		String folder = getTempFolder() + OUTPUT_FOLDER;
 		File tmpFolder = new File(folder);
-		if (!tmpFolder.exists())
+		if (!tmpFolder.exists()) {
 			tmpFolder.mkdirs();
+		}
 
 		FileOutputStream fos = new FileOutputStream(folder + fileName);
 		fos.write(content.getBytes("UTF-8")); //$NON-NLS-1$
@@ -930,15 +961,17 @@ public abstract class BaseTestCase extends TestCase {
 	 */
 
 	protected static String serializeStringList(List strs) {
-		if (strs == null)
+		if (strs == null) {
 			return null;
+		}
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < strs.size(); i++) {
 			sb.append((String) strs.get(i));
 
-			if (i != strs.size() - 1)
+			if (i != strs.size() - 1) {
 				sb.append(", "); //$NON-NLS-1$
+			}
 		}
 
 		return sb.toString();
@@ -946,7 +979,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Writes the document to the internal output stream.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 
@@ -956,7 +989,7 @@ public abstract class BaseTestCase extends TestCase {
 
 	/**
 	 * Writes the document to the internal output stream.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 
@@ -977,8 +1010,9 @@ public abstract class BaseTestCase extends TestCase {
 			writer.write(os);
 			design.onSave();
 
-		} else
+		} else {
 			designHandle.serialize(os);
+		}
 
 		this.beforeSerializedDesignHandle = beforeSerializedDesignHandle;
 	}

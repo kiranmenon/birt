@@ -1,12 +1,14 @@
 /*************************************************************************************
  * Copyright (c) 2011, 2012, 2013 James Talbut.
  *  jim-emitters@spudsoft.co.uk
- *  
- * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     James Talbut - Initial implementation.
  ************************************************************************************/
@@ -16,10 +18,13 @@ package uk.co.spudsoft.birt.emitters.excel.handlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IListBandContent;
 import org.eclipse.birt.report.engine.content.IListContent;
 import org.eclipse.birt.report.engine.content.IListGroupContent;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetView;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STSheetViewType;
 
 import uk.co.spudsoft.birt.emitters.excel.AreaBorders;
 import uk.co.spudsoft.birt.emitters.excel.BirtStyle;
@@ -33,9 +38,6 @@ public class AbstractRealListHandler extends AbstractHandler implements NestedTa
 	protected int startRow;
 	protected int startCol;
 
-	private IListGroupContent currentGroup;
-	private IListBandContent currentBand;
-
 	private AreaBorders borderDefn;
 
 	private List<NestedTableHandler> nestedTables;
@@ -44,14 +46,16 @@ public class AbstractRealListHandler extends AbstractHandler implements NestedTa
 		super(log, parent, list);
 	}
 
+	@Override
 	public void addNestedTable(NestedTableHandler nestedTableHandler) {
 		if (nestedTables == null) {
-			nestedTables = new ArrayList<NestedTableHandler>();
+			nestedTables = new ArrayList<>();
 		}
 		log.debug("Adding nested table: ", nestedTableHandler);
 		nestedTables.add(nestedTableHandler);
 	}
 
+	@Override
 	public boolean rowHasNestedTable(int rowNum) {
 		if (nestedTables != null) {
 			for (NestedTableHandler nestedTableHandler : nestedTables) {
@@ -65,6 +69,7 @@ public class AbstractRealListHandler extends AbstractHandler implements NestedTa
 		return false;
 	}
 
+	@Override
 	public int extendRowBy(int rowNum) {
 		int offset = 1;
 		if (nestedTables != null) {
@@ -128,11 +133,40 @@ public class AbstractRealListHandler extends AbstractHandler implements NestedTa
 		if (!EmitterServices.booleanOption(state.getRenderOptions(), list, ExcelEmitter.DISPLAYZEROS_PROP, true)) {
 			state.currentSheet.setDisplayZeros(false);
 		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), list, ExcelEmitter.PRINTGRIDLINES_PROP, false)) {
+			state.currentSheet.setPrintGridlines(true);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), list, ExcelEmitter.PRINTROWCOLHEADINGS_PROP,
+				false)) {
+			state.currentSheet.setPrintRowAndColumnHeadings(true);
+		}
+		if (EmitterServices.booleanOption(state.getRenderOptions(), list, ExcelEmitter.PRINTFITTOPAGE_PROP, false)) {
+			state.currentSheet.setFitToPage(true);
+		}
+		int displayZoom = EmitterServices.integerOption(state.getRenderOptions(), list,
+				ExcelEmitter.DISPLAY_SHEET_ZOOM, -1);
+		if ((displayZoom >= ExcelEmitter.poiExcelDisplaySheetZoomScaleMin)
+				&& (displayZoom <= ExcelEmitter.poiExcelDisplaySheetZoomScaleMax)) {
+			state.currentSheet.setZoom(displayZoom);
+		}
+		String pagePreview = EmitterServices.stringOption(state.getRenderOptions(), list, ExcelEmitter.PAGE_PREVIEW,
+				null);
+		if (pagePreview != null) {
+			if (pagePreview.equalsIgnoreCase(ExcelEmitter.poiExcelPreviewPageLayout)) {
+				CTSheetView view = ((XSSFSheet) state.currentSheet).getCTWorksheet().getSheetViews()
+						.getSheetViewArray(0);
+				view.setView(STSheetViewType.PAGE_LAYOUT);
+
+			} else if (pagePreview.equalsIgnoreCase(ExcelEmitter.poiExcelPreviewPageBreak)) {
+				CTSheetView view = ((XSSFSheet) state.currentSheet).getCTWorksheet().getSheetViews()
+						.getSheetViewArray(0);
+				view.setView(STSheetViewType.PAGE_BREAK_PREVIEW);
+			}
+		}
 	}
 
 	@Override
 	public void startListBand(HandlerState state, IListBandContent band) throws BirtException {
-		currentBand = band;
 		state.colNum = startCol;
 		log.debug("startListBand with startCol = ", startCol);
 	}
@@ -145,18 +179,14 @@ public class AbstractRealListHandler extends AbstractHandler implements NestedTa
 			state.rowNum += extendRowBy(state.rowNum);
 		}
 		state.colNum = startCol;
-
-		currentBand = null;
 	}
 
 	@Override
 	public void startListGroup(HandlerState state, IListGroupContent group) throws BirtException {
-		currentGroup = group;
 	}
 
 	@Override
 	public void endListGroup(HandlerState state, IListGroupContent group) throws BirtException {
-		currentGroup = null;
 	}
 
 }

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -31,119 +34,157 @@ import com.ibm.icu.util.TimeZone;
  * properties.
  */
 public interface IReportContext {
-	static final String PAGE_VAR_PAGE_LABEL = "pageLabel";
+	/** property: page label */
+	String PAGE_VAR_PAGE_LABEL = "pageLabel";
 
 	/**
 	 * return the report runnable used to create/render this report
-	 * 
-	 * @return
+	 *
+	 * @return the report runnable used to create/render this report
 	 */
 	IReportRunnable getReportRunnable();
 
 	/**
-	 * 
-	 * @param name
-	 * @return
+	 * Get the parameter value
+	 *
+	 * @param name parameter name
+	 * @return the parameter value
 	 */
 	Object getParameterValue(String name);
 
 	/**
-	 * 
-	 * @param name
-	 * @param value
+	 * Set the parameter value
+	 *
+	 * @param name  parameter name
+	 * @param value object value
 	 */
 	void setParameterValue(String name, Object value);
 
 	/**
-	 * 
-	 * @param name
-	 * @return
+	 * Get the display text
+	 *
+	 * @param name parameter name
+	 * @return the display text
 	 */
 	Object getParameterDisplayText(String name);
 
 	/**
-	 * 
+	 *
 	 * @param name
 	 * @param value
 	 */
 	void setParameterDisplayText(String name, String value);
 
 	/**
-	 * 
-	 * @return
+	 * Get the locale
+	 *
+	 * @return the locale
 	 */
 	Locale getLocale();
 
 	/**
-	 * Get time zone informations.
-	 * 
-	 * @return
+	 * Get the time zone informations
+	 *
+	 * @return the time zone informations
 	 */
 	TimeZone getTimeZone();
 
 	/**
-	 * 
-	 * @return
+	 * Get the output format
+	 *
+	 * @return the output format
 	 */
 	String getOutputFormat();
 
 	/**
-	 * get the render options used to render the report.
-	 * 
-	 * @return
+	 * Get the render options used to render the report.
+	 *
+	 * @return the render options used to render the report.
 	 */
 	IRenderOption getRenderOption();
 
 	/**
 	 * Get the application context
+	 *
+	 * @return the application context
 	 */
 	Map getAppContext();
 
 	/**
-	 * Get the http servlet request object
-	 * 
+	 * Get the HTTP servlet request object
+	 *
+	 * @return the HTTP servlet request object
+	 *
 	 */
 	Object getHttpServletRequest();
 
 	/**
 	 * Add the object to runtime scope. This object can only be retrieved in the
 	 * same phase, i.e. it is not persisted between generation and presentation.
+	 *
+	 * @param name name of the global variable
+	 * @param obj  object value
 	 */
 	void setGlobalVariable(String name, Object obj);
 
 	/**
 	 * Remove an object from runtime scope.
+	 *
+	 * @param name variable name
 	 */
 	void deleteGlobalVariable(String name);
 
 	/**
-	 * Retireve an object from runtime scope.
+	 * Get the value of the global variable
+	 *
+	 * @param name variable name
+	 * @return the value of the global variable
 	 */
 	Object getGlobalVariable(String name);
 
 	/**
 	 * Add the object to report document scope. This object can be retrieved later.
 	 * It is persisted between phases, i.e. between generation and presentation.
+	 *
+	 * @param name variable name
+	 * @param obj  object value
 	 */
 	void setPersistentGlobalVariable(String name, Serializable obj);
 
 	/**
 	 * Remove an object from report document scope.
+	 *
+	 * @param name variable name
 	 */
 	void deletePersistentGlobalVariable(String name);
 
 	/**
-	 * Retireve an object from report document scope.
+	 * Retrieve an object from report document scope.
+	 *
+	 * @param name variable name
+	 * @return the global variable value
 	 */
 	Object getPersistentGlobalVariable(String name);
 
+	/**
+	 * Get the page variable
+	 *
+	 * @param name variable name
+	 * @return the page variable
+	 */
 	Object getPageVariable(String name);
 
+	/**
+	 * Set the page variable
+	 *
+	 * @param name  variable name
+	 * @param value object value
+	 */
 	void setPageVariable(String name, Object value);
 
 	/**
 	 * Finds user-defined messages for the current thread's locale.
-	 * 
+	 *
 	 * @param key resource key of the user-defined message.
 	 * @return the corresponding locale-dependent messages. Return <code>null</code>
 	 *         if resoueceKey is blank.
@@ -156,7 +197,7 @@ public interface IReportContext {
 	 * First we look up in the report itself, then look into the referenced message
 	 * file. Each search uses a reduced form of Java locale-driven search algorithm:
 	 * Language&Country, language, default.
-	 * 
+	 *
 	 * @param key    resource key of the user defined message.
 	 * @param locale locale of message, if the input <code>locale</code> is
 	 *               <code>null</code>, the locale for the current thread will be
@@ -168,7 +209,7 @@ public interface IReportContext {
 
 	/**
 	 * Finds user-defined messages for the current thread's locale using parameters
-	 * 
+	 *
 	 * @param key    resource key of the user-defined message.
 	 * @param params string arguments used to format error messages
 	 * @return the corresponding locale-dependent messages. Return <code>null</code>
@@ -182,7 +223,7 @@ public interface IReportContext {
 	 * First we look up in the report itself, then look into the referenced message
 	 * file. Each search uses a reduced form of Java locale-driven search algorithm:
 	 * Language&Country, language, default.
-	 * 
+	 *
 	 * @param key    resource key of the user defined message.
 	 * @param locale locale of message, if the input <code>locale</code> is
 	 *               <code>null</code>, the locale for the current thread will be
@@ -195,7 +236,7 @@ public interface IReportContext {
 
 	/**
 	 * Get the type of the current task.
-	 * 
+	 *
 	 * @return task type including:
 	 *         <li><b>0</b> for GetParameterDefinition Task</li>
 	 *         <li><b>1</b> for Run Task</li>
@@ -208,16 +249,16 @@ public interface IReportContext {
 
 	/**
 	 * get the report design handle.
-	 * 
+	 *
 	 * @return report design handle
 	 */
 	ReportDesignHandle getDesignHandle();
 
 	/**
 	 * get the URL for the resource.
-	 * 
+	 *
 	 * The url can only be used in the server side.
-	 * 
+	 *
 	 * @param resourceName resource name
 	 * @return resource URL
 	 */
@@ -225,43 +266,43 @@ public interface IReportContext {
 
 	/**
 	 * get the render URL for a resource.
-	 * 
+	 *
 	 * @param resourceName resource name
 	 * @return the URL which can be used in the client side.
 	 */
 	String getResourceRenderURL(String resourceName);
 
 	/**
-	 * evaluate the script with default script language.
-	 * 
-	 * @param script
-	 * @return
+	 * Evaluate the script with default script language.
+	 *
+	 * @param script script to be evaluated
+	 * @return the evaluated script
 	 * @throws BirtException
 	 */
 	Object evaluate(String script) throws BirtException;
 
 	/**
-	 * evaluate the script with specified script language.
-	 * 
+	 * Evaluate the script with specified script language.
+	 *
 	 * @param language
-	 * @param script
-	 * @return
+	 * @param script   script to be evaluated
+	 * @return the evaluated script
 	 * @throws BirtException
 	 */
 	Object evaluate(String language, String script) throws BirtException;
 
 	/**
 	 * Evaluate the script.
-	 * 
-	 * @param script
-	 * @return
+	 *
+	 * @param script script to be evaluated
+	 * @return the evaluated script
 	 * @throws BirtException
 	 */
 	Object evaluate(Expression script) throws BirtException;
 
 	/**
-	 * get the application classLoader of the current report context
-	 * 
+	 * Get the application classLoader of the current report context
+	 *
 	 * @return application classLoader
 	 */
 	ClassLoader getApplicationClassLoader();
@@ -272,15 +313,17 @@ public interface IReportContext {
 	void cancel();
 
 	/**
-	 * cancel the current engine task
+	 * Cancel the current engine task
+	 *
+	 * @param reason cancellation reason
 	 */
 	void cancel(String reason);
 
 	/**
-	 * check if the report document generation is finished. It should be used at
+	 * Check if the report document generation is finished. It should be used at
 	 * render time. The default value is false
-	 * 
-	 * @return
+	 *
+	 * @return true, if the report document is finished
 	 */
 	boolean isReportDocumentFinished();
 }

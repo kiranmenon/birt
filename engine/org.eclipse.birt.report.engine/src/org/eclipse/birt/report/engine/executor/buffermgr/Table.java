@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -11,7 +14,7 @@
 package org.eclipse.birt.report.engine.executor.buffermgr;
 
 /**
- * 
+ *
  */
 public class Table {
 
@@ -37,6 +40,12 @@ public class Table {
 	int rowBufferSize;
 	int colBufferSize;
 
+	/**
+	 * Constructor
+	 *
+	 * @param rowSize row size
+	 * @param colSize column size
+	 */
 	public Table(int rowSize, int colSize) {
 		nextColId = -1;
 		rowCount = 0;
@@ -44,6 +53,9 @@ public class Table {
 		ensureSize(rowSize, colSize);
 	}
 
+	/**
+	 * Constructor
+	 */
 	public Table() {
 		nextColId = -1;
 		rowCount = 0;
@@ -53,7 +65,7 @@ public class Table {
 
 	/**
 	 * reset the table model.
-	 * 
+	 *
 	 */
 	public void reset() {
 		fillEmptyCells(0, 0, rowBufferSize, colBufferSize);
@@ -62,17 +74,27 @@ public class Table {
 		colCount = 0;
 	}
 
+	/**
+	 * Get the row count
+	 *
+	 * @return Return the row count
+	 */
 	public int getRowCount() {
 		return rowCount;
 	}
 
+	/**
+	 * Get the column count
+	 *
+	 * @return Return the column count
+	 */
 	public int getColCount() {
 		return colCount;
 	}
 
 	/**
 	 * create a row in the table model
-	 * 
+	 *
 	 * @param content row content
 	 */
 	public void createRow(Object content) {
@@ -103,10 +125,10 @@ public class Table {
 
 	/**
 	 * create a cell in the current row.
-	 * 
+	 *
 	 * if the cell content is not empty put it into the table if the cell is empty:
 	 * if the cell has been used, drop the cell else, put it into the table.
-	 * 
+	 *
 	 * @param cellId  column index of the cell.
 	 * @param rowSpan row span of the cell
 	 * @param colSpan col span of the cell
@@ -165,6 +187,9 @@ public class Table {
 		}
 	}
 
+	/**
+	 * Resolve dropped cells
+	 */
 	public void resolveDropCells() {
 		if (rowCount <= 0) {
 			return;
@@ -181,6 +206,11 @@ public class Table {
 		}
 	}
 
+	/**
+	 * Resolve dropped cells
+	 *
+	 * @param bandId band id
+	 */
 	public void resolveDropCells(int bandId) {
 		if (rowCount <= 0) {
 			return;
@@ -200,6 +230,11 @@ public class Table {
 		}
 	}
 
+	/**
+	 * Check if the table has dropped cells
+	 *
+	 * @return Return the check result of dropped cells
+	 */
 	public boolean hasDropCell() {
 		if (rowCount <= 0) {
 			return false;
@@ -220,9 +255,9 @@ public class Table {
 	}
 
 	/**
-	 * get the next empty cell.
-	 * 
-	 * @return
+	 * Get the next empty cell
+	 *
+	 * @return Return the next empty cell
 	 */
 	protected int getNextEmptyCell() {
 		assert rowCount > 0;
@@ -242,8 +277,9 @@ public class Table {
 	protected int getMaxColSpan(int colId, int colSpan) {
 
 		int checkSize = colCount - colId;
-		if (checkSize > colSpan)
+		if (checkSize > colSpan) {
 			checkSize = colSpan;
+		}
 
 		Cell[] cells = rows[rowCount - 1].cells;
 		for (int i = 1; i < checkSize; i++) {
@@ -294,27 +330,28 @@ public class Table {
 	}
 
 	/**
-	 * remove the cell from table layout buffer. The grid cell used by this cell
+	 * Remove the cell from table layout buffer. The grid cell used by this cell
 	 * fills EMPTY_CELL.
-	 * 
-	 * @param rowId row index
-	 * @param colId column index
+	 *
+	 * @param cell cell to be removed
 	 */
 	protected void removeCell(Cell cell) {
 		int rowId = cell.rowId;
 		int colId = cell.colId;
 		int rowSpan = cell.rowSpan;
 		int colSpan = cell.colSpan;
-		if (rowSpan < 0)
+		if (rowSpan < 0) {
 			rowSpan = rowCount - rowId;
-		if (colId + colSpan > colCount)
+		}
+		if (colId + colSpan > colCount) {
 			colSpan = colCount - colId;
+		}
 		fillEmptyCells(rowId, colId, rowSpan, colSpan);
 	}
 
 	/**
 	 * fill empty cells in the table.
-	 * 
+	 *
 	 * @param rowId   row index
 	 * @param colId   col index
 	 * @param rowSize fill area size
@@ -323,10 +360,12 @@ public class Table {
 	protected void fillEmptyCells(int rowId, int colId, int rowSize, int colSize) {
 		int lastRowId = rowId + rowSize;
 		int lastColId = colId + colSize;
-		if (lastRowId > rowCount)
+		if (lastRowId > rowCount) {
 			lastRowId = rowCount;
-		if (lastColId > colCount)
+		}
+		if (lastColId > colCount) {
 			lastColId = colCount;
+		}
 
 		for (int i = rowId; i < lastRowId; i++) {
 			Cell[] cells = rows[i].cells;
@@ -339,7 +378,7 @@ public class Table {
 
 	/**
 	 * we never change both the row span and col span at the same time.
-	 * 
+	 *
 	 * @param cell       the cell to be changed
 	 * @param newRowSpan new row span
 	 * @param newColSpan new col span
@@ -364,10 +403,23 @@ public class Table {
 		cell.rowSpan = newRowSpan;
 	}
 
+	/**
+	 * Get the cell based on row and column id
+	 *
+	 * @param rowId row id
+	 * @param colId column id
+	 * @return Return a cell
+	 */
 	public Cell getCell(int rowId, int colId) {
 		return rows[rowId].cells[colId];
 	}
 
+	/**
+	 * Get the row based on row id
+	 *
+	 * @param rowId row id
+	 * @return Return a row
+	 */
 	public Row getRow(int rowId) {
 		return rows[rowId];
 	}

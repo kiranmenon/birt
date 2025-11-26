@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -38,6 +41,7 @@ import org.eclipse.birt.report.engine.nLayout.area.impl.PageArea;
 import org.eclipse.birt.report.engine.nLayout.area.impl.RowArea;
 import org.eclipse.birt.report.engine.nLayout.area.impl.TableArea;
 import org.eclipse.birt.report.engine.nLayout.area.impl.TextArea;
+import org.eclipse.birt.report.engine.nLayout.area.style.AreaConstants;
 import org.eclipse.birt.report.engine.nLayout.area.style.BackgroundImageInfo;
 import org.eclipse.birt.report.engine.nLayout.area.style.BoxStyle;
 import org.eclipse.birt.report.engine.nLayout.area.style.DiagonalInfo;
@@ -45,16 +49,31 @@ import org.eclipse.birt.report.engine.nLayout.area.style.TextStyle;
 import org.eclipse.birt.report.engine.util.FlashFile;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 
+/**
+ * Definition of the page device renderer
+ *
+ * @since 3.3
+ *
+ */
 public abstract class PageDeviceRender implements IAreaVisitor {
 	/**
 	 * The default image folder
 	 */
 	public static final String IMAGE_FOLDER = "image"; //$NON-NLS-1$
 
+	/**
+	 * The value of "horizontal text space"
+	 */
 	public static final int H_TEXT_SPACE = 30;
 
+	/**
+	 * The value of "vertical text space"
+	 */
 	public static final int V_TEXT_SPACE = 100;
 
+	/**
+	 * The value of "ignore overflow"
+	 */
 	public static final int ignoredOverflow = 3000;
 
 	protected float scale;
@@ -70,7 +89,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	protected int currentX;
 	protected int currentY;
 
-	protected Stack rowStyleStack = new Stack();
+	protected Stack<BoxStyle> rowStyleStack = new Stack<BoxStyle>();
 
 	/**
 	 * for any (x,y) in the ContainerArea, if x<offsetX, the (x,y) will be omitted.
@@ -90,15 +109,29 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Gets the output format.
+	 *
+	 * @return Return the output format
 	 */
 	public abstract String getOutputFormat();
 
+	/**
+	 * Create the page device
+	 *
+	 * @param title
+	 * @param author
+	 * @param subject
+	 * @param description
+	 * @param context
+	 * @param report
+	 * @return Return the created page device
+	 * @throws Exception
+	 */
 	public abstract IPageDevice createPageDevice(String title, String author, String subject, String description,
 			IReportContext context, IReportContent report) throws Exception;
 
 	/**
 	 * Creates a document and create a PdfWriter
-	 * 
+	 *
 	 * @param rc the report content.
 	 */
 	public void start(IReportContent rc) {
@@ -120,7 +153,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Closes the document.
-	 * 
+	 *
 	 * @param rc the report content.
 	 */
 	public void end(IReportContent rc) {
@@ -131,6 +164,11 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		}
 	}
 
+	/**
+	 * Set the total page
+	 *
+	 * @param totalPage
+	 */
 	public void setTotalPage(ITextArea totalPage) {
 	}
 
@@ -150,10 +188,8 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Visits a container
-	 * 
+	 *
 	 * @param container
-	 * @param offsetX
-	 * @param offsetY
 	 */
 	@Override
 	public void visitContainer(IContainerArea container) {
@@ -167,9 +203,9 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	}
 
 	protected void visitChildren(IContainerArea container) {
-		Iterator iter = container.getChildren();
+		Iterator<IArea> iter = container.getChildren();
 		while (iter.hasNext()) {
-			IArea child = (IArea) iter.next();
+			IArea child = iter.next();
 			child.accept(this);
 		}
 	}
@@ -191,7 +227,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		if (body == null) {
 			return 0;
 		}
-		Iterator iter = page.getBody().getChildren();
+		Iterator<IArea> iter = page.getBody().getChildren();
 		while (iter.hasNext()) {
 			AbstractArea area = (AbstractArea) iter.next();
 			if (direction == BODY_HEIGHT) {
@@ -207,7 +243,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	 * The container may be a TableArea, RowArea, etc. Or just the border of
 	 * textArea/imageArea. This method draws the border and background of the given
 	 * container.
-	 * 
+	 *
 	 * @param container the ContainerArea specified from layout
 	 */
 	protected void startContainer(IContainerArea container) {
@@ -238,9 +274,10 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 			int height = getHeight(cell);
 			int dw = diagonalInfo.getDiagonalWidth();
 			int ds = diagonalInfo.getDiagonalStyle();
-			// support double style, use solid style instead.
-			if (ds == DiagonalInfo.BORDER_STYLE_DOUBLE) {
-				ds = DiagonalInfo.BORDER_STYLE_SOLID;
+
+			// unsupported double line style, use solid style instead
+			if (ds == AreaConstants.BORDER_STYLE_DOUBLE) {
+				ds = AreaConstants.BORDER_STYLE_SOLID;
 			}
 			switch (diagonalInfo.getDiagonalNumber()) {
 			case 2:
@@ -263,43 +300,45 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 						getScaledValue(dw), diagonalInfo.getDiagonalColor(), ds);
 				break;
 			}
-			// currently only support diagonal line, do not support antidiagonal line
-			/*
-			 * dw = diagonalInfo.getAntidiagonalWidth( ); ds =
-			 * diagonalInfo.getAntidiagonalStyle( ); // support double style, use solid
-			 * style instead. if ( ds == DiagonalInfo.BORDER_STYLE_DOUBLE ) { ds =
-			 * DiagonalInfo.BORDER_STYLE_SOLID; } switch (
-			 * diagonalInfo.getAntidiagonalNumber( ) ) {
-			 * 
-			 * case 2 : pageGraphic .drawLine( startX, startY + height - dw / 2, startX +
-			 * width / 2, startY + dw / 2, getScaledValue( diagonalInfo
-			 * .getAntidiagonalWidth( ) ), diagonalInfo.getColor( ), ds ); pageGraphic
-			 * .drawLine( startX, startY + height - dw / 2, startX + width, startY + height
-			 * / 2, getScaledValue( diagonalInfo .getAntidiagonalWidth( ) ),
-			 * diagonalInfo.getColor( ), ds ); break; case 3 : pageGraphic .drawLine(
-			 * startX, startY + height - dw / 2, startX + width / 2, startY + dw / 2,
-			 * getScaledValue( diagonalInfo .getAntidiagonalWidth( ) ),
-			 * diagonalInfo.getColor( ), ds ); pageGraphic .drawLine( startX, startY +
-			 * height - dw / 2, startX + width, startY + height / 2, getScaledValue(
-			 * diagonalInfo .getAntidiagonalWidth( ) ), diagonalInfo.getColor( ), ds );
-			 * pageGraphic .drawLine( startX, startY + height - dw / 2, startX + width,
-			 * startY + dw / 2, getScaledValue( diagonalInfo .getAntidiagonalWidth( ) ),
-			 * diagonalInfo.getColor( ), ds ); break; default : pageGraphic .drawLine(
-			 * startX, startY + height - dw / 2, startX + width, startY + dw / 2,
-			 * getScaledValue( diagonalInfo .getAntidiagonalWidth( ) ),
-			 * diagonalInfo.getColor( ), ds ); break; }
-			 */
+
+			// support diagonal line and antidiagonal line
+			int adw = diagonalInfo.getAntidiagonalWidth();
+			int ads = diagonalInfo.getAntidiagonalStyle();
+			Color adc = diagonalInfo.getAntidiagonalColor();
+			// unsupport double style, use solid style instead
+			if (ads == AreaConstants.BORDER_STYLE_DOUBLE) {
+				ads = AreaConstants.BORDER_STYLE_SOLID;
+			}
+			switch (diagonalInfo.getAntidiagonalNumber()) {
+			case 2:
+				pageGraphic.drawLine(startX, startY + height - dw / 2, startX + width / 2, startY + dw / 2,
+						getScaledValue(adw), adc, ads);
+				pageGraphic.drawLine(startX, startY + height - dw / 2, startX + width, startY + height / 2,
+						getScaledValue(adw), adc, ads);
+				break;
+			case 3:
+				pageGraphic.drawLine(startX, startY + height - dw / 2, startX + width / 2, startY + dw / 2,
+						getScaledValue(adw), adc, ads);
+				pageGraphic.drawLine(startX, startY + height - dw / 2, startX + width, startY + height / 2,
+						getScaledValue(adw), adc, ads);
+				pageGraphic.drawLine(startX, startY + height - dw / 2, startX + width, startY + dw / 2,
+						getScaledValue(adw), adc, ads);
+				break;
+			default:
+				pageGraphic.drawLine(startX + 100, startY + height - dw / 2, startX + width, startY + dw / 2,
+						getScaledValue(adw), adc, ads);
+				break;
+			}
 		}
 	}
 
 	protected void drawCell(CellArea container) {
-		drawCellDiagonal(container);
 		Color rowbc = null;
 		BackgroundImageInfo rowbi = null;
 		BoxStyle rowStyle = null;
 		// get the style of the row
 		if (rowStyleStack.size() > 0) {
-			rowStyle = (BoxStyle) rowStyleStack.peek();
+			rowStyle = rowStyleStack.peek();
 			if (rowStyle != null) {
 				rowbc = rowStyle.getBackgroundColor();
 				rowbi = rowStyle.getBackgroundImage();
@@ -338,13 +377,14 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 				drawBackgroundImage(bi, startX, startY, width, height);
 			}
 		}
-
+		// print diagonal like overlay
+		drawCellDiagonal(container);
 	}
 
 	/**
 	 * Output a layout PageArea, extend the pageArea into multiple physical pages if
 	 * needed.
-	 * 
+	 *
 	 * @param page
 	 */
 	protected void visitPage(PageArea page) {
@@ -405,7 +445,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Creates a page in given output format.
-	 * 
+	 *
 	 * @param page a layout page.
 	 */
 	protected void addPage(PageArea page) {
@@ -451,7 +491,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * This method will be invoked while a containerArea ends.
-	 * 
+	 *
 	 * @param container the ContainerArea specified from layout
 	 */
 	protected void endContainer(IContainerArea container) {
@@ -478,7 +518,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Creates a new PDF page
-	 * 
+	 *
 	 * @param page the PageArea specified from layout
 	 */
 	protected void newPage(IContainerArea page) {
@@ -498,9 +538,21 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	}
 
 	private int extendDirection = EXTEND_NONE;
+	/**
+	 * the page extend "none"
+	 */
 	public static final int EXTEND_NONE = 0;
+	/**
+	 * the page extend "horizontal"
+	 */
 	public static final int EXTEND_ON_HORIZONTAL = 1;
+	/**
+	 * the page extend "vertical"
+	 */
 	public static final int EXTEND_ON_VERTICAL = 2;
+	/**
+	 * the page extend "horizontal" & "vertical
+	 */
 	public static final int EXTEND_ON_HORIZONTAL_AND_VERTICAL = 3;
 
 	protected int getExtendDirection() {
@@ -515,6 +567,11 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		this.extendDirection |= direction;
 	}
 
+	/**
+	 * Start the area cliping
+	 *
+	 * @param area
+	 */
 	public void startClip(IArea area) {
 		int startX = currentX + getX(area);
 		int startY = currentY + getY(area);
@@ -529,17 +586,16 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * draw background image for the container
-	 * 
-	 * @param containerStyle the style of the container we draw background image for
-	 * @param imageUrl       the url of background image
-	 * @param startX         the absolute horizontal position of the container
-	 * @param startY         the absolute vertical position of the container
-	 * @param width          container width
-	 * @param height         container height
+	 *
+	 * @param bi     background information object of the background image
+	 * @param startX the absolute horizontal position of the container
+	 * @param startY the absolute vertical position of the container
+	 * @param width  container width
+	 * @param height container height
 	 */
 	public void drawBackgroundImage(BackgroundImageInfo bi, int startX, int startY, int width, int height) {
 		try {
-			pageGraphic.drawBackgroundImage(startX, startY, width, height, bi.getWidth(), bi.getHeight(),
+			pageGraphic.drawBackgroundImage(startX, startY, width, height, bi.getWidthMetricPt(), bi.getHeightMetricPt(),
 					bi.getRepeatedMode(), bi.getUrl(), bi.getImageData(), getScaledValue(bi.getXOffset()),
 					getScaledValue(bi.getYOffset()));
 		} catch (Exception e) {
@@ -549,7 +605,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Draws a container's border, and its background color/image if there is any.
-	 * 
+	 *
 	 * @param container the containerArea whose border and background need to be
 	 *                  drew
 	 */
@@ -569,6 +625,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		// container)
 		int startX = currentX + getX(container);
 		int startY = currentY + getY(container);
+
 
 		// the dimension of the container
 		int width = getWidth(container);
@@ -592,10 +649,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	private BorderInfo[] cacheCellBorder(CellArea container) {
 		// get the style of the container
 		BoxStyle style = container.getBoxStyle();
-		if (null == style) {
-			return null;
-		}
-		if (container.getContent() == null) {
+		if ((null == style) || (container.getContent() == null)) {
 			return null;
 		}
 		// FIXME refactor and perform enhancement
@@ -621,6 +675,12 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		return null;
 	}
 
+	/**
+	 * Cache border info
+	 *
+	 * @param container
+	 * @return Return array with border info
+	 */
 	public BorderInfo[] cacheBorderInfo(IContainerArea container) {
 		// get the style of the container
 		BoxStyle style = container.getBoxStyle();
@@ -660,7 +720,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Draws a text area.
-	 * 
+	 *
 	 * @param text the textArea to be drawn.
 	 */
 	protected void drawText(ITextArea text) {
@@ -690,7 +750,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 			TextArea ta = (TextArea) text;
 			if ((ta.getRunLevel() & 1) != 0) {
 				style = new TextStyle(style);
-				style.setDirection(TextStyle.DIRECTION_RTL);
+				style.setDirection(AreaConstants.DIRECTION_RTL);
 			}
 		}
 		drawTextAt(text, x, y, getWidth(text), getHeight(text), style);
@@ -705,7 +765,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 
 	/**
 	 * Draws image at the contentByte
-	 * 
+	 *
 	 * @param image the ImageArea specified from the layout
 	 */
 	protected void drawImage(IImageArea image) {
@@ -743,13 +803,14 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	}
 
 	private void drawBorder(TableBorder tb) {
-		if (null == tb)
+		if (null == tb) {
 			return;
+		}
 
 		tb.findBreakPoints();
 		Border border = null;
 		// draw column borders
-		for (Iterator i = tb.columnBorders.keySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = tb.columnBorders.keySet().iterator(); i.hasNext();) {
 			Integer pos = (Integer) i.next();
 			if (pos == tb.tableLRX) {
 				continue;
@@ -759,8 +820,9 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 				BorderSegment seg = (BorderSegment) border.segments.get(j);
 				Border rs = (Border) tb.rowBorders.get(seg.start);
 				Border re = (Border) tb.rowBorders.get(seg.end);
-				if (null == rs || null == re)
+				if (null == rs || null == re) {
 					continue;
+				}
 				int sy = getScaledValue(rs.position + rs.width / 2);
 				int ey = getScaledValue(re.position + re.width / 2);
 				int x = getScaledValue(border.position + seg.width / 2);
@@ -784,8 +846,9 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 			BorderSegment seg = (BorderSegment) border.segments.get(j);
 			Border rs = (Border) tb.rowBorders.get(seg.start);
 			Border re = (Border) tb.rowBorders.get(seg.end);
-			if (null == rs || null == re)
+			if (null == rs || null == re) {
 				continue;
+			}
 			int sy = getScaledValue(rs.position + rs.width / 2);
 			int ey = getScaledValue(re.position + re.width / 2);
 			int x = getScaledValue(border.position - seg.width / 2);
@@ -804,7 +867,7 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		}
 
 		// draw row borders
-		for (Iterator i = tb.rowBorders.keySet().iterator(); i.hasNext();) {
+		for (Iterator<?> i = tb.rowBorders.keySet().iterator(); i.hasNext();) {
 			Integer pos = (Integer) i.next();
 			if (pos == tb.tableLRY) {
 				continue;
@@ -815,8 +878,9 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 				BorderSegment seg = (BorderSegment) border.segments.get(j);
 				Border cs = (Border) tb.columnBorders.get(seg.start);
 				Border ce = (Border) tb.columnBorders.get(seg.end);
-				if (null == cs || null == ce)
+				if (null == cs || null == ce) {
 					continue;
+				}
 				// we can also adjust the columns in this position
 				int sx = getScaledValue(cs.position + cs.width / 2);
 				int ex = getScaledValue(ce.position + ce.width / 2);
@@ -849,8 +913,9 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 			BorderSegment seg = (BorderSegment) border.segments.get(j);
 			Border cs = (Border) tb.columnBorders.get(seg.start);
 			Border ce = (Border) tb.columnBorders.get(seg.end);
-			if (null == cs || null == ce)
+			if (null == cs || null == ce) {
 				continue;
+			}
 			// we can also adjust the columns in this position
 			int sx = getScaledValue(cs.position + cs.width / 2);
 			int ex = getScaledValue(ce.position + ce.width / 2);
@@ -868,78 +933,80 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 			drawBorder(new BorderInfo(currentX + sx, currentY + y, currentX + ex, currentY + y,
 					getScaledValue(seg.width), seg.color, seg.style, BorderInfo.BOTTOM_BORDER));
 		}
+
 	}
 
 	/**
 	 * Draws the borders of a container.
-	 * 
+	 *
 	 * @param borders the border info
 	 */
 	public void drawBorder(BorderInfo[] borders) {
-		if (borders == null)
+		if (borders == null) {
 			return;
+		}
 		// double>solid>dashed>dotted>none
-		ArrayList dbl = null;
-		ArrayList solid = null;
-		ArrayList dashed = null;
-		ArrayList dotted = null;
+		ArrayList<BorderInfo> dbl = null;
+		ArrayList<BorderInfo> solid = null;
+		ArrayList<BorderInfo> dashed = null;
+		ArrayList<BorderInfo> dotted = null;
 
 		for (int i = 0; i < borders.length; i++) {
 			switch (borders[i].borderStyle) {
-			case org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_DOUBLE:
+			case AreaConstants.BORDER_STYLE_DOUBLE:
 				if (null == dbl) {
-					dbl = new ArrayList();
+					dbl = new ArrayList<BorderInfo>();
 				}
 				dbl.add(borders[i]);
 				break;
-			case org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_DASHED:
+			case AreaConstants.BORDER_STYLE_DASHED:
 				if (null == dashed) {
-					dashed = new ArrayList();
+					dashed = new ArrayList<BorderInfo>();
 				}
 				dashed.add(borders[i]);
 				break;
-			case org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_DOTTED:
+			case AreaConstants.BORDER_STYLE_DOTTED:
 				if (null == dotted) {
-					dotted = new ArrayList();
+					dotted = new ArrayList<BorderInfo>();
 				}
 				dotted.add(borders[i]);
 				break;
 			default:
 				if (null == solid) {
-					solid = new ArrayList();
+					solid = new ArrayList<BorderInfo>();
 				}
 				solid.add(borders[i]);
 				break;
 			}
 		}
 		if (null != dotted) {
-			for (Iterator it = dotted.iterator(); it.hasNext();) {
-				BorderInfo bi = (BorderInfo) it.next();
+			for (Iterator<BorderInfo> it = dotted.iterator(); it.hasNext();) {
+				BorderInfo bi = it.next();
 				drawBorder(bi);
 			}
 		}
 		if (null != dashed) {
-			for (Iterator it = dashed.iterator(); it.hasNext();) {
-				BorderInfo bi = (BorderInfo) it.next();
+			for (Iterator<BorderInfo> it = dashed.iterator(); it.hasNext();) {
+				BorderInfo bi = it.next();
 				drawBorder(bi);
 			}
 		}
 		if (null != solid) {
-			for (Iterator it = solid.iterator(); it.hasNext();) {
-				BorderInfo bi = (BorderInfo) it.next();
+			for (Iterator<BorderInfo> it = solid.iterator(); it.hasNext();) {
+				BorderInfo bi = it.next();
 				drawBorder(bi);
 			}
 		}
 		if (null != dbl) {
-			for (Iterator it = dbl.iterator(); it.hasNext();) {
-				BorderInfo bi = (BorderInfo) it.next();
+			for (Iterator<BorderInfo> it = dbl.iterator(); it.hasNext();) {
+				BorderInfo bi = it.next();
 				drawDoubleBorder(bi);
 			}
 		}
 	}
 
 	private void drawBorder(BorderInfo bi) {
-		if (org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_DOUBLE == bi.borderStyle) {
+		if (AreaConstants.BORDER_STYLE_DOUBLE == bi.borderStyle) {
 			drawDoubleBorder(bi);
 		} else {
 			pageGraphic.drawLine(bi.startX, bi.startY, bi.endX, bi.endY, bi.borderWidth, bi.borderColor,
@@ -962,34 +1029,34 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		case BorderInfo.TOP_BORDER:
 			pageGraphic.drawLine(startX, startY - borderWidth / 2 + outerBorderWidth / 2, endX,
 					endY - borderWidth / 2 + outerBorderWidth / 2, outerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			pageGraphic.drawLine(startX, startY + borderWidth / 2 - innerBorderWidth / 2, endX,
 					endY + borderWidth / 2 - innerBorderWidth / 2, innerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			break;
 		case BorderInfo.RIGHT_BORDER:
 			pageGraphic.drawLine(startX + borderWidth / 2 - outerBorderWidth / 2, startY,
 					endX + borderWidth / 2 - outerBorderWidth / 2, endY, outerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			pageGraphic.drawLine(startX - borderWidth / 2 + innerBorderWidth / 2, startY,
 					endX - borderWidth / 2 + innerBorderWidth / 2, endY, innerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			break;
 		case BorderInfo.BOTTOM_BORDER:
 			pageGraphic.drawLine(startX, startY + borderWidth / 2 - outerBorderWidth / 2, endX,
 					endY + borderWidth / 2 - outerBorderWidth / 2, outerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			pageGraphic.drawLine(startX, startY - borderWidth / 2 + innerBorderWidth / 2, endX,
 					endY - borderWidth / 2 + innerBorderWidth / 2, innerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			break;
 		case BorderInfo.LEFT_BORDER:
 			pageGraphic.drawLine(startX - borderWidth / 2 + outerBorderWidth / 2, startY,
 					endX - borderWidth / 2 + outerBorderWidth / 2, endY, outerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			pageGraphic.drawLine(startX + borderWidth / 2 - innerBorderWidth / 2, startY,
 					endX + borderWidth / 2 - innerBorderWidth / 2, endY, innerBorderWidth, borderColor,
-					org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+					AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 			break;
 		}
 	}
@@ -1014,11 +1081,11 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 		return (int) (value * scale);
 	}
 
-//	private int getScaledValue( CSSValue cssValue )
-//	{
-//		return getScaledValue( PropertyUtil.getDimensionValue( cssValue ) );
-//	}
-
+	/**
+	 * Draw table border
+	 *
+	 * @param table
+	 */
 	public void drawTableBorder(TableArea table) {
 		TableBorder tb = new TableBorder(table.getX(), table.getY());
 		traverseRows(tb, table, tb.tableX, tb.tableY);
@@ -1026,8 +1093,8 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 	}
 
 	private void traverseRows(TableBorder tb, IContainerArea container, int offsetX, int offsetY) {
-		for (Iterator i = container.getChildren(); i.hasNext();) {
-			IArea area = (IArea) i.next();
+		for (Iterator<IArea> i = container.getChildren(); i.hasNext();) {
+			IArea area = i.next();
 			if (area instanceof IContainerArea) {
 				offsetX += area.getX();
 				offsetY += area.getY();
@@ -1038,14 +1105,12 @@ public abstract class PageDeviceRender implements IAreaVisitor {
 				}
 				offsetX -= area.getX();
 				offsetY -= area.getY();
-			} else {
-				continue;
 			}
 		}
 	}
 
 	private void handleBorderInRow(TableBorder tb, RowArea row, int offsetX, int offsetY) {
-		for (Iterator ri = row.getChildren(); ri.hasNext();) {
+		for (Iterator<?> ri = row.getChildren(); ri.hasNext();) {
 			IArea area = (IArea) ri.next();
 			if (!(area instanceof CellArea)) {
 				continue;

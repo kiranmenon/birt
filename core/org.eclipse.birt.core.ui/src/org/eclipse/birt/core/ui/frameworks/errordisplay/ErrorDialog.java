@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -35,6 +38,9 @@ import org.eclipse.swt.widgets.Text;
 public class ErrorDialog implements SelectionListener {
 
 	// CONSTANTS
+	/**
+	 * javadoc comment
+	 */
 	public static final String OPTION_ACCEPT = "ACCEPT"; //$NON-NLS-1$
 	public static final String OPTION_CANCEL = "CANCEL"; //$NON-NLS-1$
 	public static final int MAX_TRACE_DEPTH = 2;
@@ -273,7 +279,7 @@ public class ErrorDialog implements SelectionListener {
 		if (errors.length == 1) {
 			return errors[0];
 		}
-		StringBuffer sbErrors = new StringBuffer(""); //$NON-NLS-1$
+		StringBuilder sbErrors = new StringBuilder(""); //$NON-NLS-1$
 		for (int i = 0; i < errors.length; i++) {
 			if (i > 0) {
 				sbErrors.append("\n"); //$NON-NLS-1$
@@ -285,7 +291,7 @@ public class ErrorDialog implements SelectionListener {
 	}
 
 	private String getOrganizedFixes(String[] fixes) {
-		StringBuffer sbFixes = new StringBuffer(""); //$NON-NLS-1$
+		StringBuilder sbFixes = new StringBuilder(""); //$NON-NLS-1$
 		for (int i = 0; i < fixes.length; i++) {
 			if (i > 0) {
 				sbFixes.append("\n"); //$NON-NLS-1$
@@ -296,7 +302,7 @@ public class ErrorDialog implements SelectionListener {
 	}
 
 	private String getOrganizedTrace(Throwable t) {
-		StringBuffer sbTrace = new StringBuffer(t.getClass().getName());
+		StringBuilder sbTrace = new StringBuilder(t.getClass().getName());
 		sbTrace.append(" at:\n"); //$NON-NLS-1$
 		for (int d = 0; d < MAX_TRACE_DEPTH; d++) {
 			if (d > 0) {
@@ -319,20 +325,22 @@ public class ErrorDialog implements SelectionListener {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.
 	 * swt.events.SelectionEvent)
 	 */
+	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.
 	 * events.SelectionEvent)
 	 */
+	@Override
 	public void widgetSelected(SelectionEvent e) {
 		if (e.getSource().equals(btnOK)) {
 			this.sSelection = OPTION_ACCEPT;
@@ -346,7 +354,7 @@ public class ErrorDialog implements SelectionListener {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void toggleDetails(boolean bVisible) {
 		if (bVisible) {

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,6 +22,12 @@ import org.eclipse.birt.report.engine.layout.pdf.font.FontSplitter;
 
 import com.ibm.icu.text.Bidi;
 
+/**
+ * Class to generate data chunks / text segments
+ *
+ * @since 3.3
+ *
+ */
 public class ChunkGenerator {
 	private FontMappingManager fontManager;
 	private ITextContent textContent;
@@ -29,6 +38,14 @@ public class ChunkGenerator {
 	private ISplitter bidiSplitter = null;
 	private ISplitter fontSplitter = null;
 
+	/**
+	 * Constructor
+	 *
+	 * @param fontManager      font manager
+	 * @param textContent      text content
+	 * @param bidiProcessing   bidi processing flag
+	 * @param fontSubstitution is font substitution used flag
+	 */
 	public ChunkGenerator(FontMappingManager fontManager, ITextContent textContent, boolean bidiProcessing,
 			boolean fontSubstitution) {
 		this.fontManager = fontManager;
@@ -37,8 +54,9 @@ public class ChunkGenerator {
 		this.bidiProcessing = bidiProcessing;
 		this.fontSubstitution = fontSubstitution;
 
-		if (text == null || text.length() == 0)
+		if (text == null || text.length() == 0) {
 			return;
+		}
 		if (bidiProcessing) {
 			// FIXME implement the getDirection() method in ComputedStyle.
 			if (CSSConstants.CSS_RTL_VALUE.equals(textContent.getComputedStyle().getDirection())) {
@@ -52,38 +70,49 @@ public class ChunkGenerator {
 
 		if (null == bidiSplitter) {
 			fontSplitter = new FontSplitter(fontManager, new Chunk(text), textContent, fontSubstitution);
-		} else {
+		} else if (bidiSplitter.hasMore()) {
+			fontSplitter = new FontSplitter(fontManager, bidiSplitter.getNext(), textContent, fontSubstitution);
+		}
+
+	}
+
+	/**
+	 * Has more elements
+	 *
+	 * @return Return the validation result of more elements
+	 */
+	public boolean hasMore() {
+		if (text == null || text.length() == 0) {
+			return false;
+		}
+		if (bidiProcessing) {
+			if (null == bidiSplitter) {
+				return false;
+			}
 			if (bidiSplitter.hasMore()) {
-				fontSplitter = new FontSplitter(fontManager, bidiSplitter.getNext(), textContent, fontSubstitution);
+				return true;
 			}
 		}
-
-	}
-
-	public boolean hasMore() {
-		if (text == null || text.length() == 0)
+		if (null == fontSplitter) {
 			return false;
-		if (bidiProcessing) {
-			if (null == bidiSplitter)
-				return false;
-			if (bidiSplitter.hasMore())
-				return true;
 		}
-		if (null == fontSplitter)
-			return false;
-		if (fontSplitter.hasMore())
+		if (fontSplitter.hasMore()) {
 			return true;
-		else
-			return false;
+		}
+		return false;
 	}
 
+	/**
+	 * Get the next text part
+	 *
+	 * @return Return the next text part
+	 */
 	public Chunk getNext() {
 		while (null != fontSplitter) {
 			if (fontSplitter.hasMore()) {
 				return fontSplitter.getNext();
-			} else {
-				fontSplitter = null;
 			}
+			fontSplitter = null;
 			if (null != bidiSplitter && bidiSplitter.hasMore()) {
 				fontSplitter = new FontSplitter(fontManager, bidiSplitter.getNext(), textContent, fontSubstitution);
 			} else {

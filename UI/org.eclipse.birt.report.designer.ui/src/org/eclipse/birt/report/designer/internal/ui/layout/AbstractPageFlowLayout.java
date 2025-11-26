@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation .
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -16,11 +19,11 @@ import org.eclipse.birt.report.designer.internal.ui.editors.schematic.figures.Re
 import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.PrecisionDimension;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.draw2d.zoom.ZoomListener;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartListener;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalEditPart;
-import org.eclipse.gef.editparts.ZoomListener;
 import org.eclipse.gef.editparts.ZoomManager;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -28,7 +31,7 @@ import org.eclipse.swt.widgets.Scrollable;
 
 /**
  * add comment here
- * 
+ *
  */
 public abstract class AbstractPageFlowLayout extends ReportFlowLayout {
 
@@ -51,10 +54,12 @@ public abstract class AbstractPageFlowLayout extends ReportFlowLayout {
 
 		final ControlListener listener = new ControlListener() {
 
+			@Override
 			public void controlMoved(ControlEvent e) {
 
 			}
 
+			@Override
 			public void controlResized(ControlEvent e) {
 				layouRootLayer();
 			}
@@ -63,23 +68,28 @@ public abstract class AbstractPageFlowLayout extends ReportFlowLayout {
 		owner.getViewer().getControl().addControlListener(listener);
 		owner.addEditPartListener(new EditPartListener() {
 
+			@Override
 			public void childAdded(EditPart child, int index) {
 				// Do nothing
 			}
 
+			@Override
 			public void partActivated(EditPart editpart) {
 				// Do nothing
 			}
 
+			@Override
 			public void partDeactivated(EditPart editpart) {
 				owner.getViewer().getControl().removeControlListener(listener);
 			}
 
+			@Override
 			public void removingChild(EditPart child, int index) {
 				// Do nothing
 
 			}
 
+			@Override
 			public void selectedStateChanged(EditPart editpart) {
 				// Do nothing
 
@@ -89,6 +99,7 @@ public abstract class AbstractPageFlowLayout extends ReportFlowLayout {
 
 		getZoomManager().addZoomListener(new ZoomListener() {
 
+			@Override
 			public void zoomChanged(double zoom) {
 				if (getOwner().getParent() == null) {
 					return;
@@ -123,7 +134,7 @@ public abstract class AbstractPageFlowLayout extends ReportFlowLayout {
 
 	/**
 	 * Returns the zoom manager for current viewer.
-	 * 
+	 *
 	 * @return
 	 */
 	public ZoomManager getZoomManager() {
@@ -132,7 +143,7 @@ public abstract class AbstractPageFlowLayout extends ReportFlowLayout {
 
 	protected static class Result {
 
-		public Rectangle reportSize = new Rectangle();;
+		public Rectangle reportSize = new Rectangle();
 		public int rightSpace;
 		public int bottomSpace;
 	}

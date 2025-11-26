@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -17,97 +20,192 @@ import org.eclipse.birt.report.engine.ir.DimensionType;
 
 /**
  * Page instance.
- * 
+ *
  * The page may contains multiple columns, which is defined in the MasterPage in
  * report design.
- * 
+ *
  * The content is defined by getBody().
- * 
+ *
  */
 public interface IPageContent extends IContainerContent {
 
 	/**
-	 * @return Returns the orientation.
+	 * Get the orientation
+	 *
+	 * @return the orientation
 	 */
-	public String getOrientation();
+	String getOrientation();
 
 	/**
-	 * @return Returns the pageType.
+	 * Get the page type
+	 *
+	 * @return the page type
 	 */
-	public String getPageType();
+	String getPageType();
 
 	/**
-	 * @return Returns the pageHeight.
+	 * Get the page height
+	 *
+	 * @return the page height
 	 */
-	public DimensionType getPageHeight();
+	DimensionType getPageHeight();
 
 	/**
-	 * @return Returns the pageWidth.
+	 * Get the page width
+	 *
+	 * @return the page width
 	 */
-	public DimensionType getPageWidth();
+	DimensionType getPageWidth();
 
 	/**
-	 * @return Returns the waterMark.
+	 * Get the watermark
+	 *
+	 * @return the watermark
 	 */
-	public IImageContent getWaterMark();
-
-	public Collection getHeader();
-
-	public Collection getFooter();
-
-	public IContent getPageHeader();
-
-	public IContent getPageFooter();
-
-	public IContent getPageBody();
-
-	public void setPageHeader(IContent header);
-
-	public void setPageFooter(IContent footer);
-
-	public void setPageBody(IContent body);
-
-	public DimensionType getMarginTop();
-
-	public DimensionType getMarginBottom();
-
-	public DimensionType getMarginLeft();
-
-	public DimensionType getMarginRight();
+	IImageContent getWaterMark();
 
 	/**
-	 * @return Returns the header height
+	 * Get the header
+	 *
+	 * @return the header
 	 */
-	public DimensionType getHeaderHeight();
+	Collection<IContent> getHeader();
 
 	/**
-	 * @return Returns the footer height
+	 * Get the footer
+	 *
+	 * @return the footer
 	 */
-	public DimensionType getFooterHeight();
+	Collection<IContent> getFooter();
 
 	/**
-	 * @return Returns the width of the left part
+	 * Get the page header
+	 *
+	 * @return the page header
 	 */
-	public DimensionType getLeftWidth();
+	IContent getPageHeader();
 
 	/**
-	 * @return Returns the width of the right part
+	 * Get the page footer
+	 *
+	 * @return the page footer
 	 */
-	public DimensionType getRightWidth();
+	IContent getPageFooter();
 
 	/**
+	 * Get the page body
+	 *
+	 * @return the page body
+	 */
+	IContent getPageBody();
+
+	/**
+	 * Set the page header
+	 *
+	 * @param header header content
+	 */
+	void setPageHeader(IContent header);
+
+	/**
+	 * Set the page footer
+	 *
+	 * @param footer footer content
+	 */
+	void setPageFooter(IContent footer);
+
+	/**
+	 * Set the pagebody
+	 *
+	 * @param body body content
+	 */
+	void setPageBody(IContent body);
+
+	/**
+	 * Get the margin top
+	 *
+	 * @return the margin top
+	 */
+	DimensionType getMarginTop();
+
+	/**
+	 * Get the margin bottom
+	 *
+	 * @return the margin bottom
+	 */
+	DimensionType getMarginBottom();
+
+	/**
+	 * Get the margin left
+	 *
+	 * @return the margin left
+	 */
+	DimensionType getMarginLeft();
+
+	/**
+	 * Get the margin right
+	 *
+	 * @return the margin right
+	 */
+	DimensionType getMarginRight();
+
+	/**
+	 * Get the header height
+	 *
+	 * @return the header height
+	 */
+	DimensionType getHeaderHeight();
+
+	/**
+	 * Get the footer height
+	 *
+	 * @return the footer height
+	 */
+	DimensionType getFooterHeight();
+
+	/**
+	 * Get the width of the left part
+	 *
+	 * @return the width of the left part
+	 */
+	DimensionType getLeftWidth();
+
+	/**
+	 * Get the width of the right part
+	 *
+	 * @return the width of the right part
+	 */
+	DimensionType getRightWidth();
+
+	/**
+	 * Get the content style
+	 *
+	 * @return the content style
 	 * @deprecated use getPageBody().getStyle()
-	 * @return Returns the content style.
 	 */
-	public IStyle getContentStyle();
+	@Deprecated
+	IStyle getContentStyle();
 
-	public long getPageNumber();
+	/**
+	 * Get the page number
+	 *
+	 * @return page number
+	 */
+	long getPageNumber();
 
+	/**
+	 * Set page number
+	 *
+	 * @param pageNumber page number
+	 */
 	void setPageNumber(long pageNumber);
 
 	/**
+	 * Get the computed style of content
+	 *
+	 * @return computed style of content
 	 * @deprecated use getPageBody().getComputedStyle()
 	 */
-	public IStyle getContentComputedStyle();
+	@Deprecated
+	IStyle getContentComputedStyle();
 
 }

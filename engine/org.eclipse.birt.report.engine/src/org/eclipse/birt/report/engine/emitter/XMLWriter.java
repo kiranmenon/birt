@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -22,7 +25,7 @@ import java.util.logging.Logger;
 /**
  * Output the content following the XML specification. Only when the events of
  * endding the writer, the stream is flushed explictly.
- * 
+ *
  */
 public class XMLWriter {
 
@@ -60,11 +63,11 @@ public class XMLWriter {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * create a XML writer without the stream associated with it.
-	 * 
+	 *
 	 * To use such a XML writer, you must open it first.
-	 * 
+	 *
 	 * @param encoding     character encoding
 	 * @param outputStream outputStream for outputting
 	 */
@@ -127,7 +130,7 @@ public class XMLWriter {
 
 	/**
 	 * Open the tag
-	 * 
+	 *
 	 * @param tagName tag name
 	 */
 	public void openTag(String tagName) {
@@ -147,7 +150,7 @@ public class XMLWriter {
 
 	/**
 	 * Close the tag
-	 * 
+	 *
 	 * @param tagName tag name
 	 */
 	public void closeTag(String tagName) {
@@ -175,7 +178,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the attribute whose value is not null
-	 * 
+	 *
 	 * @param attrName  attribute name
 	 * @param attrValue attribute value
 	 */
@@ -191,7 +194,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the attribute whose value is not null but can be ""
-	 * 
+	 *
 	 * @param attrName  attribute name
 	 * @param attrValue attribute value
 	 */
@@ -207,7 +210,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the attribute when the attrValue is not null
-	 * 
+	 *
 	 * @param attrName  attribute name
 	 * @param attrValue attribute value
 	 */
@@ -219,7 +222,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the attribute
-	 * 
+	 *
 	 * @param attrName  attribute name
 	 * @param attrValue attribute value
 	 */
@@ -229,7 +232,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the attribute
-	 * 
+	 *
 	 * @param attrName  attribute name
 	 * @param attrValue attribute value
 	 */
@@ -239,7 +242,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the attribute
-	 * 
+	 *
 	 * @param attrName  attribute name
 	 * @param attrValue attribute value
 	 */
@@ -250,7 +253,7 @@ public class XMLWriter {
 
 	/**
 	 * Output the encoded content
-	 * 
+	 *
 	 * @param value       the content
 	 * @param whiteespace A <code>boolean<code> indicating if the white space
 	 *                    character should be converted or not.
@@ -283,15 +286,15 @@ public class XMLWriter {
 
 	/**
 	 * the content does not need to be encoded
-	 * 
+	 *
 	 * @param value the literal content
 	 */
 	public void literal(String value) {
 		print(value);
 	}
 
-	private static String[] INDENTS = new String[] { "", "\t", "\t\t", "\t\t\t", "\t\t\t\t", "\t\t\t\t\t",
-			"\t\t\t\t\t\t", "\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t",
+	private static String[] INDENTS = { "", "\t", "\t\t", "\t\t\t", "\t\t\t\t", "\t\t\t\t\t", "\t\t\t\t\t\t",
+			"\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t",
 			"\t\t\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t\t\t\t",
 			"\t\t\t\t\t\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
 			"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t", "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
@@ -299,7 +302,7 @@ public class XMLWriter {
 
 	/**
 	 * Get the indent string
-	 * 
+	 *
 	 * @return the indent content
 	 */
 	protected String indent() {
@@ -314,7 +317,7 @@ public class XMLWriter {
 
 	/**
 	 * Replace the escape character
-	 * 
+	 *
 	 * @param s           The string needs to be replaced.
 	 * @param whiteespace A <code>boolean<code> value indicating if the white space
 	 *                    character should be converted or not.
@@ -326,7 +329,7 @@ public class XMLWriter {
 
 	/**
 	 * Replaces the escape character in attribute value.
-	 * 
+	 *
 	 * @param s The string needs to be replaced.
 	 * @return the replaced string
 	 */

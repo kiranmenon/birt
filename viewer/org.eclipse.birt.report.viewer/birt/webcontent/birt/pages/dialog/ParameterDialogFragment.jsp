@@ -1,9 +1,9 @@
 <%-----------------------------------------------------------------------------
-	Copyright (c) 2004 Actuate Corporation and others.
+	Copyright (c) 2004, 2025 Actuate Corporation and others.
 	All rights reserved. This program and the accompanying materials 
-	are made available under the terms of the Eclipse Public License v1.0
+	are made available under the terms of the Eclipse Public License v2.0
 	which accompanies this distribution, and is available at
-	http://www.eclipse.org/legal/epl-v10.html
+	http://www.eclipse.org/legal/epl-2.0.html
 	
 	Contributors:
 		Actuate Corporation - Initial implementation.
@@ -27,7 +27,7 @@
 	<TABLE CELLSPACING="2" CELLPADDING="2" ID="parameter_table" CLASS="birtviewer_dialog_body">
 		<TR VALIGN="top">
 			<TD>
-				<TABLE STYLE="font-size:8pt">
+				<TABLE>
 					<TR HEIGHT="5px"><TD></TD></TR>
 					<%
 					if ( fragments.size( ) <= 0 )
@@ -68,6 +68,10 @@
 				</DIV>		
 			</TD>
 		</TR>
-		
-	</TABLE>	
+	</TABLE>
+	<script>
+		if (typeof birtToolbarTheme !== 'undefined' && birtToolbarTheme) {
+			birtToolbarTheme.initToggle();
+		}
+	</script>
 </DIV>

@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 package org.eclipse.birt.report.tests.model.APISamples;
 
 import java.io.BufferedInputStream;
@@ -42,11 +54,11 @@ import org.eclipse.birt.report.model.elements.TableGroup;
 import com.ibm.icu.util.ULocale;
 
 /**
- * 
+ *
  * This is a demo of how to use Model API to create report design. <br>
  * The generated report contains data source, dataset, report parameter, table,
  * style and extends elements from library
- * 
+ *
  */
 public class Sample2 {
 
@@ -169,7 +181,7 @@ public class Sample2 {
 	}
 
 	public byte[] load(String fileName) throws IOException {
-		InputStream is = null;
+		InputStream is;
 
 		is = new BufferedInputStream(this.getClass().getResourceAsStream(fileName));
 		byte data[] = null;
@@ -804,17 +816,17 @@ public class Sample2 {
 		// style "year"
 		SharedStyleHandle year = libraryFactory.newStyle("year");
 		year.setDateTimeFormat("yyyy");
-		year.setDateTimeFormatCategory(DesignChoiceConstants.DATETIEM_FORMAT_TYPE_CUSTOM);
+		year.setDateTimeFormatCategory(DesignChoiceConstants.DATETIME_FORMAT_TYPE_CUSTOM);
 
 		// style "Month"
 		SharedStyleHandle month = libraryFactory.newStyle("month");
 		month.setDateTimeFormat("MM");
-		month.setDateTimeFormatCategory(DesignChoiceConstants.DATETIEM_FORMAT_TYPE_CUSTOM);
+		month.setDateTimeFormatCategory(DesignChoiceConstants.DATETIME_FORMAT_TYPE_CUSTOM);
 
 		// style "day"
 		SharedStyleHandle day = libraryFactory.newStyle("day");
 		day.setDateTimeFormat("dd");
-		day.setDateTimeFormatCategory(DesignChoiceConstants.DATETIEM_FORMAT_TYPE_CUSTOM);
+		day.setDateTimeFormatCategory(DesignChoiceConstants.DATETIME_FORMAT_TYPE_CUSTOM);
 
 		// style "TransactionType"
 		SharedStyleHandle transaction = libraryFactory.newStyle("TransactionType");

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -40,32 +43,35 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#getX()
 	 */
 
+	@Override
 	public String getX() {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).getX();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#getY()
 	 */
 
+	@Override
 	public String getY() {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).getY();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setX(java.lang.
 	 * String)
 	 */
 
+	@Override
 	public void setX(String dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setX(dimension);
@@ -76,11 +82,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setX(double)
 	 */
 
+	@Override
 	public void setX(double dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setX(dimension);
@@ -91,12 +98,13 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setY(java.lang.
 	 * String)
 	 */
 
+	@Override
 	public void setY(String dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setY(dimension);
@@ -107,11 +115,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setY(double)
 	 */
 
+	@Override
 	public void setY(double dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setY(dimension);
@@ -122,12 +131,13 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setHeight(java.
 	 * lang.String)
 	 */
 
+	@Override
 	public void setHeight(String dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setHeight(dimension);
@@ -138,11 +148,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#setHeight(
 	 * double)
 	 */
 
+	@Override
 	public void setHeight(double dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setHeight(dimension);
@@ -153,12 +164,13 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setWidth(java.
 	 * lang.String)
 	 */
 
+	@Override
 	public void setWidth(String dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setWidth(dimension);
@@ -169,11 +181,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#setWidth(
 	 * double)
 	 */
 
+	@Override
 	public void setWidth(double dimension) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setWidth(dimension);
@@ -184,43 +197,47 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#getWidth()
 	 */
 
+	@Override
 	public String getWidth() {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).getWidth();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#getHeight()
 	 */
+	@Override
 	public String getHeight() {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).getHeight();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#getBookmark()
 	 */
 
+	@Override
 	public String getBookmark() {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).getBookmark();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setBookmark(
 	 * java.lang.String)
 	 */
 
+	@Override
 	public void setBookmark(String value) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setBookmark(value);
@@ -231,11 +248,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#
 	 * setTocExpression(java.lang.String)
 	 */
 
+	@Override
 	public void setTocExpression(String expression) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).setTocExpression(expression);
@@ -246,20 +264,23 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.script.element.IReportItem#
 	 * getTocExpression()
 	 */
 
+	@Override
 	public String getTocExpression() {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).getTocExpression();
 	}
 
+	@Override
 	public String getDataBinding(String bindingName) {
 		return ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
 				.getDataBinding(bindingName);
 	}
 
+	@Override
 	public IDataBinding[] getDataBindings() {
 		org.eclipse.birt.report.model.api.simpleapi.IDataBinding[] values = ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
 				.getDataBindings();
@@ -271,6 +292,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 		return dataBindings;
 	}
 
+	@Override
 	public void removeDataBinding(String bindingName) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
@@ -282,10 +304,11 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/**
 	 * Removes all data bindings.
-	 * 
+	 *
 	 * @throws ScriptException
 	 */
 
+	@Override
 	public void removeDataBindings() throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).removeDataBindings();
@@ -296,11 +319,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/**
 	 * Adds ComputedColumn.
-	 * 
+	 *
 	 * @param binding
 	 * @throws ScriptException
 	 */
 
+	@Override
 	public void addDataBinding(IDataBinding binding) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).addDataBinding(
@@ -314,6 +338,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 	 * Gets all hide rules.
 	 */
 
+	@Override
 	public IHideRule[] getHideRules() {
 		org.eclipse.birt.report.model.api.simpleapi.IHideRule[] values = ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
 				.getHideRules();
@@ -329,6 +354,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 	 * Removes Hide Rule through format type.
 	 */
 
+	@Override
 	public void removeHideRule(IHideRule rule) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
@@ -340,11 +366,12 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/**
 	 * Add HideRule.
-	 * 
+	 *
 	 * @param rule
 	 * @throws ScriptException
 	 */
 
+	@Override
 	public void addHideRule(IHideRule rule) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
@@ -358,6 +385,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 	 * Removes Hide Rules.
 	 */
 
+	@Override
 	public void removeHideRules() throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).removeHideRules();
@@ -366,6 +394,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 		}
 	}
 
+	@Override
 	public void addHighlightRule(IHighlightRule rule) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).addHighlightRule(
@@ -375,6 +404,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 		}
 	}
 
+	@Override
 	public IHighlightRule[] getHighlightRules() {
 		org.eclipse.birt.report.model.api.simpleapi.IHighlightRule[] values = ((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)
 				.getHighlightRules();
@@ -386,6 +416,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 		return highlightRules;
 	}
 
+	@Override
 	public void removeHighlightRule(IHighlightRule rule) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).removeHighlightRule(
@@ -395,6 +426,7 @@ public class ReportItem extends ReportElement implements IReportItem {
 		}
 	}
 
+	@Override
 	public void removeHighlightRules() throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl).removeHighlightRules();
@@ -405,12 +437,13 @@ public class ReportItem extends ReportElement implements IReportItem {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api.script.element.IReportItem#setCurrentView(
 	 * org.eclipse.birt.report.engine.api.script.element.IDesignElement)
 	 */
 
+	@Override
 	public void setCurrentView(IDesignElement viewElement) throws ScriptException {
 		try {
 			((org.eclipse.birt.report.model.api.simpleapi.IReportItem) designElementImpl)

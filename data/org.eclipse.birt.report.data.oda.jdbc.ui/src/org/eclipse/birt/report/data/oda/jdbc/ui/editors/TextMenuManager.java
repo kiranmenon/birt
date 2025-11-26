@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,16 +31,16 @@ import org.eclipse.swt.widgets.Menu;
 /**
  * Text menu manager contains 'undo,redo,cut,copy,paste,select all' menuItem. It
  * displays on textVeiwer.
- * 
+ *
  */
 class TextMenuManager {
 
-	private Hashtable htActions = new Hashtable();
+	private Hashtable<String, SQLEditorAction> htActions = new Hashtable<String, SQLEditorAction>();
 	private MenuManager manager;
 
 	/**
 	 * Constructor to specify the textMenuManager for a text viewer.
-	 * 
+	 *
 	 * @param viewer
 	 */
 	TextMenuManager(TextViewer viewer) {
@@ -63,10 +66,11 @@ class TextMenuManager {
 
 		manager.addMenuListener(new IMenuListener() {
 
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				Enumeration elements = htActions.elements();
+				Enumeration<SQLEditorAction> elements = htActions.elements();
 				while (elements.hasMoreElements()) {
-					SQLEditorAction action = (SQLEditorAction) elements.nextElement();
+					SQLEditorAction action = elements.nextElement();
 					action.update();
 				}
 			}
@@ -74,16 +78,16 @@ class TextMenuManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param control
-	 * @return
+	 * @return context menu
 	 */
 	public Menu getContextMenu(Control control) {
 		return manager.createContextMenu(control);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param id
 	 * @param viewer
 	 * @param name
@@ -91,7 +95,7 @@ class TextMenuManager {
 	 * @return
 	 */
 	private final SQLEditorAction getAction(String id, TextViewer viewer, String name, int operation) {
-		SQLEditorAction action = (SQLEditorAction) htActions.get(id);
+		SQLEditorAction action = htActions.get(id);
 		if (action == null) {
 			action = new SQLEditorAction(viewer, name, operation);
 			htActions.put(id, action);
@@ -101,7 +105,7 @@ class TextMenuManager {
 
 	/**
 	 * SQL editor action set
-	 * 
+	 *
 	 */
 	static class SQLEditorAction extends Action {
 
@@ -115,16 +119,17 @@ class TextMenuManager {
 		}
 
 		/*
-		 * 
+		 *
 		 * @see org.eclipse.jface.action.IAction#run()
 		 */
+		@Override
 		public void run() {
 			viewer.doOperation(operationCode);
 		}
 
 		/**
 		 * update the operation
-		 * 
+		 *
 		 */
 		public void update() {
 			setEnabled(viewer.canDoOperation(operationCode));

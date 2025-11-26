@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -19,7 +22,7 @@ import org.w3c.dom.css.CSSPrimitiveValue;
 
 /**
  * This interface defines constants for CSS values.
- * 
+ *
  */
 public interface CSSValueConstants {
 
@@ -402,6 +405,11 @@ public interface CSSValueConstants {
 	Value UNDERLINE_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_UNDERLINE_VALUE);
 
 	/**
+	 * The 'none' (is undecorated, default is decoration) keyword.
+	 */
+	Value UNDECORATED = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_TEXT_HYPERLINK_UNDECORATION_VALUE);
+
+	/**
 	 * The 'visible' keyword.
 	 */
 	Value VISIBLE_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_VISIBLE_VALUE);
@@ -759,8 +767,14 @@ public interface CSSValueConstants {
 	 */
 	Value JUSTIFY_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_JUSTIFY_VALUE);
 
+	/**
+	 * the "contain" value
+	 */
 	Value CONTAIN_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_CONTAIN_VALUE);
 
+	/**
+	 * the "cover" value
+	 */
 	Value COVER_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_COVER_VALUE);
 
 	/**
@@ -928,4 +942,15 @@ public interface CSSValueConstants {
 	 * the "hidden" value for overflow
 	 */
 	Value OVERFLOW_HIDDEN_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_OVERFLOW_HIDDEN_VALUE);
+
+	/**
+	 * The 'url' keyword.
+	 */
+	Value URL_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT, CSSConstants.CSS_URL_VALUE);
+
+	/**
+	 * The 'diagonal line number' keyword.
+	 */
+	Value DIAGONAL_LINE_NUMBER_VALUE = new StringValue(CSSPrimitiveValue.CSS_IDENT,
+			CSSConstants.CSS_BORDER_DIAGONAL_LINE_NUMBER_VALUE);
 }

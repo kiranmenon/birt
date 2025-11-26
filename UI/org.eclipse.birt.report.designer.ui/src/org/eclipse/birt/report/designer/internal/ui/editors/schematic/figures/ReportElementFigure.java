@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse
- * Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ * Copyright (c) 2004 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors: Actuate Corporation - initial API and implementation
  ******************************************************************************/
 
@@ -43,16 +46,32 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 
 	private Dimension size = new Dimension();
 
+	private Dimension propertySize = new Dimension();
+
+	private double percentageHeight = 1;
+
+	private double percentageWidth = 1;
+
 	private Rectangle clip;
 
 	private static final Rectangle OLD_CLIP = new Rectangle();
 
 	private int backgroundImageDPI = 0;
 
+	/**
+	 * Get the background image dpi
+	 *
+	 * @return get the background image dpi
+	 */
 	public int getBackgroundImageDPI() {
 		return backgroundImageDPI;
 	}
 
+	/**
+	 * Set the background image dpi
+	 *
+	 * @param backgroundImageDPI background image dpi
+	 */
 	public void setBackgroundImageDPI(int backgroundImageDPI) {
 		this.backgroundImageDPI = backgroundImageDPI;
 	}
@@ -68,7 +87,7 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	/**
 	 * Constructor <br>
 	 * The default alignment is <code>PositionConstants.CENTER</code>.
-	 * 
+	 *
 	 * @param image The Image to be displayed
 	 */
 	public ReportElementFigure(Image image) {
@@ -77,10 +96,10 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param image     The Image to be displayed
 	 * @param alignment A PositionConstant indicating the alignment
-	 * 
+	 *
 	 * @see ImageFigure#setImage(Image)
 	 * @see ImageFigure#setAlignment(int)
 	 */
@@ -92,19 +111,26 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	/**
 	 * @return The Image that this Figure displays
 	 */
+	@Override
 	public Image getImage() {
 		return img;
 	}
 
+	/**
+	 * Set page clip
+	 *
+	 * @param clip rectangle to clip page
+	 */
 	public void setPageClip(Rectangle clip) {
 		this.clip = clip;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.draw2d.Figure#paintBorder(org.eclipse.draw2d.Graphics)
 	 */
+	@Override
 	protected void paintBorder(Graphics graphics) {
 		if (clip != null) {
 			graphics.getClip(OLD_CLIP);
@@ -121,6 +147,7 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	/**
 	 * @see org.eclipse.draw2d.Figure#paintFigure(Graphics)
 	 */
+	@Override
 	protected void paintFigure(Graphics graphics) {
 		if (isOpaque()) {
 			if (getBorder() instanceof BaseBorder) {
@@ -175,12 +202,12 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 			}
 		}
 
-		ArrayList xyList = createImageList(x, y);
+		ArrayList<Point> xyList = createImageList(x, y);
 
-		Iterator iter = xyList.iterator();
+		Iterator<Point> iter = xyList.iterator();
 		Dimension imageSize = new Rectangle(image.getBounds()).getSize();
 		while (iter.hasNext()) {
-			Point point = (Point) iter.next();
+			Point point = iter.next();
 			graphics.drawImage(image, 0, 0, imageSize.width, imageSize.height, point.x, point.y, size.width,
 					size.height);
 		}
@@ -191,15 +218,15 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 
 	/**
 	 * Create the list of all the images to be displayed.
-	 * 
+	 *
 	 * @param x the x-cordinator of the base image.
 	 * @param y the y-cordinator of the base image.
 	 * @return the list of all the images to be displayed.
 	 */
-	private ArrayList createImageList(int x, int y) {
+	private ArrayList<Point> createImageList(int x, int y) {
 		Rectangle area = getBounds();
 
-		ArrayList yList = new ArrayList();
+		ArrayList<Point> yList = new ArrayList<Point>();
 
 		if ((repeat & ImageConstants.REPEAT_Y) == 0) {
 			yList.add(new Point(x, y));
@@ -217,11 +244,11 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 			}
 		}
 
-		ArrayList xyList = new ArrayList();
+		ArrayList<Point> xyList = new ArrayList<Point>();
 
-		Iterator iter = yList.iterator();
+		Iterator<Point> iter = yList.iterator();
 		while (iter.hasNext()) {
-			Point point = (Point) iter.next();
+			Point point = iter.next();
 
 			if ((repeat & ImageConstants.REPEAT_X) == 0) {
 				xyList.add(point);
@@ -248,7 +275,7 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	 * Sets the alignment of the Image within this Figure. The alignment comes into
 	 * play when the ImageFigure is larger than the Image. The alignment could be
 	 * any valid combination of the following:
-	 * 
+	 *
 	 * <UL>
 	 * <LI>PositionConstants.NORTH</LI>
 	 * <LI>PositionConstants.SOUTH</LI>
@@ -256,18 +283,20 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	 * <LI>PositionConstants.WEST</LI>
 	 * <LI>PositionConstants.CENTER or PositionConstants.NONE</LI>
 	 * </UL>
-	 * 
+	 *
 	 * @param flag A constant indicating the alignment
 	 */
+	@Override
 	public void setAlignment(int flag) {
 		alignment = flag;
 	}
 
 	/**
 	 * Sets the position of the Image within this Figure.
-	 * 
+	 *
 	 * @param point The position of the image to be displayed.
 	 */
+	@Override
 	public void setPosition(Point point) {
 		this.position = point;
 	}
@@ -275,16 +304,17 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	/**
 	 * Sets the repeat of the Image within this Figure. The repeat could be any
 	 * valid combination of the following:
-	 * 
+	 *
 	 * <UL>
 	 * <LI>no_repeat:0</LI>
 	 * <LI>repeat_x:1</LI>
 	 * <LI>repeat_y:2</LI>
 	 * <LI>repeat:3</LI>
 	 * </UL>
-	 * 
+	 *
 	 * @param flag A constant indicating the repeat.
 	 */
+	@Override
 	public void setRepeat(int flag) {
 		this.repeat = flag;
 	}
@@ -294,34 +324,114 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 	 * <p>
 	 * IMPORTANT: Note that it is the client's responsibility to dispose the given
 	 * image.
-	 * 
+	 *
 	 * @param image The Image to be displayed. It can be <code>null</code>.
 	 */
+	@Override
 	public void setImage(Image image) {
-		if (img == image)
+		this.setImage(image, 0, 0);
+	}
+
+	/**
+	 * Sets the Image that this ImageFigure displays.
+	 *
+	 * @param image                 The Image to be displayed. It can be
+	 *                              <code>null</code>.
+	 * @param backGroundImageHeight height of the image
+	 * @param backGroundImageWidth  width of the image
+	 */
+	@Override
+	public void setImage(Image image, int backGroundImageHeight, int backGroundImageWidth) {
+		this.setImage(image, 0, 0, 1, 1);
+	}
+
+	/**
+	 * Sets the Image that this ImageFigure displays.
+	 *
+	 * @param image                 The Image to be displayed. It can be
+	 *                              <code>null</code>.
+	 * @param backGroundImageHeight height of the image
+	 * @param backGroundImageWidth  width of the image
+	 * @param percentageHeight      percentage of height of the image to base 1.0
+	 * @param percentageWidth       percentage of width of the image to base 1.0
+	 */
+	@Override
+	public void setImage(Image image, int backGroundImageHeight, int backGroundImageWidth, double percentageHeight,
+			double percentageWidth) {
+		if (img == image && propertySize.height == backGroundImageHeight && propertySize.width == backGroundImageWidth
+				&& this.percentageHeight == percentageHeight && this.percentageWidth == percentageWidth) {
 			return;
+		}
 		img = image;
 		if (img != null) {
-			if (backgroundImageDPI > 0) {
+			propertySize.height = backGroundImageHeight;
+			propertySize.width = backGroundImageWidth;
+			this.percentageHeight = percentageHeight;
+			this.percentageWidth = percentageWidth;
+
+			if (backgroundImageDPI > 0 && backGroundImageHeight <= 0 && backGroundImageWidth > 0) {
+
+				double inch = 1d;
+
+				// scaling factor of correct image relation based on original image width
+				inch = ((double) image.getBounds().width) / backgroundImageDPI;
+				int originalWidth = (int) MetricUtility.inchToPixel(inch);
+				double scaleFactor = (double) backGroundImageWidth / originalWidth;
+
+				inch = ((double) image.getBounds().height) / backgroundImageDPI;
+				size.height = (int) (MetricUtility.inchToPixel(inch) * scaleFactor);
+				size.width = backGroundImageWidth;
+
+			} else if (backgroundImageDPI > 0 && backGroundImageWidth <= 0 && backGroundImageHeight > 0) {
+
+				double inch = 1d;
+
+				// scaling factor of correct image relation based on original image height
+				inch = ((double) image.getBounds().height) / backgroundImageDPI;
+				int originalHeight = (int) MetricUtility.inchToPixel(inch);
+				double scaleFactor = (double) backGroundImageHeight / originalHeight;
+
+				inch = ((double) image.getBounds().width) / backgroundImageDPI;
+				size.width = (int) (MetricUtility.inchToPixel(inch) * scaleFactor);
+				size.height = backGroundImageHeight;
+
+			} else if (backgroundImageDPI > 0 && (backGroundImageHeight <= 0 && backGroundImageWidth <= 0)) {
+
 				double inch = ((double) image.getBounds().width) / backgroundImageDPI;
 				size.width = (int) MetricUtility.inchToPixel(inch);
 
 				inch = ((double) image.getBounds().height) / backgroundImageDPI;
 				size.height = (int) MetricUtility.inchToPixel(inch);
+
+			} else if (backGroundImageHeight > 0 && backGroundImageWidth > 0) {
+
+				size.height = backGroundImageHeight;
+				size.width = backGroundImageWidth;
+
 			} else {
 				size = new Rectangle(image.getBounds()).getSize();
 			}
-		} else
+		} else {
 			size = new Dimension();
+		}
+		// auto scaling of percentage if one percentage is set and the image size is unset
+		if (percentageHeight != 1.0 && percentageWidth == 1.0 && backGroundImageWidth == 0) {
+			percentageWidth = percentageHeight;
+		} else if (percentageWidth != 1.0 && percentageHeight == 1.0 && backGroundImageHeight == 0) {
+			percentageHeight = percentageWidth;
+		}
+		size.height = (int) (size.height * percentageHeight);
+		size.width = (int) (size.width * percentageWidth);
 		revalidate();
 		repaint();
 	}
 
 	/**
 	 * Sets the margin for current figure.
-	 * 
+	 *
 	 * @param newMargin
 	 */
+	@Override
 	public void setMargin(Insets newMargin) {
 		if (newMargin == null) {
 			margin = new Insets();
@@ -345,44 +455,51 @@ public class ReportElementFigure extends Figure implements IReportElementFigure,
 
 	/**
 	 * Returns the margin of current figure.
-	 * 
-	 * @return
+	 *
+	 * @return Returns the margin of current figure.
 	 */
+	@Override
 	public Insets getMargin() {
 		return margin;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.draw2d.Figure#fireMoved()
 	 */
+	@Override
 	public void fireMoved() {
 		super.fireMoved();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.designer.internal.ui.layout.IFixLayoutHelper#
 	 * getFixPreferredSize(int, int)
 	 */
+	@Override
 	public Dimension getFixPreferredSize(int w, int h) {
 		return getPreferredSize(w, h);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.designer.internal.ui.layout.IFixLayoutHelper#
 	 * getFixMinimumSize(int, int)
 	 */
+	@Override
 	public Dimension getFixMinimumSize(int w, int h) {
 		return getMinimumSize(w, h);
 	}
 
 	/**
-	 * @param backGroundImageWidth
+	 * Set the Background image size
+	 *
+	 * @param backGroundImageWidth  width of the background image
+	 * @param backGroundImageHeight height of background image
 	 */
 	public void setBackGroundImageSize(int backGroundImageWidth, int backGroundImageHeight) {
 

@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.engine.extension.internal;
 
@@ -27,6 +39,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.ah = ah;
 	}
 
+	@Override
 	public IHTMLActionHandler getActionHandler() {
 		return ah;
 	}
@@ -35,13 +48,15 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.loader = loader;
 	}
 
+	@Override
 	public ClassLoader getApplicationClassLoader() {
 		return loader;
 	}
 
 	public IStyle getDynamicStyle() {
-		if (content != null)
+		if (content != null) {
 			return content.getComputedStyle();
+		}
 		return null;
 	}
 
@@ -49,6 +64,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.content = content;
 	}
 
+	@Override
 	public IContent getExtendedItemContent() {
 		return content;
 	}
@@ -64,6 +80,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.modelHandle = modelHandle;
 	}
 
+	@Override
 	public ExtendedItemHandle getModelObject() {
 		return modelHandle;
 	}
@@ -72,6 +89,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.outputFormat = outputFormat;
 	}
 
+	@Override
 	public String getOutputFormat() {
 		return outputFormat;
 	}
@@ -80,6 +98,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.queries = queries;
 	}
 
+	@Override
 	public IDataQueryDefinition[] getReportQueries() {
 		return queries;
 	}
@@ -88,6 +107,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.dpi = dpi;
 	}
 
+	@Override
 	public int getResolution() {
 		return dpi;
 	}
@@ -96,6 +116,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.context = context;
 	}
 
+	@Override
 	public IReportContext getReportContext() {
 		return context;
 	}
@@ -104,6 +125,7 @@ public class ReportItemPresentationInfo implements IReportItemPresentationInfo {
 		this.supportedImageFormats = supportedImageFormats;
 	}
 
+	@Override
 	public String getSupportedImageFormats() {
 		return supportedImageFormats;
 	}

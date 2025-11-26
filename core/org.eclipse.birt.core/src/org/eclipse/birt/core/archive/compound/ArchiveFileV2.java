@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,8 +18,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,7 +104,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 	/**
 	 * setup the flags used to open the archive.
 	 * <p>
-	 * 
+	 *
 	 * the mode can be either of:
 	 * <li>r</li> open the archive file for read only, the file must exits.
 	 * <li>rw</li> open the archive file for read and write, if the file is exits,
@@ -112,7 +113,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 	 * open the file.
 	 * <li>rwt</li> open the archive file for read and write. The exits file will be
 	 * removed. The file will be removed after close.
-	 * 
+	 *
 	 * @param mode the open mode.
 	 */
 	private void setupArchiveMode(String mode) {
@@ -139,7 +140,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * create the archive file.
-	 * 
+	 *
 	 * @param fileName file name.
 	 * @param rf       the random access file
 	 * @param mode     open mode.
@@ -164,15 +165,16 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * create the archive file.
-	 * 
+	 *
 	 * @param fileName file name.
 	 * @param mode     open mode.
 	 * @throws IOException
 	 */
 	public ArchiveFileV2(String systemId, String dependId, String fileName, RandomAccessFile rf, String mode)
 			throws IOException {
-		if (fileName == null || fileName.length() == 0)
+		if (fileName == null || fileName.length() == 0) {
 			throw new IOException(CoreMessages.getString(ResourceConstants.FILE_NAME_IS_NULL));
+		}
 
 		// make sure the file name is an absolute path
 		File fd = new File(fileName);
@@ -205,11 +207,12 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * set up the cache size.
-	 * 
+	 *
 	 * the actually cache size is round to block size.
-	 * 
+	 *
 	 * @param cacheSize cache size in bytes
 	 */
+	@Override
 	public void setCacheSize(long cacheSize) {
 		long cacheBlocks = (cacheSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
 		if (cacheBlocks > Integer.MAX_VALUE) {
@@ -219,14 +222,17 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		}
 	}
 
+	@Override
 	public long getUsedCache() {
 		return (long) caches.getUsedCacheSize() * BLOCK_SIZE;
 	}
 
+	@Override
 	public String getDependId() {
 		return dependId;
 	}
 
+	@Override
 	public String getSystemId() {
 		if (systemId == null) {
 			return archiveName;
@@ -236,7 +242,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * open the archive file for read or rw.
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private void openDocument() throws IOException {
@@ -262,7 +268,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 			totalDiskBlocks = totalBlocks;
 			allocTbl = AllocTable.loadTable(this);
 			entryTbl = NameTable.loadTable(this);
-			entries = new HashMap<String, NameEntry>();
+			entries = new HashMap<>();
 			for (NameEntry nameEnt : entryTbl.listEntries()) {
 				entries.put(nameEnt.getName(), nameEnt);
 			}
@@ -277,7 +283,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * create the document
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private void createDocument() throws IOException {
@@ -294,7 +300,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 			head.flush(this);
 			allocTbl = AllocTable.createTable(this);
 			entryTbl = NameTable.createTable(this);
-			entries = new HashMap<String, NameEntry>();
+			entries = new HashMap<>();
 		} catch (IOException ex) {
 			if (rf != null) {
 				rf.close();
@@ -306,26 +312,28 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * get the archive name.
-	 * 
+	 *
 	 * the archive name is the file name used to create the archive instance.
-	 * 
+	 *
 	 * @return archive name.
 	 */
+	@Override
 	public String getName() {
 		return archiveName;
 	}
 
 	/**
 	 * close the archive.
-	 * 
+	 *
 	 * all changed data will be flushed into disk if the file is opened for write.
-	 * 
+	 *
 	 * the file will be removed if it is opend as transient.
-	 * 
+	 *
 	 * after close, the instance can't be used any more.
-	 * 
+	 *
 	 * @throws IOException
 	 */
+	@Override
 	public synchronized void close() throws IOException {
 		if (isWritable) {
 			head.setStatus(FILE_STATUS_FINISHED);
@@ -346,6 +354,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		isClosed = true;
 	}
 
+	@Override
 	public synchronized void flush() throws IOException {
 		assertWritable();
 		if (!isTransient) {
@@ -358,6 +367,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		}
 	}
 
+	@Override
 	public synchronized void save() throws IOException {
 		assertWritable();
 		if (isTransient) {
@@ -366,6 +376,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		flush();
 	}
 
+	@Override
 	public synchronized void refresh() throws IOException {
 		assertOpen();
 		if (!isWritable) {
@@ -378,14 +389,17 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	}
 
+	@Override
 	public synchronized boolean exists(String name) {
 		return entries.containsKey(name);
 	}
 
+	@Override
 	public long getLength() {
 		return ((long) BLOCK_SIZE) * totalBlocks;
 	}
 
+	@Override
 	public synchronized ArchiveEntry openEntry(String name) throws IOException {
 		NameEntry nameEnt = entries.get(name);
 		if (nameEnt != null) {
@@ -394,8 +408,9 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		throw new FileNotFoundException(name);
 	}
 
+	@Override
 	public synchronized List<String> listEntries(String namePattern) {
-		ArrayList<String> list = new ArrayList<String>();
+		ArrayList<String> list = new ArrayList<>();
 		for (String name : entries.keySet()) {
 			if (namePattern == null || name.startsWith(namePattern)) {
 				list.add(name);
@@ -404,6 +419,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		return list;
 	}
 
+	@Override
 	public synchronized ArchiveEntry createEntry(String name) throws IOException {
 		assertWritable();
 
@@ -418,6 +434,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		return new ArchiveEntryV2(this, nameEnt);
 	}
 
+	@Override
 	public synchronized boolean removeEntry(String name) throws IOException {
 		assertWritable();
 
@@ -437,6 +454,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		return false;
 	}
 
+	@Override
 	synchronized public Object lockEntry(String name) throws IOException {
 		assertOpen();
 
@@ -451,6 +469,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 		return entry;
 	}
 
+	@Override
 	synchronized public void unlockEntry(Object locker) throws IOException {
 		assertOpen();
 		if (!(locker instanceof NameEntry)) {
@@ -461,7 +480,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * return the total blocks of the archive file.
-	 * 
+	 *
 	 * @return
 	 * @throws IOException
 	 */
@@ -490,11 +509,11 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * read the data from cache.
-	 * 
+	 *
 	 * This API read <code>len</code> bytes from <code>blockOff</code> in block
 	 * <code>blockId</code>, store the data into <code>b</code> from
 	 * <code>off</code>. The read cache is identified by <code>slotId</code>
-	 * 
+	 *
 	 * @param blockId  the block id
 	 * @param blockOff the block offset
 	 * @param b        read buffer
@@ -519,10 +538,10 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	/**
 	 * write the data into cache.
-	 * 
+	 *
 	 * The API saves <code>len</code> bytes in <code>b</code> from <code>off</code>
 	 * to block <code>blockId</code> from <code>blockOff</code>
-	 * 
+	 *
 	 * @param blockId  block id.
 	 * @param blockOff offset in the block.
 	 * @param b        data to be saved
@@ -581,12 +600,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 	}
 
 	int getDefaultBlockSize() {
-		String value = (String) AccessController.doPrivileged(new PrivilegedAction<Object>() {
-
-			public Object run() {
-				return System.getProperty(PROPERTY_DEFAULT_BLOCK_SIZE);
-			}
-		});
+		String value = System.getProperty(PROPERTY_DEFAULT_BLOCK_SIZE);
 
 		if (value != null) {
 			try {
@@ -604,6 +618,7 @@ public class ArchiveFileV2 implements IArchiveFile, ArchiveConstants {
 
 	static class ArchiveFileV2CacheListener implements CacheListener {
 
+		@Override
 		public void onCacheRelease(Cacheable cache) {
 			Block block = (Block) cache;
 			try {

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005, 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -11,14 +14,11 @@
 package org.eclipse.birt.report.designer.data.ui.datasource;
 
 import org.eclipse.birt.report.designer.data.ui.util.DataSetProvider;
-import org.eclipse.birt.report.designer.data.ui.util.DataUIConstants;
 import org.eclipse.birt.report.designer.data.ui.util.Utility;
 import org.eclipse.birt.report.designer.nls.Messages;
 import org.eclipse.birt.report.model.api.DataSourceHandle;
 import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ScriptDataSourceHandle;
-import org.eclipse.birt.report.model.api.activity.SemanticException;
-import org.eclipse.birt.report.model.api.core.UserPropertyDefn;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.util.manifest.ExtensionManifest;
@@ -31,8 +31,6 @@ public class DataSourceSelectionHelper {
 	private static final String DTP_ODA_EXT_POINT = "org.eclipse.datatools.connectivity.oda.dataSource"; //$NON-NLS-1$
 	public static final String SCRIPT_DATA_SOURCE_DISPLAY_NAME = Messages
 			.getString("DataSourceSelectionPage.ScriptDataSource.DisplayName"); //$NON-NLS-1$
-	public static final String CASSANDRA_DATA_SOURCE_DISPLAY_NAME = Messages
-			.getString("CassandraScriptedDataSource.display.name");
 
 	public Object[] getFilteredDataSourceArray() {
 		Filter aFilter = ManifestExplorer.createFilter();
@@ -44,23 +42,24 @@ public class DataSourceSelectionHelper {
 		if (dataSources == null) {
 			dataSources = new ExtensionManifest[0];
 		}
-		Object[] newArray = new Object[dataSources.length + 2];
+		Object[] newArray = new Object[dataSources.length + 1];
 		for (int i = 0; i < dataSources.length; i++) {
 			newArray[i] = dataSources[i];
 		}
 		newArray[dataSources.length] = SCRIPT_DATA_SOURCE_DISPLAY_NAME;
-		newArray[dataSources.length + 1] = CASSANDRA_DATA_SOURCE_DISPLAY_NAME;
 		return newArray;
 	}
 
 	public boolean hasNextPage(Object selectedObject) {
-		if (selectedObject == null)
+		if (selectedObject == null) {
 			return false;
+		}
 		if (selectedObject instanceof ExtensionManifest) {
 			// ODA3 check
 			if (DesignSessionUtil
-					.hasValidOdaDesignUIExtension(((ExtensionManifest) selectedObject).getDataSourceElementID()))
+					.hasValidOdaDesignUIExtension(((ExtensionManifest) selectedObject).getDataSourceElementID())) {
 				return true;
+			}
 
 			// ODA2 check
 			IConfigurationElement dataSourceElement = DataSetProvider
@@ -92,15 +91,6 @@ public class DataSourceSelectionHelper {
 		}
 		if (classType == ScriptDataSourceHandle.class) {
 			ScriptDataSourceHandle dsHandle = Utility.newScriptDataSource(dataSourceName);
-			if (dataSourceType.equals(DataUIConstants.CASSANDRA_DATA_SOURCE_SCRIPT)) {
-				UserPropertyDefn userProperty = new UserPropertyDefn();
-				userProperty.setName(DataUIConstants.SCRIPT_TYPE);
-				userProperty.setDefault(DataUIConstants.CASSANDRA_DATA_SOURCE_VALUE);
-				try {
-					dsHandle.addUserPropertyDefn(userProperty);
-				} catch (SemanticException e) {
-				}
-			}
 			return dsHandle;
 		}
 		return null;

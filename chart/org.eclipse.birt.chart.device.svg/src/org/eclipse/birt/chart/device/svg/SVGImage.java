@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2005, 2006 IBM Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * IBM Corporation - initial API and implementation
@@ -19,6 +22,7 @@ import java.awt.image.ImageProducer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Base64;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageWriteParam;
@@ -26,7 +30,6 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
 
-import org.apache.commons.codec.binary.Base64;
 import org.eclipse.birt.chart.device.ImageWriterFactory;
 import org.eclipse.birt.chart.util.SecurityUtil;
 
@@ -78,7 +81,7 @@ public class SVGImage extends Image {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public void flush() {
@@ -102,7 +105,7 @@ public class SVGImage extends Image {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.awt.Image#getScaledInstance(int, int, int)
 	 */
 	@Override
@@ -126,7 +129,7 @@ public class SVGImage extends Image {
 	public String getUrl() {
 		if (url == null) {
 			if (data != null) {
-				return BASE64 + new String(Base64.encodeBase64(data));
+				return BASE64 + new String(Base64.getEncoder().encode(data));
 
 			}
 			return ""; //$NON-NLS-1$

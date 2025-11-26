@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,6 +18,7 @@ import java.util.ResourceBundle;
 
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.i18n.EngineResourceHandle;
+
 import com.ibm.icu.util.ULocale;
 import com.ibm.icu.util.UResourceBundle;
 
@@ -26,7 +30,7 @@ import com.ibm.icu.util.UResourceBundle;
 public class EngineException extends BirtException {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 3137320793453389473L;
 
@@ -97,7 +101,7 @@ public class EngineException extends BirtException {
 
 	/**
 	 * Set locale.
-	 * 
+	 *
 	 * @param locale
 	 */
 	static public void setULocale(ULocale locale) {
@@ -117,7 +121,7 @@ public class EngineException extends BirtException {
 
 	/**
 	 * Get resource bundle.
-	 * 
+	 *
 	 * @return resource bundle
 	 */
 	static UResourceBundle getResourceBundle() {
@@ -132,7 +136,7 @@ public class EngineException extends BirtException {
 
 	/**
 	 * Get resource bundle.
-	 * 
+	 *
 	 * @param locale
 	 * @return resource bundle
 	 */
@@ -150,7 +154,7 @@ public class EngineException extends BirtException {
 
 	/**
 	 * Set element id.
-	 * 
+	 *
 	 * @param id
 	 */
 	public void setElementID(long id) {
@@ -159,7 +163,7 @@ public class EngineException extends BirtException {
 
 	/**
 	 * Get element id.
-	 * 
+	 *
 	 * @return element id
 	 */
 	public long getElementID() {
@@ -175,8 +179,9 @@ public class EngineException extends BirtException {
 	}
 
 	// suppose that this message is for end user
+	@Override
 	public String getLocalizedMessage() {
-		StringBuffer message = new StringBuffer();
+		StringBuilder message = new StringBuilder();
 		if (birtException != null) {
 			message.append(birtException.getLocalizedMessage());
 		} else {
@@ -187,8 +192,9 @@ public class EngineException extends BirtException {
 	}
 
 	// suppose that this message is used for log
+	@Override
 	public String getMessage() {
-		StringBuffer message = new StringBuffer();
+		StringBuilder message = new StringBuilder();
 		if (birtException != null) {
 			message.append(birtException.getLocalizedMessage());
 		} else {

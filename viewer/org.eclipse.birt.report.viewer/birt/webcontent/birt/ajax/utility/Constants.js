@@ -1,9 +1,9 @@
 /******************************************************************************
- *	Copyright (c) 2004 Actuate Corporation and others.
+ *	Copyright (c) 2004, 2025 Actuate Corporation and others.
  *	All rights reserved. This program and the accompanying materials 
- *	are made available under the terms of the Eclipse Public License v1.0
+ *	are made available under the terms of the Eclipse Public License v2.0
  *	which accompanies this distribution, and is available at
- *		http://www.eclipse.org/legal/epl-v10.html
+ *		http://www.eclipse.org/legal/epl-2.0.html
  *	
  *	Contributors:
  *		Actuate Corporation - Initial implementation.
@@ -63,6 +63,8 @@ var Constants = {
 	PARAM_EXPORT_DATATYPE : '__exportdatatype',
 	PARAM_LOCALENEUTRAL : '__localeneutral',
 	PARAM_CARRIAGERETURN : '__carriagereturn',
+	PARAM_COLUMNDISPLAYNAME : '__columndisplayname',
+	PARAM_COLUMNNAME : '__columnname',
 	PARAM_DATA_EXTRACT_FORMAT : '__extractformat',
 	PARAM_DATA_EXTRACT_EXTENSION : '__extractextension',
 	PARAM_ISNULL : '__isnull',
@@ -104,6 +106,9 @@ var Constants = {
 	FORMAT_PDF : 'pdf',
 	FORMAT_HTML : 'html',
 	FORMAT_PPT : 'ppt',
+	FORMAT_EXCEL : 'xls',
+	FORMAT_SPUDSOFT_XLS : 'xls_spudsoft',
+	FORMAT_SPUDSOFT_XLSX : 'xlsx',
 	
 	// Action names
 	ACTION_PRINT : 'print',

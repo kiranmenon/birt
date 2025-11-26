@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -56,22 +59,27 @@ public class ImageArea extends AbstractArea implements IImageArea {
 		this.data = data;
 	}
 
+	@Override
 	public void accept(IAreaVisitor visitor) {
 		visitor.visitImage(this);
 	}
 
+	@Override
 	public byte[] getImageData() {
 		return data;
 	}
 
+	@Override
 	public String getImageUrl() {
 		return url;
 	}
 
+	@Override
 	public AbstractArea cloneArea() {
 		return new ImageArea(this);
 	}
 
+	@Override
 	public String getExtension() {
 		return extension;
 	}
@@ -80,6 +88,7 @@ public class ImageArea extends AbstractArea implements IImageArea {
 		this.extension = extension;
 	}
 
+	@Override
 	public String getHelpText() {
 		return helpText;
 	}
@@ -88,6 +97,7 @@ public class ImageArea extends AbstractArea implements IImageArea {
 		this.helpText = helpText;
 	}
 
+	@Override
 	public String getMIMEType() {
 		return mimetype;
 	}
@@ -96,6 +106,7 @@ public class ImageArea extends AbstractArea implements IImageArea {
 		this.mimetype = mimetype;
 	}
 
+	@Override
 	public HashMap<String, String> getParameters() {
 		return params;
 	}
@@ -104,14 +115,16 @@ public class ImageArea extends AbstractArea implements IImageArea {
 		this.params = params;
 	}
 
+	@Override
 	public void addImageMap(int[] peak, IHyperlinkAction action) {
 		if (imageMapDescription == null) {
-			imageMapDescription = new ArrayList<IImageMap>();
+			imageMapDescription = new ArrayList<>();
 		}
 		ImageMap map = new ImageMap(peak, action);
 		imageMapDescription.add(map);
 	}
 
+	@Override
 	public ArrayList<IImageMap> getImageMapDescription() {
 		return imageMapDescription;
 	}
@@ -125,10 +138,12 @@ public class ImageArea extends AbstractArea implements IImageArea {
 			this.action = action;
 		}
 
+		@Override
 		public int[] getVertices() {
 			return vertices;
 		}
 
+		@Override
 		public IHyperlinkAction getAction() {
 			return action;
 		}

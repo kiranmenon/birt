@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -46,6 +49,7 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 	/**
 	 * @return
 	 */
+	@Override
 	public String getDefaultValue() {
 		return defaultValue;
 	}
@@ -59,10 +63,11 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api2.IScalarParameterDefn#isValueConcealed()
 	 */
+	@Override
 	public boolean isValueConcealed() {
 		return cancealValue;
 	}
@@ -73,9 +78,10 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IScalarParameterDefn#allowNull()
 	 */
+	@Override
 	public boolean allowNull() {
 		return !isRequired();
 	}
@@ -84,15 +90,17 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 	 * @deprecated
 	 * @param allowNull whether allow null value for the specific parameter
 	 */
+	@Deprecated
 	public void setAllowNull(boolean allowNull) {
 		this.allowNull = allowNull;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IScalarParameterDefn#allowBlank()
 	 */
+	@Override
 	public boolean allowBlank() {
 		return !isRequired();
 	}
@@ -101,15 +109,17 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 	 * @deprecated
 	 * @param allowBlank
 	 */
+	@Deprecated
 	public void setAllowBlank(boolean allowBlank) {
 		this.allowBlank = allowBlank;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IScalarParameterDefn#getFormat()
 	 */
+	@Override
 	public String getDisplayFormat() {
 		return displayFormat;
 	}
@@ -123,10 +133,11 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api2.IScalarParameterDefn#getControlType()
 	 */
+	@Override
 	public int getControlType() {
 		return controlType;
 	}
@@ -140,9 +151,10 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IScalarParameterDefn#getAlignment()
 	 */
+	@Override
 	public int getAlignment() {
 		return alignment;
 	}
@@ -156,19 +168,21 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IParameterDefn#displayInFixedOrder()
 	 */
+	@Override
 	public boolean displayInFixedOrder() {
 		return fixedOrder;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.engine.api2.IParameterDefnBase#getParameterType()
 	 */
+	@Override
 	public int getParameterType() {
 		return parameterType;
 	}
@@ -183,21 +197,24 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 	/**
 	 * @param parameterType The parameterType to set.
 	 */
+	@Override
 	public void setParameterType(int parameterType) {
 		this.parameterType = parameterType;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#clone()
 	 */
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		Object newObj = super.clone();
 		ScalarParameterDefn para = (ScalarParameterDefn) newObj;
 		ArrayList list = para.getSelectionList();
-		if (list == null)
+		if (list == null) {
 			return para;
+		}
 		ArrayList newList = new ArrayList();
 		for (int i = 0; i < list.size(); i++) {
 			ParameterSelectionChoice select = (ParameterSelectionChoice) list.get(i);
@@ -209,9 +226,10 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IParameterDefn#allowNewValues()
 	 */
+	@Override
 	public boolean allowNewValues() {
 		return allowNewValues;
 	}
@@ -241,16 +259,19 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 			}
 
 			// sort
-			if (!fixedOrder)
+			if (!fixedOrder) {
 				Collections.sort(selectionList,
 						new SelectionChoiceComparator(sortDisplayValue, displayFormat, ULocale.forLocale(locale)));
+			}
 		}
 	}
 
+	@Override
 	public String getScalarParameterType() {
 		return this.scalarParameterType;
 	}
 
+	@Override
 	public void setScalarParameterType(String type) {
 		this.scalarParameterType = type;
 	}
@@ -259,6 +280,7 @@ public class ScalarParameterDefn extends ParameterDefn implements IScalarParamet
 		autoSuggestThreshold = value;
 	}
 
+	@Override
 	public int getAutoSuggestThreshold() {
 		return autoSuggestThreshold;
 	}

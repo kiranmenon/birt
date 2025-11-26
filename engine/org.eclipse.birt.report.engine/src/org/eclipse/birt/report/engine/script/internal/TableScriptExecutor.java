@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,8 +31,9 @@ public class TableScriptExecutor extends ScriptExecutor {
 		try {
 			ITable table = new Table(tableHandle);
 			ITableEventHandler eh = getEventHandler(tableHandle, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onPrepare(table, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e);
 		}
@@ -42,11 +46,13 @@ public class TableScriptExecutor extends ScriptExecutor {
 		}
 		try {
 			ITableInstance table = new TableInstance(content, context, RunningState.CREATE);
-			if (handleScript(table, tableDesign.getOnCreate(), context).didRun())
+			if (handleScript(table, tableDesign.getOnCreate(), context).didRun()) {
 				return;
+			}
 			ITableEventHandler eh = getEventHandler(tableDesign, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onCreate(table, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e, tableDesign.getHandle());
 		}
@@ -59,11 +65,13 @@ public class TableScriptExecutor extends ScriptExecutor {
 		}
 		try {
 			ITableInstance table = new TableInstance(content, context, RunningState.RENDER);
-			if (handleScript(table, tableDesign.getOnRender(), context).didRun())
+			if (handleScript(table, tableDesign.getOnRender(), context).didRun()) {
 				return;
+			}
 			ITableEventHandler eh = getEventHandler(tableDesign, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onRender(table, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e, tableDesign.getHandle());
 		}
@@ -76,11 +84,13 @@ public class TableScriptExecutor extends ScriptExecutor {
 		}
 		try {
 			ITableInstance table = new TableInstance(content, context, RunningState.PAGEBREAK);
-			if (handleScript(table, tableDesign.getOnPageBreak(), context).didRun())
+			if (handleScript(table, tableDesign.getOnPageBreak(), context).didRun()) {
 				return;
+			}
 			ITableEventHandler eh = getEventHandler(tableDesign, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onPageBreak(table, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e, tableDesign.getHandle());
 		}

@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004, 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -32,6 +35,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
@@ -56,7 +60,23 @@ public class ChartExamples implements SelectionListener {
 
 	static final int Open_tool = 1;
 
-	private Map<TreeItem, String> hmItemToKey = new HashMap<TreeItem, String>();
+	private Map<TreeItem, String> hmItemToKey = new HashMap<>();
+
+	public static void main(String[] args) {
+		Display display = new Display();
+		Shell shell = new Shell(display);
+		shell.setLayout(new GridLayout(1, false));
+
+		new ChartExamples(shell);
+
+		shell.pack();
+		shell.open();
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch())
+				display.sleep();
+		}
+		display.dispose();
+	}
 
 	public static final Tools[] tools = { new Tools(Save_tool, "Save", "xml", SWT.RADIO), //$NON-NLS-1$ //$NON-NLS-2$
 			new Tools(Open_tool, "Open", "java", SWT.RADIO) //$NON-NLS-1$ //$NON-NLS-2$
@@ -128,15 +148,16 @@ public class ChartExamples implements SelectionListener {
 		for (int i = 0; i < tools.length; ++i) {
 			Tools tool = tools[i];
 			final Image image = tool.image;
-			if (image != null)
+			if (image != null) {
 				image.dispose();
+			}
 			tool.image = null;
 		}
 	}
 
 	/**
 	 * Create the selection tree.
-	 * 
+	 *
 	 * @param parent sGroup
 	 */
 	private void createTree(Composite parent) {
@@ -148,7 +169,7 @@ public class ChartExamples implements SelectionListener {
 
 	/**
 	 * Fill in the tree items.
-	 * 
+	 *
 	 * @param tree The selection tree.
 	 */
 	private void fillTree(Tree tree) {
@@ -178,21 +199,23 @@ public class ChartExamples implements SelectionListener {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.
 	 * swt.events.SelectionEvent)
 	 */
+	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
 		// TODO Auto-generated method stub
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.
 	 * events.SelectionEvent)
 	 */
+	@Override
 	public void widgetSelected(SelectionEvent e) {
 
 		if (e.getSource() instanceof Tree) {

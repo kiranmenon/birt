@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,6 +16,7 @@ package org.eclipse.birt.report.engine.parser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
@@ -24,6 +28,11 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
@@ -40,7 +49,7 @@ import org.w3c.tidy.Tidy;
  * <code>Element</code> child node whose tag name is body. All other nodes that
  * need to be processed to output are the descendant nodes of "body" node.
  * <p>
- * 
+ *
  */
 public class HTMLTextParser {
 
@@ -50,15 +59,19 @@ public class HTMLTextParser {
 	protected static Logger logger = Logger.getLogger(HTMLTextParser.class.getName());
 
 	/** Supported tags in HTML */
-	protected static HashSet supportedTags = new HashSet();
+	protected static HashSet<String> supportedTags = new HashSet<String>();
+
 	/**
 	 * Tidy instance
 	 */
 	protected Tidy tidy = new Tidy();
+
 	/**
 	 * Initializes and sets configuration
 	 */
 	protected static Properties props;
+
+	private static final boolean DEBUG_LOG_DOCUMENT = false;
 
 	static {
 		supportedTags.add("a"); //$NON-NLS-1$
@@ -109,7 +122,7 @@ public class HTMLTextParser {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 */
 	public HTMLTextParser() {
 		tidy.setConfigurationFromProps(props);
@@ -118,7 +131,7 @@ public class HTMLTextParser {
 
 	/**
 	 * Parse the HTML input stream.
-	 * 
+	 *
 	 * @param in the HTML input stream
 	 * @return created DOM tree, null if any error exists.
 	 */
@@ -162,7 +175,7 @@ public class HTMLTextParser {
 					if (nodeType == Node.ELEMENT_NODE) {
 						if ("script".equalsIgnoreCase(child.getNodeName())) {
 							// copy the element node
-							Element ele = null;
+							Element ele;
 							ele = desBody.getOwnerDocument().createElement(child.getNodeName());
 
 							// copy the attributes
@@ -185,13 +198,14 @@ public class HTMLTextParser {
 				copyNode(body, desBody);
 			}
 		}
-		return desDoc;
+		logDocumentTree(desDoc, true);
 
+		return desDoc;
 	}
 
 	/**
 	 * Retrieves the child node by name
-	 * 
+	 *
 	 * @param parent    the parent node
 	 * @param childName the name of the child node to retrieve
 	 * @return null if such node does not exist, otherwise return the specified
@@ -209,7 +223,7 @@ public class HTMLTextParser {
 	/**
 	 * Remove the unsupported tags and convert the JTidy DOM tree to W3C DOM tree
 	 * recursively.
-	 * 
+	 *
 	 * @param srcNode the Node in the JTidy DOM tree
 	 * @param desNode the Node in the W3c DOM tree
 	 * @see org.w3c.dom.Node
@@ -246,7 +260,7 @@ public class HTMLTextParser {
 				}
 				if (bSupported) {
 					// copy the element node
-					Element ele = null;
+					Element ele;
 					ele = desNode.getOwnerDocument().createElement(child.getNodeName());
 
 					// copy the attributes
@@ -267,7 +281,7 @@ public class HTMLTextParser {
 
 	static class DocumentBuilderPool {
 		private static final int MAX_POOL_SIZE = 16;
-		private static BlockingQueue<DocumentBuilder> builders = new LinkedBlockingQueue<DocumentBuilder>(
+		private static BlockingQueue<DocumentBuilder> builders = new LinkedBlockingQueue<>(
 				MAX_POOL_SIZE);
 
 		public static DocumentBuilder getDocumentBuilder() {
@@ -294,4 +308,32 @@ public class HTMLTextParser {
 		}
 	}
 
+	/**
+	 * Transform the document tree to String with output option with System.out
+	 *
+	 * @desDoc document
+	 * @useSystemOut print the document string with system out (default: logger)
+	 */
+	private String logDocumentTree(Document desDoc, boolean useSystemOut) {
+		if (!DEBUG_LOG_DOCUMENT) {
+			return null;
+		}
+
+		String documentTree = new String();
+		try {
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			StringWriter stringWriter = new StringWriter();
+			transformer.transform(new DOMSource(desDoc), new StreamResult(stringWriter));
+			documentTree = stringWriter.toString();
+		} catch (TransformerException te) {
+			logger.log(Level.SEVERE, te.getMessage(), te);
+		}
+		if (useSystemOut) {
+			System.out.println(documentTree);
+		} else {
+			logger.log(Level.INFO, documentTree);
+		}
+		return documentTree;
+	}
 }

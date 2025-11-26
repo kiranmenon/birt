@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -25,7 +28,7 @@ public class PDFRenderOption extends RenderOption implements IPDFRenderOption {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param options
 	 */
 	public PDFRenderOption(IRenderOption options) {
@@ -34,17 +37,19 @@ public class PDFRenderOption extends RenderOption implements IPDFRenderOption {
 
 	/**
 	 * Set flag indicates if the font needs to be embedded.
-	 * 
+	 *
 	 * @param isEmbededFont
 	 */
+	@Override
 	public void setEmbededFont(boolean isEmbededFont) {
 		setOption(IS_EMBEDDED_FONT, Boolean.valueOf(isEmbededFont));
 	}
 
 	/**
-	 * 
+	 *
 	 * @return true if font is embedded
 	 */
+	@Override
 	public boolean isEmbededFont() {
 		return getBooleanOption(IS_EMBEDDED_FONT, false);
 	}
@@ -53,6 +58,8 @@ public class PDFRenderOption extends RenderOption implements IPDFRenderOption {
 	 * @deprecated
 	 * @return the user-defined font directory
 	 */
+	@Deprecated
+	@Override
 	public String getFontDirectory() {
 		return getStringOption(FONT_DIRECTORY);
 	}
@@ -61,6 +68,8 @@ public class PDFRenderOption extends RenderOption implements IPDFRenderOption {
 	 * @deprecated
 	 * @param fontDirectory the user-defined font directory
 	 */
+	@Deprecated
+	@Override
 	public void setFontDirectory(String fontDirectory) {
 		setOption(FONT_DIRECTORY, fontDirectory);
 	}

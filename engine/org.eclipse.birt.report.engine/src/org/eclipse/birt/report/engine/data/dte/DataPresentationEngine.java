@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2010 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -64,6 +67,7 @@ public class DataPresentationEngine extends AbstractDataEngine {
 		this.needAccessFactTable = needAccessFactTable;
 	}
 
+	@Override
 	protected void doPrepareQuery(Report report, Map appContext) {
 		// prepare report queries
 		queryIDMap.putAll(report.getQueryIDs());
@@ -72,7 +76,7 @@ public class DataPresentationEngine extends AbstractDataEngine {
 	private void loadDteMetaInfo(IDocArchiveReader reader) throws IOException {
 		ArrayList result = DteMetaInfoIOUtil.loadDteMetaInfo(reader);
 		if (result != null) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			for (int i = 0; i < result.size(); i++) {
 				String[] rsetRelation = (String[]) result.get(i);
 				String pRsetId = rsetRelation[0];
@@ -94,6 +98,7 @@ public class DataPresentationEngine extends AbstractDataEngine {
 
 	private StringBuffer keyBuffer = new StringBuffer();
 
+	@Override
 	public String getResultIDByRowID(String pRsetId, String rowId, String queryId) {
 		keyBuffer.setLength(0);
 		keyBuffer.append(pRsetId);
@@ -106,6 +111,7 @@ public class DataPresentationEngine extends AbstractDataEngine {
 		return rsetId;
 	}
 
+	@Override
 	protected IBaseResultSet doExecuteQuery(IBaseResultSet parentResult, IQueryDefinition query, Object queryOwner,
 			boolean useCache) throws BirtException {
 		String queryID = (String) queryIDMap.get(query);
@@ -140,6 +146,7 @@ public class DataPresentationEngine extends AbstractDataEngine {
 		return resultSet;
 	}
 
+	@Override
 	protected IBaseResultSet doExecuteCube(IBaseResultSet parentResult, ICubeQueryDefinition query, Object queryOwner,
 			boolean useCache) throws BirtException {
 		String queryID = (String) queryIDMap.get(query);

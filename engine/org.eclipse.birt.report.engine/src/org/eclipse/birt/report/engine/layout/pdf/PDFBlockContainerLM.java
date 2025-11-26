@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -27,13 +30,14 @@ public class PDFBlockContainerLM extends PDFBlockStackingLM implements IBlockSta
 		super(context, parent, content, executor);
 	}
 
+	@Override
 	protected void createRoot() {
 		root = (ContainerArea) createBlockContainer(content, isFirst, true);
 	}
 
 	protected boolean traverseSingleChild() throws BirtException {
 		if (child != null) {
-			boolean childBreak = false;
+			boolean childBreak;
 			childBreak = child.layout();
 			if (childBreak) {
 				if (child.isFinished()) {
@@ -49,7 +53,7 @@ public class PDFBlockContainerLM extends PDFBlockStackingLM implements IBlockSta
 
 	/**
 	 * create block container area by content
-	 * 
+	 *
 	 * @param content the content object
 	 * @param isFirst if this area is the first area of the content
 	 * @param isLast  if this area is the last area of the content

@@ -1,12 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2013 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2013, 2024 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
- *  Actuate Corporation  - initial API and implementation
+ *  Actuate Corporation	- initial API and implementation
+ *  Thomas Gutmann		- add option to handle header wrapper
  *******************************************************************************/
 
 package org.eclipse.birt.report.engine.emitter.docx.writer;
@@ -19,7 +23,6 @@ import org.eclipse.birt.report.engine.content.IImageContent;
 import org.eclipse.birt.report.engine.emitter.EmitterUtil;
 import org.eclipse.birt.report.engine.emitter.wpml.WordUtil;
 import org.eclipse.birt.report.engine.layout.emitter.Image;
-
 import org.eclipse.birt.report.engine.ooxml.IPart;
 import org.eclipse.birt.report.engine.ooxml.ImageManager.ImagePart;
 
@@ -30,32 +33,50 @@ public class Header extends BasicComponent {
 	Document document;
 	int headerHeight;
 	int headerWidth;
+	boolean wrapHeader;
 
+	/**
+	 * Constructor 1
+	 */
 	Header(IPart part, Document document, int headerHeight, int headerWidth) throws IOException {
+		this(part, document, headerHeight, headerWidth, true);
+	}
+
+	/**
+	 * Constructor 2
+	 */
+	Header(IPart part, Document document, int headerHeight, int headerWidth, boolean wrapHeader) throws IOException {
 		super(part);
 		this.document = document;
 		this.headerHeight = headerHeight;
 		this.headerWidth = headerWidth;
+		this.wrapHeader = wrapHeader;
 	}
 
+	@Override
 	void start() {
 		writer.startWriter();
 		writer.openTag("w:hdr");
 		writeXmlns();
-		startHeaderFooterContainer(headerHeight, headerWidth, true);
+		if (this.wrapHeader)
+			startHeaderFooterContainer(headerHeight, headerWidth, true);
 	}
 
+	@Override
 	void end() {
-		endHeaderFooterContainer();
+		if (this.wrapHeader)
+			endHeaderFooterContainer();
 		writer.closeTag("w:hdr");
 		writer.endWriter();
 		writer.close();
 	}
 
+	@Override
 	protected int getImageID() {
 		return document.getImageID();
 	}
 
+	@Override
 	protected int getMhtTextId() {
 		return document.getMhtTextId();
 	}

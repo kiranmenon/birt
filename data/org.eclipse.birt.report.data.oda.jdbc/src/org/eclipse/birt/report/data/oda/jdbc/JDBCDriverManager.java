@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2013 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2013, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation - initial API and implementation
@@ -14,6 +17,7 @@ package org.eclipse.birt.report.data.oda.jdbc;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.CodeSource;
@@ -51,35 +55,48 @@ import org.eclipse.datatools.connectivity.services.PluginResourceLocator;
 import com.ibm.icu.util.ULocale;
 
 /**
- * Utility classs that manages the JDBC drivers available to this bridge driver.
+ * Utility class that manages the JDBC drivers available to this bridge driver.
  * Deals with dynamic discovery of JDBC drivers and some annoying class loader
  * issues. This class is not to be instantiated by the user. Use the
  * getInstance() method to obtain an instance
  */
 public class JDBCDriverManager {
-	private static final int MAX_WORD_LENGTH = 20;
-	private static final int MAX_MSG_LENGTH = 300;
-
+	/** property: JDBC login user name */
 	public static final String JDBC_USER_PROP_NAME = "user"; //$NON-NLS-1$
+
+	/** property: JDBC login password */
 	public static final String JDBC_PASSWORD_PROP_NAME = "password"; //$NON-NLS-1$
 
+	private static final int MAX_WORD_LENGTH = 20;
+
+	private static final int MAX_MSG_LENGTH = 300;
+
 	private static final String INVALID_AUTH_SQL_STATE = "28000"; // X/Open SQL State //$NON-NLS-1$
+
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
+	private static final String DRIVER_PROPERTY_VALIDATION = "birt.driver.property.validation.enabled"; //$NON-NLS-1$
+
+	private static final String DRIVER_PROPERTY_VALIDATION_EXCLUDED = "birt.driver.property.validation.excluded.drivers"; //$NON-NLS-1$
+
+	private boolean isDriverPropertyValidationEnabled = true;
+
+	private String excludedDriverForValidation;
+
 	// Driver classes that we have registered with JDBC DriverManager
-	private HashMap<String, Driver> registeredDrivers = new HashMap<String, Driver>();
+	private HashMap<String, Driver> registeredDrivers = new HashMap<>();
 
 	//
-	private Hashtable<String, Driver> testedDrivers = new Hashtable<String, Driver>();
+	private Hashtable<String, Driver> testedDrivers = new Hashtable<>();
 
 	// A HashMap of JDBC driver instances
-	private Hashtable<String, Driver> cachedJdbcDrivers = new Hashtable<String, Driver>();
+	private Hashtable<String, Driver> cachedJdbcDrivers = new Hashtable<>();
 
 	// A HashMap of driverinfo extensions which provides IConnectionFactory
 	// implementation
 	// Map is from driverClass (String) to either IConfigurationElement or
 	// IConnectionFactory
-	private HashMap driverExtensions = null;
+	private HashMap<String, Object> driverExtensions = null;
 	private boolean loadedDriver = false;
 
 	private DriverClassLoader extraDriverLoader = null;
@@ -92,17 +109,33 @@ public class JDBCDriverManager {
 	private static Logger logger = Logger.getLogger(JDBCDriverManager.class.getName());
 
 	private JDBCDriverManager() {
+		evaluateDriverSystemEnvironment();
+
 		logger.logp(java.util.logging.Level.FINE, JDBCDriverManager.class.getName(), "JDBCDriverManager", //$NON-NLS-1$
 				"JDBCDriverManager starts up"); //$NON-NLS-1$
 	}
 
+	/**
+	 * Get an instance of the JDBC driver manager
+	 *
+	 * @return an instance of the JDBC driver manager
+	 */
 	public synchronized static JDBCDriverManager getInstance() {
-		if (instance == null)
+		if (instance == null) {
 			instance = new JDBCDriverManager();
+		}
 		return instance;
 	}
 
-	public Driver getDriverInstance(Class driver, boolean refreshDriver) throws OdaException {
+	/**
+	 * Get an instance of the JDBC driver
+	 *
+	 * @param driver        driver class
+	 * @param refreshDriver refresh driver
+	 * @return an instance of the JDBC driver manager
+	 * @throws OdaException
+	 */
+	public Driver getDriverInstance(Class<?> driver, boolean refreshDriver) throws OdaException {
 		String driverName = driver.getName();
 		Driver drv = getDriverInstance(driverName);
 
@@ -116,9 +149,8 @@ public class JDBCDriverManager {
 			cachedJdbcDrivers.put(driverName, instance);
 
 			return instance;
-		} else {
-			return drv;
 		}
+		return drv;
 	}
 
 	private Driver getDriverInstance(String driverName) {
@@ -144,12 +176,14 @@ public class JDBCDriverManager {
 
 	/**
 	 * Gets a JDBC connection
-	 * 
+	 *
 	 * @param driverClass          Class name of JDBC driver
 	 * @param url                  Connection URL
 	 * @param connectionProperties Properties for establising connection
+	 * @param driverClassPath      driver class path
 	 * @return new JDBC Connection
 	 * @throws SQLException
+	 * @throws OdaException
 	 */
 	public Connection getConnection(String driverClass, String url, Properties connectionProperties,
 			Collection<String> driverClassPath) throws SQLException, OdaException {
@@ -164,27 +198,43 @@ public class JDBCDriverManager {
 
 	/**
 	 * Gets a JDBC connection
-	 * 
-	 * @param driverClass Class name of JDBC driver
-	 * @param url         Connection URL
-	 * @param user        connection user name
-	 * @param password    connection password
+	 *
+	 * @param driverClass     Class name of JDBC driver
+	 * @param url             Connection URL
+	 * @param user            connection user name
+	 * @param password        connection password
+	 * @param driverClassPath driver class path
 	 * @return new JDBC connection
 	 * @throws SQLException
+	 * @throws OdaException
 	 */
 	public Connection getConnection(String driverClass, String url, String user, String password,
 			Collection<String> driverClassPath) throws SQLException, OdaException {
 		return getConnection(driverClass, url, user, password, driverClassPath, null);
 	}
 
+	/**
+	 * Gets a JDBC connection
+	 *
+	 * @param driverClass     Class name of JDBC driver
+	 * @param url             Connection URL
+	 * @param user            connection user name
+	 * @param password        connection password
+	 * @param driverClassPath driver class path
+	 * @param props           connection properties
+	 * @return new JDBC connection
+	 * @throws SQLException
+	 * @throws OdaException
+	 */
 	public Connection getConnection(String driverClass, String url, String user, String password,
 			Collection<String> driverClassPath, Properties props) throws SQLException, OdaException {
 		validateConnectionProperties(driverClass, url, null);
-		if (logger.isLoggable(Level.FINEST))
+		if (logger.isLoggable(Level.FINEST)) {
 			logger.fine("Request JDBC Connection: driverClass=" //$NON-NLS-1$
 					+ (driverClass == null ? EMPTY_STRING : driverClass) + "; URL=" //$NON-NLS-1$
 					+ LogUtil.encryptURL(url) + "; user=" //$NON-NLS-1$
 					+ ((user == null) ? EMPTY_STRING : user));
+		}
 
 		// Construct a Properties list with user/password properties
 		props = addUserAuthenticationProperties(props, user, password);
@@ -195,12 +245,13 @@ public class JDBCDriverManager {
 	/**
 	 * Gets a JDBC connection from the specified JNDI data source URL, or if not
 	 * available, directly from the specified driver and JDBC driver url.
-	 * 
+	 *
 	 * @param driverClass          the class name of JDBC driver
 	 * @param url                  JDBC connection URL
 	 * @param jndiNameUrl          the JNDI name to look up a Data Source name
 	 *                             service; may be null or empty
 	 * @param connectionProperties properties for establising connection
+	 * @param driverClassPath      driver class path
 	 * @return a JDBC connection
 	 * @throws SQLException
 	 * @throws OdaException
@@ -208,10 +259,11 @@ public class JDBCDriverManager {
 	public Connection getConnection(String driverClass, String url, String jndiNameUrl, Properties connectionProperties,
 			Collection<String> driverClassPath) throws SQLException, OdaException {
 		validateConnectionProperties(driverClass, url, jndiNameUrl);
-		if (logger.isLoggable(Level.FINEST))
+		if (logger.isLoggable(Level.FINEST)) {
 			logger.fine("Request JDBC Connection: driverClass=" + driverClass + //$NON-NLS-1$
 					"; URL=" + LogUtil.encryptURL(url) + //$NON-NLS-1$
 					"; JNDI name URL=" + jndiNameUrl); //$NON-NLS-1$
+		}
 
 		return doConnect(driverClass, url, jndiNameUrl, connectionProperties, driverClassPath);
 	}
@@ -226,24 +278,27 @@ public class JDBCDriverManager {
 		// URL is defined, try use name service to get connection
 		Connection jndiDSConnection = getJndiDSConnection(driverClass, jndiNameUrl, connectionProperties);
 
-		if (jndiDSConnection != null) // successful
+		if (jndiDSConnection != null) { // successful
 			return jndiDSConnection; // done
+		}
 
 		IConnectionFactory factory = getDriverConnectionFactory(driverClass);
 		Exception connFactoryEx = null;
 		if (factory != null) {
 			// Use connection factory for connection
-			if (logger.isLoggable(Level.FINER))
+			if (logger.isLoggable(Level.FINER)) {
 				logger.finer("Calling IConnectionFactory.getConnection. driverClass=" + driverClass + //$NON-NLS-1$
 						", URL=" + LogUtil.encryptURL(url)); //$NON-NLS-1$
+			}
 			try {
 				Connection cn = factory.getConnection(driverClass, url, connectionProperties);
 				return cn;
 			} catch (Exception ex) {
 				// if it was an invalid authorization specification, i.e. not a driver issue,
 				// go ahead and throw the exception
-				if (ex instanceof SQLException && INVALID_AUTH_SQL_STATE.equals(((SQLException) ex).getSQLState()))
+				if (ex instanceof SQLException && INVALID_AUTH_SQL_STATE.equals(((SQLException) ex).getSQLState())) {
 					throw (SQLException) ex;
+				}
 				connFactoryEx = ex; // track the caught exception
 			}
 		}
@@ -258,39 +313,48 @@ public class JDBCDriverManager {
 			// no appropriate JDBC driver available,
 			// throw the original exception thrown by IConnectionFactory, if exists
 			if (connFactoryEx != null) {
-				if (connFactoryEx instanceof SQLException)
+				if (connFactoryEx instanceof SQLException) {
 					throw (SQLException) connFactoryEx;
+				}
 				throw new OdaException(connFactoryEx);
 			}
 
 			throw loadDriverEx;
 		}
 
-		if (logger.isLoggable(Level.FINER))
+		if (logger.isLoggable(Level.FINER)) {
 			logger.finer("Calling DriverManager to connect; URL=" + LogUtil.encryptURL(url)); //$NON-NLS-1$
+		}
 		try {
 			Driver driver = DriverManager.getDriver(url);
-			if (driver != null)
+			if (driver != null) {
+				removeUnsupportedConnectionProperties(driver, driverClass, url, connectionProperties);
 				return driver.connect(url, connectionProperties);
+			}
 		} catch (SQLException e1) {
 			// first try to identify if it was due to invalid authorization spec.
-			if (INVALID_AUTH_SQL_STATE.equals(e1.getSQLState()))
+			if (INVALID_AUTH_SQL_STATE.equals(e1.getSQLState())) {
 				throw e1;
+			}
 		}
 
 		try {
+			removeUnsupportedConnectionProperties(DriverManager.getDriver(url), driverClass, url, connectionProperties);
 			return DriverManager.getConnection(url, connectionProperties);
 		} catch (SQLException e) {
-			try {
-				// Important! Don't Change me. see 46956.
-				DriverClassLoader dl = new DriverClassLoader(driverClassPath,
-						Thread.currentThread().getContextClassLoader());
-
-				Class dc = dl.loadClass(driverClass);
+			try (
+					// Important! Don't Change me. see 46956.
+					DriverClassLoader dl = new DriverClassLoader(driverClassPath,
+							Thread.currentThread().getContextClassLoader())) {
+				Class<?> dc = dl.loadClass(driverClass);
 				if (dc != null) {
-					Connection conn = ((Driver) dc.newInstance()).connect(url, connectionProperties);
-					if (conn != null)
+					Constructor<?> constructor = dc.getConstructor();
+					Driver driver = (Driver) constructor.newInstance();
+					removeUnsupportedConnectionProperties(driver, driverClass, url, connectionProperties);
+					Connection conn = driver.connect(url, connectionProperties);
+					if (conn != null) {
 						return conn;
+					}
 				}
 				throw new JDBCException(ResourceConstants.CONN_GET_ERROR, null, truncate(e.getLocalizedMessage()));
 			} catch (Exception e1) {
@@ -300,13 +364,62 @@ public class JDBCDriverManager {
 	}
 
 	/**
-	 * 
+	 * Remove unsupported properties from the connection properties based on the
+	 * driver property information set
+	 */
+	private void removeUnsupportedConnectionProperties(Driver driver, String driverClass, String url,
+			Properties connectionProperties) {
+
+		if (isDriverPropertyValidationEnabled && ((excludedDriverForValidation == null
+				|| !excludedDriverForValidation.toLowerCase().contains(driverClass.toLowerCase())))) {
+			try {
+				DriverPropertyInfo[] supportedProperties = driver.getPropertyInfo(url, connectionProperties);
+				if (supportedProperties != null && connectionProperties != null) {
+					connectionProperties.keySet().removeIf(property -> {
+						String key = property.toString();
+						// standard properties for login w/o validation
+						if ("password".equalsIgnoreCase(key) || "user".equalsIgnoreCase(key)) {
+							return false;
+						}
+						for (DriverPropertyInfo supportedProperty : supportedProperties) {
+							if (supportedProperty.name.equalsIgnoreCase(key)) {
+								return false;
+							}
+						}
+						return true;
+					});
+				}
+			} catch (SQLException e) {
+				// do nothing, standard handling
+			}
+		}
+	}
+
+	/**
+	 * Evaluation of the system parameter to handle driver options
+	 */
+	private void evaluateDriverSystemEnvironment() {
+		String valueDriverPropertyValidation = System.getProperty(DRIVER_PROPERTY_VALIDATION);
+		String valueDriverExclusions = System.getProperty(DRIVER_PROPERTY_VALIDATION_EXCLUDED);
+
+		if (valueDriverPropertyValidation != null && valueDriverPropertyValidation.trim().length() > 0)
+			isDriverPropertyValidationEnabled = Boolean.parseBoolean(valueDriverPropertyValidation);
+
+		if (valueDriverExclusions != null
+				&& valueDriverExclusions.trim().length() > 0)
+			excludedDriverForValidation = valueDriverExclusions.trim();
+	}
+
+	/**
+	 * Truncate the message string according max length conditions
+	 *
 	 * @param message
-	 * @return
+	 * @return the truncated message
 	 */
 	private String truncate(String message) {
-		if (message == null)
+		if (message == null) {
 			return null;
+		}
 		if (message.length() > MAX_MSG_LENGTH) {
 			int maxLength = MAX_MSG_LENGTH + MAX_WORD_LENGTH;
 			if (maxLength > message.length()) {
@@ -348,11 +461,13 @@ public class JDBCDriverManager {
 	 * specified, or not able to obtain a connection from the JNDI name service.
 	 */
 	private Connection getJndiDSConnection(String driverClass, String jndiNameUrl, Properties connectionProperties) {
-		if (jndiNameUrl == null || jndiNameUrl.length() == 0)
+		if (jndiNameUrl == null || jndiNameUrl.length() == 0) {
 			return null; // no JNDI Data Source URL defined
+		}
 
-		if (logger.isLoggable(Level.FINER))
+		if (logger.isLoggable(Level.FINER)) {
 			logger.finer("Calling getJndiDSConnection: JNDI name URL=" + jndiNameUrl); //$NON-NLS-1$
+		}
 
 		IConnectionFactory factory = new JndiDataSource();
 		Connection jndiDSConnection = null;
@@ -360,8 +475,9 @@ public class JDBCDriverManager {
 			jndiDSConnection = factory.getConnection(driverClass, jndiNameUrl, connectionProperties);
 		} catch (SQLException e) {
 			// log and ignore exception
-			if (logger.isLoggable(Level.FINE))
+			if (logger.isLoggable(Level.FINE)) {
 				logger.info("getJndiDSConnection: Unable to get JNDI data source connection; " + e.toString()); //$NON-NLS-1$
+			}
 		}
 
 		return jndiDSConnection;
@@ -372,31 +488,36 @@ public class JDBCDriverManager {
 	 * driver properties. Creates a new collection if none is specified.
 	 */
 	static Properties addUserAuthenticationProperties(Properties connProps, String user, String password) {
-		if (connProps == null)
+		if (connProps == null) {
 			connProps = new Properties();
-		if (user != null)
+		}
+		if (user != null) {
 			connProps.setProperty(JDBC_USER_PROP_NAME, user);
-		if (password != null)
+		}
+		if (password != null) {
 			connProps.setProperty(JDBC_PASSWORD_PROP_NAME, password);
+		}
 		return connProps;
 	}
 
 	/**
 	 * Validate the driver class name, URL & Jndi properties.
-	 * 
+	 *
 	 * @param url
 	 * @param jndiNameUrl
 	 */
 	private void validateConnectionProperties(String driverClass, String url, String jndiNameUrl) {
-		if (isBlank(jndiNameUrl) && isBlank(driverClass))
+		if (isBlank(jndiNameUrl) && isBlank(driverClass)) {
 			throw new NullPointerException(this.resourceHandle.getMessage(ResourceConstants.EMPTYDRIVERCLASS));
+		}
 
-		if (isBlank(url) && isBlank(jndiNameUrl))
+		if (isBlank(url) && isBlank(jndiNameUrl)) {
 			throw new NullPointerException(this.resourceHandle.getMessage(ResourceConstants.MISSEDURLANDJNDI));
+		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -404,19 +525,29 @@ public class JDBCDriverManager {
 		return url == null || url.trim().toString().length() == 0;
 	}
 
+	/**
+	 * Get the driver based on extension ID
+	 *
+	 * @param extensionId extension id
+	 * @return the driver based on extension ID
+	 * @throws OdaException
+	 */
 	public IDriver getDriver(String extensionId) throws OdaException {
 		IDriver driver = null;
 		try {
 			ExtensionManifest ex = ManifestExplorer.getInstance().getExtensionManifest(extensionId);
-			if (ex != null && ex.getDataSourceElement().getAttribute("driverClass") != null)
+			if (ex != null && ex.getDataSourceElement().getAttribute("driverClass") != null) {
 				driver = (IDriver) ex.getDataSourceElement().createExecutableExtension("driverClass");
+			}
 		} catch (Exception e) {
 			// Ignore exception as we can still continue with the OdaJdbcDriver.
-			if (logger.isLoggable(Level.FINER))
+			if (logger.isLoggable(Level.FINER)) {
 				logger.finer("Failed to load driver from extension:" + extensionId);
+			}
 		}
-		if (driver == null)
+		if (driver == null) {
 			driver = new OdaJdbcDriver();
+		}
 		return driver;
 	}
 
@@ -424,6 +555,10 @@ public class JDBCDriverManager {
 	 * Searches extension registry for connection factory defined for driverClass.
 	 * Returns an instance of the factory if there is a connection factory for the
 	 * driver class. Returns null otherwise.
+	 *
+	 * @param driverClass driver class
+	 * @return the driver connection factory
+	 * @throws OdaException
 	 */
 	public IConnectionFactory getDriverConnectionFactory(String driverClass) throws OdaException {
 		loadDriverExtensions();
@@ -431,8 +566,9 @@ public class JDBCDriverManager {
 		IConnectionFactory factory = null;
 		Object driverInfo = null;
 		synchronized (driverExtensions) {
-			if (driverClass != null)
+			if (driverClass != null) {
 				driverInfo = driverExtensions.get(driverClass);
+			}
 
 			if (driverInfo != null) {
 				// Driver has own connection factory; use it
@@ -469,15 +605,17 @@ public class JDBCDriverManager {
 	}
 
 	private void loadDriverExtensions() {
-		if (loadedDriver)
+		if (loadedDriver) {
 			// Already loaded
 			return;
+		}
 
 		synchronized (this) {
-			if (loadedDriver)
+			if (loadedDriver) {
 				return;
+			}
 			// First time: load all driverinfo extensions
-			driverExtensions = new HashMap();
+			driverExtensions = new HashMap<String, Object>();
 			IExtensionRegistry extReg = Platform.getExtensionRegistry();
 
 			/*
@@ -488,17 +626,20 @@ public class JDBCDriverManager {
 			 */
 			IExtensionPoint extPoint = extReg.getExtensionPoint(OdaJdbcDriver.Constants.DRIVER_INFO_EXTENSION);
 
-			if (extPoint == null)
+			if (extPoint == null) {
 				return;
+			}
 
 			IExtension[] exts = extPoint.getExtensions();
-			if (exts == null)
+			if (exts == null) {
 				return;
+			}
 
 			for (int e = 0; e < exts.length; e++) {
 				IConfigurationElement[] configElems = exts[e].getConfigurationElements();
-				if (configElems == null)
+				if (configElems == null) {
 					continue;
+				}
 
 				for (int i = 0; i < configElems.length; i++) {
 					if (configElems[i].getName().equals(OdaJdbcDriver.Constants.DRIVER_INFO_ELEM_JDBCDRIVER)) {
@@ -525,11 +666,11 @@ public class JDBCDriverManager {
 	/**
 	 * The method which test whether the give connection properties can be used to
 	 * create a connection
-	 * 
+	 *
 	 * @param driverClassName  the name of driver class
 	 * @param connectionString the connection URL
-	 * @param userId           the user id
-	 * @param password         the pass word
+	 * @param userId           login user
+	 * @param password         login password
 	 * @return boolean whether could the connection being created
 	 * @throws OdaException
 	 */
@@ -538,6 +679,17 @@ public class JDBCDriverManager {
 		return testConnection(driverClassName, connectionString, null, userId, password);
 	}
 
+	/**
+	 * Method to test the driver connection
+	 *
+	 * @param driverClassName  driver class name
+	 * @param connectionString connection string
+	 * @param userId           login user
+	 * @param password         login password
+	 * @param props            connection properties
+	 * @return the test result of the given connection
+	 * @throws OdaException
+	 */
 	public boolean testConnection(String driverClassName, String connectionString, String userId, String password,
 			Properties props) throws OdaException {
 		return testConnection(driverClassName, connectionString, null, userId, password, props);
@@ -546,7 +698,7 @@ public class JDBCDriverManager {
 	/**
 	 * Tests whether the given connection properties can be used to obtain a
 	 * connection.
-	 * 
+	 *
 	 * @param driverClassName  the name of driver class
 	 * @param connectionString the JDBC driver connection URL
 	 * @param jndiNameUrl      the JNDI name to look up a Data Source name service;
@@ -562,6 +714,21 @@ public class JDBCDriverManager {
 		return testConnection(driverClassName, connectionString, jndiNameUrl, userId, password, new Properties());
 	}
 
+	/**
+	 * Tests whether the given connection properties can be used to obtain a
+	 * connection.
+	 *
+	 * @param driverClassName  driver class name
+	 * @param connectionString JDBC driver connection string
+	 * @param jndiNameUrl      JNDI name to look up a Data Source name service; may
+	 *                         be null or empty
+	 * @param userId           login user
+	 * @param password         login password
+	 * @param props            connection properties
+	 * @return true if the the specified properties are valid to obtain a
+	 *         connection; false otherwise
+	 * @throws OdaException
+	 */
 	public boolean testConnection(String driverClassName, String connectionString, String jndiNameUrl, String userId,
 			String password, Properties props) throws OdaException {
 		boolean canConnect = false;
@@ -605,7 +772,7 @@ public class JDBCDriverManager {
 			// drivers in DriverManager
 
 			if (testedDrivers.get(driverClassName) == null) {
-				Driver driver = (Driver) getRegisteredDriver(driverClassName);
+				Driver driver = getRegisteredDriver(driverClassName);
 
 				// The driver might be a wrapped driver. The toString()
 				// method
@@ -628,13 +795,12 @@ public class JDBCDriverManager {
 				// that url has been registered.) but a connection
 				// cannot be built using driver whose name is given, throw a
 				// exception.
-				if (!canConnect)
+				if (!canConnect) {
 					throw new JDBCException(ResourceConstants.CANNOT_PARSE_URL, null);
-			} else {
-				if (((Driver) this.testedDrivers.get(driverClassName)).acceptsURL(connectionString)) {
-					tryCreateConnection(driverClassName, connectionString, userId, password, props);
-					canConnect = true;
 				}
+			} else if (this.testedDrivers.get(driverClassName).acceptsURL(connectionString)) {
+				tryCreateConnection(driverClassName, connectionString, userId, password, props);
+				canConnect = true;
 			}
 		} catch (SQLException e) {
 			throw new JDBCException(ResourceConstants.TEST_CONNECTION_FAIL, e);
@@ -644,15 +810,17 @@ public class JDBCDriverManager {
 			throw ex;
 		}
 		// If the given url cannot be parsed.
-		if (canConnect == false)
+		if (!canConnect) {
 			throw new JDBCException(ResourceConstants.NO_SUITABLE_DRIVER, null);
+		}
 
 		return true;
 	}
 
 	private void closeConnection(Connection conn) {
-		if (conn == null)
+		if (conn == null) {
 			return; // nothing to close
+		}
 
 		try {
 			conn.close();
@@ -663,10 +831,11 @@ public class JDBCDriverManager {
 
 	private boolean isExpectedDriver(Driver driver, String className) {
 		String actual;
-		if (driver instanceof WrappedDriver)
+		if (driver instanceof WrappedDriver) {
 			actual = driver.toString();
-		else
+		} else {
 			actual = driver.getClass().getName();
+		}
 		return isExpectedDriverClass(actual, className);
 	}
 
@@ -686,7 +855,7 @@ public class JDBCDriverManager {
 
 	/**
 	 * Try to create a connection based on given connection properties.
-	 * 
+	 *
 	 * @param driverClassName
 	 * @param connectionString
 	 * @param userId
@@ -703,14 +872,14 @@ public class JDBCDriverManager {
 
 	/**
 	 * Look for the Driver from drivers directory if it not in plugin class path
-	 * 
+	 *
 	 * @param className
 	 * @return Driver instance
 	 * @throws OdaException
 	 */
 	private Driver findDriver(String className, Collection<String> driverClassPath, boolean refresh)
 			throws OdaException {
-		Class driverClass = null;
+		Class<?> driverClass = null;
 		try {
 			driverClass = Class.forName(className);
 			// Driver class in class path
@@ -752,24 +921,27 @@ public class JDBCDriverManager {
 
 	/**
 	 * Deregister the driver by the given class name from DriverManager
-	 * 
+	 *
 	 * @param className
 	 * @return true if deregister the driver successfully
 	 * @throws OdaException
 	 */
 	public boolean deregisterDriver(String className) throws OdaException {
-		if (className == null || className.length() == 0)
+		if (className == null || className.length() == 0) {
 			// no driver class; assume class already deregistered
 			return false;
+		}
 
 		Driver driver = getRegisteredDriver(className);
-		if (driver == null)
+		if (driver == null) {
 			return false;
+		}
 
 		if (driver != null) {
 			try {
-				if (logger.isLoggable(Level.FINER))
+				if (logger.isLoggable(Level.FINER)) {
 					logger.finer("Registering with DriverManager: wrapped driver for " + className); //$NON-NLS-1$
+				}
 
 				synchronized (registeredDrivers) {
 					registeredDrivers.remove(className);
@@ -785,13 +957,17 @@ public class JDBCDriverManager {
 		return true;
 	}
 
+	/**
+	 * Load and register a JDBC driver
+	 *
+	 * @param className       class name
+	 * @param driverClassPath driver class path
+	 * @throws OdaException
+	 */
 	public void loadAndRegisterDriver(String className, Collection<String> driverClassPath) throws OdaException {
-		if (className == null || className.length() == 0)
-			// no driver class; assume class already loaded
+		if (className == null || className.length() == 0 || isDriverRegistered(className)) {
 			return;
-
-		if (isDriverRegistered(className))
-			return;
+		}
 
 		if (logger.isLoggable(Level.FINEST)) {
 			logger.info("Loading JDBC driver class: " + className); //$NON-NLS-1$
@@ -828,7 +1004,7 @@ public class JDBCDriverManager {
 	 * this class's ClassLoader. DriverManager will not allow this class to create
 	 * connections using such driver. To solve the problem, we create a wrapper
 	 * Driver in our class loader, and register it with DriverManager
-	 * 
+	 *
 	 * @param className
 	 * @param driverClassPath
 	 * @param refreshClassLoader
@@ -837,8 +1013,9 @@ public class JDBCDriverManager {
 	private void registerDriver(Driver driver, String className) {
 		assert driver != null;
 		try {
-			if (logger.isLoggable(Level.FINER))
+			if (logger.isLoggable(Level.FINER)) {
 				logger.finer("Registering with DriverManager: wrapped driver for " + className); //$NON-NLS-1$
+			}
 
 			synchronized (registeredDrivers) {
 				DriverManager.registerDriver(driver);
@@ -852,14 +1029,14 @@ public class JDBCDriverManager {
 
 	/**
 	 * Search driver in the "drivers" directory and load it if found
-	 * 
-	 * @param className
-	 * @return
+	 *
+	 * @param className class name
+	 * @return the loaded driver
 	 * @throws OdaException
 	 * @throws DriverException
 	 * @throws OdaException
 	 */
-	private Class loadExtraDriver(String className, boolean refreshUrlsWhenFail, boolean refreshClassLoader,
+	private Class<?> loadExtraDriver(String className, boolean refreshUrlsWhenFail, boolean refreshClassLoader,
 			Collection<String> driverClassPath) throws OdaException {
 		assert className != null;
 
@@ -890,7 +1067,7 @@ public class JDBCDriverManager {
 			logger.log(Level.SEVERE, "refreshUrlsWhenFail: " + refreshUrlsWhenFail); //$NON-NLS-1$
 			logger.log(Level.SEVERE, "driverClassPath: " + driverClassPath); //$NON-NLS-1$
 
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			for (URL url : extraDriverLoader.getURLs()) {
 				sb.append("[").append(url).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -911,7 +1088,7 @@ public class JDBCDriverManager {
 	}
 
 	private static class DriverClassLoader extends URLClassLoader {
-		private HashSet fileSet = new HashSet();
+		private HashSet<String> fileSet = new HashSet<String>();
 		private Collection<String> driverClassPath;
 
 		public DriverClassLoader(Collection<String> driverClassPath, ClassLoader parent) throws OdaException {
@@ -921,13 +1098,14 @@ public class JDBCDriverManager {
 			refreshURLs();
 		}
 
+		@Override
 		protected PermissionCollection getPermissions(CodeSource codesource) {
 			return this.getClass().getProtectionDomain().getPermissions();
 		}
 
 		/**
 		 * Refresh the URL list of DriverClassLoader
-		 * 
+		 *
 		 * @return if the refreshURL is different than the former one then return true
 		 *         otherwise return false
 		 * @throws OdaException
@@ -940,6 +1118,7 @@ public class JDBCDriverManager {
 			return foundNewUnderSpecifiedDIR || foundNewUnderDefaultDIR;
 		}
 
+		@SuppressWarnings("unused")
 		private boolean refreshFileURLsUnderSpecifiedDIR() throws OdaException {
 			boolean hasNewDriver = false;
 			if (driverClassPath != null && driverClassPath.size() > 0) {
@@ -966,6 +1145,7 @@ public class JDBCDriverManager {
 			if (driverClassFile.isDirectory()) {
 				File[] driverFiles = driverClassFile.listFiles(new FileFilter() {
 
+					@Override
 					public boolean accept(File pathname) {
 						if (pathname.isFile() && OdaJdbcDriver.isDriverFile(pathname.getName())) {
 							return true;
@@ -1042,17 +1222,20 @@ public class JDBCDriverManager {
 		/*
 		 * @see java.sql.Driver#acceptsURL(java.lang.String)
 		 */
+		@Override
 		public boolean acceptsURL(String u) throws SQLException {
 			boolean res = this.driver.acceptsURL(u);
-			if (logger.isLoggable(Level.FINER))
+			if (logger.isLoggable(Level.FINER)) {
 				logger.log(Level.FINER, "WrappedDriver(" + driverClass + //$NON-NLS-1$
 						").acceptsURL(" + LogUtil.encryptURL(u) + ")returns: " + res); //$NON-NLS-1$//$NON-NLS-2$
+			}
 			return res;
 		}
 
 		/*
 		 * @see java.sql.Driver#connect(java.lang.String, java.util.Properties)
 		 */
+		@Override
 		public java.sql.Connection connect(String u, Properties p) throws SQLException {
 			logger.entering(WrappedDriver.class.getName() + ":" + driverClass, //$NON-NLS-1$
 					"connect", LogUtil.encryptURL(u)); //$NON-NLS-1$
@@ -1066,6 +1249,7 @@ public class JDBCDriverManager {
 		/*
 		 * @see java.sql.Driver#getMajorVersion()
 		 */
+		@Override
 		public int getMajorVersion() {
 			return this.driver.getMajorVersion();
 		}
@@ -1073,6 +1257,7 @@ public class JDBCDriverManager {
 		/*
 		 * @see java.sql.Driver#getMinorVersion()
 		 */
+		@Override
 		public int getMinorVersion() {
 			return this.driver.getMinorVersion();
 		}
@@ -1080,6 +1265,7 @@ public class JDBCDriverManager {
 		/*
 		 * @see java.sql.Driver#getPropertyInfo(java.lang.String, java.util.Properties)
 		 */
+		@Override
 		public DriverPropertyInfo[] getPropertyInfo(String u, Properties p) throws SQLException {
 			return this.driver.getPropertyInfo(u, p);
 		}
@@ -1087,6 +1273,7 @@ public class JDBCDriverManager {
 		/*
 		 * @see java.sql.Driver#jdbcCompliant()
 		 */
+		@Override
 		public boolean jdbcCompliant() {
 			return this.driver.jdbcCompliant();
 		}
@@ -1094,10 +1281,12 @@ public class JDBCDriverManager {
 		/*
 		 * @see java.lang.Object#toString()
 		 */
+		@Override
 		public String toString() {
 			return driverClass;
 		}
 
+		@Override
 		public Logger getParentLogger() throws SQLFeatureNotSupportedException {
 			throw new SQLFeatureNotSupportedException();
 		}

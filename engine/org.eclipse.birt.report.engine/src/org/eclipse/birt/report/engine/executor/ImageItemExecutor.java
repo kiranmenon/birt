@@ -1,17 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.birt.report.engine.executor;
-
-import static org.eclipse.birt.report.engine.ir.DimensionType.UNITS_IN;
 
 import java.util.logging.Level;
 
@@ -32,7 +33,7 @@ import org.eclipse.birt.report.model.api.elements.structures.EmbeddedImage;
  * <code>ImageItemExecutor</code> is a concrete subclass of
  * <code>StyledItemExecutor</code> that manipulate different types of images. An
  * image can be represented in a design file in one of the following forms:
- * 
+ *
  * <li>
  * <h4>URL</h4>
  * <ul>
@@ -53,15 +54,14 @@ import org.eclipse.birt.report.model.api.elements.structures.EmbeddedImage;
  * The image comes from a BLOB field in the query. It also required to save the
  * image content to a temporary file.
  * </ul>
- * 
+ *
  */
 public class ImageItemExecutor extends QueryItemExecutor {
 
 	/**
 	 * Creates an ImageItemExecutor using this constructor.
-	 * 
-	 * @param context The execution context.
-	 * @param visitor The report visitor.
+	 *
+	 * @param manager The execution manager.
 	 */
 	public ImageItemExecutor(ExecutorManager manager) {
 		super(manager, ExecutorManager.IMAGEITEM);
@@ -69,7 +69,7 @@ public class ImageItemExecutor extends QueryItemExecutor {
 
 	/**
 	 * execute the image. The execution process is:
-	 * 
+	 *
 	 * <li>create the image content
 	 * <li>push it into the stack
 	 * <li>open the query and seek to the first record
@@ -80,10 +80,11 @@ public class ImageItemExecutor extends QueryItemExecutor {
 	 * <li>call emitter to output the image
 	 * <li>close query
 	 * <li>popup the image
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.executor.ReportItemExecutor#excute(org.eclipse.birt.report.engine.ir.ReportItemDesign,
 	 *      org.eclipse.birt.report.engine.emitter.IReportEmitter)
 	 */
+	@Override
 	public IContent execute() {
 		ImageItemDesign imageDesign = (ImageItemDesign) getDesign();
 
@@ -124,7 +125,8 @@ public class ImageItemExecutor extends QueryItemExecutor {
 		DimensionType height = imageDesign.getHeight();
 
 		if (imageDesign.isProportionalScale() && width != null && height != null) {
-			com.lowagie.text.Image imageData = EmitterUtil.getImage(imageContent);
+			org.openpdf.text.Image imageData = EmitterUtil.getImage(imageContent);
+			String targetUnit = DimensionType.UNITS_PX;
 
 			if (imageData != null) {
 				double iw = imageData.getWidth();
@@ -134,15 +136,15 @@ public class ImageItemExecutor extends QueryItemExecutor {
 
 				double rw = 0;
 				double rh = 0;
-				String targetUnit = UNITS_IN;
-				if (width.getUnits().equalsIgnoreCase(height.getUnits())) {
+				targetUnit = DimensionType.UNITS_IN;
+				if (width != null && width.getUnits().equalsIgnoreCase(height.getUnits())) {
 					targetUnit = width.getUnits();
 					rw = width.getMeasure();
 					rh = height.getMeasure();
 				} else {
 					try {
-						rw = width.convertTo(UNITS_IN);
-						rh = height.convertTo(UNITS_IN);
+						rw = width.convertTo(DimensionType.UNITS_IN);
+						rh = height.convertTo(DimensionType.UNITS_IN);
 					} catch (IllegalArgumentException e) {
 						rw = PropertyUtil.getDimensionValue(imageContent, width) / 1000.0;
 						rh = PropertyUtil.getDimensionValue(imageContent, height) / 1000.0;
@@ -167,6 +169,7 @@ public class ImageItemExecutor extends QueryItemExecutor {
 		}
 	}
 
+	@Override
 	public void close() throws BirtException {
 		finishTOCEntry();
 		closeQuery();

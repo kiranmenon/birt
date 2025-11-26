@@ -1,10 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.eclipse.birt.build</groupId>
 		<artifactId>org.eclipse.birt.build-parent</artifactId>
-		<version>4.9.0-SNAPSHOT</version>
+		<version>4.22.0-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
 
@@ -70,28 +84,12 @@
 		</dependency>
 	</dependencies>
 
-	<!-- <include name="coreapi.jar" /> <include name="dteapi.jar" /> <include 
-		name="dataaggregationapi.jar" /> <include name="modelapi.jar" /> <include 
-		name="modelodaapi.jar" /> "../org.eclipse.birt.report.model.adapter.oda/lib" 
-		<include name="odadesignapi.jar" /> <include name="scriptapi.jar" /> <include 
-		name="dataextraction.jar" /> <include name="dataadapterapi.jar" /> <include 
-		name="crosstabcoreapi.jar" /> <include name="emitterconfig.jar" /> <include 
-		name="chartitemapi.jar" /> <include name="chartexamplescoreapi.jar" /> <fileset 
-		dir="../org.w3c.sac/lib"> <include name="*.jar" /> </fileset> <include name="com.ibm.icu_*.jar" 
-		/> <include name="org.eclipse.emf.common_*.jar" /> <include name="org.eclipse.emf.ecore.xmi_*.jar" 
-		/> <include name="org.eclipse.emf.ecore_*.jar" /> <include name="org.eclipse.birt.axis.overlay_*.jar" 
-		/> <mapper type="regexp" from="org.eclipse.birt.chart.engine_.*.jar" to="chartengineapi.jar"/> 
-		<mapper type="regexp" from="org.mozilla.javascript_.*.jar" to="js.jar"/> 
-		<include name="javax.servlet*.jar"/> <include name="org.w3c.css.sac_*.jar"/> 
-		<include name="org.apache.commons.codec_*.jar"/> <include name="commons-cli*.jar" 
-		/> -->
-
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4.1</version>
+				<version>${maven-assembly-plugin-version}</version>
 				<configuration>
 					<!-- <filters> <filter>src/assembly/filter.properties</filter> </filters> -->
 					<descriptors>
@@ -111,7 +109,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
+				<version>${maven.dependency.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>unpack</id>

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -47,7 +50,7 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param handle           - the entry point to the DE report design IR
 	 * @param executionContext - the execution context to execute the onPrepare
 	 *                         script
@@ -70,11 +73,12 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.model.api.DesignVisitor#visitReportDesign(org.eclipse
 	 * .birt.report.model.api.ReportDesignHandle)
 	 */
+	@Override
 	public void visitReportDesign(ReportDesignHandle handle) {
 		handleOnPrepare(handle);
 
@@ -135,11 +139,12 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 
 	/**
 	 * setup the master page object from the base master page handle.
-	 * 
+	 *
 	 * @param page   page object
 	 * @param handle page handle
 	 */
 
+	@Override
 	public void visitGraphicMasterPage(GraphicMasterPageHandle handle) {
 		// handleOnPrepare( handle );
 
@@ -150,6 +155,7 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitSimpleMasterPage(SimpleMasterPageHandle handle) {
 		// handleOnPrepare( handle );
 
@@ -164,10 +170,12 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitAutoText(AutoTextHandle handle) {
 		handleOnPrepare(handle);
 	}
 
+	@Override
 	public void visitList(ListHandle handle) {
 		handleOnPrepare(handle);
 
@@ -196,6 +204,7 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitFreeForm(FreeFormHandle handle) {
 		handleOnPrepare(handle);
 
@@ -206,10 +215,12 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitTextDataItem(TextDataHandle handle) {
 		handleOnPrepare(handle);
 	}
 
+	@Override
 	public void visitParameterGroup(ParameterGroupHandle handle) {
 		// handleOnPrepare( handle );
 
@@ -220,6 +231,7 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitCascadingParameterGroup(CascadingParameterGroupHandle handle) {
 		// handleOnPrepare( handle );
 
@@ -230,18 +242,22 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitScalarParameter(ScalarParameterHandle handle) {
 		// handleOnPrepare( handle );
 	}
 
+	@Override
 	public void visitLabel(LabelHandle handle) {
 		handleOnPrepare(handle);
 	}
 
+	@Override
 	public void visitDataItem(DataItemHandle handle) {
 		handleOnPrepare(handle);
 	}
 
+	@Override
 	public void visitGrid(GridHandle handle) {
 		handleOnPrepare(handle);
 
@@ -258,10 +274,12 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitImage(ImageHandle handle) {
 		handleOnPrepare(handle);
 	}
 
+	@Override
 	public void visitTable(TableHandle handle) {
 		handleOnPrepare(handle);
 
@@ -296,10 +314,12 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitColumn(ColumnHandle handle) {
 		// handleOnPrepare( handle );
 	}
 
+	@Override
 	public void visitRow(RowHandle handle) {
 		handleOnPrepare(handle);
 
@@ -310,6 +330,7 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitCell(CellHandle handle) {
 		handleOnPrepare(handle);
 
@@ -322,10 +343,11 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 
 	/**
 	 * create a list group using the DE's ListGroup.
-	 * 
+	 *
 	 * @param handle De's list group
 	 * @return engine's list group
 	 */
+	@Override
 	public void visitListGroup(ListGroupHandle handle) {
 		handleOnPrepare(handle);
 
@@ -345,10 +367,11 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 
 	/**
 	 * create a table group using the DE's TableGroup.
-	 * 
+	 *
 	 * @param handle De's table group
 	 * @return engine's table group
 	 */
+	@Override
 	public void visitTableGroup(TableGroupHandle handle) {
 		handleOnPrepare(handle);
 
@@ -365,17 +388,19 @@ abstract class ScriptedDesignVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitTextItem(TextItemHandle handle) {
 		handleOnPrepare(handle);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.model.api.DesignVisitor#visitExtendedItem(org.eclipse
 	 * .birt.report.model.api.ExtendedItemHandle)
 	 */
+	@Override
 	protected void visitExtendedItem(ExtendedItemHandle handle) {
 
 	}

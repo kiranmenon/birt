@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c)2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -118,6 +121,7 @@ public class ParameterHelper {
 				private static final long serialVersionUID = 1L;
 				private Set values = new HashSet();
 
+				@Override
 				public boolean add(Object arg0) {
 					if (!values.contains(arg0)) {
 						values.add(arg0);
@@ -142,8 +146,9 @@ public class ParameterHelper {
 			// if display text is set , DON'T apply the formatter.
 			String name = labelColumnName;
 			Object value = resultIterator.getValue(name);
-			if (value != null)
+			if (value != null) {
 				return value.toString();
+			}
 			return null;
 		}
 	}
@@ -177,8 +182,7 @@ public class ParameterHelper {
 	}
 
 	private static void addColumnBinding(QueryDefinition query, String expression) throws BirtException {
-		ArrayList<IColumnBinding> bindingColumnList = new ArrayList<IColumnBinding>();
-		bindingColumnList.addAll(ExpressionUtil.extractColumnExpressions(expression, ExpressionUtil.DATA_INDICATOR));
+		ArrayList<IColumnBinding> bindingColumnList = new ArrayList<>(ExpressionUtil.extractColumnExpressions(expression, ExpressionUtil.DATA_INDICATOR));
 		bindingColumnList.addAll(ExpressionUtil.extractColumnExpressions(expression, ExpressionUtil.ROW_INDICATOR));
 		for (IColumnBinding binding : bindingColumnList) {
 			addBinding(query, binding.getResultSetColumnName());
@@ -229,6 +233,7 @@ public class ParameterHelper {
 			this.distinct = distinct;
 		}
 
+		@Override
 		public int compare(Object obj1, Object obj2) {
 			int result = comparator.compare(obj1, obj2);
 			if (result == 0 && !distinct) {

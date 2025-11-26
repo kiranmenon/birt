@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -162,7 +165,7 @@ public class TableLayout {
 
 	/**
 	 * resolve cell border conflict
-	 * 
+	 *
 	 * @param cellArea
 	 */
 	public void resolveBorderConflict(CellArea cellArea, boolean isFirst) {
@@ -212,15 +215,13 @@ public class TableLayout {
 						cellArea.getBoxStyle().setTopBorder(border);
 					}
 				}
-			} else {
-				if (tableStyle != null) {
-					BorderInfo border = bcr.resolveTableTopBorder(tableStyle, null, columnStyle, null);
-					if (border != null) {
-						if (cellArea.getBoxStyle() == BoxStyle.DEFAULT) {
-							cellArea.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
-						}
-						cellArea.getBoxStyle().setTopBorder(border);
+			} else if (tableStyle != null) {
+				BorderInfo border = bcr.resolveTableTopBorder(tableStyle, null, columnStyle, null);
+				if (border != null) {
+					if (cellArea.getBoxStyle() == BoxStyle.DEFAULT) {
+						cellArea.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
 					}
+					cellArea.getBoxStyle().setTopBorder(border);
 				}
 			}
 
@@ -284,15 +285,13 @@ public class TableLayout {
 						cellArea.getBoxStyle().setTopBorder(border);
 					}
 				}
-			} else {
-				if (preRowStyle != null || topCellStyle != null) {
-					BorderInfo border = bcr.resolveCellTopBorder(preRowStyle, null, topCellStyle, null);
-					if (border != null) {
-						if (cellArea.getBoxStyle() == BoxStyle.DEFAULT) {
-							cellArea.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
-						}
-						cellArea.getBoxStyle().setTopBorder(border);
+			} else if (preRowStyle != null || topCellStyle != null) {
+				BorderInfo border = bcr.resolveCellTopBorder(preRowStyle, null, topCellStyle, null);
+				if (border != null) {
+					if (cellArea.getBoxStyle() == BoxStyle.DEFAULT) {
+						cellArea.setBoxStyle(new BoxStyle(BoxStyle.DEFAULT));
 					}
+					cellArea.getBoxStyle().setTopBorder(border);
 				}
 			}
 			// resolve left border
@@ -350,7 +349,7 @@ public class TableLayout {
 
 	/**
 	 * get column style
-	 * 
+	 *
 	 * @param columnID
 	 * @return
 	 */
@@ -448,7 +447,7 @@ public class TableLayout {
 	/**
 	 * When pagination happens, if drop cells should be finished by force, we need
 	 * to end these cells and vertical align for them.
-	 * 
+	 *
 	 */
 	public int resolveAll(RowArea row) {
 		if (row == null || rows.size() == 0) {
@@ -528,8 +527,9 @@ public class TableLayout {
 				width = resolveBottomBorder(cell);
 			}
 
-			if (width > result)
+			if (width > result) {
 				result = width;
+			}
 			i = i + cell.getColSpan() - 1;
 		}
 
@@ -618,21 +618,11 @@ public class TableLayout {
 		return false;
 	}
 
-	private boolean isEmptyRow(RowArea rowArea) {
-		for (int i = startCol; i <= endCol; i++) {
-			CellArea cell = rowArea.getCell(i);
-			if (cell != null && cell.getChildrenCount() > 0) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	/**
 	 * 1) Creates row wrapper. 2) For the null cell in the row wrapper, fills the
 	 * relevant position with dummy cell or empty cell. 3) Updates the height of the
 	 * row and the cells in the row.
-	 * 
+	 *
 	 * @param rowArea current rowArea.
 	 */
 	private void updateRow(RowArea rowArea, boolean isFixedLayout) {
@@ -652,8 +642,7 @@ public class TableLayout {
 			lastRow = (RowArea) rows.getCurrent();
 		}
 		currentRow = rowArea;
-		// Do not use specified height if row is empty to avoid endless page break
-		int sheight = isEmptyRow(rowArea) ? 0 : rowArea.getSpecifiedHeight();
+		int sheight = rowArea.getSpecifiedHeight();
 		int height = sheight;
 		/*
 		 * In this case, the row should be the first row of new page. 1. this row is the
@@ -803,7 +792,7 @@ public class TableLayout {
 
 	/**
 	 * Creates dummy cell and updates its delta value.
-	 * 
+	 *
 	 * @param upperCell the upper cell.
 	 * @return the created dummy cell.
 	 */
@@ -835,13 +824,14 @@ public class TableLayout {
 
 	/**
 	 * Updates the row height and the height of the cells in the row.
-	 * 
+	 *
 	 * @param rowArea
 	 * @param height
 	 */
 	private void updateRowHeight(RowArea row, int height, boolean isFixedLayout) {
-		if (height < 0)
+		if (height < 0) {
 			return;
+		}
 		row.setHeight(height);
 		for (int i = startCol; i <= endCol; i++) {
 			CellArea cell = row.getCell(i);
@@ -882,10 +872,10 @@ public class TableLayout {
 
 	/*
 	 * //---------debug
-	 * 
-	 * 
+	 *
+	 *
 	 * // a method for debugging.
-	 * 
+	 *
 	 * public static void getInfo( IArea area, int offsetX, int offsetY ) { if( area
 	 * instanceof CellArea ) { System.out.println(
 	 * "------------------Cell------------------" ); //top border int x = offsetX +
@@ -908,14 +898,14 @@ public class TableLayout {
 	 * TextArea ) { TextArea textArea = (TextArea )area; System.out.println(
 	 * "$$text$$" + textArea.getText( ) ); } else if ( area instanceof ContainerArea
 	 * ) { traverse( area, offsetX, offsetY ); } }
-	 * 
+	 *
 	 * private static void traverse( IArea area, int offsetX, int offsetY ) {
 	 * ContainerArea container = (ContainerArea) area; offsetX = offsetX +
 	 * area.getX( ); offsetY = offsetY + area.getY( ); for ( Iterator i =
 	 * container.getChildren( ); i.hasNext( ); ) { getInfo( (IArea) i.next( ),
 	 * offsetX, offsetY ); } offsetX = offsetX - area.getX( ); offsetY = offsetY -
 	 * area.getY( ); }
-	 * 
+	 *
 	 */
 
 }

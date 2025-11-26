@@ -1,15 +1,20 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
  *******************************************************************************/
 
 package org.eclipse.birt.chart.style;
+
+import java.util.Objects;
 
 import org.eclipse.birt.chart.computation.GObjectFactory;
 import org.eclipse.birt.chart.computation.IGObjectFactory;
@@ -51,10 +56,11 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * The constructor.
-	 * 
-	 * @param font
-	 * @param backcolor
-	 * @param backimage
+	 *
+	 * @param font      font
+	 * @param color     color
+	 * @param backcolor background color
+	 * @param backimage background image
 	 * @param padding
 	 */
 	public SimpleStyle(FontDefinition font, ColorDefinition color, ColorDefinition backcolor, Image backimage,
@@ -70,7 +76,7 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * The constructor.
-	 * 
+	 *
 	 * @param src
 	 */
 	public SimpleStyle(IStyle src) {
@@ -106,8 +112,8 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * Returns a copy of current instance.
-	 * 
-	 * @return
+	 *
+	 * @return Returns a copy of current instance.
 	 */
 	public SimpleStyle copy() {
 		SimpleStyle ss = new SimpleStyle();
@@ -142,7 +148,7 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * Sets the font of current style.
-	 * 
+	 *
 	 * @param font
 	 */
 	public void setFont(FontDefinition font) {
@@ -151,7 +157,7 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * Sets the color of current style.
-	 * 
+	 *
 	 * @param color
 	 */
 	public void setColor(ColorDefinition color) {
@@ -160,7 +166,7 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * Sets the background color of current style.
-	 * 
+	 *
 	 * @param backcolor
 	 */
 	public void setBackgroundColor(ColorDefinition backcolor) {
@@ -169,7 +175,7 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * Sets the background image of current style.
-	 * 
+	 *
 	 * @param backimage
 	 */
 	public void setBackgroundImage(Image backimage) {
@@ -178,7 +184,7 @@ public final class SimpleStyle implements IStyle {
 
 	/**
 	 * Sets the padding of current style.
-	 * 
+	 *
 	 * @param padding
 	 */
 	public void setPadding(Insets padding) {
@@ -187,128 +193,134 @@ public final class SimpleStyle implements IStyle {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.style.IStyle#getFont()
 	 */
+	@Override
 	public FontDefinition getFont() {
 		return font;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.style.IStyle#getBackgroundColor()
 	 */
+	@Override
 	public ColorDefinition getBackgroundColor() {
 		return backcolor;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.style.IStyle#getBackgroundImage()
 	 */
+	@Override
 	public Image getBackgroundImage() {
 		return backimage;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.style.IStyle#getPadding()
 	 */
+	@Override
 	public Insets getPadding() {
 		return padding;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.chart.style.IStyle#getColor()
 	 */
+	@Override
 	public ColorDefinition getColor() {
 		return color;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((backcolor == null) ? 0 : backcolor.hashCode());
-		result = prime * result + ((backimage == null) ? 0 : backimage.hashCode());
-		result = prime * result + ((color == null) ? 0 : color.hashCode());
-		result = prime * result + ((font == null) ? 0 : font.hashCode());
-		result = prime * result + ((padding == null) ? 0 : padding.hashCode());
-		return result;
+		return Objects.hash(backcolor, backimage, color, font, padding);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if ((obj == null) || (getClass() != obj.getClass())) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		SimpleStyle other = (SimpleStyle) obj;
-		if (backcolor == null) {
-			if (other.backcolor != null)
-				return false;
-		} else if (!backcolor.equals(other.backcolor))
+		if (!Objects.equals(backcolor, other.backcolor)) {
 			return false;
-		if (backimage == null) {
-			if (other.backimage != null)
-				return false;
-		} else if (!backimage.equals(other.backimage))
+		}
+		if (!Objects.equals(backimage, other.backimage)) {
 			return false;
-		if (color == null) {
-			if (other.color != null)
-				return false;
-		} else if (!color.equals(other.color))
+		}
+		if (!Objects.equals(color, other.color)) {
 			return false;
-		if (font == null) {
-			if (other.font != null)
-				return false;
-		} else if (!font.equals(other.font))
+		}
+		if (!Objects.equals(font, other.font)) {
 			return false;
-		if (padding == null) {
-			if (other.padding != null)
-				return false;
-		} else if (!padding.equals(other.padding))
+		}
+		if (!Objects.equals(padding, other.padding)) {
 			return false;
+		}
 		return true;
 	}
 
+	@Override
 	public FormatSpecifier getDateTimeFormat() {
 		return dateTimeFormat;
 	}
 
+	/**
+	 * Set the date time format
+	 *
+	 * @param df date time format
+	 */
 	public void setDateTimeFormat(FormatSpecifier df) {
 		this.dateTimeFormat = df;
 	}
 
+	@Override
 	public FormatSpecifier getNumberFormat() {
 		return numberFormat;
 	}
 
+	/**
+	 * Set the number format
+	 *
+	 * @param nf number format
+	 */
 	public void setNumberFormat(FormatSpecifier nf) {
 		this.numberFormat = nf;
 	}
 
+	@Override
 	public FormatSpecifier getStringFormat() {
 		return stringFormat;
 	}
 
+	/**
+	 * Set the string format
+	 *
+	 * @param sf string format
+	 */
 	public void setStringFormat(FormatSpecifier sf) {
 		this.stringFormat = sf;
 	}

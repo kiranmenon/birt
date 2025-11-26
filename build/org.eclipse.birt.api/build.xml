@@ -1,12 +1,26 @@
 <?xml version="1.0"?>
+<!--
+ *******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
 <project default="test" basedir=".">
 	<target name="test" depends="build-api-package" />
-	<property name="BIRT_VERSION" value="4.9.0" />
+	<property name="BIRT_VERSION" value="4.22.0" />
 	<property name="HERE" location="." />
 	<property name="LIB_DIR" location="./target/lib" />
 	<property name="ROOT_DIR" location="../../" />
-	<property name="P2UPDATESITE_DIR" location="../org.eclipse.birt.p2updatesite/" />
-	<property name="PRODUCT_DIR" location="${P2UPDATESITE_DIR}/target/products/org.eclipse.birt.designer/win32/win32/x86_64/designer/" />
+	<property name="P2UPDATESITE_DIR" location="../birt-packages/birt-report-all-in-one/" />
+	<property name="PRODUCT_DIR" location="${P2UPDATESITE_DIR}/target/products/org.eclipse.birt.report.designer.all/win32/win32/x86_64/eclipse/" />
 	<target name="clean">
 		<delete dir="./target" />
 	</target>
@@ -17,8 +31,6 @@
 	</target>
 	<target name="copy-api-jars">
 		<echo>copy API jars to "${LIB_DIR}</echo>
-		<copy file="${ROOT_DIR}/engine/org.eclipse.birt.report.engine/lib/commons-cli-1.0.jar" tofile="${LIB_DIR}/commons-cli-1.0.jar" />
-		<copy file="${ROOT_DIR}/common/org.w3c.sac/lib/flute.jar" tofile="${LIB_DIR}/flute.jar" />
 		<copy todir="${LIB_DIR}">
 			<fileset dir="${ROOT_DIR}">
 				<include name="core/org.eclipse.birt.core/target/org.eclipse.birt.core-*-api.jar" />
@@ -59,19 +71,23 @@
 		</copy>
 		<copy todir="${LIB_DIR}">
 			<fileset dir="${PRODUCT_DIR}/plugins">
-				<include name="org.mozilla.javascript_*.jar" />
+				<include name="org.mozilla.rhino_*.jar" />
 			</fileset>
-			<globmapper from="org.mozilla.javascript_*.jar" to="js.jar" />
+			<globmapper from="org.mozilla.rhino_*.jar" to="js.jar" />
 		</copy>
 		<antcall target="build-odadesign-api" />
 		<antcall target="build-odaconnectivity-api" />
 		<copy todir="${LIB_DIR}">
 			<fileset dir="${PRODUCT_DIR}/plugins">
-				<include name="org.apache.commons.codec_*.jar" />
+				<include name="org.apache.commons.cli_*.jar" />
+				<include name="org.apache.commons.commons-codec_*.jar" />
 				<include name="org.eclipse.birt.axis.overlay_*.jar" />
 				<include name="org.eclipse.emf.common_*.jar" />
 				<include name="org.eclipse.emf.ecore.xmi_*.jar" />
 				<include name="org.eclipse.emf.ecore_*.jar" />
+				<!--
+				<include name="org.eclipse.equinox.common_*.jar" />
+				-->
 				<include name="org.w3c.css.sac_*.jar" />
 				<include name="com.ibm.icu_*.jar" />
 				<include name="javax*.jar" />
@@ -120,7 +136,7 @@
 	<target name="build-api-manifest">
 		<property name="MANIFEST_TEMPLATE" location="./MANIFEST.MF.template" />
 		<property name="MANIFEST_MF" location="./target/manifest.mf" />
-		<java classname="CreateManifest">
+		<java classname="CreateManifest" fork="yes">
 			<classpath>
 				<pathelement location="${HERE}" />
 			</classpath>
@@ -129,6 +145,6 @@
 			<sysproperty key="LIB_DIR" value="${LIB_DIR}" />
 		</java>
 		<!-- update manifest version -->
-		<replaceregexp file="${MANIFEST_MF}" match="Bundle-Version: 4.9.0.qualifier" replace="Bundle-Version: ${BIRT_VERSION}" />
+		<replaceregexp file="${MANIFEST_MF}" match="Bundle-Version: 4.22.0.qualifier" replace="Bundle-Version: ${BIRT_VERSION}" />
 	</target>
 </project>

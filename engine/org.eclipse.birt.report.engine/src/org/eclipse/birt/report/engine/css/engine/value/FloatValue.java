@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -11,23 +14,28 @@
 
 package org.eclipse.birt.report.engine.css.engine.value;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
-
 import org.w3c.dom.DOMException;
 import org.w3c.dom.css.CSSPrimitiveValue;
 
+import com.ibm.icu.text.DecimalFormat;
+import com.ibm.icu.text.DecimalFormatSymbols;
+import com.ibm.icu.util.ULocale;
+
 /**
  * This class represents float values.
- * 
+ *
  */
 public class FloatValue extends Value implements CSSPrimitiveValue {
 
-	private final static DecimalFormat FORMATTER = new DecimalFormat("#.###", new DecimalFormatSymbols(Locale.ENGLISH));
+	private final static DecimalFormat FORMATTER = new DecimalFormat("#.###",
+			new DecimalFormatSymbols(ULocale.ENGLISH));
 
 	/**
-	 * Returns the CSS text associated with the given type/value pair.
+	 * Get the CSS text associated with the given type/value pair.
+	 *
+	 * @param unit
+	 * @param value
+	 * @return Returns the CSS text associated with the given type/value pair.
 	 */
 	public static String getCssText(short unit, float value) {
 		if (unit < 0 || unit >= UNITS.length) {
@@ -55,6 +63,9 @@ public class FloatValue extends Value implements CSSPrimitiveValue {
 
 	/**
 	 * Creates a new value.
+	 *
+	 * @param unitType   unit type
+	 * @param floatValue float value
 	 */
 	public FloatValue(short unitType, float floatValue) {
 		this.unitType = unitType;
@@ -64,6 +75,7 @@ public class FloatValue extends Value implements CSSPrimitiveValue {
 	/**
 	 * The type of the value.
 	 */
+	@Override
 	public short getPrimitiveType() {
 		return unitType;
 	}
@@ -71,10 +83,12 @@ public class FloatValue extends Value implements CSSPrimitiveValue {
 	/**
 	 * Returns the float value.
 	 */
+	@Override
 	public float getFloatValue() {
 		return floatValue;
 	}
 
+	@Override
 	public float getFloatValue(short unitType) {
 		return convertFloatValue(unitType, this);
 	}
@@ -82,6 +96,7 @@ public class FloatValue extends Value implements CSSPrimitiveValue {
 	/**
 	 * A string representation of the current value.
 	 */
+	@Override
 	public String getCssText() {
 		return getCssText(unitType, floatValue);
 	}
@@ -89,12 +104,17 @@ public class FloatValue extends Value implements CSSPrimitiveValue {
 	/**
 	 * Returns a printable representation of this value.
 	 */
+	@Override
 	public String toString() {
 		return getCssText();
 	}
 
 	/**
 	 * Converts the actual float value to the given unit type.
+	 *
+	 * @param unitType unit type
+	 * @param value    float value
+	 * @return Return the float value
 	 */
 	public static float convertFloatValue(short unitType, FloatValue value) {
 		switch (unitType) {
@@ -340,6 +360,7 @@ public class FloatValue extends Value implements CSSPrimitiveValue {
 		}
 	}
 
+	@Override
 	public boolean equals(Object value) {
 		if (value instanceof FloatValue) {
 			FloatValue f = (FloatValue) value;

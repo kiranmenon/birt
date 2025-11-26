@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -16,7 +19,7 @@ import org.eclipse.birt.report.engine.api.IReportPart;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 
 /**
- * 
+ *
  */
 public class ReportPart implements IReportPart {
 
@@ -26,18 +29,20 @@ public class ReportPart implements IReportPart {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IReportItem#getReportRunnable()
 	 */
+	@Override
 	public IReportRunnable getReportRunnable() {
 		return reportRunnable;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api2.IReportItem#getRenderOption()
 	 */
+	@Override
 	public IRenderOption getRenderOption() {
 		return renderOption;
 	}

@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -14,17 +17,27 @@ package org.eclipse.birt.report.engine.layout.area.impl;
 import org.eclipse.birt.report.engine.content.ICellContent;
 import org.eclipse.birt.report.engine.content.IContent;
 import org.eclipse.birt.report.engine.content.IStyle;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.css.engine.value.FloatValue;
 import org.eclipse.birt.report.engine.css.engine.value.Value;
 import org.w3c.dom.css.CSSPrimitiveValue;
 import org.w3c.dom.css.CSSValue;
 
+/**
+ * Cell area
+ *
+ * @since 3.3
+ *
+ */
 public class CellArea extends ContainerArea {
 
 	static Value DEFAULT_PADDING = new FloatValue(CSSPrimitiveValue.CSS_NUMBER, 1500);
 
 	protected int rowSpan = 0;
 
+	/**
+	 * Constructor
+	 */
 	public CellArea() {
 		super((IContent) null);
 	}
@@ -36,6 +49,11 @@ public class CellArea extends ContainerArea {
 		setDefaultPadding();
 	}
 
+	/**
+	 * Get column id
+	 *
+	 * @return Return the column id
+	 */
 	public int getColumnID() {
 		if (content != null) {
 			return ((ICellContent) content).getColumn();
@@ -43,6 +61,11 @@ public class CellArea extends ContainerArea {
 		return 0;
 	}
 
+	/**
+	 * Get row id
+	 *
+	 * @return Return the row id
+	 */
 	public int getRowID() {
 		if (content != null) {
 			return ((ICellContent) content).getRow();
@@ -50,6 +73,11 @@ public class CellArea extends ContainerArea {
 		return 0;
 	}
 
+	/**
+	 * Get column span
+	 *
+	 * @return Return the column span value
+	 */
 	public int getColSpan() {
 		if (content != null) {
 			return ((ICellContent) content).getColSpan();
@@ -57,14 +85,23 @@ public class CellArea extends ContainerArea {
 		return 1;
 	}
 
+	/**
+	 * Get row span
+	 *
+	 * @return Return the row span value
+	 */
 	public int getRowSpan() {
 		if (rowSpan == 0 && content != null) {
 			return ((ICellContent) content).getRowSpan();
-		} else {
-			return rowSpan;
 		}
+		return rowSpan;
 	}
 
+	/**
+	 * Set row span
+	 *
+	 * @param rowSpan row span value
+	 */
 	public void setRowSpan(int rowSpan) {
 		this.rowSpan = rowSpan;
 	}
@@ -73,21 +110,21 @@ public class CellArea extends ContainerArea {
 
 		if (content != null) {
 			IStyle contentStyle = content.getStyle();
-			CSSValue padding = contentStyle.getProperty(IStyle.STYLE_PADDING_TOP);
+			CSSValue padding = contentStyle.getProperty(StyleConstants.STYLE_PADDING_TOP);
 			if (padding == null) {
-				style.setProperty(IStyle.STYLE_PADDING_TOP, DEFAULT_PADDING);
+				style.setProperty(StyleConstants.STYLE_PADDING_TOP, DEFAULT_PADDING);
 			}
-			padding = contentStyle.getProperty(IStyle.STYLE_PADDING_BOTTOM);
+			padding = contentStyle.getProperty(StyleConstants.STYLE_PADDING_BOTTOM);
 			if (padding == null) {
-				style.setProperty(IStyle.STYLE_PADDING_BOTTOM, DEFAULT_PADDING);
+				style.setProperty(StyleConstants.STYLE_PADDING_BOTTOM, DEFAULT_PADDING);
 			}
-			padding = contentStyle.getProperty(IStyle.STYLE_PADDING_LEFT);
+			padding = contentStyle.getProperty(StyleConstants.STYLE_PADDING_LEFT);
 			if (padding == null) {
-				style.setProperty(IStyle.STYLE_PADDING_LEFT, DEFAULT_PADDING);
+				style.setProperty(StyleConstants.STYLE_PADDING_LEFT, DEFAULT_PADDING);
 			}
-			padding = contentStyle.getProperty(IStyle.STYLE_PADDING_RIGHT);
+			padding = contentStyle.getProperty(StyleConstants.STYLE_PADDING_RIGHT);
 			if (padding == null) {
-				style.setProperty(IStyle.STYLE_PADDING_RIGHT, DEFAULT_PADDING);
+				style.setProperty(StyleConstants.STYLE_PADDING_RIGHT, DEFAULT_PADDING);
 			}
 		}
 	}

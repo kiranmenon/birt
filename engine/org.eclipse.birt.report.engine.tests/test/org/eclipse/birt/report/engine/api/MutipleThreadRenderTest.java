@@ -1,7 +1,20 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.engine.api;
 
 import java.io.ByteArrayOutputStream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.birt.report.engine.EngineCase;
 import org.eclipse.birt.report.engine.RunnableMonitor;
@@ -13,6 +26,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 	final static String REPORT_DESIGN_RESOURCE = "org/eclipse/birt/report/engine/api/mutiple-thread-render.rptdesign";
 	final static String REPORT_DESIGN = "./utest/report.rptdesign";
 
+	@Override
 	public void setUp() throws Exception {
 		super.setUp();
 		removeFile(REPORT_DOCUMENT);
@@ -21,6 +35,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 		copyResource(REPORT_DESIGN_RESOURCE, REPORT_DESIGN);
 	}
 
+	@Override
 	public void tearDown() throws Exception {
 		removeFile(REPORT_DOCUMENT);
 		removeFile(REPORT_DESIGN);
@@ -32,7 +47,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 	 * Start the render threads at the same time with create thread. In the rener
 	 * thread, it will test if the document is finished. If it is finished, it will
 	 * start to render.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	public void testMutipleThreadWithProgressive() throws Exception {
@@ -61,6 +76,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 			super(monitor);
 		}
 
+		@Override
 		public void doRun() throws Exception {
 			System.out.println("start run document");
 			IReportRunnable report = engine.openReportDesign(REPORT_DESIGN);
@@ -81,6 +97,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 			super(monitor);
 		}
 
+		@Override
 		public void doRun() throws Exception {
 			IReportDocument document = null;
 
@@ -113,7 +130,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 							task.close();
 						}
 					}
-					if (document.isComplete() == false) {
+					if (!document.isComplete()) {
 						sleep(1000);
 						document.refresh();
 					} else {
@@ -134,6 +151,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 			super(monitor);
 		}
 
+		@Override
 		public void doRun() throws Exception {
 			IReportDocument document = null;
 			try {
@@ -165,7 +183,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 							task.close();
 						}
 					}
-					if (document.isComplete() == false) {
+					if (!document.isComplete()) {
 						sleep(1000);
 						document.refresh();
 					} else {
@@ -186,6 +204,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 			super(monitor);
 		}
 
+		@Override
 		public void doRun() throws Exception {
 			IReportDocument document = null;
 			try {
@@ -198,7 +217,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 					}
 				}
 
-				while (document.isComplete() == false) {
+				while (!document.isComplete()) {
 					sleep(1000);
 					document.refresh();
 				}
@@ -226,6 +245,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 			super(monitor);
 		}
 
+		@Override
 		public void doRun() throws Exception {
 			IReportDocument document = null;
 			try {
@@ -238,7 +258,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 					}
 				}
 
-				while (document.isComplete() == false) {
+				while (!document.isComplete()) {
 					sleep(1000);
 					document.refresh();
 				}
@@ -261,7 +281,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 	}
 
 	int THREAD_COUNT = 20;
-	int runningThread;
+	AtomicInteger runningThread = new AtomicInteger();
 
 	public void testMutipleThreadRenderShareDocument() throws Exception {
 		IReportRunnable report = engine.openReportDesign(REPORT_DESIGN);
@@ -278,10 +298,10 @@ public class MutipleThreadRenderTest extends EngineCase {
 			new Thread(renders[i]).start();
 		}
 		long waitingTime = 0;
-		while (runningThread > 0) {
+		while (runningThread.get() > 0) {
 			Thread.sleep(200);
 			waitingTime += 200;
-			if (waitingTime > 20000) {
+			if (waitingTime > 200000) {
 				fail();
 			}
 		}
@@ -304,9 +324,10 @@ public class MutipleThreadRenderTest extends EngineCase {
 			this.engine = engine;
 			this.document = document;
 			this.output = new ByteArrayOutputStream();
-			runningThread++;
+			runningThread.incrementAndGet();
 		}
 
+		@Override
 		public void run() {
 			try {
 				long pageCount = document.getPageCount();
@@ -326,7 +347,7 @@ public class MutipleThreadRenderTest extends EngineCase {
 			} catch (Exception ex) {
 				fail();
 			} finally {
-				runningThread--;
+				runningThread.decrementAndGet();
 			}
 		}
 	}

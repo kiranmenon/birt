@@ -1,12 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2013 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2013, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
- *  Actuate Corporation  - initial API and implementation
+ *  Actuate Corporation - initial API and implementation
+ *  Thomas Gutmann - added single handling of margin-attributes for MHT-files
  *******************************************************************************/
 
 package org.eclipse.birt.report.engine.emitter.docx.writer;
@@ -16,6 +20,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,13 +31,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import org.eclipse.birt.report.engine.content.IContent;
 import org.eclipse.birt.report.engine.content.IForeignContent;
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.emitter.EmitterUtil;
 import org.eclipse.birt.report.engine.emitter.HTMLTags;
 import org.eclipse.birt.report.engine.emitter.HTMLWriter;
@@ -43,19 +48,7 @@ import org.eclipse.birt.report.engine.emitter.wpml.WordUtil;
 import org.eclipse.birt.report.engine.emitter.wpml.writer.AbstractWordXmlWriter;
 import org.eclipse.birt.report.engine.executor.css.HTMLProcessor;
 import org.eclipse.birt.report.engine.ir.DimensionType;
-import org.eclipse.birt.report.engine.ir.EngineIRConstants;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
-import org.eclipse.birt.report.engine.parser.TextParser;
-import org.eclipse.birt.report.engine.util.FileUtil;
-import org.eclipse.birt.report.model.api.IResourceLocator;
-import org.eclipse.birt.report.model.api.ReportDesignHandle;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.css.CSSValue;
-
 import org.eclipse.birt.report.engine.ooxml.IPart;
 import org.eclipse.birt.report.engine.ooxml.ImageManager;
 import org.eclipse.birt.report.engine.ooxml.ImageManager.ImagePart;
@@ -63,10 +56,28 @@ import org.eclipse.birt.report.engine.ooxml.MimeType;
 import org.eclipse.birt.report.engine.ooxml.constants.NameSpaces;
 import org.eclipse.birt.report.engine.ooxml.constants.RelationshipTypes;
 import org.eclipse.birt.report.engine.ooxml.writer.OOXmlWriter;
+import org.eclipse.birt.report.engine.parser.TextParser;
+import org.eclipse.birt.report.engine.util.FileUtil;
+import org.eclipse.birt.report.model.api.IResourceLocator;
+import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.css.CSSValue;
 
 public abstract class BasicComponent extends AbstractWordXmlWriter {
 
 	private static Logger logger = Logger.getLogger(BasicComponent.class.getName());
+
+	// MS Word (DOCX), MHT-file: font size 12pt won't be correct converted
+	private static String DOCX_MHT_FONT_SIZE_ISSUE = "12pt";
+
+	// MS Word (DOCX), MHT-file: replacement font size
+	private static String DOCX_MHT_FONT_SIZE_REPLACEMENT = "12.5pt";
 
 	protected ImageManager imageManager;
 
@@ -90,9 +101,11 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 
 	private final String BOUNDARY = "___Actuate_Content_Boundary___";
 
-	private List<String> imageSrc = new ArrayList<String>();
+	private List<String> imageSrc = new ArrayList<>();
 
 	private ReportDesignHandle handle;
+
+	protected boolean wrappedTable = true;
 
 	protected BasicComponent(IPart part) throws IOException {
 		this.part = part;
@@ -163,6 +176,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		writer.closeTag("v:shape");
 	}
 
+	@Override
 	protected void openHyperlink(HyperlinkInfo info) {
 		if (info == null) {
 			return;
@@ -173,7 +187,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			writer.attribute("w:anchor", info.getUrl());
 		} else if (HyperlinkInfo.HYPERLINK == info.getType()) {
 			if (info.getUrl() != null) {
-				String url = info.getUrl().replaceAll(" ", "");
+				String url = info.getUrl().replace(" ", "");
 				writer.attribute("r:id", part.getHyperlinkId(url));
 			}
 			if (info.getBookmark() != null) {
@@ -185,6 +199,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		}
 	}
 
+	@Override
 	protected void closeHyperlink(HyperlinkInfo info) {
 		if ((info == null) || (info.getType() == HyperlinkInfo.DRILL)) {
 			return;
@@ -192,12 +207,14 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		writer.closeTag("w:hyperlink");
 	}
 
+	@Override
 	protected void writeTableLayout() {
 		writer.openTag("w:tblLayout");
 		writer.attribute("w:type", "fixed");
 		writer.closeTag("w:tblLayout");
 	}
 
+	@Override
 	protected void writeFontSize(IStyle style) {
 		CSSValue fontSize = style.getProperty(StyleConstants.STYLE_FONT_SIZE);
 		int size = WordUtil.parseFontSize(PropertyUtil.getDimensionValue(fontSize));
@@ -205,6 +222,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		writeAttrTag("w:szCs", size);
 	}
 
+	@Override
 	protected void writeFont(String fontFamily) {
 		writer.openTag("w:rFonts");
 		writer.attribute("w:ascii", fontFamily);
@@ -214,6 +232,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		writer.closeTag("w:rFonts");
 	}
 
+	@Override
 	protected void writeFontStyle(IStyle style) {
 		String val = WordUtil.removeQuote(style.getFontStyle());
 		if (!"normal".equalsIgnoreCase(val)) {
@@ -222,6 +241,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		}
 	}
 
+	@Override
 	protected void writeFontWeight(IStyle style) {
 		String val = WordUtil.removeQuote(style.getFontWeight());
 		if (!"normal".equalsIgnoreCase(val)) {
@@ -273,6 +293,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		}
 	}
 
+	@Override
 	protected void writeVmerge(SpanInfo spanInfo) {
 		if (spanInfo.isStart()) {
 			writeAttrTag("w:vMerge", "restart");
@@ -297,18 +318,25 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		bookmarkId++;
 	}
 
+	protected void writeForeign(IForeignContent foreignContent, boolean wrappedTable, boolean combineMarginPadding) {
+		this.wrappedTable = wrappedTable;
+		this.combineMarginPadding = combineMarginPadding;
+		writeForeign(foreignContent);
+	}
+
 	protected void writeForeign(IForeignContent foreignContent) {
-		if (foreignContent.getRawValue() != null) {
-			String uri = "mhtText" + getMhtTextId() + ".mht";
-			MimeType type = MimeType.MHT;
-			String relationshipType = RelationshipTypes.AFCHUNK;
-			IPart mhtPart = part.getPart(uri, type, relationshipType);
-			handle = foreignContent.getReportContent().getDesign().getReportDesign();
-			writeMhtPart(mhtPart, foreignContent);
-			writer.openTag("w:altChunk");
-			writer.attribute("r:id", mhtPart.getRelationshipId());
-			writer.closeTag("w:altChunk");
-		}
+		if (foreignContent.getRawValue() == null)
+			foreignContent.setRawValue(new String(""));
+
+		String uri = "mhtText" + getMhtTextId() + ".mht";
+		MimeType type = MimeType.MHT;
+		String relationshipType = RelationshipTypes.AFCHUNK;
+		IPart mhtPart = part.getPart(uri, type, relationshipType);
+		handle = foreignContent.getReportContent().getDesign().getReportDesign();
+		writeMhtPart(mhtPart, foreignContent);
+		writer.openTag("w:altChunk");
+		writer.attribute("r:id", mhtPart.getRelationshipId());
+		writer.closeTag("w:altChunk");
 	}
 
 	private void writeMhtPart(IPart mhtPart, IForeignContent foreignContent) {
@@ -321,9 +349,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			mhtPartWriter.println("Content-Type: multipart/related; type=\"text/html\"; boundary=\"" + BOUNDARY + "\"");
 			writeHtmlText(foreignContent);
 			writeImages();
-		} catch (IOException e) {
-			logger.log(Level.WARNING, e.getMessage(), e);
-		} catch (EncoderException e) {
+		} catch (IOException | EncoderException e) {
 			logger.log(Level.WARNING, e.getMessage(), e);
 		} finally {
 			if (mhtPartWriter != null) {
@@ -343,8 +369,12 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		int display = getElementType(x, y, width, height, style);
 		String tagName = getTagByType(display, DISPLAY_FLAG_ALL);
 		if (null != tagName) {
-			htmlBuffer.append("<div");
-			if (tagName.equalsIgnoreCase("span")) {
+			// solve MS Word/MHT font-size issue
+			if (style.getFontSize().equalsIgnoreCase(DOCX_MHT_FONT_SIZE_ISSUE)) {
+				style.setFontSize(DOCX_MHT_FONT_SIZE_REPLACEMENT);
+			}
+			htmlBuffer.append("<" + tagName);
+			if (tagName.equalsIgnoreCase(HTMLTags.TAG_SPAN)) {
 				htmlBuffer.append(" style=\"display: inline\" ");
 			}
 		}
@@ -375,13 +405,14 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 	private String normalize(String foreignText, Map appContext) throws UnsupportedEncodingException {
 		Document doc = new TextParser().parse(foreignText, TextParser.TEXT_TYPE_HTML);
 		HTMLProcessor htmlProcessor = new HTMLProcessor(handle, appContext);
-		HashMap<String, String> styleMap = new HashMap<String, String>();
+		HashMap<String, String> styleMap = new HashMap<>();
 		Element body = null;
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		HTMLWriter htmlWriter = new HTMLWriter();
+		htmlWriter.setEnableCompactMode(true); // HVB, bug 519375
 		htmlWriter.open(byteOut);
 		if (doc != null) {
-			NodeList bodys = doc.getElementsByTagName("body");
+			NodeList bodys = doc.getElementsByTagName(HTMLTags.TAG_BODY);
 			if (bodys.getLength() > 0) {
 				body = (Element) bodys.item(0);
 			}
@@ -402,9 +433,9 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			htmlBuffer.append("<head>");
 			htmlBuffer.append("<style type=" + "\"text/css\"" + ">");
 			htmlBuffer.append(".styleForeign");
-			htmlBuffer.append('{');
+			htmlBuffer.append(" {");
 			htmlBuffer.append(styleBuffer.toString());
-			htmlBuffer.append('}');
+			htmlBuffer.append(" }");
 			htmlBuffer.append("</style>");
 			htmlBuffer.append("</head>");
 		}
@@ -442,13 +473,13 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			display = style.getDisplay();
 		}
 
-		if (EngineIRConstants.DISPLAY_NONE.equalsIgnoreCase(display)) {
+		if (DesignChoiceConstants.DISPLAY_NONE.equalsIgnoreCase(display)) {
 			type |= DISPLAY_NONE;
 		}
 
 		if (x != null || y != null) {
 			return type | DISPLAY_BLOCK;
-		} else if (EngineIRConstants.DISPLAY_INLINE.equalsIgnoreCase(display)) {
+		} else if (DesignChoiceConstants.DISPLAY_INLINE.equalsIgnoreCase(display)) {
 			type |= DISPLAY_INLINE;
 			if (width != null || height != null) {
 				type |= DISPLAY_INLINE_BLOCK;
@@ -472,10 +503,14 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		return tag;
 	}
 
+	@SuppressWarnings("unused")
 	private void buildForeignStyles(IForeignContent foreignContent, StringBuffer foreignStyles, int display) {
 		IStyle style = foreignContent.getComputedStyle();
 		foreignStyles.setLength(0);
 		buildTextAlign(foreignStyles, style);
+		if (!wrappedTable) {
+			buildForeignBorders(foreignStyles, style);
+		}
 		style = getElementStyle(foreignContent);
 		if (style == null) {
 			return;
@@ -485,6 +520,41 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		buildText(foreignStyles, style);
 		buildVisual(foreignStyles, style);
 		buildTextDecoration(foreignStyles, style);
+	}
+
+	protected void buildForeignBorders(StringBuffer foreignStyles, IStyle style) {
+		String borderStyle = style.getBorderBottomStyle();
+		if (hasBorder(borderStyle)) {
+			buildBorder(HTMLTags.ATTR_BORDER_BOTTOM, foreignStyles, borderStyle, style.getBorderBottomColor(),
+					style.getProperty(StyleConstants.STYLE_BORDER_BOTTOM_WIDTH));
+		}
+
+		borderStyle = style.getBorderTopStyle();
+		if (hasBorder(borderStyle)) {
+			buildBorder(HTMLTags.ATTR_BORDER_TOP, foreignStyles, borderStyle, style.getBorderTopColor(),
+					style.getProperty(StyleConstants.STYLE_BORDER_TOP_WIDTH));
+		}
+
+		borderStyle = style.getBorderLeftStyle();
+		if (hasBorder(borderStyle)) {
+			buildBorder(HTMLTags.ATTR_BORDER_LEFT, foreignStyles, borderStyle, style.getBorderLeftColor(),
+					style.getProperty(StyleConstants.STYLE_BORDER_LEFT_WIDTH));
+		}
+
+		borderStyle = style.getBorderRightStyle();
+		if (hasBorder(borderStyle)) {
+			buildBorder(HTMLTags.ATTR_BORDER_RIGHT, foreignStyles, borderStyle, style.getBorderRightColor(),
+					style.getProperty(StyleConstants.STYLE_BORDER_RIGHT_WIDTH));
+		}
+
+	}
+
+	private void buildBorder(String borderAttributeName, StringBuffer styleBuffer, String style, String color,
+			CSSValue width) {
+		addPropName(styleBuffer, borderAttributeName);
+		addPropValue(styleBuffer, width.getCssText() + " " + style + " #"
+				+ WordUtil.parseColor(color));
+		styleBuffer.append(';');
 	}
 
 	private IStyle getElementStyle(IContent content) {
@@ -547,60 +617,102 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 
 	/**
 	 * Build the margins.
-	 * 
+	 *
 	 * @param styleBuffer
 	 * @param style
 	 */
 	private void buildMargins(StringBuffer styleBuffer, IStyle style) {
 		// build the margins
 		String topMargin = style.getMarginTop();
-		String rightMargin = style.getMarginRight();
+		String rightMargin = "0px";
 		String bottomMargin = style.getMarginBottom();
-		String leftMargin = style.getMarginLeft();
+		String leftMargin = "0px";
 
-		if (null != topMargin && null != rightMargin && null != bottomMargin && null != leftMargin) {
-			if (rightMargin.equals(leftMargin)) {
-				if (topMargin.equals(bottomMargin)) {
-					if (topMargin.equals(rightMargin)) {
-						// The four margins have the same value
-						buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN, topMargin);
+		if (!wrappedTable) {
+			rightMargin = style.getMarginRight();
+			leftMargin = style.getMarginLeft();
+		}
+
+		// MHT-files for DOCX needs for each margin-attribute an own style tag to be
+		// displayed correctly
+		boolean marginStyleMultipleAttr = !wrappedTable;
+		if (marginStyleMultipleAttr) {
+			buildMarginMultipleAttributes(styleBuffer, style, topMargin, rightMargin, bottomMargin, leftMargin);
+		} else {
+			if (null != topMargin && null != rightMargin && null != bottomMargin && null != leftMargin) {
+				if (rightMargin.equals(leftMargin)) {
+					if (topMargin.equals(bottomMargin)) {
+						if (topMargin.equals(rightMargin)) {
+							// The four margins have the same value
+							buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN, topMargin);
+						} else {
+							// The top & bottom margins have the same value. The
+							// right & left margins have the same value.
+							addPropName(styleBuffer, HTMLTags.ATTR_MARGIN);
+							addPropValue(styleBuffer, topMargin);
+							addPropValue(styleBuffer, rightMargin);
+							styleBuffer.append(';');
+						}
 					} else {
-						// The top & bottom margins have the same value. The
-						// right & left margins have the same value.
+						// only the right & left margins have the same value.
 						addPropName(styleBuffer, HTMLTags.ATTR_MARGIN);
 						addPropValue(styleBuffer, topMargin);
 						addPropValue(styleBuffer, rightMargin);
+						addPropValue(styleBuffer, bottomMargin);
 						styleBuffer.append(';');
 					}
 				} else {
-					// only the right & left margins have the same value.
+					// four margins have different values.
 					addPropName(styleBuffer, HTMLTags.ATTR_MARGIN);
 					addPropValue(styleBuffer, topMargin);
 					addPropValue(styleBuffer, rightMargin);
 					addPropValue(styleBuffer, bottomMargin);
+					addPropValue(styleBuffer, leftMargin);
 					styleBuffer.append(';');
 				}
 			} else {
-				// four margins have different values.
-				addPropName(styleBuffer, HTMLTags.ATTR_MARGIN);
-				addPropValue(styleBuffer, topMargin);
-				addPropValue(styleBuffer, rightMargin);
-				addPropValue(styleBuffer, bottomMargin);
-				addPropValue(styleBuffer, leftMargin);
-				styleBuffer.append(';');
+				// At least one margin has null value.
+				buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_TOP, topMargin);
+				buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_RIGHT, rightMargin);
+				buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_BOTTOM, bottomMargin);
+				buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_LEFT, leftMargin);
 			}
-		} else {
-			// At least one margin has null value.
-			buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_TOP, topMargin);
-			buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_RIGHT, rightMargin);
-			buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_BOTTOM, bottomMargin);
-			buildProperty(styleBuffer, HTMLTags.ATTR_MARGIN_LEFT, leftMargin);
+		}
+	}
+
+	/**
+	 * Build the single attributes of margin
+	 */
+	private void buildMarginMultipleAttributes(StringBuffer styleBuffer, IStyle style, String topMargin,
+			String rightMargin, String bottomMargin, String leftMargin) {
+		buildMarginAttribute(styleBuffer, HTMLTags.ATTR_MARGIN_TOP, topMargin, style.getPaddingTop());
+		buildMarginAttribute(styleBuffer, HTMLTags.ATTR_MARGIN_RIGHT, rightMargin, style.getPaddingRight());
+		buildMarginAttribute(styleBuffer, HTMLTags.ATTR_MARGIN_BOTTOM, bottomMargin, style.getPaddingBottom());
+		buildMarginAttribute(styleBuffer, HTMLTags.ATTR_MARGIN_LEFT, leftMargin, style.getPaddingLeft());
+	}
+
+	/**
+	 * Build the single attribute of each margin position (top, right, bottom, left)
+	 */
+	private void buildMarginAttribute(StringBuffer styleBuffer, String attribute, String marginValue,
+			String paddingValue) {
+		if (null != marginValue) {
+			if (combineMarginPadding) {
+				int marginPt = WordUtil.convertToPt(marginValue);
+				if (paddingValue != null) {
+					marginPt += WordUtil.convertToPt(paddingValue);
+					marginValue = marginPt + "pt";
+				}
+			}
+			addPropName(styleBuffer, attribute);
+			addPropValue(styleBuffer, marginValue);
+			styleBuffer.append(';');
 		}
 	}
 
 	/**
 	 * Build the paddings.
-	 * 
+	 *
 	 * @param styleBuffer
 	 * @param style
 	 */
@@ -664,20 +776,20 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 	}
 
 	private void buildTextDecoration(StringBuffer styleBuffer, IStyle style) {
-		CSSValue linethrough = style.getProperty(IStyle.STYLE_TEXT_LINETHROUGH);
-		CSSValue underline = style.getProperty(IStyle.STYLE_TEXT_UNDERLINE);
-		CSSValue overline = style.getProperty(IStyle.STYLE_TEXT_OVERLINE);
+		CSSValue linethrough = style.getProperty(StyleConstants.STYLE_TEXT_LINETHROUGH);
+		CSSValue underline = style.getProperty(StyleConstants.STYLE_TEXT_UNDERLINE);
+		CSSValue overline = style.getProperty(StyleConstants.STYLE_TEXT_OVERLINE);
 
-		if (linethrough == IStyle.LINE_THROUGH_VALUE || underline == IStyle.UNDERLINE_VALUE
-				|| overline == IStyle.OVERLINE_VALUE) {
+		if (linethrough == CSSValueConstants.LINE_THROUGH_VALUE || underline == CSSValueConstants.UNDERLINE_VALUE
+				|| overline == CSSValueConstants.OVERLINE_VALUE) {
 			styleBuffer.append(" text-decoration:"); //$NON-NLS-1$
-			if (IStyle.LINE_THROUGH_VALUE == linethrough) {
+			if (CSSValueConstants.LINE_THROUGH_VALUE == linethrough) {
 				addPropValue(styleBuffer, "line-through");
 			}
-			if (IStyle.UNDERLINE_VALUE == underline) {
+			if (CSSValueConstants.UNDERLINE_VALUE == underline) {
 				addPropValue(styleBuffer, "underline");
 			}
-			if (IStyle.OVERLINE_VALUE == overline) {
+			if (CSSValueConstants.OVERLINE_VALUE == overline) {
 				addPropValue(styleBuffer, "overline");
 			}
 			styleBuffer.append(';');
@@ -697,8 +809,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			try {
 				byte[] data = EmitterUtil.getImageData(uri);
 				if (data != null && data.length != 0) {
-					Base64 base = new Base64();
-					String pic2Text = new String(base.encode(data));
+					String pic2Text = new String(Base64.getEncoder().encode(data));
 					mhtPartWriter.println(pic2Text);
 				}
 			} catch (IOException e) {
@@ -758,9 +869,8 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			} else if (nodeType == Node.COMMENT_NODE) {
 				writer.comment(node.getNodeValue());
 			} else if (nodeType == Node.ELEMENT_NODE) {
-				Element element = (Element) node;
-				if ("br".equalsIgnoreCase(node.getNodeName())) {
-					// <br/> is correct. <br></br> is not correct. The brower
+				if (HTMLTags.TAG_BR.equalsIgnoreCase(node.getNodeName())) {
+					// <br/> is correct. <br></br> is not correct. The browser
 					// will treat the <br></br> as <br><br>
 					boolean bImplicitCloseTag = writer.isImplicitCloseTag();
 					writer.setImplicitCloseTag(true);
@@ -768,7 +878,19 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 					processNodes((Element) node, cssStyles, writer, appContext);
 					endNode(node, writer);
 					writer.setImplicitCloseTag(bImplicitCloseTag);
+				} else if (HTMLTags.TAG_FONT.equalsIgnoreCase(node.getNodeName())) {
+					// <font> will be replaced to span-tag to correct font-size behavior
+					Node fontNode = convertFontTagToSpanTag(node, cssStyles);
+					startNode(fontNode, cssStyles, writer, appContext);
+					processNodes((Element) fontNode, cssStyles, writer, appContext);
+					endNode(fontNode, writer);
+
 				} else {
+					// solve MS Word/MHT font-size issue
+					if (HTMLTags.TAG_DIV.equalsIgnoreCase(node.getNodeName())
+							|| HTMLTags.TAG_SPAN.equalsIgnoreCase(node.getNodeName())) {
+						getCorrectFontSize(node, cssStyles);
+					}
 					startNode(node, cssStyles, writer, appContext);
 					processNodes((Element) node, cssStyles, writer, appContext);
 					endNode(node, writer);
@@ -800,7 +922,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 			}
 		}
 		if (cssStyle != null) {
-			StringBuffer buffer = new StringBuffer();
+			StringBuilder buffer = new StringBuilder();
 			Iterator ite = cssStyle.entrySet().iterator();
 			while (ite.hasNext()) {
 				Map.Entry entry = (Map.Entry) ite.next();
@@ -851,7 +973,7 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 
 	/**
 	 * test if the text node is in the script
-	 * 
+	 *
 	 * @param node text node
 	 * @return true if the text is a script, otherwise, false.
 	 */
@@ -873,14 +995,15 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		Matcher matcher = pattern.matcher(foreignText);
 		if (matcher.matches()) {
 			return foreignText;
-		} else
-			return "<html>" + foreignText + "</html>";
+		}
+		return "<html>" + foreignText + "</html>";
 	}
 
 	protected String getRelationshipId() {
 		return part.getRelationshipId();
 	}
 
+	@Override
 	public void startTableRow(double height, boolean isHeader, boolean repeatHeader, boolean fixedLayout) {
 		writer.openTag("w:tr");
 
@@ -904,12 +1027,14 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 		writer.closeTag("w:trPr");
 	}
 
+	@Override
 	protected void writeIndent(int textIndent) {
 		writer.openTag("w:ind");
 		writer.attribute("w:firstLine", textIndent);
 		writer.closeTag("w:ind");
 	}
 
+	@Override
 	protected void writeIndent(int leftMargin, int rightMargin, int textIndent) {
 		if (leftMargin == 0 && rightMargin == 0 && textIndent == 0) {
 			return;
@@ -934,4 +1059,125 @@ public abstract class BasicComponent extends AbstractWordXmlWriter {
 	abstract void end();
 
 	abstract protected int getMhtTextId();
+
+	/**
+	 * Get the replaced span tag for the font tag to support correct styles
+	 *
+	 * @param nodeFont  html tag font which will be replaced
+	 * @param cssStyles CSS style around the font tag
+	 *
+	 * @return the alternative node of the font tag
+	 */
+	private Node convertFontTagToSpanTag(Node nodeFont, HashMap<Node, Object> cssStyles) {
+		String fontSize = null;
+		String fontColor = null;
+		String fontFamily = null;
+
+		// create new span-tag
+		Document doc = nodeFont.getOwnerDocument();
+		Element spanTag = doc.createElement(HTMLTags.TAG_SPAN);
+
+		NamedNodeMap nodeAttributes = nodeFont.getAttributes();
+		if (nodeAttributes != null) {
+
+			if (nodeAttributes.getNamedItem(HTMLTags.ATTR_TAG_FONT_SIZE) != null) {
+				String size = nodeAttributes.getNamedItem(HTMLTags.ATTR_TAG_FONT_SIZE).getNodeValue().trim();
+
+				// size: absolute value converting
+				if (size.equals("0") || size.equals("1")) {
+					fontSize = "8pt";
+				} else if (size.equals("2")) {
+					fontSize = "10pt";
+				} else if (size.equals("3")) {
+					// MS Word, MHT-file: font size 12pt won't be correct converted
+					fontSize = DOCX_MHT_FONT_SIZE_REPLACEMENT;
+				} else if (size.equals("4")) {
+					fontSize = "14pt";
+				} else if (size.equals("5")) {
+					fontSize = "18pt";
+				} else if (size.equals("6")) {
+					fontSize = "24pt";
+				} else if (size.equals("7")) {
+					fontSize = "36pt";
+				}
+				// size: relative value converting
+				if (fontSize == null) {
+					if (size.length() > 2) {
+						size = size.substring(0, 2);
+					}
+					if (size.equals("-2")) {
+						fontSize = "0.75em";
+					} else if (size.equals("-1")) {
+						fontSize = "1.0em";
+					} else if (size.equals("-0") || size.equals("+0")) {
+						fontSize = "1.25em";
+					} else if (size.equals("+1")) {
+						fontSize = "1.35em";
+					} else if (size.equals("+2")) {
+						fontSize = "1.8em";
+					} else if (size.equals("+3")) {
+						fontSize = "2.4em";
+					} else if (size.equals("+4")) {
+						fontSize = "3.6em";
+					} else {
+						fontSize = "10pt";
+					}
+				}
+			}
+			Node colorNode = nodeAttributes.getNamedItem(HTMLTags.ATTR_TAG_FONT_COLOR);
+			if (colorNode != null && colorNode.getNodeValue().trim().length() > 0) {
+				fontColor = colorNode.getNodeValue().trim();
+			}
+			Node fontNode = nodeAttributes.getNamedItem(HTMLTags.ATTR_TAG_FONT_FACE);
+			if (fontNode != null && fontNode.getNodeValue().trim().length() > 0) {
+				fontFamily = fontNode.getNodeValue().trim();
+			}
+		}
+		String styleValues = "";
+		if (fontSize != null && fontSize.length() > 0) {
+			styleValues += HTMLTags.ATTR_FONT_SIZE + ":" + fontSize + ";";
+		}
+		if (fontColor != null && fontColor.length() > 0) {
+			styleValues += HTMLTags.ATTR_COLOR + ":" + fontColor + ";";
+		}
+		if (fontFamily != null && fontFamily.length() > 0) {
+			styleValues += HTMLTags.ATTR_FONT_FAMILY + ":" + fontFamily + ";";
+		}
+		if (styleValues != null && styleValues.trim().length() > 0) {
+			Attr spanAttr = doc.createAttribute(HTMLTags.ATTR_STYLE);
+			spanAttr.setNodeValue(styleValues);
+			spanTag.setAttributeNode(spanAttr);
+		}
+		NodeList fontContentChildren = nodeFont.getChildNodes();
+		for (int i = 0; i < fontContentChildren.getLength(); i++) {
+			Node child = fontContentChildren.item(i).cloneNode(true);
+			spanTag.appendChild(child);
+		}
+		HashMap<String, Object> nodeStyle = (HashMap<String, Object>) cssStyles.get(nodeFont);
+		cssStyles.remove(nodeFont);
+		cssStyles.put(spanTag, nodeStyle);
+		return spanTag;
+	}
+
+	/**
+	 * Get the corrected font size to solve the MS Word (DOCX) / MHT font size issue
+	 * MHT font size 12pt will be changed at MS Word side to font size 10pt
+	 *
+	 * @param nodeTag   html tag to validate the font size
+	 * @param cssStyles CSS style around the tag
+	 *
+	 */
+	private void getCorrectFontSize(Node nodeTag, HashMap<Node, Object> cssStyles) {
+		HashMap<String, Object> nodeStyle = (HashMap<String, Object>) cssStyles.get(nodeTag);
+		if (nodeStyle != null) {
+			for (Object key : nodeStyle.keySet()) {
+				if (((String) key).contains(HTMLTags.ATTR_FONT_SIZE) && nodeStyle.get(key) != null
+						&& ((String) nodeStyle.get(key)).equalsIgnoreCase(DOCX_MHT_FONT_SIZE_ISSUE)) {
+						nodeStyle.replace((String) key, DOCX_MHT_FONT_SIZE_REPLACEMENT);
+						break;
+				}
+			}
+		}
+	}
+
 }

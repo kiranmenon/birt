@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2009 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,7 +16,7 @@ package org.eclipse.birt.report.engine.ir;
 
 /**
  * Image Item definition.
- * 
+ *
  */
 public class ImageItemDesign extends ReportItemDesign {
 
@@ -72,19 +75,23 @@ public class ImageItemDesign extends ReportItemDesign {
 	 */
 	protected boolean proportionalScale;
 
+	/**
+	 * Constructor
+	 */
 	public ImageItemDesign() {
 		this.imageSource = IMAGE_URI;
 	}
 
+	@Override
 	public Object accept(IReportItemVisitor visitor, Object value) {
 		return visitor.visitImageItem(this, value);
 	}
 
 	/**
 	 * get the type of the image source.
-	 * 
+	 *
 	 * Image can be defined by expression, uri and name.
-	 * 
+	 *
 	 * @return type of the image source.
 	 */
 	public int getImageSource() {
@@ -157,6 +164,11 @@ public class ImageItemDesign extends ReportItemDesign {
 		return null;
 	}
 
+	/**
+	 * Set image file
+	 *
+	 * @param file file URI
+	 */
 	public void setImageFile(Expression file) {
 		imageSource = IMAGE_FILE;
 		imageUri = file;
@@ -164,7 +176,7 @@ public class ImageItemDesign extends ReportItemDesign {
 
 	/**
 	 * set the help info.
-	 * 
+	 *
 	 * @param key  resource key
 	 * @param text text content
 	 */
@@ -175,7 +187,7 @@ public class ImageItemDesign extends ReportItemDesign {
 
 	/**
 	 * get the help text property.
-	 * 
+	 *
 	 * @return help text
 	 */
 	public String getHelpText() {
@@ -184,7 +196,7 @@ public class ImageItemDesign extends ReportItemDesign {
 
 	/**
 	 * get the help text resource key property.
-	 * 
+	 *
 	 * @return resource key of the help text
 	 */
 	public String getHelpTextKey() {
@@ -193,7 +205,7 @@ public class ImageItemDesign extends ReportItemDesign {
 
 	/**
 	 * get the FitToContainer property.
-	 * 
+	 *
 	 * @return the FitToContainer property.
 	 */
 	public boolean isFitToContainer() {
@@ -202,7 +214,7 @@ public class ImageItemDesign extends ReportItemDesign {
 
 	/**
 	 * set the FitToContainer property.
-	 * 
+	 *
 	 * @param fitToContainer
 	 */
 	public void setFitToContainer(boolean fitToContainer) {

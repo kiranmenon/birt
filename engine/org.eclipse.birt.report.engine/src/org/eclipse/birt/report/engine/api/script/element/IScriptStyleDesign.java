@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -25,7 +28,7 @@ public interface IScriptStyleDesign {
 	 * <li>BACKGROUND_ATTACHMENT_SCROLL
 	 * <li>BACKGROUND_ATTACHMENT_FIXED
 	 * </ul>
-	 * 
+	 *
 	 * @return the background attachment
 	 */
 
@@ -38,7 +41,7 @@ public interface IScriptStyleDesign {
 	 * <li>BACKGROUND_ATTACHMENT_SCROLL
 	 * <li>BACKGROUND_ATTACHMENT_FIXED
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new background attachment
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -47,7 +50,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the address of the background image.
-	 * 
+	 *
 	 * @return the address of the background image as a string
 	 */
 
@@ -55,7 +58,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Sets the address of the background image. The value is a URL as a string.
-	 * 
+	 *
 	 * @param value the new background image address
 	 * @throws ScriptException if the property is locked
 	 */
@@ -71,11 +74,41 @@ public interface IScriptStyleDesign {
 	 * <li>BACKGROUND_REPEAT_REPEAT_Y
 	 * <li>BACKGROUND_REPEAT_NO_REPEAT
 	 * </ul>
-	 * 
+	 *
 	 * @return the repeat pattern
 	 */
 
 	String getBackgroundRepeat();
+
+	/**
+	 * Set the background height of the background image.
+	 *
+	 * @param value the new background image height
+	 * @throws ScriptException if the property is locked
+	 */
+	void setBackgroundHeight(String value) throws ScriptException;
+
+	/**
+	 * Returns the height of the background image.
+	 *
+	 * @return the background image height
+	 */
+	String getBackgroundHeight();
+
+	/**
+	 * Set the background width of the background image.
+	 *
+	 * @param value the new background image width
+	 * @throws ScriptException if the property is locked
+	 */
+	void setBackgroundWidth(String value) throws ScriptException;
+
+	/**
+	 * Returns the width of the background image.
+	 *
+	 * @return the background image width
+	 */
+	String getBackgroundWidth();
 
 	/**
 	 * Sets the repeat pattern for a background image. The input value is defined in
@@ -86,7 +119,7 @@ public interface IScriptStyleDesign {
 	 * <li>BACKGROUND_REPEAT_REPEAT_Y
 	 * <li>BACKGROUND_REPEAT_NO_REPEAT
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new repeat pattern
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -107,7 +140,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the style of the bottom line
 	 */
 
@@ -127,7 +160,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new style of the bottom line
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -148,7 +181,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the style of the left line
 	 */
 
@@ -168,7 +201,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new style of the left line
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -189,7 +222,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the style of the right line
 	 */
 
@@ -209,7 +242,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new style of the right line
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -230,7 +263,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the style of the top line
 	 */
 
@@ -250,7 +283,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>LINE_STYLE_INSET</code>
 	 * <li><code>LINE_STYLE_OUTSET</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new style of the right line
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -260,7 +293,7 @@ public interface IScriptStyleDesign {
 	/**
 	 * Tests whether the section can shrink if the actual content is smaller than
 	 * the design size.
-	 * 
+	 *
 	 * @return <code>true</code> if can shrink, otherwise <code>false</code>
 	 * @see #setCanShrink(boolean)
 	 */
@@ -270,7 +303,7 @@ public interface IScriptStyleDesign {
 	/**
 	 * Sets whether the section can shrink if the actual content is smaller than the
 	 * design size.
-	 * 
+	 *
 	 * @param value <code>true</code> if can shrink, <code>false</code> not.
 	 * @throws ScriptException if the property is locked
 	 * @see #canShrink()
@@ -280,7 +313,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the pattern of a string format.
-	 * 
+	 *
 	 * @return the pattern of a string format
 	 */
 
@@ -288,7 +321,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Sets the pattern of a string format.
-	 * 
+	 *
 	 * @param pattern the pattern of a string forma
 	 * @throws ScriptException if the property is locked
 	 */
@@ -297,7 +330,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the category of a string format.
-	 * 
+	 *
 	 * @return the category of a string format
 	 */
 
@@ -305,7 +338,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Sets the category of a string format. The <code>pattern</code> can be one of:
-	 * 
+	 *
 	 * <ul>
 	 * <li><code>DesignChoiceConstants.STRING_FORMAT_TYPE_UNFORMATTED</code>
 	 * <li><code>DesignChoiceConstants.STRING_FORMAT_TYPE_UPPERCASE</code>
@@ -317,7 +350,7 @@ public interface IScriptStyleDesign {
 	 * <li>
 	 * <code>DesignChoiceConstants.STRING_FORMAT_TYPE_SOCIAL_SECURITY_NUMBER</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param pattern the category of a string format
 	 * @throws ScriptException if <code>pattern</code> is not one of the above
 	 *                         values.
@@ -327,7 +360,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the pattern of a number format for a style.
-	 * 
+	 *
 	 * @return the pattern of a number format
 	 */
 
@@ -335,7 +368,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Sets the pattern of a number format.
-	 * 
+	 *
 	 * @param pattern the pattern of a number format
 	 * @throws ScriptException if the property is locked
 	 */
@@ -344,7 +377,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the category of a number format for a style.
-	 * 
+	 *
 	 * @return the category of a number format
 	 */
 
@@ -353,7 +386,7 @@ public interface IScriptStyleDesign {
 	/**
 	 * Sets the category of a number format for a highlight rule. The
 	 * <code>pattern</code> can be one of:
-	 * 
+	 *
 	 * <ul>
 	 * <li><code>DesignChoiceConstants.NUMBER_FORMAT_TYPE_UNFORMATTED</code>
 	 * <li><code>DesignChoiceConstants.NUMBER_FORMAT_TYPE_GENERAL_NUMBER</code>
@@ -364,7 +397,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>DesignChoiceConstants.NUMBER_FORMAT_TYPE_STANDARD</code>
 	 * <li><code>DesignChoiceConstants.NUMBER_FORMAT_TYPE_CUSTOM</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param category the category of a number format
 	 * @throws ScriptException if <code>category</code> is not one of the above
 	 *                         values.
@@ -374,7 +407,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the pattern of the date-time-format.
-	 * 
+	 *
 	 * @return the pattern of the date-time-format
 	 */
 
@@ -382,7 +415,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Sets the pattern of a date time format for a highlight rule.
-	 * 
+	 *
 	 * @param pattern the pattern of a date time format
 	 * @throws ScriptException if the property is locked
 	 */
@@ -391,7 +424,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the category of the date-time-format.
-	 * 
+	 *
 	 * @return the category of the date-time-format
 	 */
 
@@ -399,7 +432,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Sets the category of a number format. The <code>pattern</code> can be one of:
-	 * 
+	 *
 	 * <ul>
 	 * <li><code>DesignChoiceConstants.DATETIEM_FORMAT_TYPE_UNFORMATTED</code>
 	 * <li><code>DesignChoiceConstants.DATETIEM_FORMAT_TYPE_GENERAL_DATE</code>
@@ -411,7 +444,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>DesignChoiceConstants.DATETIEM_FORMAT_TYPE_SHORT_TIME</code>
 	 * <li><code>DesignChoiceConstants.DATETIEM_FORMAT_TYPE_CUSTOM</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param pattern the category of a date-time format
 	 * @throws ScriptException if <code>pattern</code> is not one of the above
 	 *                         values.
@@ -428,7 +461,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>DISPLAY_INLINE</code>
 	 * <li><code>DISPLAY_BLOCK</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the display value as a string
 	 */
 
@@ -443,7 +476,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>DISPLAY_INLINE</code>
 	 * <li><code>DISPLAY_BLOCK</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new display value
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -452,7 +485,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Returns the name of the master page on which to start this section.
-	 * 
+	 *
 	 * @return the master page name
 	 * @see #setMasterPage(String)
 	 */
@@ -464,7 +497,7 @@ public interface IScriptStyleDesign {
 	 * normal page sequence is used. If defined, the section starts on a new page,
 	 * and the master page is the one defined here. The subsequent pages are those
 	 * defined by the report's page sequence.
-	 * 
+	 *
 	 * @param value the new master page name
 	 * @throws ScriptException if the property is locked
 	 * @see #getMasterPage()
@@ -478,7 +511,7 @@ public interface IScriptStyleDesign {
 	 * <ul>
 	 * <li><code>ORPHANS_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the orphans property
 	 * @see #setOrphans(String)
 	 */
@@ -493,7 +526,7 @@ public interface IScriptStyleDesign {
 	 * <ul>
 	 * <li><code>ORPHANS_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new orphans property
 	 * @throws ScriptException if the value is not an integer or one of the above
 	 *                         constants.
@@ -513,7 +546,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>PAGE_BREAK_RIGHT</code>
 	 * <li><code>PAGE_BREAK_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the page break after property
 	 */
 
@@ -530,7 +563,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>PAGE_BREAK_RIGHT</code>
 	 * <li><code>PAGE_BREAK_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new page break after property
 	 * @throws ScriptException if the value is not pre-defined.
 	 */
@@ -548,7 +581,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>PAGE_BREAK_RIGHT</code>
 	 * <li><code>PAGE_BREAK_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the page break before property
 	 */
 
@@ -565,7 +598,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>PAGE_BREAK_RIGHT</code>
 	 * <li><code>PAGE_BREAK_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new page break before property
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -580,7 +613,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>PAGEBREAK_INSIDE_AUTO</code>
 	 * <li><code>PAGEBREAK_INSIDE_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the page break inside property
 	 */
 
@@ -594,7 +627,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>PAGEBREAK_INSIDE_AUTO</code>
 	 * <li><code>PAGEBREAK_INSIDE_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new page break inside property
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -605,7 +638,7 @@ public interface IScriptStyleDesign {
 	 * Tests whether to show this frame even if it is empty, or all its data
 	 * elements are empty. If <code>false</code>, the section is automatically
 	 * hidden when empty.
-	 * 
+	 *
 	 * @return <code>true</code> if show-if-blank, otherwise <code>false</code>
 	 * @see #setShowIfBlank(boolean)
 	 */
@@ -615,7 +648,7 @@ public interface IScriptStyleDesign {
 	/**
 	 * Sets whether to show this frame even if it is empty, or all its data elements
 	 * are empty.
-	 * 
+	 *
 	 * @param value <code>true</code> if show the frame. <code>false</code> not.
 	 * @throws ScriptException if the property is locked
 	 * @see #getShowIfBlank()
@@ -630,7 +663,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_UNDERLINE_NONE</code>
 	 * <li><code>TEXT_UNDERLINE_UNDERLINE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the text underline value
 	 */
 
@@ -643,7 +676,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_UNDERLINE_NONE</code>
 	 * <li><code>TEXT_UNDERLINE_UNDERLINE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new text underline
 	 * @throws ScriptException if the value is not pre-defined.
 	 */
@@ -657,7 +690,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_OVERLINE_NONE</code>
 	 * <li><code>TEXT_OVERLINE_OVERLINE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the text overline value
 	 */
 
@@ -670,7 +703,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_OVERLINE_NONE</code>
 	 * <li><code>TEXT_OVERLINE_OVERLINE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new text overline value
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -684,7 +717,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_LINE_THROUGH_NONE</code>
 	 * <li><code>TEXT_LINE_THROUGH_LINE_THROUGH</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the text line-through value
 	 */
 
@@ -697,7 +730,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_LINE_THROUGH_NONE</code>
 	 * <li><code>TEXT_LINE_THROUGH_LINE_THROUGH</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new text line-through value
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -713,7 +746,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_ALIGN_RIGHT</code>
 	 * <li><code>TEXT_ALIGN_JUSTIFY</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the text align value
 	 */
 
@@ -728,7 +761,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TEXT_ALIGN_RIGHT</code>
 	 * <li><code>TEXT_ALIGN_JUSTIFY</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new text align
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -744,7 +777,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TRANSFORM_LOWERCASE</code>
 	 * <li><code>TRANSFORM_NONE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the text transform
 	 */
 
@@ -759,7 +792,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>TRANSFORM_LOWERCASE</code>
 	 * <li><code>TRANSFORM_NONE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new text transform
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -780,7 +813,7 @@ public interface IScriptStyleDesign {
 	 * <li>VERTICAL_ALIGN_BOTTOM
 	 * <li>VERTICAL_ALIGN_TEXT_BOTTOM
 	 * </ul>
-	 * 
+	 *
 	 * @return the value of the vertical align property
 	 */
 
@@ -799,7 +832,7 @@ public interface IScriptStyleDesign {
 	 * <li>VERTICAL_ALIGN_BOTTOM
 	 * <li>VERTICAL_ALIGN_TEXT_BOTTOM
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new vertical align
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -814,7 +847,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>WHITE_SPACE_PRE</code>
 	 * <li><code>WHITE_SPACE_NOWRAP</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the white space
 	 */
 
@@ -828,7 +861,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>WHITE_SPACE_PRE</code>
 	 * <li><code>WHITE_SPACE_NOWRAP</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new white space
 	 * @throws ScriptException if the value is not one of the above.
 	 */
@@ -841,7 +874,7 @@ public interface IScriptStyleDesign {
 	 * <ul>
 	 * <li><code>WIDOWS_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the widows property
 	 * @see #setWidows(String)
 	 */
@@ -856,7 +889,7 @@ public interface IScriptStyleDesign {
 	 * <ul>
 	 * <li><code>WIDOWS_INHERIT</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param value the new windows property
 	 * @throws ScriptException if the value is not an integer or one of the above
 	 *                         constants.
@@ -867,82 +900,82 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the font color.
-	 * 
+	 *
 	 * @return color
-	 * 
+	 *
 	 */
 	String getColor();
 
 	/**
 	 * Set the font color.
-	 * 
+	 *
 	 * @param color
 	 * @throws ScriptException
-	 * 
+	 *
 	 */
 	void setColor(String color) throws ScriptException;
 
 	/**
 	 * Get the background color.
-	 * 
+	 *
 	 * @return background color
-	 * 
+	 *
 	 */
 	String getBackgroundColor();
 
 	/**
 	 * Set the background color.
-	 * 
+	 *
 	 * @param color
 	 * @throws ScriptException
-	 * 
+	 *
 	 */
 	void setBackgroundColor(String color) throws ScriptException;
 
 	/**
 	 * Get the color of the top side of the border.
-	 * 
+	 *
 	 * @return color of top border
-	 * 
+	 *
 	 */
 	String getBorderTopColor();
 
 	/**
 	 * Set the color of the top side of the border.
-	 * 
+	 *
 	 * @param color
 	 * @throws ScriptException
-	 * 
+	 *
 	 */
 	void setBorderTopColor(String color) throws ScriptException;
 
 	/**
 	 * Get the color of the left side of the border.
-	 * 
+	 *
 	 * @return color of left side of border
-	 * 
+	 *
 	 */
 	String getBorderLeftColor();
 
 	/**
 	 * Set the color of the left side of the border.
-	 * 
+	 *
 	 * @param color
 	 * @throws ScriptException
-	 * 
+	 *
 	 */
 	void setBorderLeftColor(String color) throws ScriptException;
 
 	/**
 	 * Get the color of the right side of the border.
-	 * 
+	 *
 	 * @return color of right side of border
 	 */
 	String getBorderRightColor();
 
 	/**
 	 * Set the color of the right side of the border.
-	 * 
+	 *
 	 * @param color
 	 * @throws ScriptException
 	 */
@@ -950,14 +983,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the color of the bottom side of the border.
-	 * 
+	 *
 	 * @return color of bottom side of border
 	 */
 	String getBorderBottomColor();
 
 	/**
 	 * Set the color of the bottom side of the border.
-	 * 
+	 *
 	 * @param color
 	 * @throws ScriptException
 	 */
@@ -965,14 +998,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the x position for the background.
-	 * 
+	 *
 	 * @return x position
 	 */
 	String getBackGroundPositionX();
 
 	/**
 	 * Set the x position for the background.
-	 * 
+	 *
 	 * @param x
 	 * @throws ScriptException
 	 */
@@ -980,14 +1013,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the y position for the background.
-	 * 
+	 *
 	 * @return y position
 	 */
 	String getBackGroundPositionY();
 
 	/**
 	 * Set the y position for the background.
-	 * 
+	 *
 	 * @param y
 	 * @throws ScriptException
 	 */
@@ -995,14 +1028,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the spacing between individual letters.
-	 * 
+	 *
 	 * @return spacing
 	 */
 	String getLetterSpacing();
 
 	/**
 	 * Set the spacing between individual letters.
-	 * 
+	 *
 	 * @param spacing
 	 * @throws ScriptException
 	 */
@@ -1010,14 +1043,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the height of a line. Implies spacing between lines.
-	 * 
+	 *
 	 * @return height of a line
 	 */
 	String getLineHeight();
 
 	/**
 	 * Set the height of a line. Implies spacing between lines.
-	 * 
+	 *
 	 * @param height
 	 * @throws ScriptException
 	 */
@@ -1025,14 +1058,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the text indent.
-	 * 
+	 *
 	 * @return text indent
 	 */
 	String getTextIndent();
 
 	/**
 	 * Set the text indent.
-	 * 
+	 *
 	 * @param indent
 	 * @throws ScriptException
 	 */
@@ -1040,14 +1073,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the spacing between two words.
-	 * 
+	 *
 	 * @return spacing
 	 */
 	String getWordSpacing();
 
 	/**
 	 * Set the spacing between two words.
-	 * 
+	 *
 	 * @param spacing
 	 * @throws ScriptException
 	 */
@@ -1055,14 +1088,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the width of the top side of the border.
-	 * 
+	 *
 	 * @return width of top side of border
 	 */
 	String getBorderTopWidth();
 
 	/**
 	 * Set the width of the top side of the border.
-	 * 
+	 *
 	 * @param width
 	 * @throws ScriptException
 	 */
@@ -1070,14 +1103,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the width of left side of the border.
-	 * 
+	 *
 	 * @return width of left side of border
 	 */
 	String getBorderLeftWidth();
 
 	/**
 	 * Set the width of left side of the border.
-	 * 
+	 *
 	 * @param width
 	 * @throws ScriptException
 	 */
@@ -1085,14 +1118,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the width of right side of the border.
-	 * 
+	 *
 	 * @return width of right side of border
 	 */
 	String getBorderRightWidth();
 
 	/**
 	 * Set the width of the right side of the border.
-	 * 
+	 *
 	 * @param width
 	 * @throws ScriptException
 	 */
@@ -1100,14 +1133,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the width of the bottom side of the border.
-	 * 
+	 *
 	 * @return width of bottom side of border
 	 */
 	String getBorderBottomWidth();
 
 	/**
 	 * Set the width of the bottom side of the border.
-	 * 
+	 *
 	 * @param width
 	 * @throws ScriptException
 	 */
@@ -1115,14 +1148,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the margin of the top side.
-	 * 
+	 *
 	 * @return margin of top side.
 	 */
 	String getMarginTop();
 
 	/**
 	 * Set the margin of the top side.
-	 * 
+	 *
 	 * @param margin
 	 * @throws ScriptException
 	 */
@@ -1130,14 +1163,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the margin of the right side.
-	 * 
+	 *
 	 * @return margin of right side
 	 */
 	String getMarginRight();
 
 	/**
 	 * Set the margin of the right side.
-	 * 
+	 *
 	 * @param margin
 	 * @throws ScriptException
 	 */
@@ -1145,14 +1178,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the margin of the left side.
-	 * 
+	 *
 	 * @return margin of left side
 	 */
 	String getMarginLeft();
 
 	/**
 	 * Set the margin of the left side.
-	 * 
+	 *
 	 * @param margin
 	 * @throws ScriptException
 	 */
@@ -1160,14 +1193,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the margin of the bottom side.
-	 * 
+	 *
 	 * @return margin of bottom side
 	 */
 	String getMarginBottom();
 
 	/**
 	 * Set the margin of the bottom side.
-	 * 
+	 *
 	 * @param margin
 	 * @throws ScriptException
 	 */
@@ -1175,14 +1208,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the padding of the top side.
-	 * 
+	 *
 	 * @return padding of top side
 	 */
 	String getPaddingTop();
 
 	/**
 	 * Set the padding of the top side.
-	 * 
+	 *
 	 * @param padding
 	 * @throws ScriptException
 	 */
@@ -1190,14 +1223,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the padding of the right side.
-	 * 
+	 *
 	 * @return padding of right side
 	 */
 	String getPaddingRight();
 
 	/**
 	 * Set the padding of the right side.
-	 * 
+	 *
 	 * @param padding
 	 * @throws ScriptException
 	 */
@@ -1205,14 +1238,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the padding of the left side.
-	 * 
+	 *
 	 * @return padding of left side
 	 */
 	String getPaddingLeft();
 
 	/**
 	 * Set the padding of the left side.
-	 * 
+	 *
 	 * @param padding
 	 * @throws ScriptException
 	 */
@@ -1220,14 +1253,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the padding of the bottom side.
-	 * 
+	 *
 	 * @return padding of bottom side
 	 */
 	String getPaddingBottom();
 
 	/**
 	 * Set the padding of the bottom side.
-	 * 
+	 *
 	 * @param padding
 	 * @throws ScriptException
 	 */
@@ -1235,14 +1268,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the font size.
-	 * 
+	 *
 	 * @return font size
 	 */
 	String getFontSize();
 
 	/**
 	 * Set the font size.
-	 * 
+	 *
 	 * @param fontSize
 	 * @throws ScriptException
 	 */
@@ -1250,14 +1283,14 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the font family.
-	 * 
+	 *
 	 * @return font family
 	 */
 	String getFontFamily();
 
 	/**
 	 * Set the font family.
-	 * 
+	 *
 	 * @param fontFamily
 	 * @throws ScriptException
 	 */
@@ -1265,7 +1298,7 @@ public interface IScriptStyleDesign {
 
 	/**
 	 * Get the weight of the font.
-	 * 
+	 *
 	 * @return weight of font
 	 */
 	String getFontWeight();
@@ -1288,7 +1321,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>FONT_WEIGHT_800</code>
 	 * <li><code>FONT_WEIGHT_900</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param fontWeight the new font weight
 	 * @throws ScriptException if the input value is not one of the above.
 	 */
@@ -1302,7 +1335,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>FONT_VARIANT_NORMAL</code>
 	 * <li><code>FONT_VARIANT_SMALL_CAPS</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the font variant in a string.
 	 */
 	String getFontVariant();
@@ -1314,7 +1347,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>FONT_VARIANT_NORMAL</code>
 	 * <li><code>FONT_VARIANT_SMALL_CAPS</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param fontVariant the new font variant.
 	 * @throws ScriptException if the input value is not one of the above.
 	 */
@@ -1328,7 +1361,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>FONT_STYLE_ITALIC</code>
 	 * <li><code>FONT_STYLE_OBLIQUE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @return the font style in string.
 	 */
 	String getFontStyle();
@@ -1341,7 +1374,7 @@ public interface IScriptStyleDesign {
 	 * <li><code>FONT_STYLE_ITALIC</code>
 	 * <li><code>FONT_STYLE_OBLIQUE</code>
 	 * </ul>
-	 * 
+	 *
 	 * @param fontStyle the new font style.
 	 * @throws ScriptException if the input value is not one of the above.
 	 */

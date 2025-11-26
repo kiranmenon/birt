@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2010 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,7 +31,7 @@ import org.eclipse.birt.report.engine.executor.ExecutionContext;
 /**
  * A factory class to create data engines. For now, only DtE data engine is
  * created in this factory.
- * 
+ *
  */
 public class DataEngineFactory {
 	/**
@@ -44,7 +47,7 @@ public class DataEngineFactory {
 
 	/**
 	 * get instance of factory
-	 * 
+	 *
 	 * @return the factory instance
 	 */
 	synchronized public static DataEngineFactory getInstance() {
@@ -56,7 +59,7 @@ public class DataEngineFactory {
 
 	/**
 	 * create a <code>DataEngine</code> given an execution context
-	 * 
+	 *
 	 * @param context the execution context
 	 * @return a data engine instance
 	 */

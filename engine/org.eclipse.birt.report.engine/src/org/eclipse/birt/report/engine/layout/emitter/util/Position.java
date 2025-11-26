@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -35,6 +38,7 @@ public class Position implements Comparable<Position> {
 		this.y = y;
 	}
 
+	@Override
 	public boolean equals(Object object) {
 		if (object == this) {
 			return true;
@@ -46,6 +50,7 @@ public class Position implements Comparable<Position> {
 		return x == dest.x && y == dest.y;
 	}
 
+	@Override
 	public int hashCode() {
 		int code = 13;
 		code += x;
@@ -54,10 +59,12 @@ public class Position implements Comparable<Position> {
 		return code;
 	}
 
+	@Override
 	public String toString() {
 		return "( " + x + ", " + y + " )";
 	}
 
+	@Override
 	public int compareTo(Position other) {
 		if (other == null) {
 			return 0;

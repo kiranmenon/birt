@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -54,9 +57,14 @@ public class ImageOutputBaseTest extends TestCase {
 		this.workspaceDir = workspaceDir;
 	}
 
+	@Override
 	public void runTest() throws Throwable {
 
-		Map<ImageCompParam, Integer> params = new HashMap<ImageCompParam, Integer>();
+		if (!ImageUtil.isRenderingTestApplicable()) {
+			return;
+		}
+
+		Map<ImageCompParam, Integer> params = new HashMap<>();
 		params.put(ImageCompParam.TOLERANCE, 4);
 
 		// 1: verify PNG
@@ -66,14 +74,13 @@ public class ImageOutputBaseTest extends TestCase {
 				workspaceDir + File.separator + ImageRenderTest.OUTDIR + dirName + File.separator + filename + ".png");//$NON-NLS-1$
 		generator2.generate();
 		generator2.flush();
-		Image result = ImageUtil.compare(
-				workspaceDir + File.separator + ImageRenderTest.CONTROLDIR + dirName + File.separator + filename
-						+ ".png", //$NON-NLS-1$
+		String control = workspaceDir + File.separator + ImageRenderTest.CONTROLDIR + dirName + File.separator
+				+ filename + ".png";
+		Image result = ImageUtil.compare(control, // $NON-NLS-1$
 				workspaceDir + File.separator + ImageRenderTest.OUTDIR + dirName + File.separator + filename + ".png",
 				params); // $NON-NLS-1$
 		if (result != null) {
-			ImageUtil.savePNG(result, workspaceDir + File.separator + ImageRenderTest.OUTDIR + dirName + File.separator
-					+ filename + ".diff.png");
+			ImageUtil.savePNG(result, control);
 			fail();
 		}
 
@@ -91,6 +98,7 @@ public class ImageOutputBaseTest extends TestCase {
 						+ ".svg", //$NON-NLS-1$
 				workspaceDir + File.separator + ImageRenderTest.OUTDIR + dirName + File.separator + filename + ".svg" //$NON-NLS-1$
 		};
+
 		for (String file : files) {
 			InputStream inStream = new FileInputStream(file);
 			TranscoderInput input = new TranscoderInput(inStream);
@@ -104,7 +112,7 @@ public class ImageOutputBaseTest extends TestCase {
 		result = ImageUtil.compare(files[0] + ".png", //$NON-NLS-1$
 				files[1] + ".png"); //$NON-NLS-1$
 		if (result != null) {
-			ImageUtil.savePNG(result, files[1] + ".diff.png"); //$NON-NLS-1$
+			ImageUtil.savePNG(result, files[0] + ".png"); //$NON-NLS-1$
 			fail();
 		}
 

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - modification of Batik's RectValue.java to support BIRT's CSS rules
@@ -17,7 +20,7 @@ import org.w3c.dom.css.Rect;
 
 /**
  * This class represents CSS rect values.
- * 
+ *
  */
 public class RectValue extends Value implements Rect {
 
@@ -42,7 +45,12 @@ public class RectValue extends Value implements Rect {
 	protected Value left;
 
 	/**
-	 * Creates a new Rect value.
+	 * Creates a new rectangle value.
+	 *
+	 * @param t top
+	 * @param r right
+	 * @param b bottom
+	 * @param l left
 	 */
 	public RectValue(Value t, Value r, Value b, Value l) {
 		top = t;
@@ -54,6 +62,7 @@ public class RectValue extends Value implements Rect {
 	/**
 	 * The type of the value.
 	 */
+	@Override
 	public short getPrimitiveType() {
 		return CSSPrimitiveValue.CSS_RECT;
 	}
@@ -61,35 +70,28 @@ public class RectValue extends Value implements Rect {
 	/**
 	 * A string representation of the current value.
 	 */
+	@Override
 	public String getCssText() {
 		return "rect(" + top.getCssText() + ", " + right.getCssText() + ", " + bottom.getCssText() + ", "
 				+ left.getCssText() + ")";
 	}
 
-	/**
-	 * Implements {@link Value#getTop()}.
-	 */
+	@Override
 	public CSSPrimitiveValue getTop() throws DOMException {
 		return top;
 	}
 
-	/**
-	 * Implements {@link Value#getRight()}.
-	 */
+	@Override
 	public CSSPrimitiveValue getRight() throws DOMException {
 		return right;
 	}
 
-	/**
-	 * Implements {@link Value#getBottom()}.
-	 */
+	@Override
 	public CSSPrimitiveValue getBottom() throws DOMException {
 		return bottom;
 	}
 
-	/**
-	 * Implements {@link Value#getLeft()}.
-	 */
+	@Override
 	public CSSPrimitiveValue getLeft() throws DOMException {
 		return left;
 	}
@@ -97,6 +99,7 @@ public class RectValue extends Value implements Rect {
 	/**
 	 * Returns a printable representation of this value.
 	 */
+	@Override
 	public String toString() {
 		return getCssText();
 	}

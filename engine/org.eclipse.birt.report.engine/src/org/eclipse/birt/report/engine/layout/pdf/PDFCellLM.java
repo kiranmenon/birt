@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -42,6 +45,7 @@ public class PDFCellLM extends PDFBlockStackingLM implements IBlockStackingLayou
 		cellContent = (ICellContent) content;
 	}
 
+	@Override
 	protected void createRoot() {
 		if (root == null) {
 			// FIXME setup rowSpan
@@ -62,6 +66,7 @@ public class PDFCellLM extends PDFBlockStackingLM implements IBlockStackingLayou
 		root.setWidth(columnWidth);
 	}
 
+	@Override
 	protected void initialize() {
 		boolean isNewArea = (root == null);
 		createRoot();
@@ -79,6 +84,7 @@ public class PDFCellLM extends PDFBlockStackingLM implements IBlockStackingLayou
 		maxAvaHeight = root.getContentHeight();
 	}
 
+	@Override
 	protected void closeLayout() {
 		if (root != null) {
 			root.setHeight(getCurrentBP() + getOffsetY()
@@ -87,6 +93,7 @@ public class PDFCellLM extends PDFBlockStackingLM implements IBlockStackingLayou
 
 	}
 
+	@Override
 	protected boolean isHidden() {
 		int startColumn = cellContent.getColumn();
 		int endColumn = startColumn + cellContent.getColSpan();
@@ -97,16 +104,15 @@ public class PDFCellLM extends PDFBlockStackingLM implements IBlockStackingLayou
 		return isHiddenByVisibility();
 	}
 
+	@Override
 	protected boolean isRootEmpty() {
-		if (isLast) {
-			return false;
-		}
-		if (parent.root != null && parent.root.getChildrenCount() > 0) {
+		if (isLast || (parent.root != null && parent.root.getChildrenCount() > 0)) {
 			return false;
 		}
 		return super.isRootEmpty();
 	}
 
+	@Override
 	public boolean pageBreakInsideAvoid() {
 		if (content == null) {
 			return false;
@@ -122,21 +128,22 @@ public class PDFCellLM extends PDFBlockStackingLM implements IBlockStackingLayou
 		return false;
 	}
 
+	@Override
 	public boolean isPageEmpty() {
 		if (root != null && root.getChildrenCount() > 0) {
 			return false;
-		} else {
-			if (parent != null) {
-				return parent.isPageEmpty();
-			}
+		} else if (parent != null) {
+			return parent.isPageEmpty();
 		}
 		return true;
 	}
 
+	@Override
 	protected boolean needPageBreakAfter(String pageBreak) {
 		return false;
 	}
 
+	@Override
 	protected boolean needPageBreakBefore(String pageBreak) {
 		return false;
 	}

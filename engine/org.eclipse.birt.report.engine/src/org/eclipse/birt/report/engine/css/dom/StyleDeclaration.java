@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -18,6 +21,12 @@ import org.eclipse.birt.core.util.IOUtil;
 import org.eclipse.birt.report.engine.css.engine.CSSEngine;
 import org.w3c.dom.css.CSSValue;
 
+/**
+ * Definition of the style declarations
+ *
+ * @since 3.3
+ *
+ */
 public class StyleDeclaration extends AbstractStyle {
 	protected CSSValue[] values;
 	protected boolean shared;
@@ -26,6 +35,7 @@ public class StyleDeclaration extends AbstractStyle {
 	/**
 	 * set the property
 	 */
+	@Override
 	public void setProperty(int index, CSSValue value) {
 		// assert index >= 0 && index < NUMBER_OF_STYLE;
 		if (values[index] != value) {
@@ -44,11 +54,17 @@ public class StyleDeclaration extends AbstractStyle {
 	/**
 	 * set the property
 	 */
+	@Override
 	public CSSValue getProperty(int index) {
 		assert index >= 0 && index < NUMBER_OF_STYLE;
 		return values[index];
 	}
 
+	/**
+	 * Constructor of style declaration based on style declaration
+	 *
+	 * @param style
+	 */
 	public StyleDeclaration(StyleDeclaration style) {
 		super(style.engine);
 		this.values = style.values;
@@ -56,6 +72,11 @@ public class StyleDeclaration extends AbstractStyle {
 		this.shared = true;
 	}
 
+	/**
+	 * Constructor of style declaration based on CSS engine
+	 *
+	 * @param engine
+	 */
 	public StyleDeclaration(CSSEngine engine) {
 		super(engine);
 		this.values = new CSSValue[NUMBER_OF_STYLE];
@@ -70,14 +91,17 @@ public class StyleDeclaration extends AbstractStyle {
 		shared = false;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return propertyCount == 0;
 	}
 
+	@Override
 	public int getLength() {
 		return propertyCount;
 	}
 
+	@Override
 	public boolean equals(Object aStyle) {
 		if (aStyle instanceof StyleDeclaration) {
 			StyleDeclaration style = (StyleDeclaration) aStyle;
@@ -95,6 +119,7 @@ public class StyleDeclaration extends AbstractStyle {
 		return false;
 	}
 
+	@Override
 	public void write(DataOutputStream out) throws IOException {
 		// count how many valid value in the style
 		IOUtil.writeInt(out, propertyCount);

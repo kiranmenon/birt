@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -22,10 +25,10 @@ import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.Sec
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SimpleComboSection;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.TextSection;
-import org.eclipse.birt.report.model.api.CellHandle;
-import org.eclipse.birt.report.model.api.ReportItemHandle;
-import org.eclipse.birt.report.model.api.StyleHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
+import org.eclipse.birt.report.model.elements.interfaces.ICellModel;
+import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
+import org.eclipse.birt.report.model.elements.interfaces.IStyledElementModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
@@ -34,24 +37,25 @@ import org.eclipse.swt.widgets.Composite;
  */
 public class CellPage extends GeneralFontPage {
 
+	@Override
 	public void buildUI(Composite parent) {
 		super.buildUI(parent);
-		container.setLayout(WidgetUtil.createGridLayout(6, 15));
+		container.setLayout(org.eclipse.birt.report.designer.internal.ui.util.WidgetUtil.createGridLayout(6, 15));
 
 		// Defines providers.
 
-		IDescriptorProvider dropProvider = new ComboPropertyDescriptorProvider(CellHandle.DROP_PROP,
+		IDescriptorProvider dropProvider = new ComboPropertyDescriptorProvider(ICellModel.DROP_PROP,
 				ReportDesignConstants.CELL_ELEMENT);
 
 		ColorPropertyDescriptorProvider backgroundProvider = new ColorPropertyDescriptorProvider(
-				StyleHandle.BACKGROUND_COLOR_PROP, ReportDesignConstants.STYLE_ELEMENT);
+				IStyleModel.BACKGROUND_COLOR_PROP, ReportDesignConstants.STYLE_ELEMENT);
 		backgroundProvider.enableReset(true);
 
 		ComboPropertyDescriptorProvider vAlignProvider = new ComboPropertyDescriptorProvider(
-				StyleHandle.VERTICAL_ALIGN_PROP, ReportDesignConstants.STYLE_ELEMENT);
+				IStyleModel.VERTICAL_ALIGN_PROP, ReportDesignConstants.STYLE_ELEMENT);
 		vAlignProvider.enableReset(true);
 
-		IDescriptorProvider styleProvider = new SimpleComboPropertyDescriptorProvider(ReportItemHandle.STYLE_PROP,
+		IDescriptorProvider styleProvider = new SimpleComboPropertyDescriptorProvider(IStyledElementModel.STYLE_PROP,
 				ReportDesignConstants.CELL_ELEMENT);
 
 		// Defines sections.

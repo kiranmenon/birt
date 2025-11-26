@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2007, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -14,24 +17,38 @@ package org.eclipse.birt.report.engine.emitter.html;
 import org.eclipse.birt.report.engine.content.ICellContent;
 import org.eclipse.birt.report.engine.content.IColumn;
 import org.eclipse.birt.report.engine.content.IContainerContent;
+import org.eclipse.birt.report.engine.content.IElement;
 import org.eclipse.birt.report.engine.content.IForeignContent;
 import org.eclipse.birt.report.engine.content.IImageContent;
 import org.eclipse.birt.report.engine.content.IRowContent;
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.content.ITableContent;
 import org.eclipse.birt.report.engine.content.ITextContent;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.emitter.HTMLTags;
 import org.eclipse.birt.report.engine.emitter.HTMLWriter;
 import org.eclipse.birt.report.engine.emitter.html.util.HTMLEmitterUtil;
 import org.eclipse.birt.report.engine.ir.DimensionType;
+import org.eclipse.birt.report.model.api.metadata.DimensionValue;
+import org.eclipse.birt.report.model.api.util.DimensionUtil;
 import org.w3c.dom.css.CSSValue;
 
 /**
- * 
+ *
  */
 
 public class HTMLPerformanceOptimize extends HTMLEmitter {
 
+	/**
+	 * Constructor
+	 *
+	 * @param reportEmitter     report emitter
+	 * @param writer            HTML writer
+	 * @param fixedReport       fixed report layout
+	 * @param enableInlineStyle enabled inline style
+	 * @param browserVersion    browser version
+	 */
 	public HTMLPerformanceOptimize(HTMLReportEmitter reportEmitter, HTMLWriter writer, boolean fixedReport,
 			boolean enableInlineStyle, int browserVersion) {
 		super(reportEmitter, writer, fixedReport, enableInlineStyle, browserVersion);
@@ -40,6 +57,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the report default style
 	 */
+	@Override
 	public void buildDefaultStyle(StringBuffer styleBuffer, IStyle style) {
 		if (style == null || style.isEmpty()) {
 			return;
@@ -67,6 +85,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build attribute class
 	 */
+	@Override
 	public void buildStyle(StringBuffer styleBuffer, IStyle style) {
 		if (style == null || style.isEmpty()) {
 			return;
@@ -74,7 +93,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, null);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -84,6 +103,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of the page head and page footer
 	 */
+	@Override
 	public void buildPageBandStyle(StringBuffer styleBuffer, IStyle style) {
 		if (style == null || style.isEmpty()) {
 			return;
@@ -113,6 +133,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of table content
 	 */
+	@Override
 	public void buildTableStyle(ITableContent table, StringBuffer styleBuffer) {
 		addDefaultTableStyles(styleBuffer);
 
@@ -121,10 +142,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 
 		boolean isInline = false;
 		// output the display
-		CSSValue display = style.getProperty(IStyle.STYLE_DISPLAY);
-		if (IStyle.NONE_VALUE == display) {
+		CSSValue display = style.getProperty(StyleConstants.STYLE_DISPLAY);
+		if (CSSValueConstants.NONE_VALUE == display) {
 			styleBuffer.append(" display: none;");
-		} else if (IStyle.INLINE_VALUE == display || IStyle.INLINE_BLOCK_VALUE == display) {
+		} else if (CSSValueConstants.INLINE_VALUE == display || CSSValueConstants.INLINE_BLOCK_VALUE == display) {
 			isInline = true;
 			// implement the inline table for old version browser
 			if (!reportEmitter.browserSupportsInlineBlock) {
@@ -145,32 +166,29 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 		if (null != width) {
 			buildSize(styleBuffer, HTMLTags.ATTR_WIDTH, width);
 			widthOutputFlag = true;
-		} else {
-			// Shrink table will not output the 100% as the default width in
-			// HTML.
-			// This is different with the PDF. PDF will use the 100% as the
-			// default width for a shrink table.
-			// If the table's columns all have a absolute width, we should not
-			// output the 100% as the default width.
-			if (!"true".equalsIgnoreCase(style.getCanShrink())) {
-				boolean absoluteWidth = true;
-				for (int i = 0; i < table.getColumnCount(); i++) {
-					IColumn column = table.getColumn(i);
-					DimensionType columnWidth = column.getWidth();
-					if (columnWidth == null) {
-						absoluteWidth = false;
-						break;
-					} else {
-						if ("%".endsWith(columnWidth.getUnits())) {
-							absoluteWidth = false;
-							break;
-						}
-					}
+		} else // Shrink table will not output the 100% as the default width in
+		// HTML.
+		// This is different with the PDF. PDF will use the 100% as the
+		// default width for a shrink table.
+		// If the table's columns all have a absolute width, we should not
+		// output the 100% as the default width.
+		if (!"true".equalsIgnoreCase(style.getCanShrink())) {
+			boolean absoluteWidth = true;
+			for (int i = 0; i < table.getColumnCount(); i++) {
+				IColumn column = table.getColumn(i);
+				DimensionType columnWidth = column.getWidth();
+				if (columnWidth == null) {
+					absoluteWidth = false;
+					break;
 				}
-				if (!absoluteWidth) {
-					styleBuffer.append(" width: 100%;");
-					widthOutputFlag = true;
+				if ("%".endsWith(columnWidth.getUnits())) {
+					absoluteWidth = false;
+					break;
 				}
+			}
+			if (!absoluteWidth) {
+				styleBuffer.append(" width: 100%;");
+				widthOutputFlag = true;
 			}
 		}
 
@@ -187,7 +205,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 						styleBuffer.append(" width: 1px;");
 					}
 				}
-				CSSValue overflowValue = style.getProperty(IStyle.STYLE_OVERFLOW);
+				CSSValue overflowValue = style.getProperty(StyleConstants.STYLE_OVERFLOW);
 				if (overflowValue == null) {
 					// only inline table support it in Chrome and IE
 					if (isInline) {
@@ -221,9 +239,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] tableSize = { table.getHeight(), table.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, tableSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -232,6 +251,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of column
 	 */
+	@Override
 	public void buildColumnStyle(IColumn column, StringBuffer styleBuffer) {
 		buildSize(styleBuffer, HTMLTags.ATTR_WIDTH, column.getWidth());
 
@@ -239,8 +259,8 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 		IStyle style = column.getStyle();
 
 		// output the none value of the display
-		CSSValue display = style.getProperty(IStyle.STYLE_DISPLAY);
-		if (IStyle.NONE_VALUE == display) {
+		CSSValue display = style.getProperty(StyleConstants.STYLE_DISPLAY);
+		if (CSSValueConstants.NONE_VALUE == display) {
 			styleBuffer.append(" display:none;");
 		}
 
@@ -261,9 +281,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] columnSize = { null, column.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, columnSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -272,6 +293,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Handles the alignment property of the column content.
 	 */
+	@Override
 	public void handleColumnAlign(IColumn column) {
 		// Column doesn't support text-align in BIRT.
 	}
@@ -279,15 +301,16 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of row content.
 	 */
+	@Override
 	public void buildRowStyle(IRowContent row, StringBuffer styleBuffer) {
 		buildSize(styleBuffer, HTMLTags.ATTR_HEIGHT, row.getHeight()); // $NON-NLS-1$
 
-		// The method getStyle( ) will nevel return a null value;
+		// The method getStyle( ) will never return a null value;
 		IStyle style = row.getStyle();
 
 		// output the none value of the display
-		CSSValue display = style.getProperty(IStyle.STYLE_DISPLAY);
-		if (IStyle.NONE_VALUE == display) {
+		CSSValue display = style.getProperty(StyleConstants.STYLE_DISPLAY);
+		if (CSSValueConstants.NONE_VALUE == display) {
 			styleBuffer.append(" display: none;");
 		}
 
@@ -296,9 +319,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] rowSize = { row.getHeight(), row.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, rowSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -307,21 +331,22 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Handles the Text-Align property of the row content.
 	 */
+	@Override
 	public void handleRowAlign(IRowContent row) {
 		// The method getStyle( ) will nevel return a null value;
 		IStyle style = row.getStyle();
 
 		// Build the Vertical-Align property of the row content
-		CSSValue vAlign = style.getProperty(IStyle.STYLE_VERTICAL_ALIGN);
-		if (null == vAlign || IStyle.BASELINE_VALUE == vAlign) {
+		CSSValue vAlign = style.getProperty(StyleConstants.STYLE_VERTICAL_ALIGN);
+		if (null == vAlign || CSSValueConstants.BASELINE_VALUE == vAlign) {
 			// The default vertical-align value of cell is top. And the cell can
 			// inherit the valign from parent row.
-			vAlign = IStyle.TOP_VALUE;
+			vAlign = CSSValueConstants.TOP_VALUE;
 		}
 		writer.attribute(HTMLTags.ATTR_VALIGN, vAlign.getCssText());
 
 		// Build the Text-Align property.
-		CSSValue hAlign = style.getProperty(IStyle.STYLE_TEXT_ALIGN);
+		CSSValue hAlign = style.getProperty(StyleConstants.STYLE_TEXT_ALIGN);
 		if (null != hAlign) {
 			writer.attribute(HTMLTags.ATTR_ALIGN, hAlign.getCssText());
 		}
@@ -330,6 +355,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of cell content.
 	 */
+	@Override
 	public void buildCellStyle(ICellContent cell, StringBuffer styleBuffer, boolean isHead, boolean fixedCellHeight) {
 		// The method getStyle( ) will never return a null value;
 		IStyle style = cell.getStyle();
@@ -343,8 +369,8 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			HTMLEmitterUtil.buildOverflowStyle(styleBuffer, style, true);
 		}
 		// output the none value of the display
-		CSSValue display = style.getProperty(IStyle.STYLE_DISPLAY);
-		if (IStyle.NONE_VALUE == display) {
+		CSSValue display = style.getProperty(StyleConstants.STYLE_DISPLAY);
+		if (CSSValueConstants.NONE_VALUE == display) {
 			styleBuffer.append(" display: none !important; display: block;");
 		}
 
@@ -357,6 +383,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] cellSize = { cell.getHeight(), cell.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildMargins(styleBuffer, style);
 		if (fixedCellHeight) {
@@ -366,7 +393,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			AttributeBuilder.buildPaddings(styleBuffer, style);
 		}
 		AttributeBuilder.buildBorders(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, cellSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -375,14 +402,15 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Handles the vertical align property of the element content.
 	 */
+	@Override
 	public void handleCellVAlign(ICellContent cell) {
 		// The method getStyle( ) will never return a null value;
 		IStyle style = cell.getStyle();
 
 		// Build the Vertical-Align property of the row content
-		CSSValue vAlign = style.getProperty(IStyle.STYLE_VERTICAL_ALIGN);
-		if (IStyle.BASELINE_VALUE == vAlign) {
-			vAlign = IStyle.TOP_VALUE;
+		CSSValue vAlign = style.getProperty(StyleConstants.STYLE_VERTICAL_ALIGN);
+		if (CSSValueConstants.BASELINE_VALUE == vAlign) {
+			vAlign = CSSValueConstants.TOP_VALUE;
 		}
 		if (null != vAlign) {
 			// The default vertical-align value has already been outputted on
@@ -394,8 +422,9 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of contianer content.
 	 */
+	@Override
 	public void buildContainerStyle(IContainerContent container, StringBuffer styleBuffer) {
-		int display = ((Integer) containerDisplayStack.peek()).intValue();
+		int display = containerDisplayStack.peek().intValue();
 		// shrink
 		handleShrink(display, container.getStyle(), container.getHeight(), container.getWidth(), styleBuffer);
 		if ((display & HTMLEmitterUtil.DISPLAY_NONE) > 0) {
@@ -410,9 +439,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] containerSize = { container.getHeight(), container.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, containerSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -421,12 +451,13 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Handles the alignment property of the container content.
 	 */
+	@Override
 	public void handleContainerAlign(IContainerContent container) {
 		// The method getStyle( ) will nevel return a null value;
 		IStyle style = container.getStyle();
 		// Container doesn't support vertical-align.
 		// Build the Text-Align property.
-		CSSValue hAlign = style.getProperty(IStyle.STYLE_TEXT_ALIGN);
+		CSSValue hAlign = style.getProperty(StyleConstants.STYLE_TEXT_ALIGN);
 		if (null != hAlign) {
 			writer.attribute(HTMLTags.ATTR_ALIGN, hAlign.getCssText());
 		}
@@ -435,6 +466,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of text content.
 	 */
+	@Override
 	public void buildTextStyle(ITextContent text, StringBuffer styleBuffer, int display) {
 		IStyle style = text.getStyle();
 		// check 'can-shrink' property
@@ -460,9 +492,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] textSize = { text.getHeight(), text.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, textSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -471,6 +504,7 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of foreign content.
 	 */
+	@Override
 	public void buildForeignStyle(IForeignContent foreign, StringBuffer styleBuffer, int display) {
 		IStyle style = foreign.getStyle();
 		// check 'can-shrink' property
@@ -496,9 +530,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] foreignSize = { foreign.getHeight(), foreign.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, foreignSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);
@@ -507,10 +542,52 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 	/**
 	 * Build the style of image content.
 	 */
+	@Override
 	public void buildImageStyle(IImageContent image, StringBuffer styleBuffer, int display) {
 		// image size
-		buildSize(styleBuffer, HTMLTags.ATTR_WIDTH, image.getWidth()); // $NON-NLS-1$
-		buildSize(styleBuffer, HTMLTags.ATTR_HEIGHT, image.getHeight()); // $NON-NLS-1$
+
+		DimensionType imgWidth = image.getWidth();
+		if (imgWidth != null && "%".equals(imgWidth.getUnits()) && image.getImageCalculatedSize().getWidth() > 0) {
+			imgWidth = new DimensionType(image.getImageCalculatedSize().getWidth(), DimensionType.UNITS_PX);
+		}
+
+		DimensionType imgHeight = image.getHeight();
+		if (imgHeight != null && "%".equals(imgHeight.getUnits()) && image.getImageCalculatedSize().getHeight() > 0) {
+			imgHeight = new DimensionType(image.getImageCalculatedSize().getHeight(), DimensionType.UNITS_PX);
+		}
+
+		boolean useHeightAutoValue = false;
+
+		// column width
+		DimensionType columnWidth = null;
+		IElement parent = image.getParent();
+		if (parent != null && parent instanceof ICellContent) {
+			columnWidth = ((ICellContent)parent).getColumnInstance().getWidth();
+		}
+		if (columnWidth != null && image.isFitToContainer()) {
+
+			DimensionValue compareColumnWidthValue = DimensionUtil.convertTo(columnWidth.getMeasure(),
+					columnWidth.getUnits(), DimensionType.UNITS_MM);
+
+			// image width raw size
+			if (imgWidth == null) {
+				imgWidth = new DimensionType(image.getImageCalculatedSize().getWidth(), DimensionType.UNITS_PX);
+			}
+			DimensionValue compareImageWidthValue = DimensionUtil.convertTo(imgWidth.getMeasure(), imgWidth.getUnits(),
+					DimensionType.UNITS_MM);
+
+			if (compareImageWidthValue.getMeasure() > compareColumnWidthValue.getMeasure()) {
+				imgWidth = new DimensionType(compareColumnWidthValue.getMeasure(), DimensionType.UNITS_MM);
+				useHeightAutoValue = true;
+			}
+		}
+
+		buildSize(styleBuffer, HTMLTags.ATTR_WIDTH, imgWidth); // $NON-NLS-1$
+		if (useHeightAutoValue) {
+			buildSize(styleBuffer, HTMLTags.ATTR_HEIGHT, "auto"); // $NON-NLS-1$
+		} else {
+			buildSize(styleBuffer, HTMLTags.ATTR_HEIGHT, imgHeight); // $NON-NLS-1$
+		}
 		// build the value of display
 		// An image is indeed inline by default, and align itself on the text
 		// baseline with room for descenders. That caused the gap and extra height,
@@ -531,9 +608,10 @@ public class HTMLPerformanceOptimize extends HTMLEmitter {
 			return;
 		}
 
+		DimensionType[] imageSize = { image.getHeight(), image.getWidth() };
 		AttributeBuilder.buildFont(styleBuffer, style);
 		AttributeBuilder.buildBox(styleBuffer, style);
-		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter);
+		AttributeBuilder.buildBackground(styleBuffer, style, reportEmitter, imageSize);
 		AttributeBuilder.buildText(styleBuffer, style);
 		AttributeBuilder.buildVisual(styleBuffer, style);
 		AttributeBuilder.buildTextDecoration(styleBuffer, style);

@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2004 Actuate Corporation. All rights reserved. This program and
- * the accompanying materials are made available under the terms of the Eclipse
- * Public License v1.0 which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html Contributors: Actuate Corporation -
- * initial API and implementation
+ * Copyright (c) 2004 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  ******************************************************************************/
 
 package org.eclipse.birt.core.framework;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * An platform context that is based on file operations. Since in web
@@ -26,7 +26,7 @@ public class PlatformFileContext implements IPlatformContext {
 
 	/**
 	 * PlatformFileContext Constructor
-	 * 
+	 *
 	 */
 	public PlatformFileContext() {
 		root = getSystemBirtHome();
@@ -35,7 +35,7 @@ public class PlatformFileContext implements IPlatformContext {
 
 	/**
 	 * PlatformFileContext Constructor( String , IPlatformConfig )
-	 * 
+	 *
 	 * @param root
 	 * @param platformConfig
 	 */
@@ -48,6 +48,7 @@ public class PlatformFileContext implements IPlatformContext {
 		arguments = config.getOSGiArguments();
 	}
 
+	@Override
 	public String getPlatform() {
 		return root;
 	}
@@ -57,15 +58,10 @@ public class PlatformFileContext implements IPlatformContext {
 	}
 
 	private String getSystemBirtHome() {
-		return AccessController.doPrivileged(new PrivilegedAction<String>() {
-
-			public String run() {
-				String home = System.getProperty(IPlatformConfig.BIRT_HOME);
-				if (home == null || "".equals(home)) {
-					return null;
-				}
-				return home;
-			}
-		});
+		String home = System.getProperty(IPlatformConfig.BIRT_HOME);
+		if (home == null || "".equals(home)) {
+			return null;
+		}
+		return home;
 	}
 }

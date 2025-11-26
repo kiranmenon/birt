@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -14,7 +17,7 @@ package org.eclipse.birt.report.engine.emitter;
 /**
  * <code>HTMLWriter</code> is a concrete subclass of <code>XMLWriter</code> that
  * outputs the HTML content.
- * 
+ *
  */
 public class HTMLWriter extends XMLWriter {
 
@@ -29,7 +32,7 @@ public class HTMLWriter extends XMLWriter {
 
 	/**
 	 * Outputs the style.
-	 * 
+	 *
 	 * @param name  The style name.
 	 * @param value The style values.
 	 */
@@ -59,7 +62,7 @@ public class HTMLWriter extends XMLWriter {
 
 	/**
 	 * Outputs java script code.
-	 * 
+	 *
 	 * @param code a line of code
 	 */
 	public void writeCode(String code) {
@@ -98,6 +101,7 @@ public class HTMLWriter extends XMLWriter {
 		bText = true;// bText is useless.
 	}
 
+	@Override
 	public void text(String value) {
 		text(value, true);
 	}
@@ -116,6 +120,7 @@ public class HTMLWriter extends XMLWriter {
 		bText = true;
 	}
 
+	@Override
 	protected String encodeText(String text) {
 		return HTMLEncodeUtil.encodeText(text, false);
 	}

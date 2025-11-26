@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -24,221 +27,447 @@ import org.eclipse.birt.report.engine.ir.DimensionType;
 
 /**
  * object created by report generator.
- * 
+ *
  * the content of report document.
- * 
+ *
  */
 public interface IContent extends IElement, CSSStylableElement, IStyledElement {
-	final static int SERIALIZE_CONTENT = -1;
-	final static int REPORT_CONTENT = 0;
-	final static int CELL_CONTENT = 1;
-	final static int CONTAINER_CONTENT = 2;
-	final static int DATA_CONTENT = 3;
-	final static int FOREIGN_CONTENT = 4;
-	final static int IMAGE_CONTENT = 5;
-	final static int LABEL_CONTENT = 6;
-	final static int PAGE_CONTENT = 7;
-	final static int ROW_CONTENT = 8;
-	final static int TABLE_BAND_CONTENT = 9;
-	final static int TABLE_CONTENT = 10;
-	final static int TEXT_CONTENT = 11;
-	final static int AUTOTEXT_CONTENT = 12;
-	final static int LIST_CONTENT = 13;
-	final static int LIST_BAND_CONTENT = 14;
-	final static int GROUP_CONTENT = 15;
-	final static int LIST_GROUP_CONTENT = 16;
-	final static int TABLE_GROUP_CONTENT = 17;
+
+	/** property: serialize content key */
+	int SERIALIZE_CONTENT = -1;
+
+	/** property: report content key */
+	int REPORT_CONTENT = 0;
+
+	/** property: cell content key */
+	int CELL_CONTENT = 1;
+
+	/** property: container content key */
+	int CONTAINER_CONTENT = 2;
+
+	/** property: data content key */
+	int DATA_CONTENT = 3;
+
+	/** property: foreign content key */
+	int FOREIGN_CONTENT = 4;
+
+	/** property: image content key */
+	int IMAGE_CONTENT = 5;
+
+	/** property: label content key */
+	int LABEL_CONTENT = 6;
+
+	/** property: page content key */
+	int PAGE_CONTENT = 7;
+
+	/** property: row content key */
+	int ROW_CONTENT = 8;
+
+	/** property: table band content key */
+	int TABLE_BAND_CONTENT = 9;
+
+	/** property: table content key */
+	int TABLE_CONTENT = 10;
+
+	/** property: text content key */
+	int TEXT_CONTENT = 11;
+
+	/** property: auto text content key */
+	int AUTOTEXT_CONTENT = 12;
+
+	/** property: list content key */
+	int LIST_CONTENT = 13;
+
+	/** property: list band content key */
+	int LIST_BAND_CONTENT = 14;
+
+	/** property: group content key */
+	int GROUP_CONTENT = 15;
+
+	/** property: list group content key */
+	int LIST_GROUP_CONTENT = 16;
+
+	/** property: table group content key */
+	int TABLE_GROUP_CONTENT = 17;
+
+	/** property: document extension */
+	int DOCUMENT_EXTENSION = 0;
+
+	/** property: layout extension */
+	int LAYOUT_EXTENSION = 1;
 
 	/**
 	 * the content type, must be one of the predefines.
-	 * 
-	 * @return
+	 *
+	 * @return content type
 	 */
 	int getContentType();
 
 	/**
 	 * get the instance id of the content. the instance id is the unique id of the
 	 * content.
-	 * 
-	 * @return
+	 *
+	 * @return instance id
 	 */
 	InstanceID getInstanceID();
 
 	/**
 	 * set the instace id of the content. the instance id can only be set by the
 	 * content generator.
-	 * 
+	 *
 	 * @param id
 	 */
 	void setInstanceID(InstanceID id);
 
-	static final int DOCUMENT_EXTENSION = 0;
-	static final int LAYOUT_EXTENSION = 1;
-
+	/**
+	 * Get the extension
+	 *
+	 * @param extension
+	 * @return extension
+	 */
 	Object getExtension(int extension);
 
 	/**
 	 * Set the extension of the content. Only 2 extension supported so far
 	 * <li>0: document extension</li>
 	 * <li>1: layout extension</li>
-	 * 
+	 *
 	 * @param extension extension type
 	 * @param value     extension value
-	 * @throws ArrayIndexOutOfBoundsException if index is outof range {0,1}
+	 * @throws ArrayIndexOutOfBoundsException if index is out of range {0,1}
 	 */
 	void setExtension(int extension, Object value);
 
 	/**
-	 * return the report which contains/create this content.
-	 * 
-	 * @return
+	 * Get the report which contains/create this content.
+	 *
+	 * @return report the report which contains/create this content.
 	 */
 	IReportContent getReportContent();
 
 	/**
-	 * set the report content.
-	 * 
-	 * @param report
+	 * Set the report content.
+	 *
+	 * @param report report content
 	 */
 	void setReportContent(IReportContent report);
 
 	/**
-	 * unique id of the content.
-	 * 
-	 * @return
+	 * Get the name.
+	 *
+	 * @return name
 	 */
 	String getName();
 
+	/**
+	 * Set the name
+	 *
+	 * @param name
+	 */
 	void setName(String name);
 
 	/**
-	 * the design object which create this content.
-	 * 
-	 * @return
+	 * Get the design object which create this content.
+	 *
+	 * @return the design object which create this content.
 	 */
 	Object getGenerateBy();
 
+	/**
+	 * Set the generated by object
+	 *
+	 * @param generateBy generated by
+	 */
 	void setGenerateBy(Object generateBy);
 
 	/**
-	 * @return inline style
+	 * Get the inline style
+	 *
+	 * @return the inline style
 	 */
 	IStyle getInlineStyle();
 
+	/**
+	 * Set the inline style
+	 *
+	 * @param style inline style
+	 */
 	void setInlineStyle(IStyle style);
 
 	/**
-	 * use visitor to process the object.
-	 * 
-	 * @param visitor
+	 * Use visitor to process the object.
+	 *
+	 * @param visitor content visitor
+	 * @param value
+	 * @return processed object
 	 * @throws BirtException
 	 */
 	Object accept(IContentVisitor visitor, Object value) throws BirtException;
 
 	/**
+	 * Get the bookmark
+	 *
 	 * @return the bookmark value
 	 */
 	String getBookmark();
 
+	/**
+	 * Set the bookmark
+	 *
+	 * @param bookmark element bookmark
+	 */
 	void setBookmark(String bookmark);
 
 	/**
+	 * Get the hyperlink action
+	 *
 	 * @return hyperlink actions
 	 */
 	IHyperlinkAction getHyperlinkAction();
 
+	/**
+	 * Set the hyperlink action
+	 *
+	 * @param hyperlink hyperlink action
+	 */
 	void setHyperlinkAction(IHyperlinkAction hyperlink);
 
 	/**
-	 * @return Returns the altText.
+	 * Get the alternative text
+	 *
+	 * @return the alternative text.
 	 */
 	String getAltText();
 
+	/**
+	 * Set the alternative text
+	 *
+	 * @param altText alternative text
+	 */
 	void setAltText(String altText);
 
 	/**
-	 * @return Returns the altText key.
+	 * Get the alternative text key
+	 *
+	 * @return the alternative text key
 	 */
 	String getAltTextKey();
 
+	/**
+	 * Set the alternative text key
+	 *
+	 * @param altTextKey alternative text key
+	 */
 	void setAltTextKey(String altTextKey);
 
 	/**
-	 * @return Returns the helpText.
+	 * Get the help text
+	 *
+	 * @return the help text
 	 */
 	String getHelpText();
 
+	/**
+	 * Set the help text
+	 *
+	 * @param help help text
+	 */
 	void setHelpText(String help);
 
 	/**
-	 * sepcified value, the actual height is defined in IBounds
-	 * 
+	 * Get the specified value, the actual height is defined in IBounds
+	 *
 	 * @return the height of the report item
 	 */
 	DimensionType getHeight();
 
+	/**
+	 * Set the element height
+	 *
+	 * @param height element height
+	 */
 	void setHeight(DimensionType height);
 
 	/**
 	 * specified value, the real value is defined in IBounds
-	 * 
+	 *
 	 * @return the width of the report item
 	 */
 	DimensionType getWidth();
 
+	/**
+	 * Set the element width
+	 *
+	 * @param width element width
+	 */
 	void setWidth(DimensionType width);
 
 	/**
-	 * specified value, the real value is defined in IBounds
-	 * 
-	 * @return the x position of the report item.
+	 * Get the specified value, the real value is defined in IBounds
+	 *
+	 * @return the x position of the report item
 	 */
 	DimensionType getX();
 
+	/**
+	 * Set the x position of the report item
+	 *
+	 * @param x x position of the report item
+	 */
 	void setX(DimensionType x);
 
 	/**
-	 * specified value, the real value is defined in IBounds
-	 * 
-	 * @return Returns the y position of the report item.
+	 * Get the specified value, the real value is defined in IBounds
+	 *
+	 * @return the y position of the report item
 	 */
 	DimensionType getY();
 
+	/**
+	 * Set the y position of the report item
+	 *
+	 * @param y y position of the report item
+	 */
 	void setY(DimensionType y);
 
+	/**
+	 * Get the table of content
+	 *
+	 * @return table of content
+	 */
 	Object getTOC();
 
+	/**
+	 * Get the table of content
+	 *
+	 * @param toc table of content
+	 */
 	void setTOC(Object toc);
 
+	/**
+	 * Write the content
+	 *
+	 * @param out data output sream
+	 * @throws IOException
+	 */
 	void writeContent(DataOutputStream out) throws IOException;
 
+	/**
+	 * Read the content
+	 *
+	 * @param in     data input stream
+	 * @param loader class loader
+	 * @throws IOException
+	 */
 	void readContent(DataInputStream in, ClassLoader loader) throws IOException;
 
+	/**
+	 * Clone the content
+	 *
+	 * @param isDeep deep copy is used
+	 * @return the cloned content
+	 */
 	IContent cloneContent(boolean isDeep);
 
+	/**
+	 * Is RTL used
+	 *
+	 * @return is RTL used
+	 */
 	boolean isRTL();
 
+	/**
+	 * Is direction RTL
+	 *
+	 * @return is direction RTL
+	 */
 	boolean isDirectionRTL();
 
+	/**
+	 * Get ACL
+	 *
+	 * @return ACL
+	 */
 	String getACL();
 
+	/**
+	 * Set the ACL
+	 *
+	 * @param acl ACL
+	 */
 	void setACL(String acl);
 
+	/**
+	 * Get the result set
+	 *
+	 * @return result set
+	 */
 	IBaseResultSet getResultSet();
 
+	/**
+	 * Check is last child
+	 *
+	 * @return is last child
+	 */
 	boolean isLastChild();
 
+	/**
+	 * Set is last child
+	 *
+	 * @param isLastChild is last child
+	 */
 	void setLastChild(boolean isLastChild);
 
+	/**
+	 * Has children
+	 *
+	 * @return has children
+	 */
 	boolean hasChildren();
 
+	/**
+	 * Set has children
+	 *
+	 * @param hasChildren has children
+	 */
 	void setHasChildren(boolean hasChildren);
 
+	/**
+	 * Get user properties
+	 *
+	 * @return user properties
+	 */
 	Map<String, Object> getUserProperties();
 
+	/**
+	 * Set the user properties
+	 *
+	 * @param values user properties
+	 */
 	void setUserProperties(Map<String, Object> values);
 
+	/**
+	 * Get the extensions
+	 *
+	 * @return extensions
+	 */
 	Map<String, Object> getExtensions();
 
+	/**
+	 * Set the extensions
+	 *
+	 * @param values extensions
+	 */
 	void setExtensions(Map<String, Object> values);
+
+	/**
+	 * @return PDF tag type
+	 */
+	public String getTagType();
+
+	/**
+	 * Set the PDF tag type
+	 */
+	public void setTagType(String tagType);
+
 }

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -13,7 +16,7 @@ package org.eclipse.birt.report.engine.ir;
 
 /**
  * AutoText.
- * 
+ *
  */
 public class AutoTextItemDesign extends ReportItemDesign {
 
@@ -35,13 +38,14 @@ public class AutoTextItemDesign extends ReportItemDesign {
 	public AutoTextItemDesign() {
 	}
 
+	@Override
 	public Object accept(IReportItemVisitor visitor, Object value) {
 		return visitor.visitAutoTextItem(this, value);
 	}
 
 	/**
 	 * get text content
-	 * 
+	 *
 	 * @return Returns the text.
 	 */
 	public String getText() {
@@ -50,7 +54,7 @@ public class AutoTextItemDesign extends ReportItemDesign {
 
 	/**
 	 * set text content
-	 * 
+	 *
 	 * @param text The text to set.
 	 */
 	public void setText(String textKey, String text) {
@@ -67,7 +71,7 @@ public class AutoTextItemDesign extends ReportItemDesign {
 
 	/**
 	 * set autoText type
-	 * 
+	 *
 	 * @param type The autoText type.
 	 */
 	public void setType(String type) {

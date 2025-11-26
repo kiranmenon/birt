@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,7 +18,7 @@ import org.w3c.dom.css.CSSValue;
 
 /**
  * This singleton class represents the 'inherit' value.
- * 
+ *
  */
 public class InheritValue extends Value {
 
@@ -33,6 +36,7 @@ public class InheritValue extends Value {
 	/**
 	 * A string representation of the current value.
 	 */
+	@Override
 	public String getCssText() {
 		return "inherit";
 	}
@@ -40,6 +44,7 @@ public class InheritValue extends Value {
 	/**
 	 * A code defining the type of the value.
 	 */
+	@Override
 	public short getCssValueType() {
 		return CSSValue.CSS_INHERIT;
 	}
@@ -47,6 +52,7 @@ public class InheritValue extends Value {
 	/**
 	 * Returns a printable representation of this object.
 	 */
+	@Override
 	public String toString() {
 		return getCssText();
 	}

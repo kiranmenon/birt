@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -11,8 +14,6 @@
 
 package org.eclipse.birt.chart.log;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
@@ -22,7 +23,7 @@ import org.eclipse.birt.core.framework.Platform;
 
 /**
  * A centralized class to start use and manager loggers.
- * 
+ *
  * @see ILogger
  */
 final public class Logger {
@@ -37,11 +38,11 @@ final public class Logger {
 
 	/**
 	 * Returns the logger by the given name.
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
-	synchronized public static final ILogger getLogger(String name) {
+	synchronized public static ILogger getLogger(String name) {
 		// TODO use java logger impl as default, later will use the extension
 		// configuration.
 
@@ -81,18 +82,13 @@ final public class Logger {
 
 	private static StreamHandler getTracingHandler() {
 		if (tracingHandler == null) {
-			tracingHandler = AccessController.doPrivileged(new PrivilegedAction<StreamHandler>() {
-
-				public StreamHandler run() {
-					StreamHandler handler = new StreamHandler(System.out, new SimpleFormatter());
-					try {
-						tracingHandler.setLevel(Level.ALL);
-					} catch (SecurityException e) {
-						e.printStackTrace();
-					}
-					return handler;
-				}
-			});
+			StreamHandler handler = new StreamHandler(System.out, new SimpleFormatter());
+			try {
+				tracingHandler.setLevel(Level.ALL);
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			}
+			tracingHandler = handler;
 		}
 		return tracingHandler;
 	}

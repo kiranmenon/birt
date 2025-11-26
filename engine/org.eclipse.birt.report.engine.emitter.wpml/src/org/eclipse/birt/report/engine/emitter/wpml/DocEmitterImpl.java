@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c)2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,29 +31,43 @@ import org.eclipse.birt.report.engine.emitter.wpml.writer.DocWriter;
 import org.eclipse.birt.report.engine.layout.pdf.util.HTML2Content;
 import org.eclipse.birt.report.engine.presentation.ContentEmitterVisitor;
 
+/**
+ * Doc emitter implementation
+ *
+ * @since 3.3
+ *
+ */
 public class DocEmitterImpl extends AbstractEmitterImpl {
 
 	private static final String OUTPUT_FORMAT = "doc";
 
-	private Stack<IStyle> inlineStyles = new Stack<IStyle>();
+	private Stack<IStyle> inlineStyles = new Stack<>();
 
 	private boolean inForeign = false;
 
 	private boolean hasPInside = false;
 
+	/**
+	 * Constructor
+	 *
+	 * @param contentVisitor content visitor
+	 */
 	public DocEmitterImpl(ContentEmitterVisitor contentVisitor) {
 		this.contentVisitor = contentVisitor;
 	}
 
+	@Override
 	public void initialize(IEmitterServices service) throws EngineException {
 		super.initialize(service);
 		wordWriter = new DocWriter(out);
 	}
 
+	@Override
 	public String getOutputFormat() {
 		return OUTPUT_FORMAT;
 	}
 
+	@Override
 	public void endContainer(IContainerContent container) {
 		boolean flag = hasForeignParent(container);
 
@@ -62,10 +79,8 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 				if (!styles.isEmpty()) {
 					styles.pop();
 				}
-			} else {
-				if (!inlineStyles.isEmpty()) {
-					inlineStyles.pop();
-				}
+			} else if (!inlineStyles.isEmpty()) {
+				inlineStyles.pop();
 			}
 
 			if (!CSSConstants.CSS_INLINE_VALUE.equalsIgnoreCase(container.getComputedStyle().getDisplay())) {
@@ -80,6 +95,7 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 		}
 	}
 
+	@Override
 	public void startContainer(IContainerContent container) {
 		boolean flag = hasForeignParent(container);
 
@@ -107,12 +123,14 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 		return false;
 	}
 
+	@Override
 	public void endTable(ITableContent table) {
 		hasPInside = false;
 		endTable();
 		decreaseTOCLevel(table);
 	}
 
+	@Override
 	public void startForeign(IForeignContent foreign) throws BirtException {
 		if (IForeignContent.HTML_TYPE.equalsIgnoreCase(foreign.getRawType())) {
 			inForeign = true;
@@ -143,7 +161,7 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 			width = Math.min(width, context.getCurrentWidth());
 			wordWriter.startTable(foreign.getComputedStyle(), width, inForeign);
 			wordWriter.startTableRow(-1);
-			wordWriter.startTableCell(width, foreign.getComputedStyle(), null);
+			wordWriter.startTableCell(width, foreign.getComputedStyle(), null, null);
 			writeBookmark(foreign);
 			writeToc(foreign);
 			contentVisitor.visitChildren(foreign, null);
@@ -166,10 +184,11 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 		} else {
 			Object rawValue = foreign.getRawValue();
 			String text = rawValue == null ? "" : rawValue.toString();
-			writeContent(DocEmitterImpl.NORMAL, text, foreign);
+			writeContent(AbstractEmitterImpl.NORMAL, text, foreign);
 		}
 	}
 
+	@Override
 	protected void writeContent(int type, String txt, IContent content) {
 		if (inForeign) {
 			hasPInside = true;
@@ -188,14 +207,16 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 				if (!styles.isEmpty()) {
 					computedStyle = new CompositeStyle(styles.peek(), content.getStyle());
 				}
-			} else
+			} else {
 				inlineFlag = InlineFlag.MIDDLE_INLINE;
+			}
 			if (!inlineStyles.isEmpty()) {
 				inlineStyle = mergeStyles(inlineStyles);
 			}
 			IContent parent = (IContent) content.getParent();
-			if (parent != null && parent.getComputedStyle() != null)
+			if (parent != null && parent.getComputedStyle() != null) {
 				textAlign = parent.getComputedStyle().getTextAlign();
+			}
 		} else {
 			adjustInline();
 		}
@@ -214,7 +235,7 @@ public class DocEmitterImpl extends AbstractEmitterImpl {
 				style.setProperty(i, null);
 
 				for (int p = inlineStyles.size() - 1; p >= 0; p--) {
-					IStyle pstyle = (IStyle) inlineStyles.get(p);
+					IStyle pstyle = inlineStyles.get(p);
 
 					if (!isNullValue(pstyle.getProperty(i))) {
 						style.setProperty(i, pstyle.getProperty(i));

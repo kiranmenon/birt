@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - modification of Batik's IdentifierManager.java to support BIRT's CSS rules
@@ -21,13 +24,14 @@ import org.w3c.dom.css.CSSPrimitiveValue;
 /**
  * This class provides a manager for the property with support for identifier
  * values.
- * 
+ *
  */
 public abstract class IdentifierManager extends AbstractValueManager {
 
 	/**
 	 * Implements {@link ValueManager#createValue(LexicalUnit,CSSEngine)}.
 	 */
+	@Override
 	public Value createValue(LexicalUnit lu, CSSEngine engine) throws DOMException {
 		switch (lu.getLexicalUnitType()) {
 		case LexicalUnit.SAC_INHERIT:
@@ -46,7 +50,7 @@ public abstract class IdentifierManager extends AbstractValueManager {
 		}
 	}
 
-	protected Value createStringValue(short type, String value, CSSEngine engine) throws DOMException {
+	protected Value createStringValue(short type, String value) throws DOMException {
 		if (type != CSSPrimitiveValue.CSS_IDENT) {
 			throw createInvalidStringTypeDOMException(type);
 		}
@@ -58,8 +62,11 @@ public abstract class IdentifierManager extends AbstractValueManager {
 	}
 
 	/**
-	 * Returns the map that contains the name/value mappings for each possible
+	 * Get the map that contains the name/value mappings for each possible
 	 * identifiers.
+	 *
+	 * @return Returns the map that contains the name/value mappings for each
+	 *         possible identifiers.
 	 */
 	public abstract StringMap getIdentifiers();
 }

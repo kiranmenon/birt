@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -21,7 +24,7 @@ import org.eclipse.birt.report.engine.api.script.instance.IScriptStyle;
  * A node that wraps around a TOC entry. To navigate to a specific TOC entry,
  * one starts with the TOC root and traverse down the TOC tree, obtaining list
  * of TOC nodes.
- * 
+ *
  * For each node, the user can go to a specific page by following the bookmark.
  */
 public class TOCNode {
@@ -64,7 +67,7 @@ public class TOCNode {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param node
 	 */
 	public TOCNode(TOCNode node) {
@@ -120,7 +123,7 @@ public class TOCNode {
 
 	/**
 	 * Set bookmark
-	 * 
+	 *
 	 * @param bookmark
 	 */
 	public void setBookmark(String bookmark) {
@@ -129,7 +132,7 @@ public class TOCNode {
 
 	/**
 	 * Set Node id
-	 * 
+	 *
 	 * @param id
 	 */
 	public void setNodeID(String id) {
@@ -138,7 +141,7 @@ public class TOCNode {
 
 	/**
 	 * Set parent toc.
-	 * 
+	 *
 	 * @param parent
 	 */
 	public void setParent(TOCNode parent) {
@@ -147,7 +150,7 @@ public class TOCNode {
 
 	/**
 	 * Get toc style.
-	 * 
+	 *
 	 * @return toc style
 	 */
 	public IScriptStyle getTOCStyle() {
@@ -156,7 +159,7 @@ public class TOCNode {
 
 	/**
 	 * Set toc style.
-	 * 
+	 *
 	 * @param toc style
 	 */
 	public void setTOCStyle(IScriptStyle tocStyle) {

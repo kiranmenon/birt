@@ -1,34 +1,54 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
  *******************************************************************************/
 package org.eclipse.birt.report.engine.css.engine;
 
+/**
+ * Factory of the property manager
+ *
+ * @since 3.3
+ *
+ */
 public interface PropertyManagerFactory {
 
 	/**
 	 * Returns the number of properties.
+	 *
+	 * @return Returns the number of properties.
 	 */
-	abstract public int getNumberOfProperties();
+	int getNumberOfProperties();
 
 	/**
 	 * Returns the property index, or -1.
+	 *
+	 * @param name name of the property
+	 * @return Returns the property index, or -1.
 	 */
-	abstract public int getPropertyIndex(String name);
+	int getPropertyIndex(String name);
 
 	/**
 	 * Returns the ValueManagers.
+	 *
+	 * @param idx index of the value manager
+	 * @return Returns the ValueManagers.
 	 */
-	abstract public ValueManager getValueManager(int idx);
+	ValueManager getValueManager(int idx);
 
 	/**
 	 * Returns the name of the property at the given index.
+	 *
+	 * @param idx index of the property
+	 * @return Returns the name of the property at the given index.
 	 */
-	abstract public String getPropertyName(int idx);
+	String getPropertyName(int idx);
 }

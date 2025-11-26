@@ -1,9 +1,12 @@
 /***********************************************************************
- * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -36,7 +39,11 @@ import org.eclipse.birt.report.engine.content.impl.ObjectContent;
 import org.eclipse.birt.report.engine.content.impl.ReportContent;
 import org.eclipse.birt.report.engine.content.impl.TextContent;
 import org.eclipse.birt.report.engine.css.dom.StyleDeclaration;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.FloatValue;
 import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
+import org.eclipse.birt.report.engine.internal.util.DataProtocolUtil;
+import org.eclipse.birt.report.engine.internal.util.DataProtocolUtil.DataUrlInfo;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.engine.parser.TextParser;
 import org.eclipse.birt.report.engine.util.FileUtil;
@@ -46,6 +53,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.css.CSSPrimitiveValue;
 import org.w3c.dom.css.CSSValue;
 
 /**
@@ -299,7 +307,7 @@ import org.w3c.dom.css.CSSValue;
  * <li>display</li>
  * <li>visibility</li>
  * </ul>
- * 
+ *
  * Supported css shorthand as following
  * <table border=1>
  * <tr>
@@ -349,13 +357,17 @@ import org.w3c.dom.css.CSSValue;
  */
 public class HTML2Content implements HTMLConstants {
 
-	protected static final HashSet htmlBlockDisplay = new HashSet();
+	protected static final HashSet<String> htmlBlockDisplay = new HashSet<String>();
 
-	protected static final HashSet htmlInlineDisplay = new HashSet();
+	protected static final HashSet<String> htmlInlineDisplay = new HashSet<String>();
 
-	protected static final HashMap textTypeMapping = new HashMap();
+	protected static final HashMap<String, String> textTypeMapping = new HashMap<String, String>();
 
 	private static final String LIST_STYLE_TYPE = "list-style-type";
+
+	private static final int DEFAULT_LIST_ICON_PADDING_NUMBER = 2500;
+
+	private static final int DEFAULT_LIST_ICON_PADDING_SYMBOLE = 5000;
 
 	static {
 		htmlInlineDisplay.add(TAG_I);
@@ -411,8 +423,14 @@ public class HTML2Content implements HTMLConstants {
 
 	}
 
-	protected static char[] listChar = new char[] { '\u2022', '\u25E6', '\u25AA' };
+	protected static char[] listChar = { '\u2022', '\u25E6', '\u25AA' };
 
+	/**
+	 * Get the list of char
+	 *
+	 * @param nestCount count of chars
+	 * @return char
+	 */
 	public static char getListChar(int nestCount) {
 		if (nestCount <= 2) {
 			return listChar[nestCount];
@@ -420,6 +438,11 @@ public class HTML2Content implements HTMLConstants {
 		return listChar[2];
 	}
 
+	/**
+	 * Convert HTML to content
+	 *
+	 * @param foreign foreign content
+	 */
 	public static void html2Content(IForeignContent foreign) {
 		processForeignData(foreign);
 	}
@@ -429,14 +452,14 @@ public class HTML2Content implements HTMLConstants {
 			return;
 		}
 
-		HashMap styleMap = new HashMap();
+		HashMap<Element, StyleProperties> styleMap = new HashMap<Element, StyleProperties>();
 		ReportDesignHandle reportDesign = foreign.getReportContent().getDesign().getReportDesign();
 		HTMLStyleProcessor htmlProcessor = new HTMLStyleProcessor(reportDesign);
 		Object rawValue = foreign.getRawValue();
 		Document doc = null;
 		if (null != rawValue) {
 			doc = new TextParser().parse(foreign.getRawValue().toString(),
-					(String) textTypeMapping.get(foreign.getRawType()));
+					textTypeMapping.get(foreign.getRawType()));
 		}
 
 		Element body = null;
@@ -453,8 +476,8 @@ public class HTML2Content implements HTMLConstants {
 			IContainerContent container = foreign.getReportContent().createContainerContent();
 
 			IStyle parentStyle = foreign.getStyle();
-			if (CSSValueConstants.INLINE_VALUE.equals(parentStyle.getProperty(IStyle.STYLE_DISPLAY))) {
-				container.getStyle().setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
+			if (CSSValueConstants.INLINE_VALUE.equals(parentStyle.getProperty(StyleConstants.STYLE_DISPLAY))) {
+				container.getStyle().setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
 			}
 			addChild(foreign, container);
 			processNodes(body, styleMap, container, null, 0);
@@ -467,22 +490,34 @@ public class HTML2Content implements HTMLConstants {
 		addChild(parent, label);
 		label.setText(text);
 		StyleDeclaration inlineStyle = new StyleDeclaration(parent.getCSSEngine());
-		inlineStyle.setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
+		inlineStyle.setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
 		label.setInlineStyle(inlineStyle);
 		return label;
 	}
 
 	/**
 	 * Visits the children nodes of the specific node
-	 * 
+	 *
 	 * @param ele        the specific node
 	 * @param needEscape the flag indicating the content needs escaping
 	 * @param cssStyles
 	 * @param content    the parent content of the element
-	 * 
+	 *
 	 */
-	static void processNodes(Element ele, Map cssStyles, IContent content, ActionContent action, int nestCount) {
+	static void processNodes(Element ele, Map<Element, StyleProperties> cssStyles, IContent content,
+			ActionContent action, int nestCount) {
 		int level = 0;
+
+		// ordered list, handling of start level by attribute start
+		if (ele.getTagName().toLowerCase().equals(TAG_OL) && ele.hasAttribute(PROPERTY_OL_START)) {
+			int olStartIndex = 0;
+			try {
+				olStartIndex = Integer.valueOf(ele.getAttribute(PROPERTY_OL_START));
+				level += olStartIndex - 1;
+			} catch (NumberFormatException nfe) {
+				// on error the default index will be used
+			}
+		}
 		for (Node node = ele.getFirstChild(); node != null; node = node.getNextSibling()) {
 			if (node.getNodeName().equals(TAG_VALUEOF)) // $NON-NLS-1$
 			{
@@ -496,16 +531,12 @@ public class HTML2Content implements HTMLConstants {
 				}
 			} else if (node.getNodeName().equals(TAG_SCRIPT)) // $NON-NLS-1$
 			{
-				continue;
 			} else if (node.getNodeType() == Node.TEXT_NODE) {
 				ILabelContent label = createLabel(node.getNodeValue(), content);
 				if (action != null) {
 					label.setHyperlinkAction(action);
 				}
-			} else if ( // supportedHTMLElementTags.contains(node.getNodeName().
-			// toUpperCase())
-			// &&
-			node.getNodeType() == Node.ELEMENT_NODE) {
+			} else if (node.getNodeType() == Node.ELEMENT_NODE) {
 				handleElement((Element) node, cssStyles, content, action, ++level, nestCount);
 			}
 		}
@@ -543,12 +574,13 @@ public class HTML2Content implements HTMLConstants {
 			addChild(content, label);
 			label.setText("\n"); //$NON-NLS-1$
 			StyleDeclaration inlineStyle = new StyleDeclaration(content.getCSSEngine());
-			inlineStyle.setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
+			inlineStyle.setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
 			label.setInlineStyle(inlineStyle);
 		} else if (lTagName.equals(TAG_UL) || lTagName.equals(TAG_OL))// $NON-NLS-1$
 		{
 			IReportContent report = content.getReportContent();
 			ITableContent table = report.createTableContent();
+			table.setTagType("L");
 			addChild(content, table);
 			Column column1 = new Column(report);
 			column1.setWidth(new DimensionType(2, "em"));
@@ -565,22 +597,25 @@ public class HTML2Content implements HTMLConstants {
 			IRowContent row = report.createRowContent();
 			addChild(content, row);
 			handleStyle(ele, cssStyles, row);
+			row.setTagType("LI");
 
-			// fix scr 157259In PDF <li> effect is incorrect when page break
-			// happens.
+			// fix scr 157259In PDF <li> effect is incorrect when page break happens.
 			// add a container to number serial, keep consistent page-break
 
-			StyleDeclaration style = new StyleDeclaration(content.getCSSEngine());
-			style.setProperty(IStyle.STYLE_VERTICAL_ALIGN, CSSValueConstants.TOP_VALUE);
-			style.setProperty(IStyle.STYLE_PADDING_BOTTOM, IStyle.NUMBER_0);
-			style.setProperty(IStyle.STYLE_PADDING_LEFT, IStyle.NUMBER_0);
-			style.setProperty(IStyle.STYLE_PADDING_RIGHT, IStyle.NUMBER_0);
-			style.setProperty(IStyle.STYLE_PADDING_TOP, IStyle.NUMBER_0);
+			StyleDeclaration styleListIcon = new StyleDeclaration(content.getCSSEngine());
+			// list item, set text alignment
+			if (!content.isDirectionRTL()) {
+				styleListIcon.setProperty(StyleConstants.STYLE_TEXT_ALIGN, CSSValueConstants.RIGHT_VALUE);
+			}
+			styleListIcon.setProperty(StyleConstants.STYLE_VERTICAL_ALIGN, CSSValueConstants.TOP_VALUE);
+			styleListIcon.setProperty(StyleConstants.STYLE_PADDING_BOTTOM, CSSValueConstants.NUMBER_0);
+			styleListIcon.setProperty(StyleConstants.STYLE_PADDING_LEFT, CSSValueConstants.NUMBER_0);
+			styleListIcon.setProperty(StyleConstants.STYLE_PADDING_TOP, CSSValueConstants.NUMBER_0);
 			ICellContent orderCell = report.createCellContent();
 			orderCell.setRowSpan(1);
 			orderCell.setColumn(0);
 			orderCell.setColSpan(1);
-			orderCell.setInlineStyle(style);
+			orderCell.setInlineStyle(styleListIcon);
 			addChild(row, orderCell);
 			TextContent text = (TextContent) report.createTextContent();
 			addChild(orderCell, text);
@@ -595,16 +630,20 @@ public class HTML2Content implements HTMLConstants {
 			}
 			Object value = cssStyles.get(ele.getParentNode()).getProperty(LIST_STYLE_TYPE);
 			String styleType = "";
-			if (value != null)
+			if (value != null) {
 				styleType = value.toString();
+			}
 			if (ele.getParentNode().getNodeName().equals(TAG_OL) && !nestList) // $NON-NLS-1$
 			{
 				// set default style type to the <ol> tag;
-				if ("".equals(styleType))
+				if ("".equals(styleType)) {
 					styleType = BulletFrame.CSS_LISTSTYLETYPE_DECIMAL;
+				}
 				BulletFrame frame = new BulletFrame(styleType);
 				// index mean the order in the list
 				text.setText(frame.paintBullet(index) + "."); //$NON-NLS-1$
+				styleListIcon.setProperty(StyleConstants.STYLE_PADDING_RIGHT,
+						new FloatValue(CSSPrimitiveValue.CSS_NUMBER, DEFAULT_LIST_ICON_PADDING_NUMBER));
 			} else if (ele.getParentNode().getNodeName().equals(TAG_UL) && !nestList) // $NON-NLS-1$
 			{
 				BulletFrame frame = new BulletFrame(styleType);
@@ -612,20 +651,29 @@ public class HTML2Content implements HTMLConstants {
 				if ("".equals(text.getText())) // add default list type when tag <ul> attribute is empty.
 				{
 					text.setText("\u2022"); // the disc type
+					text.setTagType("Lbl");
 				}
+				styleListIcon.setProperty(StyleConstants.STYLE_PADDING_RIGHT,
+						new FloatValue(CSSPrimitiveValue.CSS_NUMBER, DEFAULT_LIST_ICON_PADDING_SYMBOLE));
 			}
-
+			StyleDeclaration styleListItem = new StyleDeclaration(content.getCSSEngine());
+			styleListItem.setProperty(StyleConstants.STYLE_VERTICAL_ALIGN, CSSValueConstants.TOP_VALUE);
+			styleListItem.setProperty(StyleConstants.STYLE_PADDING_BOTTOM, CSSValueConstants.NUMBER_0);
+			styleListItem.setProperty(StyleConstants.STYLE_PADDING_LEFT, CSSValueConstants.NUMBER_0);
+			styleListItem.setProperty(StyleConstants.STYLE_PADDING_RIGHT, CSSValueConstants.NUMBER_0);
+			styleListItem.setProperty(StyleConstants.STYLE_PADDING_TOP, CSSValueConstants.NUMBER_0);
 			ICellContent childCell = report.createCellContent();
 			childCell.setRowSpan(1);
 			childCell.setColumn(1);
 			childCell.setColSpan(1);
-			childCell.setInlineStyle(style);
+			childCell.setInlineStyle(styleListItem);
+			childCell.setTagType("LBody");
 			addChild(row, childCell);
 
 			processNodes(ele, cssStyles, childCell, action, nestCount + 1);
 		}
 
-		else if (lTagName.equals(TAG_DD) || lTagName.equals(TAG_DT)) // $NON-NLS-1$ //$NON-NLS-2$
+		else if (lTagName.equals(TAG_DD) || lTagName.equals(TAG_DT)) // $NON-NLS-1$
 		{
 			IContainerContent container = content.getReportContent().createContainerContent();
 			addChild(content, container);
@@ -634,8 +682,8 @@ public class HTML2Content implements HTMLConstants {
 			if (lTagName.equals(TAG_DD)) // $NON-NLS-1$
 			{
 				StyleDeclaration style = new StyleDeclaration(content.getCSSEngine());
-				style.setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
-				style.setProperty(IStyle.STYLE_VERTICAL_ALIGN, CSSValueConstants.TOP_VALUE);
+				style.setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
+				style.setProperty(StyleConstants.STYLE_VERTICAL_ALIGN, CSSValueConstants.TOP_VALUE);
 				TextContent text = (TextContent) content.getReportContent().createTextContent();
 				addChild(container, text);
 				if (ele.getParentNode().getNodeName().equals(TAG_DL)) // $NON-NLS-1$
@@ -659,34 +707,56 @@ public class HTML2Content implements HTMLConstants {
 		{
 			TableProcessor.processTable(ele, cssStyles, content, action);
 		} else if (htmlBlockDisplay.contains(lTagName) || htmlInlineDisplay.contains(lTagName)) {
+			//
+			StyleProperties spEle = cssStyles.get(ele);
+			if (spEle.getStyle().getMarginTop() == null) {
+				spEle.getStyle().setMarginTop("0px");
+			}
+			if (spEle.getStyle().getMarginBottom() == null) {
+				String marginBottom = (lTagName.equals(TAG_P)) ? "1em" : "0px";
+				spEle.getStyle().setMarginBottom(marginBottom);
+			}
 			IContainerContent container = content.getReportContent().createContainerContent();
 			handleStyle(ele, cssStyles, container);
+			mapHtmlTagToPdfTag(container, lTagName);
 			addChild(content, container);
-			// handleStyle(ele, cssStyles, container);
 			processNodes(ele, cssStyles, container, action, nestCount);
 		} else {
 			processNodes(ele, cssStyles, content, action, nestCount);
 		}
 	}
 
+	// FIXME: The mapping should be configurable.
+	// FIXME: In particular, it should be possible to adjust the heading levels,
+	// (i.e to specify a positive or negative offset, such that H1->H2, H2->H3).
+	static final Map<String, String> HTML_TAG_TO_PDF_TAG = Map.of(
+			"DIV", "DIV",
+			"P", "P",
+			"H1", "H1",
+			"H2", "H2",
+			"H3", "H3",
+			"H4", "H4"
+		);
+
 	/**
-	 * Checks if the content inside the DOM should be escaped.
-	 * 
-	 * @param doc the root of the DOM tree
-	 * @return true if the content needs escaping, otherwise false.
+	 * This sets the container's tag type corresponding to the HTML tag, if
+	 * possible.
+	 *
+	 * @param container
+	 * @param lTagName
 	 */
-	private static boolean checkEscapeSpace(Node doc) {
-		String textType = null;
-		if (doc != null && doc.getFirstChild() != null && doc.getFirstChild() instanceof Element) {
-			textType = ((Element) doc.getFirstChild()).getAttribute("text-type"); //$NON-NLS-1$
-			return (!TextParser.TEXT_TYPE_HTML.equalsIgnoreCase(textType));
+	private static void mapHtmlTagToPdfTag(IContainerContent container, String lTagName) {
+		if (lTagName == null)
+			return;
+		String mapped = HTML_TAG_TO_PDF_TAG.get(lTagName.toUpperCase());
+		if (mapped != null) {
+			container.setTagType(mapped);
 		}
-		return true;
 	}
 
 	/**
 	 * Outputs the A element
-	 * 
+	 *
 	 * @param ele the A element instance
 	 */
 	protected static ActionContent handleAnchor(Element ele, IContent content, ActionContent defaultAction) {
@@ -740,12 +810,12 @@ public class HTML2Content implements HTMLConstants {
 
 	/**
 	 * Outputs the embed content. Currently only support flash.
-	 * 
+	 *
 	 * @param ele
 	 * @param cssStyles
 	 * @param content
 	 */
-	protected static void outputEmbedContent(Element ele, Map cssStyles, IContent content) {
+	protected static void outputEmbedContent(Element ele, Map<Element, StyleProperties> cssStyles, IContent content) {
 		String classId = ele.getAttribute(PROPERTY_CLASSID);
 		if ("clsid:D27CDB6E-AE6D-11cf-96B8-444553540000".equalsIgnoreCase(classId)) {
 			outputFlash(ele, cssStyles, content);
@@ -754,12 +824,12 @@ public class HTML2Content implements HTMLConstants {
 
 	/**
 	 * Outputs the flash.
-	 * 
+	 *
 	 * @param ele
 	 * @param cssStyles
 	 * @param content
 	 */
-	protected static void outputFlash(Element ele, Map cssStyles, IContent content) {
+	protected static void outputFlash(Element ele, Map<Element, StyleProperties> cssStyles, IContent content) {
 		String src = null;
 		String flashVars = null;
 		String alt = null;
@@ -804,11 +874,11 @@ public class HTML2Content implements HTMLConstants {
 				flash.setHeight(foreign.getHeight());
 			}
 
-			if (flashVars != null && !"".equals(flashVars)) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (flashVars != null && !"".equals(flashVars)) //$NON-NLS-1$
 			{
 				flash.addParam("FlashVars", flashVars); //$NON-NLS-1$
 			}
-			if (alt == null) // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (alt == null) // $NON-NLS-1$
 			{
 				alt = ele.getAttribute(PROPERTY_ALT);
 			}
@@ -821,18 +891,19 @@ public class HTML2Content implements HTMLConstants {
 	private static IForeignContent getForeignRoot(IContent content) {
 		while (!(content instanceof IForeignContent)) {
 			content = (IContent) content.getParent();
-			if (content == null)
+			if (content == null) {
 				return null;
+			}
 		}
 		return (IForeignContent) content;
 	}
 
 	/**
 	 * Outputs the image
-	 * 
+	 *
 	 * @param ele the IMG element instance
 	 */
-	protected static void outputImg(Element ele, Map cssStyles, IContent content) {
+	protected static void outputImg(Element ele, Map<Element, StyleProperties> cssStyles, IContent content) {
 		String src = ele.getAttribute("src"); //$NON-NLS-1$
 		if (src != null) {
 			IImageContent image = content.getReportContent().createImageContent();
@@ -841,6 +912,11 @@ public class HTML2Content implements HTMLConstants {
 
 			if (!FileUtil.isLocalResource(src)) {
 				image.setImageSource(IImageContent.IMAGE_URL);
+				image.setURI(src);
+			} else if (src.startsWith(DataProtocolUtil.DATA_PROTOCOL)) {
+				DataUrlInfo parseDataUrl = DataProtocolUtil.parseDataUrl(src);
+				image.setImageSource(IImageContent.IMAGE_URL);
+				image.setMIMEType(parseDataUrl.getMediaType());
 				image.setURI(src);
 			} else {
 				ReportDesignHandle handle = content.getReportContent().getDesign().getReportDesign();
@@ -854,17 +930,17 @@ public class HTML2Content implements HTMLConstants {
 				image.setURI(src);
 			}
 
-			if (null != ele.getAttribute(PROPERTY_WIDTH) && !"".equals(ele.getAttribute(PROPERTY_WIDTH))) //$NON-NLS-1$ //$NON-NLS-2$
+			if (null != ele.getAttribute(PROPERTY_WIDTH) && !"".equals(ele.getAttribute(PROPERTY_WIDTH))) //$NON-NLS-1$
 																											// //$NON-NLS-3$
 			{
 				image.setWidth(PropertyUtil.getDimensionAttribute(ele, PROPERTY_WIDTH)); // $NON-NLS-1$
 			}
-			if (ele.getAttribute(PROPERTY_HEIGHT) != null && !"".equals(ele.getAttribute(PROPERTY_HEIGHT))) //$NON-NLS-1$ //$NON-NLS-2$
+			if (ele.getAttribute(PROPERTY_HEIGHT) != null && !"".equals(ele.getAttribute(PROPERTY_HEIGHT))) //$NON-NLS-1$
 																											// //$NON-NLS-3$
 			{
 				image.setHeight(PropertyUtil.getDimensionAttribute(ele, PROPERTY_HEIGHT)); // $NON-NLS-1$
 			}
-			if (ele.getAttribute(PROPERTY_ALT) != null && !"".equals(ele.getAttribute(PROPERTY_ALT))) //$NON-NLS-1$ //$NON-NLS-2$
+			if (ele.getAttribute(PROPERTY_ALT) != null && !"".equals(ele.getAttribute(PROPERTY_ALT))) //$NON-NLS-1$
 																										// //$NON-NLS-3$
 			{
 				image.setAltText(ele.getAttribute(PROPERTY_ALT)); // $NON-NLS-1$
@@ -875,7 +951,7 @@ public class HTML2Content implements HTMLConstants {
 	protected static void addChild(IContent parent, IContent child) {
 
 		if (parent != null && child != null) {
-			Collection children = parent.getChildren();
+			Collection<IContent> children = parent.getChildren();
 			if (!children.contains(child)) {
 				children.add(child);
 				child.setParent(parent);
@@ -883,36 +959,41 @@ public class HTML2Content implements HTMLConstants {
 		}
 	}
 
-	protected static void formalizeInlineContainer(List parentChildren, IContent parent, IContent content) {
+	/**
+	 * Formalize the inline container
+	 *
+	 * @param parentChildren parent children list
+	 * @param parent         parent content
+	 * @param content        current content
+	 */
+	protected static void formalizeInlineContainer(List<IContent> parentChildren, IContent parent, IContent content) {
 		IStyle style = content.getStyle();
 
-		CSSValue display = style.getProperty(IStyle.STYLE_DISPLAY);
+		CSSValue display = style.getProperty(StyleConstants.STYLE_DISPLAY);
 
 		if (CSSValueConstants.INLINE_VALUE.equals(display)) {
 
-			Iterator iter = content.getChildren().iterator();
-			ArrayList contentChildren = new ArrayList();
+			Iterator<IContent> iter = content.getChildren().iterator();
+			ArrayList<IContent> contentChildren = new ArrayList<IContent>();
 			IContainerContent clonedBlock = null;
 			while (iter.hasNext()) {
-				IContent child = (IContent) iter.next();
+				IContent child = iter.next();
 				boolean isContainer = child.getChildren().size() > 0;
 				if (isContainer) {
 					formalizeInlineContainer(contentChildren, content, child);
 				}
 				if (clonedBlock == null) {
-					CSSValue childDisplay = child.getStyle().getProperty(IStyle.STYLE_DISPLAY);
+					CSSValue childDisplay = child.getStyle().getProperty(StyleConstants.STYLE_DISPLAY);
 					if (CSSValueConstants.BLOCK_VALUE.equals(childDisplay)) {
 						IReportContent report = content.getReportContent();
 						clonedBlock = report.createContainerContent();
 						IStyle clonedStyle = report.createStyle();
 						clonedStyle.setProperties(content.getStyle());
-						clonedStyle.setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.BLOCK_VALUE);
+						clonedStyle.setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.BLOCK_VALUE);
 						clonedBlock.setInlineStyle(clonedStyle);
 						clonedBlock.getChildren().add(child);
-					} else {
-						if (!isContainer) {
-							contentChildren.add(child);
-						}
+					} else if (!isContainer) {
+						contentChildren.add(child);
 					}
 				} else {
 					iter.remove();
@@ -932,10 +1013,10 @@ public class HTML2Content implements HTMLConstants {
 				parentChildren.add(clonedBlock);
 			}
 		} else {
-			Iterator iter = content.getChildren().iterator();
-			ArrayList newChildren = new ArrayList();
+			Iterator<IContent> iter = content.getChildren().iterator();
+			ArrayList<IContent> newChildren = new ArrayList<IContent>();
 			while (iter.hasNext()) {
-				IContent child = (IContent) iter.next();
+				IContent child = iter.next();
 				boolean isContainer = child.getChildren().size() > 0;
 				if (isContainer) {
 					formalizeInlineContainer(newChildren, content, child);
@@ -953,6 +1034,11 @@ public class HTML2Content implements HTMLConstants {
 		}
 	}
 
+	/**
+	 * Main method
+	 *
+	 * @param args arguments
+	 */
 	public static void main(String[] args) {
 		/*
 		 * ReportContent report = new ReportContent( ); IContent root =
@@ -991,25 +1077,24 @@ public class HTML2Content implements HTMLConstants {
 		IContent inlineContent = createInlineContent(report);
 		inline.getChildren().add(inlineContent);
 		inline.getChildren().add(createBlockContent(report));
-		ArrayList list = new ArrayList();
+		ArrayList<IContent> list = new ArrayList<IContent>();
 
 		formalizeInlineContainer(list, root, inline);
 		root.getChildren().clear();
 		if (list.size() > 0) {
 			root.getChildren().addAll(list);
 		}
-		int i = 0;
 	}
 
 	protected static IContent createInlineContent(ReportContent report) {
 		IContent content = report.createContainerContent();
-		content.getStyle().setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
+		content.getStyle().setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.INLINE_VALUE);
 		return content;
 	}
 
 	protected static IContent createBlockContent(ReportContent report) {
 		IContent content = report.createContainerContent();
-		content.getStyle().setProperty(IStyle.STYLE_DISPLAY, CSSValueConstants.BLOCK_VALUE);
+		content.getStyle().setProperty(StyleConstants.STYLE_DISPLAY, CSSValueConstants.BLOCK_VALUE);
 		return content;
 	}
 

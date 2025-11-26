@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -29,7 +32,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param ruleHandle
 	 */
 
@@ -39,7 +42,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param ruleHandle
 	 */
 
@@ -49,7 +52,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param rule
 	 * @param handle
 	 */
@@ -62,30 +65,37 @@ public class HighlightRuleImpl implements IHighlightRule {
 		highlightRuleImpl = highlightRule;
 	}
 
+	@Override
 	public String getColor() {
 		return highlightRuleImpl.getColor();
 	}
 
+	@Override
 	public String getDateTimeFormat() {
 		return highlightRuleImpl.getDateTimeFormat();
 	}
 
+	@Override
 	public String getFontStyle() {
 		return highlightRuleImpl.getFontStyle();
 	}
 
+	@Override
 	public String getFontWeight() {
 		return highlightRuleImpl.getFontWeight();
 	}
 
+	@Override
 	public String getStringFormat() {
 		return highlightRuleImpl.getStringFormat();
 	}
 
+	@Override
 	public String getTestExpression() {
 		return highlightRuleImpl.getTestExpression();
 	}
 
+	@Override
 	public void setColor(String color) throws ScriptException {
 		try {
 			highlightRuleImpl.setColor(color);
@@ -94,6 +104,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 		}
 	}
 
+	@Override
 	public void setDateTimeFormat(String format) throws ScriptException {
 		try {
 			highlightRuleImpl.setDateTimeFormat(format);
@@ -103,6 +114,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setFontStyle(String style) throws ScriptException {
 		try {
 
@@ -113,6 +125,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setFontWeight(String weight) throws ScriptException {
 		try {
 
@@ -123,6 +136,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setStringFormat(String format) throws ScriptException {
 		try {
 			highlightRuleImpl.setStringFormat(format);
@@ -132,6 +146,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setTestExpression(String expression) throws ScriptException {
 		try {
 			highlightRuleImpl.setTestExpression(expression);
@@ -141,6 +156,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setValue1(String value1) throws ScriptException {
 		try {
 
@@ -151,6 +167,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setValue2(String value2) throws ScriptException {
 		try {
 
@@ -161,6 +178,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setOperator(String operator) throws ScriptException {
 		try {
 			highlightRuleImpl.setOperator(operator);
@@ -170,6 +188,7 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public void setBackGroundColor(String color) throws ScriptException {
 		try {
 			highlightRuleImpl.setBackGroundColor(color);
@@ -179,22 +198,27 @@ public class HighlightRuleImpl implements IHighlightRule {
 
 	}
 
+	@Override
 	public IStructure getStructure() {
 		return highlightRuleImpl.getStructure();
 	}
 
+	@Override
 	public String getBackGroundColor() {
 		return highlightRuleImpl.getBackGroundColor();
 	}
 
+	@Override
 	public String getOperator() {
 		return highlightRuleImpl.getOperator();
 	}
 
+	@Override
 	public String getValue1() {
 		return highlightRuleImpl.getValue1();
 	}
 
+	@Override
 	public String getValue2() {
 		return highlightRuleImpl.getValue2();
 	}

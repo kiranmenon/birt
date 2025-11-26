@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -24,6 +27,7 @@ import org.eclipse.birt.report.engine.ir.Report;
 import org.eclipse.birt.report.model.api.DesignConfig;
 import org.eclipse.birt.report.model.api.DesignEngine;
 import org.eclipse.birt.report.model.api.DesignFileException;
+import org.eclipse.birt.report.model.api.IModuleOption;
 import org.eclipse.birt.report.model.api.IResourceLocator;
 import org.eclipse.birt.report.model.api.ModuleOption;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
@@ -33,10 +37,10 @@ import com.ibm.icu.util.ULocale;
 
 /**
  * Report Parser.
- * 
+ *
  * used to parse the design file, and get the IR of design.
- * 
- * 
+ *
+ *
  */
 public class ReportParser {
 
@@ -45,18 +49,28 @@ public class ReportParser {
 	 */
 	static protected Logger logger = Logger.getLogger(ReportParser.class.getName());
 
-	private Map options = new HashMap();
+	private Map<String, Object> options = new HashMap<String, Object>();
 
 	/**
-	 * constructor.
+	 * Constructor 1
 	 */
 	public ReportParser() {
 	}
 
+	/**
+	 * Constructor 2
+	 *
+	 * @param engine report engine
+	 */
 	public ReportParser(IReportEngine engine) {
 		loadOption(engine);
 	}
 
+	/**
+	 * Constructor 3
+	 *
+	 * @param context execution context
+	 */
 	public ReportParser(ExecutionContext context) {
 
 		if (context != null) {
@@ -75,27 +89,33 @@ public class ReportParser {
 			if (config != null) {
 				Object locator = config.getResourceLocator();
 				if (locator != null) {
-					options.put(ModuleOption.RESOURCE_LOCATOR_KEY, locator);
+					options.put(IModuleOption.RESOURCE_LOCATOR_KEY, locator);
 				}
 				Object resourcePath = config.getResourcePath();
 				if (resourcePath != null) {
-					options.put(ModuleOption.RESOURCE_FOLDER_KEY, resourcePath);
+					options.put(IModuleOption.RESOURCE_FOLDER_KEY, resourcePath);
 				}
 			}
 		}
 	}
 
-	public ReportParser(Map options) {
+	/**
+	 * Constructor 4
+	 *
+	 * @param options report parser options
+	 */
+	public ReportParser(Map<String, Object> options) {
 		this.options.putAll(options);
 	}
 
 	/**
 	 * parse the XML input stream.
-	 * 
+	 *
 	 * @param name design file name
-	 * 
+	 *
 	 * @param in   design file
 	 * @return created report IR, null if exit any errors.
+	 * @throws DesignFileException
 	 */
 	public Report parse(String name, InputStream in) throws DesignFileException {
 		ReportDesignHandle designHandle = getDesignHandle(name, in);
@@ -105,9 +125,10 @@ public class ReportParser {
 
 	/**
 	 * parse the XML input stream.
-	 * 
+	 *
 	 * @param name design file name
 	 * @return created report IR, null if exit any errors.
+	 * @throws DesignFileException
 	 */
 	public Report parse(String name) throws DesignFileException {
 		ReportDesignHandle designHandle = getDesignHandle(name, null);
@@ -115,13 +136,21 @@ public class ReportParser {
 		return parse(designHandle);
 	}
 
+	/**
+	 * Get design handle
+	 *
+	 * @param name report design name
+	 * @param in   report stream
+	 * @return design handle
+	 * @throws DesignFileException
+	 */
 	public ReportDesignHandle getDesignHandle(String name, InputStream in) throws DesignFileException {
 		// Create new design session
 		SessionHandle sessionHandle = new DesignEngine(new DesignConfig()).newSessionHandle(ULocale.getDefault());
 
 		// get the resource locator form the options and set it to the session
 		// handle
-		IResourceLocator locator = (IResourceLocator) options.get(ModuleOption.RESOURCE_LOCATOR_KEY);
+		IResourceLocator locator = (IResourceLocator) options.get(IModuleOption.RESOURCE_LOCATOR_KEY);
 		if (locator != null) {
 			sessionHandle.setResourceLocator(locator);
 		}
@@ -129,17 +158,18 @@ public class ReportParser {
 		// Obtain design handle
 		ReportDesignHandle designHandle = null;
 		ModuleOption modOptions = new ModuleOption(options);
-		if (in != null)
+		if (in != null) {
 			designHandle = sessionHandle.openDesign(name, in, modOptions);
-		else
+		} else {
 			designHandle = sessionHandle.openDesign(name, modOptions);
+		}
 
 		return designHandle;
 	}
 
 	/**
 	 * parse the XML input stream.
-	 * 
+	 *
 	 * @param design DE's IR
 	 * @return FPE's IR, null if there is any error.
 	 */

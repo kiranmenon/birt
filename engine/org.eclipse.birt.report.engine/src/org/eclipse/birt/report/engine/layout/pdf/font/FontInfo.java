@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -14,9 +17,16 @@ package org.eclipse.birt.report.engine.layout.pdf.font;
 import org.eclipse.birt.report.engine.emitter.EmitterUtil;
 import org.eclipse.birt.report.engine.layout.PDFConstants;
 
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
+import org.openpdf.text.Font;
+import org.openpdf.text.pdf.BaseFont;
 
+/**
+ *
+ * Definition of the font information
+ *
+ * @since 3.3
+ *
+ */
 public class FontInfo {
 	private BaseFont bf;
 
@@ -35,6 +45,15 @@ public class FontInfo {
 	private float linethroughPosition;
 	private float overlinePosition;
 
+	/**
+	 * Constructor 1
+	 *
+	 * @param bf         base font
+	 * @param fontSize   font size
+	 * @param fontStyle  font style
+	 * @param fontWeight font weight
+	 * @param simulation font simulation
+	 */
 	public FontInfo(BaseFont bf, float fontSize, int fontStyle, int fontWeight, boolean simulation) {
 		this.bf = bf;
 		this.fontStyle = fontStyle;
@@ -44,6 +63,11 @@ public class FontInfo {
 		setupFontSize();
 	}
 
+	/**
+	 * Constructor 2
+	 *
+	 * @param fontInfo font info object
+	 */
 	public FontInfo(FontInfo fontInfo) {
 		this.bf = fontInfo.bf;
 		this.fontStyle = fontInfo.fontStyle;
@@ -53,6 +77,11 @@ public class FontInfo {
 		setupFontSize();
 	}
 
+	/**
+	 * Set the font size
+	 *
+	 * @param fontSize font size
+	 */
 	public void setFontSize(float fontSize) {
 		this.fontSize = fontSize;
 		setupFontSize();
@@ -108,53 +137,108 @@ public class FontInfo {
 		overlinePosition = 0;
 	}
 
+	/**
+	 * Set the font simulation
+	 *
+	 * @param simulation simulation should be available
+	 */
 	public void setSimulation(boolean simulation) {
 		this.simulation = simulation;
 	}
 
+	/**
+	 * Get the base font
+	 *
+	 * @return Return the base font
+	 */
 	public BaseFont getBaseFont() {
 		return this.bf;
 	}
 
+	/**
+	 * Get the font size
+	 *
+	 * @return Return the font size
+	 */
 	public float getFontSize() {
 		return this.fontSize;
 	}
 
+	/**
+	 * Get the font style
+	 *
+	 * @return Return the font style
+	 */
 	public int getFontStyle() {
 		return this.fontStyle;
 	}
 
+	/**
+	 * Get the font weight
+	 *
+	 * @return Return the font weight
+	 */
 	public int getFontWeight() {
 		return this.fontWeight;
 	}
 
+	/**
+	 * Get the simulation of the font
+	 *
+	 * @return Return the simulation of the font
+	 */
 	public boolean getSimulation() {
 		return this.simulation;
 	}
 
+	/**
+	 * Get the line width of the font
+	 *
+	 * @return Return the line width of the font
+	 */
 	public float getLineWidth() {
 		return this.lineWidth;
 	}
 
+	/**
+	 * Get the overline position of the font
+	 *
+	 * @return Return theoverline position of the font
+	 */
 	public int getOverlinePosition() {
 		return (int) (overlinePosition * PDFConstants.LAYOUT_TO_PDF_RATIO);
 	}
 
+	/**
+	 * Get the underline position of the font
+	 *
+	 * @return Return the underline position of the font
+	 */
 	public int getUnderlinePosition() {
 		return (int) (underlinePosition * PDFConstants.LAYOUT_TO_PDF_RATIO);
 	}
 
+	/**
+	 * Get the line though position of the font
+	 *
+	 * @return Return the line though position of the font
+	 */
 	public int getLineThroughPosition() {
 		return (int) (linethroughPosition * PDFConstants.LAYOUT_TO_PDF_RATIO);
 	}
 
+	/**
+	 * Get the font baseline
+	 *
+	 * @return Return the font baseline
+	 */
 	public int getBaseline() {
 		return (int) (baselinePosition * PDFConstants.LAYOUT_TO_PDF_RATIO);
 	}
 
 	/**
 	 * Gets the width of the specified word.
-	 * 
+	 *
 	 * @param word the word
 	 * @return the points of the width
 	 */
@@ -169,6 +253,11 @@ public class FontInfo {
 		return bf.getWidthPoint(word, fontSize);
 	}
 
+	/**
+	 * Get italic adjusted font
+	 *
+	 * @return Get italic adjusted font
+	 */
 	public int getItalicAdjust() {
 		// get width for text with simulated italic font.
 		if (simulation && (Font.ITALIC == fontStyle || Font.BOLDITALIC == fontStyle)) {
@@ -179,13 +268,18 @@ public class FontInfo {
 
 	/**
 	 * Gets the height of the specified word.
-	 * 
+	 *
 	 * @return the height of the font, it equals ascent+|descent|+leading
 	 */
 	public float getWordHeight() {
 		return fontHeight;
 	}
 
+	/**
+	 * Get the font name
+	 *
+	 * @return Return the font name
+	 */
 	public String getFontName() {
 		assert bf != null;
 		String[][] familyFontNames = bf.getFamilyFontName();

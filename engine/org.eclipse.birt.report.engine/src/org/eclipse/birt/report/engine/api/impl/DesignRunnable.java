@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -37,7 +40,7 @@ abstract public class DesignRunnable implements IReportRunnable {
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param report reference to report
 	 */
 	public DesignRunnable(IReportEngine engine, DesignElementHandle designHandle) {
@@ -45,30 +48,37 @@ abstract public class DesignRunnable implements IReportRunnable {
 		this.designHandle = designHandle;
 	}
 
+	@Override
 	public Object getProperty(String propertyName) {
 		FactoryPropertyHandle handle = getDesignHandle().getFactoryPropertyHandle(propertyName);
-		if (handle != null)
+		if (handle != null) {
 			return handle.getStringValue();
+		}
 		return null;
 	}
 
+	@Override
 	public Object getProperty(String path, String propertyName) {
 		return null;
 	}
 
+	@Override
 	public DesignElementHandle getDesignHandle() {
 		return designHandle;
 	}
 
+	@Override
 	public IReportEngine getReportEngine() {
 		return engine;
 	}
 
+	@Override
 	public String getReportName() {
 		ModuleHandle moduleHandle = getModuleHandle();
 		return moduleHandle.getFileName();
 	}
 
+	@Override
 	public HashMap getTestConfig() {
 		ModuleHandle moduleHandle = getModuleHandle();
 		HashMap configs = new HashMap();
@@ -86,10 +96,11 @@ abstract public class DesignRunnable implements IReportRunnable {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.birt.report.engine.api.IReportRunnable#getImage(java.lang
 	 * .String)
 	 */
+	@Override
 	public IImage getImage(String name) {
 		ModuleHandle moduleHandle = getModuleHandle();
 		EmbeddedImage embeddedImage = moduleHandle.findImage(name);

@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -11,14 +14,18 @@
 
 package org.eclipse.birt.chart.ui.swt.composites;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.birt.chart.model.attribute.ColorDefinition;
 import org.eclipse.birt.chart.model.attribute.FontDefinition;
 import org.eclipse.birt.chart.ui.extension.i18n.Messages;
 import org.eclipse.birt.chart.ui.swt.interfaces.IFontDefinitionDialog;
 import org.eclipse.birt.chart.ui.swt.wizard.ChartWizardContext;
-import org.eclipse.birt.chart.ui.util.ChartUIUtil;
+import org.eclipse.jface.resource.FontDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.ACC;
@@ -32,39 +39,35 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 /**
  * @author Actuate Corporation
- * 
+ *
  */
 public class FontDefinitionComposite extends Composite {
 
 	private static final String TOOLTIP = Messages.getString("FontDefinitionComposite.Tooltip.FontDialog"); //$NON-NLS-1$
 
-	private Composite cmpContent = null;
-
 	private FontCanvas cnvSelection = null;
 
 	private Button btnFont = null;
+
+	private ResourceManager resourceManager;
 
 	private FontDefinition fdCurrent = null;
 
 	private ColorDefinition cdCurrent = null;
 
-	private Vector<Listener> vListeners = null;
+	private List<Listener> vListeners = null;
 
 	public static final int FONT_CHANTED_EVENT = 1;
 
@@ -77,8 +80,6 @@ public class FontDefinitionComposite extends Composite {
 	public static final int ENABLE_ROTATION = 1 << 1;
 
 	public static final int DEFAULT_NONE = 0;
-
-	private int iSize = 18;
 
 	private int optionalStyle = DEFAULT_NONE;
 
@@ -117,44 +118,30 @@ public class FontDefinitionComposite extends Composite {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void init() {
+		this.resourceManager = new LocalResourceManager(JFaceResources.getResources(), this);
 		if (Display.getCurrent().getHighContrast()) {
-			GC gc = new GC(this);
-			iSize = gc.getFontMetrics().getHeight() + 2;
+//			GC gc = new GC(this);
+//			iSize = gc.getFontMetrics().getHeight() + 2;
 		}
-		this.setSize(getParent().getClientArea().width, getParent().getClientArea().height);
-		vListeners = new Vector<Listener>();
+
+		this.vListeners = new ArrayList<>();
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private void placeComponents() {
-		FillLayout flMain = new FillLayout();
-		flMain.marginHeight = 0;
-		flMain.marginWidth = 0;
 
-		GridLayout glContent = new GridLayout();
-		glContent.verticalSpacing = 0;
-		glContent.horizontalSpacing = 2;
-		glContent.marginHeight = 0;
-		glContent.marginWidth = 0;
-		glContent.numColumns = 2;
+		this.setLayout(new FillChooserInternalLayout());
 
-		this.setLayout(flMain);
-
-		cmpContent = new Composite(this, SWT.NONE);
-		cmpContent.setLayout(glContent);
-
-		cnvSelection = new FontCanvas(cmpContent, SWT.BORDER, fdCurrent, cdCurrent, false, true, false);
-		GridData gdCNVSelection = new GridData(GridData.FILL_HORIZONTAL);
-		gdCNVSelection.heightHint = iSize;
-		cnvSelection.setLayoutData(gdCNVSelection);
+		cnvSelection = new FontCanvas(this, SWT.BORDER, fdCurrent, cdCurrent, false, true, false);
 		cnvSelection.setToolTipText(TOOLTIP);
 		cnvSelection.addMouseListener(new MouseAdapter() {
 
+			@Override
 			public void mouseUp(MouseEvent e) {
 				openFontDialog();
 			}
@@ -162,22 +149,20 @@ public class FontDefinitionComposite extends Composite {
 		});
 		cnvSelection.addFocusListener(new FocusAdapter() {
 
+			@Override
 			public void focusGained(FocusEvent e) {
 				cnvSelection.traverse(SWT.TRAVERSE_TAB_NEXT);
 			}
 		});
 
-		btnFont = new Button(cmpContent, SWT.NONE);
-		GridData gdBEllipsis = new GridData();
-		ChartUIUtil.setChartImageButtonSizeByPlatform(gdBEllipsis);
-		btnFont.setLayoutData(gdBEllipsis);
+		btnFont = new Button(this, SWT.NONE);
 		btnFont.setText("A"); //$NON-NLS-1$
-		btnFont.setFont(new Font(Display.getCurrent(), "Times New Roman", 14, SWT.BOLD)); //$NON-NLS-1$
-		// btnFont.setImage( UIHelper.getImage( "icons/obj16/fonteditor.gif" ) );
-		// //$NON-NLS-1$
+
+		btnFont.setFont(this.resourceManager.createFont(FontDescriptor.createFrom("Times New Roman", 14, SWT.BOLD))); //$NON-NLS-1$
 		btnFont.setToolTipText(TOOLTIP);
 		btnFont.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				openFontDialog();
 			}
@@ -185,6 +170,29 @@ public class FontDefinitionComposite extends Composite {
 		});
 	}
 
+	private class FillChooserInternalLayout extends Layout {
+		@Override
+		public Point computeSize(Composite editor, int wHint, int hHint, boolean force) {
+			if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT) {
+				return new Point(wHint, hHint);
+			}
+			Point buttonSize = btnFont.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+			Point selectionSize = cnvSelection.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+
+			return new Point(selectionSize.x + buttonSize.x, buttonSize.y);
+		}
+
+		@Override
+		public void layout(Composite editor, boolean force) {
+			Rectangle bounds = editor.getClientArea();
+			Point buttonSize = btnFont.computeSize(SWT.DEFAULT, SWT.DEFAULT, force);
+
+			cnvSelection.setBounds(0, 0, bounds.width - buttonSize.x, buttonSize.y - 1);
+			btnFont.setBounds(bounds.width - buttonSize.x, 0, buttonSize.x, buttonSize.y);
+		}
+	}
+
+	@Override
 	public void setEnabled(boolean bState) {
 		this.btnFont.setEnabled(bState);
 		this.cnvSelection.setEnabled(bState);
@@ -192,6 +200,7 @@ public class FontDefinitionComposite extends Composite {
 		this.bEnabled = bState;
 	}
 
+	@Override
 	public boolean isEnabled() {
 		return this.bEnabled;
 	}
@@ -212,8 +221,8 @@ public class FontDefinitionComposite extends Composite {
 
 	public void setFontColor(ColorDefinition cd) {
 		this.cdCurrent = cd;
-		cnvSelection.setColor(cdCurrent);
-		cnvSelection.redraw();
+		this.cnvSelection.setColor(cdCurrent);
+		this.cnvSelection.redraw();
 	}
 
 	public void addListener(Listener listener) {
@@ -243,7 +252,7 @@ public class FontDefinitionComposite extends Composite {
 		for (int iL = 0; iL < vListeners.size(); iL++) {
 			Event se = new Event();
 			se.widget = this;
-			Object[] data = new Object[] { fdCurrent, cdCurrent };
+			Object[] data = { fdCurrent, cdCurrent };
 			se.data = data;
 			se.type = FONT_CHANTED_EVENT;
 			vListeners.get(iL).handleEvent(se);
@@ -258,6 +267,7 @@ public class FontDefinitionComposite extends Composite {
 	void initAccessible() {
 		getAccessible().addAccessibleListener(new AccessibleAdapter() {
 
+			@Override
 			public void getHelp(AccessibleEvent e) {
 				e.result = getToolTipText();
 			}
@@ -265,6 +275,7 @@ public class FontDefinitionComposite extends Composite {
 
 		getAccessible().addAccessibleControlListener(new AccessibleControlAdapter() {
 
+			@Override
 			public void getChildAtPoint(AccessibleControlEvent e) {
 				Point testPoint = toControl(new Point(e.x, e.y));
 				if (getBounds().contains(testPoint)) {
@@ -272,6 +283,7 @@ public class FontDefinitionComposite extends Composite {
 				}
 			}
 
+			@Override
 			public void getLocation(AccessibleControlEvent e) {
 				Rectangle location = getBounds();
 				Point pt = toDisplay(new Point(location.x, location.y));
@@ -281,14 +293,17 @@ public class FontDefinitionComposite extends Composite {
 				e.height = location.height;
 			}
 
+			@Override
 			public void getChildCount(AccessibleControlEvent e) {
 				e.detail = 0;
 			}
 
+			@Override
 			public void getRole(AccessibleControlEvent e) {
 				e.detail = ACC.ROLE_COMBOBOX;
 			}
 
+			@Override
 			public void getState(AccessibleControlEvent e) {
 				e.detail = ACC.STATE_NORMAL;
 			}

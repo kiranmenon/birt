@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -40,31 +43,34 @@ import org.eclipse.birt.data.engine.odi.IResultClass;
 import org.eclipse.birt.data.engine.odi.IResultObject;
 
 /**
- * 
+ *
  */
 public class ResultSetUtil {
 	// ----------------------service for result object save and load--------------
 
 	/**
 	 * Write the result object value if it is used in column binding map
-	 * 
+	 *
 	 * @param dos
 	 * @param resultObject
 	 * @param nameSet
 	 * @throws DataException
 	 * @throws IOException
 	 */
-	public static int writeResultObject(DataOutputStream dos, IResultObject resultObject, int count, Set nameSet,
+	public static int writeResultObject(DataOutputStream dos, IResultObject resultObject, int count,
+			Set<String> nameSet,
 			Map<String, StringTable> stringTableMap, Map<String, IIndexSerializer> index, int rowIndex, int version)
 			throws DataException, IOException {
 		return writeResultObject(dos, resultObject, count, nameSet, stringTableMap, index, rowIndex, version, false);
 	}
 
-	public static int writeResultObject(DataOutputStream dos, IResultObject resultObject, int count, Set nameSet,
+	public static int writeResultObject(DataOutputStream dos, IResultObject resultObject, int count,
+			Set<String> nameSet,
 			Map<String, StringTable> stringTableMap, Map<String, IIndexSerializer> index, int rowIndex, int version,
 			boolean saveRowId) throws DataException, IOException {
-		if (resultObject.getResultClass() == null)
+		if (resultObject.getResultClass() == null) {
 			return 0;
+		}
 
 		ByteArrayOutputStream tempBaos = new ByteArrayOutputStream();
 		BufferedOutputStream tempBos = new BufferedOutputStream(tempBaos);
@@ -99,19 +105,18 @@ public class ResultSetUtil {
 				}
 
 				StringTable table = null;
-				if (stringTableMap != null)
+				if (stringTableMap != null) {
 					table = stringTableMap.get(resultObject.getResultClass().getFieldName(i));
+				}
 				if (table != null) {
 					int stringIndex = table.getIndex((String) resultObject.getFieldValue(i));
 //					IOUtil.writeObject( tempDos, stringIndex );
 					IOUtil.writeInt(tempDos, stringIndex);
+				} else if (version > VersionManager.VERSION_3_7_2_1) {
+					ResultObjectUtil.writeObject(tempDos, resultObject.getFieldValue(i),
+							resultObject.getResultClass().getFieldValueClass(i), version);
 				} else {
-					if (version > VersionManager.VERSION_3_7_2_1) {
-						ResultObjectUtil.writeObject(tempDos, resultObject.getFieldValue(i),
-								resultObject.getResultClass().getFieldValueClass(i), version);
-					} else {
-						IOUtil.writeObject(tempDos, resultObject.getFieldValue(i));
-					}
+					IOUtil.writeObject(tempDos, resultObject.getFieldValue(i));
 				}
 			}
 		}
@@ -170,13 +175,11 @@ public class ResultSetUtil {
 							obs[i] = IOUtil.readObject(dis, DataEngineSession.getCurrentClassLoader());
 						}
 					}
+				} else if (version > VersionManager.VERSION_3_7_2_1) {
+					obs[i] = ResultObjectUtil.readObject(dis, typeClazz, DataEngineSession.getCurrentClassLoader(),
+							version);
 				} else {
-					if (version > VersionManager.VERSION_3_7_2_1) {
-						obs[i] = ResultObjectUtil.readObject(dis, typeClazz, DataEngineSession.getCurrentClassLoader(),
-								version);
-					} else {
-						obs[i] = IOUtil.readObject(dis, DataEngineSession.getCurrentClassLoader());
-					}
+					obs[i] = IOUtil.readObject(dis, DataEngineSession.getCurrentClassLoader());
 				}
 			}
 			ResultObject resultObject = new ResultObject(rsMeta, obs);
@@ -189,23 +192,22 @@ public class ResultSetUtil {
 			if (t instanceof ClassNotFoundException) {
 				throw new DataException(ResourceConstants.FAIL_LOAD_CLASS, e, new String[] { t.getMessage(),
 						rsMeta.getFieldNativeTypeName(i + 1), rsMeta.getFieldName(i + 1), });
-			} else {
-				throw new DataException(ResourceConstants.FAIL_LOAD_COLUMN_VALUE, e,
-						new String[] { rsMeta.getFieldNativeTypeName(i + 1), rsMeta.getFieldName(i + 1) });
 			}
+			throw new DataException(ResourceConstants.FAIL_LOAD_COLUMN_VALUE, e,
+					new String[] { rsMeta.getFieldNativeTypeName(i + 1), rsMeta.getFieldName(i + 1) });
 		}
 
 	}
 
 	/**
 	 * Get result set column name collection from column binding map
-	 * 
+	 *
 	 * @param cacheRequestMap
 	 * @return
 	 * @throws DataException
 	 */
-	public static Set getRsColumnRequestMap(List<IBinding> cacheRequestMap) throws DataException {
-		Set resultSetNameSet = new HashSet();
+	public static Set<String> getRsColumnRequestMap(List<IBinding> cacheRequestMap) throws DataException {
+		Set<String> resultSetNameSet = new HashSet<>();
 		if (cacheRequestMap != null) {
 			Iterator<IBinding> iter = cacheRequestMap.iterator();
 			List<String> dataSetColumnList = null;
@@ -221,9 +223,10 @@ public class ResultSetUtil {
 							dataSetColumnList.addAll(ExpressionCompilerUtil.extractDataSetColumnExpression(
 									((IPushedDownExpression) binding.getExpression()).getOriginalExpression()));
 						}
-					} else
+					} else {
 						dataSetColumnList = ExpressionCompilerUtil
 								.extractDataSetColumnExpression(getArgumentExpression(binding));
+					}
 				}
 				if (dataSetColumnList != null) {
 					resultSetNameSet.addAll(dataSetColumnList);
@@ -234,9 +237,9 @@ public class ResultSetUtil {
 	}
 
 	private static IBaseExpression getArgumentExpression(IBinding binding) throws DataException {
-		List arguments = binding.getArguments();
+		List<IBaseExpression> arguments = binding.getArguments();
 		if (arguments != null && arguments.size() > 0) {
-			return (IBaseExpression) arguments.get(0);
+			return arguments.get(0);
 		}
 		return null;
 	}

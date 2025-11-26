@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2009, 2025 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -17,15 +20,24 @@ import java.io.IOException;
 
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.core.util.IOUtil;
+import org.eclipse.birt.report.engine.api.ImageSize;
 import org.eclipse.birt.report.engine.content.IContent;
 import org.eclipse.birt.report.engine.content.IContentVisitor;
 import org.eclipse.birt.report.engine.content.IImageContent;
+import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.engine.ir.Expression;
 import org.eclipse.birt.report.engine.ir.ImageItemDesign;
 import org.eclipse.birt.report.engine.ir.Report;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.birt.report.model.api.elements.structures.EmbeddedImage;
 
+/**
+ * Representation of the image content
+ *
+ * @since 3.3
+ *
+ */
 public class ImageContent extends AbstractContent implements IImageContent {
 	protected String helpTextKey;
 	protected String extension;
@@ -44,6 +56,12 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/** Resolution of the image */
 	private int resolution;
 
+	/** raw image size */
+	protected ImageSize imageRawSize = null;
+
+	/** calculated image size (e.g. relative image content) */
+	protected ImageSize imageCalcSize = null;
+
 	ImageContent(IImageContent image) {
 		super(image);
 		helpTextKey = image.getHelpKey();
@@ -53,8 +71,10 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		data = image.getData();
 		imageMap = image.getImageMap();
 		MIMEType = image.getMIMEType();
+		imageRawSize = image.getImageRawSize();
 	}
 
+	@Override
 	public int getContentType() {
 		return IMAGE_CONTENT;
 	}
@@ -67,10 +87,12 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		super(content);
 	}
 
+	@Override
 	public Object accept(IContentVisitor visitor, Object value) throws BirtException {
 		return visitor.visitImage(this, value);
 	}
 
+	@Override
 	public String getAltText() {
 		// This is for backward compatibility. The alt text property was stored
 		// as string and will not be written in the content.
@@ -86,6 +108,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		return altText;
 	}
 
+	@Override
 	public String getAltTextKey() {
 		if (altTextKey == null) {
 			if (generateBy instanceof ImageItemDesign) {
@@ -95,10 +118,12 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		return altTextKey;
 	}
 
+	@Override
 	public void setAltTextKey(String key) {
 		altTextKey = key;
 	}
 
+	@Override
 	public String getHelpText() {
 		if (helpText == null) {
 			if (generateBy instanceof ImageItemDesign) {
@@ -108,6 +133,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		return helpText;
 	}
 
+	@Override
 	public String getHelpKey() {
 		if (helpTextKey == null) {
 			if (generateBy instanceof ImageItemDesign) {
@@ -117,10 +143,12 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		return helpTextKey;
 	}
 
+	@Override
 	public void setHelpKey(String key) {
 		helpTextKey = key;
 	}
 
+	@Override
 	public byte[] getData() {
 		if (sourceType == IImageContent.IMAGE_NAME) {
 			Report reportDesign = report.getDesign();
@@ -137,14 +165,17 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		return data;
 	}
 
+	@Override
 	public void setData(byte[] data) {
 		this.data = data;
 	}
 
+	@Override
 	public String getExtension() {
 		return extension;
 	}
 
+	@Override
 	public String getURI() {
 		switch (sourceType) {
 		case IMAGE_NAME:
@@ -157,6 +188,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		}
 	}
 
+	@Override
 	public int getImageSource() {
 		return sourceType;
 	}
@@ -164,8 +196,18 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/**
 	 * @param altText The altText to set.
 	 */
+	@Override
 	public void setAltText(String altText) {
 		this.altText = altText;
+	}
+
+	@Override
+	public boolean isFitToContainer() {
+		boolean fit = false;
+		if (generateBy instanceof ImageItemDesign) {
+			fit = ((ImageItemDesign) generateBy).isFitToContainer();
+		}
+		return fit;
 	}
 
 	private void setImageName(String name) {
@@ -233,6 +275,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/**
 	 * @param extension The extension to set.
 	 */
+	@Override
 	public void setExtension(String extension) {
 		this.extension = extension;
 	}
@@ -240,6 +283,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/**
 	 * @param sourceType The sourceType to set.
 	 */
+	@Override
 	public void setImageSource(int sourceType) {
 		this.sourceType = sourceType;
 	}
@@ -247,6 +291,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/**
 	 * @param uri The uri to set.
 	 */
+	@Override
 	public void setURI(String uri) {
 		switch (sourceType) {
 		case IMAGE_NAME:
@@ -264,9 +309,10 @@ public class ImageContent extends AbstractContent implements IImageContent {
 
 	/**
 	 * set the image map
-	 * 
+	 *
 	 * @param imageMap - the image map
 	 */
+	@Override
 	public void setImageMap(Object imageMap) {
 		this.imageMap = imageMap;
 	}
@@ -274,15 +320,17 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/**
 	 * get the image map
 	 */
+	@Override
 	public Object getImageMap() {
 		return imageMap;
 	}
 
 	/**
 	 * set the MIME type
-	 * 
+	 *
 	 * @param MIMEType - the MIMEType
 	 */
+	@Override
 	public void setMIMEType(String MIMEType) {
 		this.MIMEType = MIMEType;
 	}
@@ -290,6 +338,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	/**
 	 * get the MIMEType
 	 */
+	@Override
 	public String getMIMEType() {
 		return MIMEType;
 	}
@@ -303,6 +352,7 @@ public class ImageContent extends AbstractContent implements IImageContent {
 	static final protected short FIELD_MIMETYPE = 506;
 	static final protected short FIELD_DATA = 507;
 
+	@Override
 	protected void writeFields(DataOutputStream out) throws IOException {
 		super.writeFields(out);
 		if (extension != null) {
@@ -339,10 +389,12 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		}
 	}
 
+	@Override
 	public boolean needSave() {
 		return true;
 	}
 
+	@Override
 	protected void readField(int version, int filedId, DataInputStream in, ClassLoader loader) throws IOException {
 		switch (filedId) {
 		case FIELD_EXTENSEION:
@@ -368,15 +420,104 @@ public class ImageContent extends AbstractContent implements IImageContent {
 		}
 	}
 
+	@Override
 	protected IContent cloneContent() {
 		return new ImageContent(this);
 	}
 
+	@Override
 	public int getResolution() {
 		return resolution;
 	}
 
+	@Override
 	public void setResolution(int resolution) {
 		this.resolution = resolution;
 	}
+
+	/**
+	 * Set the image raw size
+	 *
+	 * @param imageRawSize image raw size
+	 */
+	public void setImageRawSize(ImageSize imageRawSize) {
+		this.imageRawSize = imageRawSize;
+		this.setImageCalculatedSize(calculateImageSize());
+	}
+
+	/**
+	 * Calculate the image dimension of the image
+	 *
+	 * @param imageDimensionType image dimension type (0: width, 1: height)
+	 * @return Return the calculated image dimension in "px"
+	 */
+	private ImageSize calculateImageSize() {
+
+		double contentWidthValue = 100;
+		String contentWidthUnit = DimensionType.UNITS_PERCENTAGE;
+
+		double contentHeightValue = 100;
+		String contentHeightUnit = DimensionType.UNITS_PERCENTAGE;
+
+		double calculatedWidthValue = 200;
+		double calculatedHeightValue = 200;
+
+		if (this.getWidth() != null) {
+			contentWidthUnit = this.getWidth().getUnits();
+			contentWidthValue = this.getWidth().getMeasure();
+		}
+
+		if (this.getHeight() != null) {
+			contentHeightUnit = this.getHeight().getUnits();
+			contentHeightValue = this.getHeight().getMeasure();
+		}
+
+		if (this.imageRawSize != null) {
+
+			// calculate the image width size in "px"
+			if (DesignChoiceConstants.UNITS_PERCENTAGE.equals(contentWidthUnit)) {
+				calculatedWidthValue = (this.imageRawSize.getWidth() * contentWidthValue / 100);
+
+			} else {
+				calculatedWidthValue = this.imageRawSize.getWidth();
+			}
+
+			// calculate the image height size in "px"
+			if (DesignChoiceConstants.UNITS_PERCENTAGE.equals(contentHeightUnit)) {
+				calculatedHeightValue = (this.imageRawSize.getHeight() * contentHeightValue / 100);
+
+			} else {
+				calculatedHeightValue = this.imageRawSize.getHeight();
+			}
+		}
+		return new ImageSize("px", (float) calculatedWidthValue, (float) calculatedHeightValue);
+	}
+
+	/**
+	 * Get the image raw size
+	 *
+	 * @return Return the image raw size
+	 */
+	public ImageSize getImageRawSize() {
+		return this.imageRawSize;
+	}
+
+	/**
+	 * Set the calculated image size
+	 *
+	 * @param imageCalcSize calculated image size
+	 */
+	public void setImageCalculatedSize(ImageSize imageCalcSize) {
+		this.imageCalcSize = imageCalcSize;
+	}
+
+	/**
+	 * Get the calculated image size
+	 *
+	 * @return Return the calculated image size
+	 */
+	public ImageSize getImageCalculatedSize() {
+		return this.imageCalcSize;
+	}
+
 }

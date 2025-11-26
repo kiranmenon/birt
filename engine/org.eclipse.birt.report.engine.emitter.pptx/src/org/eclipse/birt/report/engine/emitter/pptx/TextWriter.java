@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021, 2024, 2025 Contributors to the Eclipse Foundation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   See git history
+ *******************************************************************************/
 
 package org.eclipse.birt.report.engine.emitter.pptx;
 
@@ -25,7 +37,7 @@ import org.eclipse.birt.report.engine.nLayout.area.style.BoxStyle;
 import org.eclipse.birt.report.engine.nLayout.area.style.TextStyle;
 import org.eclipse.birt.report.engine.ooxml.writer.OOXmlWriter;
 
-import com.lowagie.text.Font;
+import org.openpdf.text.Font;
 
 public class TextWriter {
 
@@ -66,10 +78,11 @@ public class TextWriter {
 					return false;
 				}
 			}
-			if (hasNonEmptyTextArea(container))
+			if (hasNonEmptyTextArea(container)) {
 				return true;
-			else
+			} else {
 				return false;
+			}
 		} else if (container instanceof InlineTextArea) {
 			Iterator<IArea> iter = container.getChildren();
 			while (iter.hasNext()) {
@@ -78,52 +91,56 @@ public class TextWriter {
 					return false;
 				}
 			}
-			if (hasNonEmptyTextArea(container))
+			if (hasNonEmptyTextArea(container)) {
 				return true;
-			else
+			} else {
 				return false;
+			}
 		}
 		return false;
 	}
 
 	private static boolean hasNonEmptyTextArea(IArea container) {
 		if (container instanceof TextArea) {
-			if (((TextArea) container).getText() != null)
+			if (((TextArea) container).getText() != null) {
 				return true;
-			else
+			} else {
 				return false;
+			}
 		}
 
-		if (!(container instanceof IContainerArea))
+		if (!(container instanceof IContainerArea)) {
 			return false;
+		}
 		Iterator<IArea> iter = ((IContainerArea) container).getChildren();
 		while (iter.hasNext()) {
 			IArea area = iter.next();
-			if (hasNonEmptyTextArea(area))
+			if (hasNonEmptyTextArea(area)) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	private static boolean isSquareBorder(BorderInfo[] borders) {
-		if (borders == null || borders.length != 4)
+		if (borders == null || borders.length != 4) {
 			return false;
+		}
 		Color color = borders[0].borderColor;
-		if (color == null)
+		if (color == null) {
 			return false;
+		}
 		int style = borders[0].borderStyle;
 		int width = borders[0].borderWidth;
-		if (width == 0)
+		if (width == 0) {
 			return false;
+		}
 
 		for (int i = 1; i <= 3; i++) {
 			BorderInfo info = borders[i];
-			if (!color.equals(info.borderColor))
+			if (!color.equals(info.borderColor) || (info.borderStyle != style) || info.borderWidth == 0 || info.borderWidth != width) {
 				return false;
-			if (info.borderStyle != style)
-				return false;
-			if (info.borderWidth == 0 || info.borderWidth != width)
-				return false;
+			}
 		}
 		return true;
 	}
@@ -271,6 +288,19 @@ public class TextWriter {
 			writer.attribute("type", "slidenum");
 			setTextProperty("a:rPr", text.getStyle());
 			writer.openTag("a:pPr");
+			TextStyle style = text.getStyle();
+			// text alignment of slide number
+			if (style != null) {
+				if (hAlign != null) {
+					writer.attribute("algn", hAlign);
+				}
+				if (render.isRTL() || style.isRtl()) {
+					writer.attribute("rtl", 1);
+					if (hAlign == null) {
+						writer.attribute("algn", "r");
+					}
+				}
+			}
 			writer.closeTag("a:pPr");
 			writer.openTag("a:t");
 			canvas.writeText("‹#›");
@@ -388,8 +418,9 @@ public class TextWriter {
 	}
 
 	private void writeLineStyle() {
-		if (!needDrawSquareBorder)
+		if (!needDrawSquareBorder) {
 			return;
+		}
 		canvas.setProperty(borders[0].borderColor, PPTXUtil.convertToEnums(borders[0].borderWidth),
 				borders[0].borderStyle);
 	}
@@ -403,6 +434,8 @@ public class TextWriter {
 			int shapeId = canvas.getPresentation().getNextShapeId();
 			writer.attribute("id", shapeId);
 			writer.attribute("name", "TextBox " + shapeId);
+			// hyperlink decoration at text area
+			canvas.setHyperlink(link);
 			writer.closeTag("p:cNvPr");
 			writer.openTag("p:cNvSpPr");
 			writer.attribute("txBox", "1");
@@ -474,7 +507,7 @@ public class TextWriter {
 		if (container instanceof BlockTextArea) {
 			IArea firstChild = container.getFirstChild();
 			IContent ic = container.getContent();
-			if (ic != null && ic instanceof AutoTextContent) {
+			if (ic instanceof AutoTextContent) {
 				AutoTextItemDesign id = (AutoTextItemDesign) ic.getGenerateBy();
 				autotexttype = id.getType();
 			}
@@ -551,7 +584,7 @@ public class TextWriter {
 
 	/**
 	 * Create a blank text body on respective font size
-	 * 
+	 *
 	 * @param fontSize
 	 */
 	public void writeBlankTextBlock(int fontSize) {

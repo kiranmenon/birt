@@ -1,9 +1,12 @@
 /***********************************************************************
- * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2009, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -21,16 +24,25 @@ import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IContent;
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.content.ITextContent;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.layout.pdf.font.FontInfo;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
 import org.eclipse.birt.report.engine.nLayout.LayoutContext;
 import org.eclipse.birt.report.engine.nLayout.area.ILayout;
+import org.eclipse.birt.report.engine.nLayout.area.style.AreaConstants;
 import org.eclipse.birt.report.engine.nLayout.area.style.TextStyle;
 import org.w3c.dom.css.CSSValue;
 
 import com.ibm.icu.text.ArabicShaping;
 import com.ibm.icu.text.ArabicShapingException;
 
+/**
+ * Implementation of the text area layout
+ *
+ * @since 3.3
+ *
+ */
 public class TextAreaLayout implements ILayout {
 	protected static Logger logger = Logger.getLogger(TextAreaLayout.class.getName());
 	/**
@@ -43,26 +55,37 @@ public class TextAreaLayout implements ILayout {
 
 	private ITextContent textContent = null;
 
-	private static HashSet splitChar = new HashSet();
+	private static HashSet<Character> splitChar = new HashSet<Character>();
 
 	private ArrayList<ITextListener> listenerList = null;
 
+	/**
+	 * Denotes if the text content is empty (in this case a single blank space is
+	 * used as a replacement text).
+	 */
 	private boolean blankText = false;
 
 	static {
 		splitChar.add(Character.valueOf(' '));
 		splitChar.add(Character.valueOf('\r'));
 		splitChar.add(Character.valueOf('\n'));
-	};
+	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param parent  parent
+	 * @param context layout context
+	 * @param content content
+	 */
 	public TextAreaLayout(ContainerArea parent, LayoutContext context, IContent content) {
 		parentLM = (InlineStackingArea) parent;
 		ITextContent textContent = (ITextContent) content;
 		parentLM.setTextIndent(textContent);
 		String text = textContent.getText();
-		if (text != null && text.length() != 0)
-			transform(textContent);
-		else {
+		if (text != null && text.length() != 0) {
+			transform(textContent, context);
+		} else {
 			textContent.setText(" ");
 			blankText = true;
 		}
@@ -95,40 +118,56 @@ public class TextAreaLayout implements ILayout {
 		} while (true);
 	}
 
+	/**
+	 * Add listener
+	 *
+	 * @param listener text listener
+	 */
 	public void addListener(ITextListener listener) {
 		if (listenerList == null) {
-			listenerList = new ArrayList<ITextListener>();
+			listenerList = new ArrayList<>();
 		}
 		listenerList.add(listener);
 	}
 
+	/**
+	 * Built the text style
+	 *
+	 * @param content  content
+	 * @param fontInfo font info
+	 * @return Return the created text style
+	 */
 	public static TextStyle buildTextStyle(IContent content, FontInfo fontInfo) {
 		IStyle style = content.getComputedStyle();
 		TextStyle textStyle = new TextStyle(fontInfo);
-		CSSValue direction = style.getProperty(IStyle.STYLE_DIRECTION);
-		if (IStyle.RTL_VALUE.equals(direction)) {
-			textStyle.setDirection(TextStyle.DIRECTION_RTL);
+		CSSValue direction = style.getProperty(StyleConstants.STYLE_DIRECTION);
+		if (CSSValueConstants.RTL_VALUE.equals(direction)) {
+			textStyle.setDirection(AreaConstants.DIRECTION_RTL);
 		}
-		textStyle.setFontSize(PropertyUtil.getDimensionValue(style.getProperty(IStyle.STYLE_FONT_SIZE)));
-		textStyle.setLetterSpacing(PropertyUtil.getDimensionValue(style.getProperty(IStyle.STYLE_LETTER_SPACING)));
-		textStyle.setWordSpacing(PropertyUtil.getDimensionValue(style.getProperty(IStyle.STYLE_WORD_SPACING)));
-		textStyle.setLineThrough(style.getProperty(IStyle.STYLE_TEXT_LINETHROUGH) == IStyle.LINE_THROUGH_VALUE);
-		textStyle.setOverLine(style.getProperty(IStyle.STYLE_TEXT_OVERLINE) == IStyle.OVERLINE_VALUE);
-		CSSValue underLine = style.getProperty(IStyle.STYLE_TEXT_UNDERLINE);
-		if (underLine == IStyle.UNDERLINE_VALUE) {
+		textStyle.setFontSize(PropertyUtil.getDimensionValue(style.getProperty(StyleConstants.STYLE_FONT_SIZE)));
+		textStyle.setLetterSpacing(
+				PropertyUtil.getDimensionValue(style.getProperty(StyleConstants.STYLE_LETTER_SPACING)));
+		textStyle.setWordSpacing(PropertyUtil.getDimensionValue(style.getProperty(StyleConstants.STYLE_WORD_SPACING)));
+		textStyle.setLineThrough(
+				style.getProperty(StyleConstants.STYLE_TEXT_LINETHROUGH) == CSSValueConstants.LINE_THROUGH_VALUE);
+		textStyle
+				.setOverLine(style.getProperty(StyleConstants.STYLE_TEXT_OVERLINE) == CSSValueConstants.OVERLINE_VALUE);
+		CSSValue underLine = style.getProperty(StyleConstants.STYLE_TEXT_UNDERLINE);
+		if (underLine == CSSValueConstants.UNDERLINE_VALUE) {
 			textStyle.setUnderLine(true);
 		}
-		textStyle.setAlign(style.getProperty(IStyle.STYLE_TEXT_ALIGN));
+		textStyle.setAlign(style.getProperty(StyleConstants.STYLE_TEXT_ALIGN));
+		textStyle.setHasHyperlinkDecoration(
+				!(style.getProperty(StyleConstants.STYLE_TEXT_HYPERLINK_STYLE) == CSSValueConstants.UNDECORATED));
+
 		IStyle s = content.getStyle();
-		Color color = PropertyUtil.getColor(s.getProperty(IStyle.STYLE_COLOR));
+		Color color = PropertyUtil.getColor(s.getProperty(StyleConstants.STYLE_COLOR));
 		if (color != null) {
 			textStyle.setColor(color);
+		} else if (content.getHyperlinkAction() != null && textStyle.isHasHyperlinkDecoration()) {
+			textStyle.setColor(Color.BLUE);
 		} else {
-			if (content.getHyperlinkAction() != null) {
-				textStyle.setColor(Color.BLUE);
-			} else {
-				textStyle.setColor(PropertyUtil.getColor(style.getProperty(IStyle.STYLE_COLOR)));
-			}
+			textStyle.setColor(PropertyUtil.getColor(style.getProperty(StyleConstants.STYLE_COLOR)));
 		}
 		if (content.getHyperlinkAction() != null) {
 			textStyle.setHasHyperlink(true);
@@ -136,13 +175,15 @@ public class TextAreaLayout implements ILayout {
 		return textStyle;
 	}
 
+	@Override
 	public void layout() throws BirtException {
 		layoutChildren();
 	}
 
 	protected void layoutChildren() throws BirtException {
-		if (null == textContent)
+		if (null == textContent) {
 			return;
+		}
 		while (comp.hasNextArea()) {
 			TextArea area = comp.getNextArea(getFreeSpace());
 			// for a textArea which just has a line break. We should not add TextArea into
@@ -162,7 +203,13 @@ public class TextAreaLayout implements ILayout {
 		return false;
 	}
 
-	public void addTextArea(AbstractArea textArea) throws BirtException {
+	/**
+	 * Add text area
+	 *
+	 * @param textArea text area
+	 * @throws BirtException
+	 */
+	public void addTextArea(TextArea textArea) throws BirtException {
 		parentLM.add(textArea);
 		textArea.setParent(parentLM);
 		parentLM.update(textArea);
@@ -170,13 +217,16 @@ public class TextAreaLayout implements ILayout {
 		if (listenerList != null) {
 			for (Iterator<ITextListener> i = listenerList.iterator(); i.hasNext();) {
 				ITextListener listener = i.next();
-				listener.onAddEvent((TextArea) textArea);
+				listener.onAddEvent(textArea);
 			}
 		}
 	}
 
 	/**
-	 * true if succeed to new a line.
+	 * Set new line, true if succeed to new a line.
+	 *
+	 * @param endParagraph end paragraph
+	 * @throws BirtException
 	 */
 	public void newLine(boolean endParagraph) throws BirtException {
 		parentLM.endLine(endParagraph);
@@ -188,21 +238,41 @@ public class TextAreaLayout implements ILayout {
 		}
 	}
 
+	/**
+	 * Get the free space
+	 *
+	 * @return Return the free space
+	 */
 	public int getFreeSpace() {
 		return parentLM.getCurrentMaxContentWidth();
 	}
 
-	public void transform(ITextContent textContent) {
+	/**
+	 * Transform the text content
+	 *
+	 * @param textContent text content
+	 * @param context     layout context
+	 */
+	public void transform(ITextContent textContent, LayoutContext context) {
+		String originalText = textContent.getText();
+
+		// If we want to create PDF, replace TAB characters with spaces
+		boolean mustReplaceTabs = "pdf".equals(context.getFormat());
+		if (mustReplaceTabs && originalText != null) {
+			originalText = originalText.replace('\t', ' ');
+			textContent.setText((originalText));
+		}
+
 		String transformType = textContent.getComputedStyle().getTextTransform();
 		if (transformType.equalsIgnoreCase("uppercase")) //$NON-NLS-1$
 		{
-			textContent.setText(textContent.getText().toUpperCase());
+			textContent.setText(originalText.toUpperCase());
 		} else if (transformType.equalsIgnoreCase("lowercase")) //$NON-NLS-1$
 		{
-			textContent.setText(textContent.getText().toLowerCase());
+			textContent.setText(originalText.toLowerCase());
 		} else if (transformType.equalsIgnoreCase("capitalize")) //$NON-NLS-1$
 		{
-			textContent.setText(capitalize(textContent.getText()));
+			textContent.setText(capitalize(originalText));
 		}
 
 		ArabicShaping shaping = new ArabicShaping(ArabicShaping.LETTERS_SHAPE);
@@ -218,10 +288,10 @@ public class TextAreaLayout implements ILayout {
 		boolean capitalizeNextChar = true;
 		char[] array = text.toCharArray();
 		for (int i = 0; i < array.length; i++) {
-			Character c = Character.valueOf(text.charAt(i));
-			if (splitChar.contains(c))
+			Character c = text.charAt(i);
+			if (splitChar.contains(c)) {
 				capitalizeNextChar = true;
-			else if (capitalizeNextChar) {
+			} else if (capitalizeNextChar) {
 				array[i] = Character.toUpperCase(array[i]);
 				capitalizeNextChar = false;
 			}
@@ -229,6 +299,9 @@ public class TextAreaLayout implements ILayout {
 		return new String(array);
 	}
 
+	/**
+	 * Add listener to the end of the text area
+	 */
 	public void close() {
 		if (listenerList != null) {
 			for (Iterator<ITextListener> i = listenerList.iterator(); i.hasNext();) {
@@ -238,6 +311,9 @@ public class TextAreaLayout implements ILayout {
 		}
 	}
 
+	/**
+	 * Initialize method
+	 */
 	public void initialize() {
 	}
 

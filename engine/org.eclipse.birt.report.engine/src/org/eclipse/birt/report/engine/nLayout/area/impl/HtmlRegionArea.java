@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -14,7 +17,17 @@ package org.eclipse.birt.report.engine.nLayout.area.impl;
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.nLayout.area.IContainerArea;
 
+/**
+ * Definition of the HTML region area
+ *
+ * @since 3.3
+ *
+ */
 public class HtmlRegionArea extends RegionArea implements IContainerArea {
+
+	/**
+	 * Constructor
+	 */
 	public HtmlRegionArea() {
 		super();
 	}
@@ -23,7 +36,8 @@ public class HtmlRegionArea extends RegionArea implements IContainerArea {
 		super(area);
 	}
 
-	public void close() throws BirtException {
+	@Override
+	public void close() {
 		if (specifiedHeight >= currentBP) {
 			finished = true;
 		} else {
@@ -32,6 +46,7 @@ public class HtmlRegionArea extends RegionArea implements IContainerArea {
 		setContentHeight(specifiedHeight);
 	}
 
+	@Override
 	public void update(AbstractArea area) throws BirtException {
 		int aHeight = area.getAllocatedHeight();
 		currentBP += aHeight;
@@ -40,6 +55,11 @@ public class HtmlRegionArea extends RegionArea implements IContainerArea {
 		}
 	}
 
+	/**
+	 * Verify if the HTML region is finished
+	 *
+	 * @return true, HTML region is finished
+	 */
 	public boolean isFinished() {
 		return finished;
 	}

@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004, 2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,52 +18,107 @@ import java.util.List;
 
 /**
  * Provides the interfaces for the Table Content
- * 
- * 
+ *
+ *
  */
 public interface ITableContent extends IContainerContent {
 
+	/**
+	 * Get the column count
+	 *
+	 * @return the column count
+	 */
 	int getColumnCount();
 
+	/**
+	 * Get the column based on index
+	 *
+	 * @param index column index
+	 * @return the column
+	 */
 	IColumn getColumn(int index);
 
+	/**
+	 * Add the column
+	 *
+	 * @param column column
+	 */
 	void addColumn(IColumn column);
 
 	/**
-	 * @return Returns the caption.
+	 * Get the caption
+	 *
+	 * @return the caption
 	 */
-	public String getCaption();
-
-	public void setCaption(String caption);
-
-	public String getCaptionKey();
-
-	public void setCaptionKey(String key);
+	String getCaption();
 
 	/**
-	 * @return
+	 * Set the caption
+	 *
+	 * @param caption
 	 */
-	public boolean isHeaderRepeat();
-
-	public void setHeaderRepeat(boolean repeat);
+	void setCaption(String caption);
 
 	/**
-	 * get the header band. return null if the table has no header.
-	 * 
-	 * @return
+	 * Get the caption key
+	 *
+	 * @return the caption key
 	 */
-	public ITableBandContent getHeader();
+	String getCaptionKey();
 
 	/**
-	 * get the footer band,return NULL if the table has no footer.
-	 * 
-	 * @return
+	 * Set the caption key
+	 *
+	 * @param key caption key
 	 */
-	public ITableBandContent getFooter();
+	void setCaptionKey(String key);
 
-	public List getColumns();
+	/**
+	 * Is header repeated
+	 *
+	 * @return is header repeated
+	 */
+	boolean isHeaderRepeat();
 
-	public void setSummary(String summary);
+	/**
+	 * Set the repeat of the header
+	 *
+	 * @param repeat header repeated
+	 */
+	void setHeaderRepeat(boolean repeat);
 
-	public String getSummary();
+	/**
+	 * Get the header band, return null if the table has no header
+	 *
+	 * @return the header band, return null if the table has no header
+	 */
+	ITableBandContent getHeader();
+
+	/**
+	 * Get the footer band, return null if the table has no footer
+	 *
+	 * @return the footer band, return null if the table has no footer
+	 */
+	ITableBandContent getFooter();
+
+	/**
+	 * Get the table columns
+	 *
+	 * @return the table columns
+	 */
+	List getColumns();
+
+	/**
+	 * Set the summary
+	 *
+	 * @param summary
+	 */
+	void setSummary(String summary);
+
+	/**
+	 * Get the summary
+	 *
+	 * @return the summary
+	 */
+	String getSummary();
 }

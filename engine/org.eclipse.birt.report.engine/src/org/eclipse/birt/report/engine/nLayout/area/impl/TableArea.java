@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -31,9 +34,9 @@ import org.eclipse.birt.report.engine.content.ITableContent;
 import org.eclipse.birt.report.engine.content.impl.ReportContent;
 import org.eclipse.birt.report.engine.css.dom.StyleDeclaration;
 import org.eclipse.birt.report.engine.css.engine.StyleConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSValueConstants;
 import org.eclipse.birt.report.engine.executor.ExecutionContext;
 import org.eclipse.birt.report.engine.ir.DimensionType;
-import org.eclipse.birt.report.engine.ir.EngineIRConstants;
 import org.eclipse.birt.report.engine.ir.GridItemDesign;
 import org.eclipse.birt.report.engine.layout.LayoutUtil;
 import org.eclipse.birt.report.engine.layout.pdf.util.PropertyUtil;
@@ -43,7 +46,14 @@ import org.eclipse.birt.report.engine.nLayout.area.style.BackgroundImageInfo;
 import org.eclipse.birt.report.engine.nLayout.area.style.BoxStyle;
 import org.eclipse.birt.report.engine.presentation.UnresolvedRowHint;
 import org.eclipse.birt.report.engine.util.ResourceLocatorWrapper;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 
+/**
+ * Definition of the table area
+ *
+ * @since 3.3
+ *
+ */
 public class TableArea extends RepeatableArea {
 
 	protected transient TableLayoutInfo layoutInfo;
@@ -55,6 +65,13 @@ public class TableArea extends RepeatableArea {
 	protected int startCol;
 	protected int endCol;
 
+	/**
+	 * Constructor container based
+	 *
+	 * @param parent
+	 * @param context
+	 * @param content
+	 */
 	public TableArea(ContainerArea parent, LayoutContext context, IContent content) {
 		super(parent, context, content);
 	}
@@ -65,16 +82,32 @@ public class TableArea extends RepeatableArea {
 		layoutInfo = table.layoutInfo;
 	}
 
+	/**
+	 * Verify if the row exists at the table
+	 *
+	 * @param row
+	 * @return true, row exists
+	 */
 	public boolean contains(RowArea row) {
 		return children.contains(row);
 	}
 
+	/**
+	 * Add row to the table
+	 *
+	 * @param row new row
+	 */
 	public void addRow(RowArea row) {
 		if (layout != null) {
 			layout.addRow(row, context.isFixedLayout());
 		}
 	}
 
+	/**
+	 * Get column count
+	 *
+	 * @return Return column count
+	 */
 	public int getColumnCount() {
 		if (content != null) {
 			return ((ITableContent) content).getColumnCount();
@@ -96,6 +129,12 @@ public class TableArea extends RepeatableArea {
 		return new TableArea(this);
 	}
 
+	/**
+	 * Get the position X from the layout based on column id
+	 *
+	 * @param columnID
+	 * @return Return the position X from the layout
+	 */
 	public int getXPos(int columnID) {
 		if (layoutInfo != null) {
 			return layoutInfo.getXPosition(columnID);
@@ -103,6 +142,11 @@ public class TableArea extends RepeatableArea {
 		return 0;
 	}
 
+	/**
+	 * Verify if the table use grid design (without data)
+	 *
+	 * @return true, table is grid design
+	 */
 	public boolean isGridDesign() {
 		if (content != null) {
 			Object gen = content.getGenerateBy();
@@ -117,7 +161,7 @@ public class TableArea extends RepeatableArea {
 		if (style != null && !style.isEmpty()) {
 			boxStyle = new BoxStyle();
 			IStyle cs = content.getComputedStyle();
-			Color color = PropertyUtil.getColor(cs.getProperty(IStyle.STYLE_BACKGROUND_COLOR));
+			Color color = PropertyUtil.getColor(cs.getProperty(StyleConstants.STYLE_BACKGROUND_COLOR));
 
 			if (color != null) {
 				boxStyle.setBackgroundColor(color);
@@ -131,20 +175,25 @@ public class TableArea extends RepeatableArea {
 					rl = exeContext.getResourceLocator();
 				}
 				BackgroundImageInfo backgroundImage = new BackgroundImageInfo(getImageUrl(url),
-						style.getProperty(IStyle.STYLE_BACKGROUND_REPEAT), 0, 0, 0, 0, rl);
+						style.getProperty(StyleConstants.STYLE_BACKGROUND_REPEAT),
+						PropertyUtil.getDimensionValue(style.getProperty(StyleConstants.STYLE_BACKGROUND_POSITION_X)),
+						PropertyUtil.getDimensionValue(style.getProperty(StyleConstants.STYLE_BACKGROUND_POSITION_Y)),
+						0, 0, rl, this.getCurrentModule(),
+						style.getProperty(StyleConstants.STYLE_BACKGROUND_IMAGE_TYPE));
+				backgroundImage.setImageSize(style);
 				boxStyle.setBackgroundImage(backgroundImage);
 			}
 			localProperties = new LocalProperties();
 			int maw = parent.getMaxAvaWidth();
 
-			localProperties.setMarginBottom(getDimensionValue(cs.getProperty(IStyle.STYLE_MARGIN_BOTTOM), maw));
-			localProperties.setMarginLeft(getDimensionValue(cs.getProperty(IStyle.STYLE_MARGIN_LEFT), maw));
-			localProperties.setMarginTop(getDimensionValue(cs.getProperty(IStyle.STYLE_MARGIN_TOP), maw));
-			localProperties.setMarginRight(getDimensionValue(cs.getProperty(IStyle.STYLE_MARGIN_RIGHT), maw));
+			localProperties.setMarginBottom(getDimensionValue(cs.getProperty(StyleConstants.STYLE_MARGIN_BOTTOM), maw));
+			localProperties.setMarginLeft(getDimensionValue(cs.getProperty(StyleConstants.STYLE_MARGIN_LEFT), maw));
+			localProperties.setMarginTop(getDimensionValue(cs.getProperty(StyleConstants.STYLE_MARGIN_TOP), maw));
+			localProperties.setMarginRight(getDimensionValue(cs.getProperty(StyleConstants.STYLE_MARGIN_RIGHT), maw));
 			if (!isInlineStacking) {
-				pageBreakAfter = cs.getProperty(IStyle.STYLE_PAGE_BREAK_AFTER);
-				pageBreakInside = cs.getProperty(IStyle.STYLE_PAGE_BREAK_INSIDE);
-				pageBreakBefore = cs.getProperty(IStyle.STYLE_PAGE_BREAK_BEFORE);
+				pageBreakAfter = cs.getProperty(StyleConstants.STYLE_PAGE_BREAK_AFTER);
+				pageBreakInside = cs.getProperty(StyleConstants.STYLE_PAGE_BREAK_INSIDE);
+				pageBreakBefore = cs.getProperty(StyleConstants.STYLE_PAGE_BREAK_BEFORE);
 			}
 		} else {
 			hasStyle = false;
@@ -181,22 +230,26 @@ public class TableArea extends RepeatableArea {
 		}
 		ReportContent report = (ReportContent) content.getReportContent();
 		IRowContent row = report.createRowContent();
+		row.setTagType("Caption");
 		row.setParent(content);
 		ICellContent cell = report.createCellContent();
+		cell.setTagType(null);
 		cell.setColSpan(getColumnCount());
 		cell.setColumn(0);
 		StyleDeclaration cstyle = new StyleDeclaration(report.getCSSEngine());
-		cstyle.setProperty(IStyle.STYLE_BORDER_TOP_STYLE, IStyle.HIDDEN_VALUE);
-		cstyle.setProperty(IStyle.STYLE_BORDER_LEFT_STYLE, IStyle.HIDDEN_VALUE);
-		cstyle.setProperty(IStyle.STYLE_BORDER_RIGHT_STYLE, IStyle.HIDDEN_VALUE);
+		cstyle.setProperty(StyleConstants.STYLE_BORDER_TOP_STYLE, CSSValueConstants.HIDDEN_VALUE);
+		cstyle.setProperty(StyleConstants.STYLE_BORDER_LEFT_STYLE, CSSValueConstants.HIDDEN_VALUE);
+		cstyle.setProperty(StyleConstants.STYLE_BORDER_RIGHT_STYLE, CSSValueConstants.HIDDEN_VALUE);
 		cell.setInlineStyle(cstyle);
 		cell.setParent(row);
 		ILabelContent captionLabel = report.createLabelContent();
+		captionLabel.setTagType(null);
 		captionLabel.setParent(cell);
 		captionLabel.setText(caption);
 		StyleDeclaration style = new StyleDeclaration(report.getCSSEngine());
-		style.setProperty(IStyle.STYLE_TEXT_ALIGN, IStyle.CENTER_VALUE);
+		style.setProperty(StyleConstants.STYLE_TEXT_ALIGN, CSSValueConstants.CENTER_VALUE);
 		captionLabel.setInlineStyle(style);
+		captionLabel.setTagType(null);
 		RowArea captionRow = new RowArea(this, context, row);
 		captionRow.isDummy = true;
 		captionRow.setParent(this);
@@ -208,7 +261,6 @@ public class TableArea extends RepeatableArea {
 		captionCell.initialize();
 		captionCell.isDummy = true;
 		captionCell.setRowSpan(1);
-		captionRow.children.add(captionCell);
 		BlockTextArea captionText = new BlockTextArea(captionCell, context, captionLabel);
 		captionText.isDummy = true;
 		captionText.layout();
@@ -216,9 +268,8 @@ public class TableArea extends RepeatableArea {
 		captionCell.setContentHeight(h);
 		captionRow.setHeight(captionCell.getAllocatedHeight());
 		captionRow.finished = true;
-		add(captionRow);
 		if (repeatList == null) {
-			repeatList = new ArrayList();
+			repeatList = new ArrayList<AbstractArea>();
 		}
 		repeatList.add(captionRow);
 		update(captionRow);
@@ -262,7 +313,7 @@ public class TableArea extends RepeatableArea {
 					InstanceID unresolvedTableIID = unresolvedRow.getTableArea().getContent().getInstanceID();
 					// this iid can be null, because the table may be generated
 					// from HTML2Content.
-					// in this case, they are ignored by unresloved row hint.
+					// in this case, they are ignored by unresolved row hint.
 					// Currently, large HTML text is not supported to be split.
 					if (unresolvedTableIID != null) {
 						pageHintGenerator.addUnresolvedRowHint(unresolvedTableIID.toUniqueString(),
@@ -332,6 +383,9 @@ public class TableArea extends RepeatableArea {
 		return getLastRow(this);
 	}
 
+	/**
+	 * Resolve the bottom border of the table
+	 */
 	public void resolveBottomBorder() {
 		RowArea lastRow = getLastRow();
 		if (lastRow != null) {
@@ -382,6 +436,11 @@ public class TableArea extends RepeatableArea {
 		}
 	}
 
+	/**
+	 * Relayout the children of the table area
+	 *
+	 * @throws BirtException
+	 */
 	public void relayoutChildren() throws BirtException {
 		String nextRowId = null;
 		if (unresolvedRow != null) {
@@ -395,7 +454,7 @@ public class TableArea extends RepeatableArea {
 		 * rowId 3. udpate the rowSpan in collection 2 4. add all rows to layout
 		 */
 
-		List<RowArea> rows = new ArrayList<RowArea>();
+		List<RowArea> rows = new ArrayList<>();
 		collectRows(this, layout, rows);
 		int rowCount = getRowCountNeedResolved(rows, nextRowId);
 		boolean resolved = false;
@@ -545,6 +604,13 @@ public class TableArea extends RepeatableArea {
 		checkDisplayNone();
 	}
 
+	/**
+	 * Get the cell width
+	 *
+	 * @param startColumn
+	 * @param endColumn
+	 * @return Return the cell width
+	 */
 	public int getCellWidth(int startColumn, int endColumn) {
 		if (layoutInfo != null) {
 			return layoutInfo.getCellWidth(startColumn, endColumn);
@@ -552,6 +618,12 @@ public class TableArea extends RepeatableArea {
 		return 0;
 	}
 
+	/**
+	 * Resolve the border conflict
+	 *
+	 * @param cellArea
+	 * @param isFirst
+	 */
 	public void resolveBorderConflict(CellArea cellArea, boolean isFirst) {
 		if (layout != null) {
 			layout.resolveBorderConflict(cellArea, isFirst);
@@ -597,7 +669,7 @@ public class TableArea extends RepeatableArea {
 		/**
 		 * Calculates the column width for the table. the return value should be each
 		 * column width in point.
-		 * 
+		 *
 		 * @param columns             The column width specified in report design.
 		 * @param tableWidth          The suggested table width. If isTableWidthDefined
 		 *                            is true, this value is user defined table width;
@@ -608,20 +680,20 @@ public class TableArea extends RepeatableArea {
 		 * @return each column width in point.
 		 */
 		protected int[] formalize(DimensionType[] columns, int tableWidth, boolean isTableWidthDefined) {
-			ArrayList percentageList = new ArrayList();
-			ArrayList unsetList = new ArrayList();
-			ArrayList preFixedList = new ArrayList();
+			ArrayList<Integer> percentageList = new ArrayList<Integer>();
+			ArrayList<Integer> unsetList = new ArrayList<Integer>();
+			ArrayList<Integer> preFixedList = new ArrayList<Integer>();
 			int[] resolvedColumnWidth = new int[columns.length];
 			double total = 0.0f;
 			int fixedLength = 0;
 			for (int i = 0; i < columns.length; i++) {
 				if (columns[i] == null) {
 					unsetList.add(Integer.valueOf(i));
-				} else if (EngineIRConstants.UNITS_PERCENTAGE.equals(columns[i].getUnits())) {
+				} else if (DesignChoiceConstants.UNITS_PERCENTAGE.equals(columns[i].getUnits())) {
 					percentageList.add(Integer.valueOf(i));
 					total += columns[i].getMeasure();
-				} else if (EngineIRConstants.UNITS_EM.equals(columns[i].getUnits())
-						|| EngineIRConstants.UNITS_EX.equals(columns[i].getUnits())) {
+				} else if (DesignChoiceConstants.UNITS_EM.equals(columns[i].getUnits())
+						|| DesignChoiceConstants.UNITS_EX.equals(columns[i].getUnits())) {
 					int len = getDimensionValue(table, columns[i],
 							getDimensionValue(table.getComputedStyle().getProperty(StyleConstants.STYLE_FONT_SIZE)));
 					resolvedColumnWidth[i] = len;
@@ -641,11 +713,11 @@ public class TableArea extends RepeatableArea {
 
 			if (fixedLength >= tableWidth) {
 				for (int i = 0; i < unsetList.size(); i++) {
-					Integer index = (Integer) unsetList.get(i);
+					Integer index = unsetList.get(i);
 					resolvedColumnWidth[index.intValue()] = 0;
 				}
 				for (int i = 0; i < percentageList.size(); i++) {
-					Integer index = (Integer) percentageList.get(i);
+					Integer index = percentageList.get(i);
 					resolvedColumnWidth[index.intValue()] = 0;
 				}
 				return resolvedColumnWidth;
@@ -657,7 +729,7 @@ public class TableArea extends RepeatableArea {
 					if (!preFixedList.isEmpty()) {
 						int delta = left / preFixedList.size();
 						for (int i = 0; i < preFixedList.size(); i++) {
-							Integer index = (Integer) preFixedList.get(i);
+							Integer index = preFixedList.get(i);
 							resolvedColumnWidth[index.intValue()] += delta;
 						}
 					}
@@ -665,54 +737,49 @@ public class TableArea extends RepeatableArea {
 					float leftPercentage = (((float) (tableWidth - fixedLength)) / tableWidth) * 100.0f;
 					double ratio = leftPercentage / total;
 					for (int i = 0; i < percentageList.size(); i++) {
-						Integer index = (Integer) percentageList.get(i);
+						Integer index = percentageList.get(i);
 						columns[index.intValue()] = new DimensionType(columns[index.intValue()].getMeasure() * ratio,
 								columns[index.intValue()].getUnits());
 						resolvedColumnWidth[index.intValue()] = getDimensionValue(table, columns[index.intValue()],
 								tableWidth);
 					}
 				}
-			}
-			// unsetList is not empty.
-			else {
-				if (percentageList.isEmpty()) {
-					int left = tableWidth - fixedLength;
-					int eachWidth = left / unsetList.size();
+			} else if (percentageList.isEmpty()) {
+				int left = tableWidth - fixedLength;
+				int eachWidth = left / unsetList.size();
+				for (int i = 0; i < unsetList.size(); i++) {
+					Integer index = unsetList.get(i);
+					resolvedColumnWidth[index.intValue()] = eachWidth;
+				}
+			} else {
+				float leftPercentage = (((float) (tableWidth - fixedLength)) / tableWidth) * 100.0f;
+				if (leftPercentage <= total) {
+					double ratio = leftPercentage / total;
 					for (int i = 0; i < unsetList.size(); i++) {
-						Integer index = (Integer) unsetList.get(i);
-						resolvedColumnWidth[index.intValue()] = eachWidth;
+						Integer index = unsetList.get(i);
+						resolvedColumnWidth[index.intValue()] = 0;
+					}
+					for (int i = 0; i < percentageList.size(); i++) {
+						Integer index = percentageList.get(i);
+						columns[index.intValue()] = new DimensionType(columns[index.intValue()].getMeasure() * ratio,
+								columns[index.intValue()].getUnits());
+						resolvedColumnWidth[index.intValue()] = getDimensionValue(table, columns[index.intValue()],
+								tableWidth);
 					}
 				} else {
-					float leftPercentage = (((float) (tableWidth - fixedLength)) / tableWidth) * 100.0f;
-					if (leftPercentage <= total) {
-						double ratio = leftPercentage / total;
-						for (int i = 0; i < unsetList.size(); i++) {
-							Integer index = (Integer) unsetList.get(i);
-							resolvedColumnWidth[index.intValue()] = 0;
-						}
-						for (int i = 0; i < percentageList.size(); i++) {
-							Integer index = (Integer) percentageList.get(i);
-							columns[index.intValue()] = new DimensionType(
-									columns[index.intValue()].getMeasure() * ratio,
-									columns[index.intValue()].getUnits());
-							resolvedColumnWidth[index.intValue()] = getDimensionValue(table, columns[index.intValue()],
-									tableWidth);
-						}
-					} else {
-						int usedLength = fixedLength;
-						for (int i = 0; i < percentageList.size(); i++) {
-							Integer index = (Integer) percentageList.get(i);
-							int width = getDimensionValue(table, columns[index.intValue()], tableWidth);
-							usedLength += width;
-							resolvedColumnWidth[index.intValue()] = width;
+					int usedLength = fixedLength;
+					for (int i = 0; i < percentageList.size(); i++) {
+						Integer index = percentageList.get(i);
+						int width = getDimensionValue(table, columns[index.intValue()], tableWidth);
+						usedLength += width;
+						resolvedColumnWidth[index.intValue()] = width;
 
-						}
-						int left = tableWidth - usedLength;
-						int eachWidth = left / unsetList.size();
-						for (int i = 0; i < unsetList.size(); i++) {
-							Integer index = (Integer) unsetList.get(i);
-							resolvedColumnWidth[index.intValue()] = eachWidth;
-						}
+					}
+					int left = tableWidth - usedLength;
+					int eachWidth = left / unsetList.size();
+					for (int i = 0; i < unsetList.size(); i++) {
+						Integer index = unsetList.get(i);
+						resolvedColumnWidth[index.intValue()] = eachWidth;
 					}
 				}
 			}
@@ -738,10 +805,12 @@ public class TableArea extends RepeatableArea {
 
 				}
 			}
-			if (startCol < 0)
+			if (startCol < 0) {
 				startCol = 0;
-			if (endCol < 0)
+			}
+			if (endCol < 0) {
 				endCol = 0;
+			}
 
 			boolean isTableWidthDefined = false;
 			int specifiedWidth = getDimensionValue(table, table.getWidth(), maxWidth);
@@ -756,90 +825,26 @@ public class TableArea extends RepeatableArea {
 			return formalize(columns, tableWidth, isTableWidthDefined);
 		}
 
-		public int[] resolve(int specifiedWidth, int maxWidth) {
-			assert (specifiedWidth <= maxWidth);
-			int columnNumber = table.getColumnCount();
-			int[] columns = new int[columnNumber];
-			int columnWithWidth = 0;
-			int colSum = 0;
-
-			for (int j = 0; j < table.getColumnCount(); j++) {
-				IColumn column = table.getColumn(j);
-				int columnWidth = getDimensionValue(table, column.getWidth(), width);
-				if (columnWidth > 0) {
-					columns[j] = columnWidth;
-					colSum += columnWidth;
-					columnWithWidth++;
-				} else {
-					columns[j] = -1;
-				}
-			}
-
-			if (columnWithWidth == columnNumber) {
-				if (colSum <= maxWidth) {
-					return columns;
-				} else {
-					float delta = colSum - maxWidth;
-					for (int i = 0; i < columnNumber; i++) {
-						columns[i] -= (int) (delta * columns[i] / colSum);
-					}
-					return columns;
-				}
-			} else {
-				if (specifiedWidth == 0) {
-					if (colSum < maxWidth) {
-						distributeLeftWidth(columns, (maxWidth - colSum) / (columnNumber - columnWithWidth));
-					} else {
-						redistributeWidth(columns,
-								colSum - maxWidth + (columnNumber - columnWithWidth) * maxWidth / columnNumber,
-								maxWidth, colSum);
-					}
-				} else {
-					if (colSum < specifiedWidth) {
-						distributeLeftWidth(columns, (specifiedWidth - colSum) / (columnNumber - columnWithWidth));
-					} else {
-						if (colSum < maxWidth) {
-							distributeLeftWidth(columns, (maxWidth - colSum) / (columnNumber - columnWithWidth));
-						} else {
-							redistributeWidth(columns,
-									colSum - specifiedWidth
-											+ (columnNumber - columnWithWidth) * specifiedWidth / columnNumber,
-									specifiedWidth, colSum);
-						}
-					}
-
-				}
-
-			}
-			return columns;
-		}
-
-		private void redistributeWidth(int cols[], int delta, int sum, int currentSum) {
-			int avaWidth = sum / cols.length;
-			for (int i = 0; i < cols.length; i++) {
-				if (cols[i] < 0) {
-					cols[i] = avaWidth;
-				} else {
-					cols[i] -= (int) (((float) cols[i]) * delta / currentSum);
-				}
-			}
-
-		}
-
-		private void distributeLeftWidth(int cols[], int avaWidth) {
-			for (int i = 0; i < cols.length; i++) {
-				if (cols[i] < 0) {
-					cols[i] = avaWidth;
-				}
-			}
-		}
 	}
 
+	/**
+	 * Definition of table layout info
+	 *
+	 * @since 3.3
+	 *
+	 */
 	public static class TableLayoutInfo {
 
 		ITableContent tableContent;
 		LayoutContext context;
 
+		/**
+		 * Constructor
+		 *
+		 * @param tableContent
+		 * @param context
+		 * @param colWidth
+		 */
 		public TableLayoutInfo(ITableContent tableContent, LayoutContext context, int[] colWidth) {
 			this.tableContent = tableContent;
 			this.context = context;
@@ -854,20 +859,31 @@ public class TableArea extends RepeatableArea {
 			}
 		}
 
+		/**
+		 * Get the table width
+		 *
+		 * @return Return the table width
+		 */
 		public int getTableWidth() {
 			return this.tableWidth;
 		}
 
+		/**
+		 * Get the position X
+		 *
+		 * @param index
+		 * @return Return the position X
+		 */
 		public int getXPosition(int index) {
 			return xPositions[index];
 		}
 
 		/**
-		 * get cell width
-		 * 
+		 * Get cell width
+		 *
 		 * @param startColumn
 		 * @param endColumn
-		 * @return
+		 * @return Return the cell width
 		 */
 		public int getCellWidth(int startColumn, int endColumn) {
 			assert (startColumn < endColumn);
@@ -891,25 +907,6 @@ public class TableArea extends RepeatableArea {
 		 * array of position for each column
 		 */
 		protected int[] xPositions = null;
-
-		/**
-		 * Creates a hidden column at X position 0.
-		 * 
-		 * @author bidi_hcg
-		 */
-		private void addDummyColumnForRTL(int[] colWidth) {
-			this.colWidth = new int[columnNumber + 1];
-			System.arraycopy(colWidth, 0, this.colWidth, 0, columnNumber);
-			this.colWidth[columnNumber] = xPositions[columnNumber - 1];
-
-			int[] newXPositions = new int[columnNumber + 1];
-			System.arraycopy(xPositions, 0, newXPositions, 0, columnNumber);
-			xPositions = newXPositions;
-			xPositions[columnNumber] = 0;
-
-			tableWidth += this.colWidth[columnNumber - 1];
-			++columnNumber;
-		}
 	}
 
 }

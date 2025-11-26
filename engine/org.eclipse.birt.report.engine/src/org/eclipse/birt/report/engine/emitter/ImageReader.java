@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c)2010 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,29 +18,56 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.birt.report.engine.content.IImageContent;
 import org.eclipse.birt.report.engine.content.impl.ReportContent;
 import org.eclipse.birt.report.engine.executor.ExecutionContext;
+import org.eclipse.birt.report.engine.internal.util.DataProtocolUtil;
+import org.eclipse.birt.report.engine.internal.util.DataProtocolUtil.DataUrlInfo;
 import org.eclipse.birt.report.engine.util.FlashFile;
 import org.eclipse.birt.report.engine.util.ResourceLocatorWrapper;
 import org.eclipse.birt.report.engine.util.SvgFile;
 import org.eclipse.birt.report.model.api.IResourceLocator;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 
+/**
+ * Image reader of pdf output
+ *
+ * @since 3.3
+ *
+ */
 public class ImageReader {
 
+	/** property: type image object, raster image */
 	public static final int TYPE_IMAGE_OBJECT = 0;
+
+	/** property: type image object, flash */
 	public static final int TYPE_FLASH_OBJECT = 1;
+
+	/** property: type image object, svg image */
 	public static final int TYPE_SVG_OBJECT = 2;
+
+	/** property: type image object, converted svg image */
 	public static final int TYPE_CONVERTED_SVG_OBJECT = 3;
 
+	/** property: image read status, unloaded */
 	public static final int OBJECT_UNLOADED = -1;
+
+	/** property: image read status, resource unreachable */
 	public static final int RESOURCE_UNREACHABLE = 0;
+
+	/** property: image read status, unsupported object */
 	public static final int UNSUPPORTED_OBJECTS = 1;
+
+	/** property: image read status, object loaded successfully */
 	public static final int OBJECT_LOADED_SUCCESSFULLY = 2;
 
 	private int objectType = TYPE_IMAGE_OBJECT;
@@ -50,6 +80,16 @@ public class ImageReader {
 
 	protected static Logger logger = Logger.getLogger(ImageReader.class.getName());
 
+	private static final String URL_PROTOCOL_TYPE_DATA = "data:";
+	private static final String URL_PROTOCOL_TYPE_FILE = "file:";
+	private static final String URL_PROTOCOL_URL_ENCODED_SPACE = "%20";
+
+	/**
+	 * Constructor
+	 *
+	 * @param content               content environment of the image
+	 * @param supportedImageFormats supported image formats
+	 */
 	public ImageReader(IImageContent content, String supportedImageFormats) {
 		this.content = content;
 		this.supportedImageFormats = supportedImageFormats;
@@ -59,10 +99,15 @@ public class ImageReader {
 		}
 	}
 
+	/**
+	 * Read the image
+	 *
+	 * @return Return the read status
+	 */
 	public int read() {
 		buffer = null;
 		checkObjectType(content);
-		String uri = content.getURI();
+		String uri = this.verifyURI(content.getURI());
 		try {
 			switch (content.getImageSource()) {
 			case IImageContent.IMAGE_FILE:
@@ -98,10 +143,20 @@ public class ImageReader {
 		return status;
 	}
 
+	/**
+	 * Get the byte array of the image
+	 *
+	 * @return Return the byte array of the image
+	 */
 	public byte[] getByteArray() {
 		return buffer;
 	}
 
+	/**
+	 * Get the image type
+	 *
+	 * @return Return the image type
+	 */
 	public int getType() {
 		return objectType;
 	}
@@ -138,8 +193,9 @@ public class ImageReader {
 	private boolean isOutputSupported() {
 		if (objectType == TYPE_IMAGE_OBJECT) {
 			if (-1 != supportedImageFormats.indexOf("PNG") || -1 != supportedImageFormats.indexOf("GIF")
-					|| -1 != supportedImageFormats.indexOf("BMP") || -1 != supportedImageFormats.indexOf("JPG"))
+					|| -1 != supportedImageFormats.indexOf("BMP") || -1 != supportedImageFormats.indexOf("JPG")) {
 				return true;
+			}
 		} else if (objectType == TYPE_FLASH_OBJECT) {
 			if (-1 != supportedImageFormats.indexOf("SWF")) {
 				return true;
@@ -157,7 +213,42 @@ public class ImageReader {
 			status = RESOURCE_UNREACHABLE;
 			return;
 		}
-		readImage(new URL(uri));
+
+		/*
+		 * If the image is using the data protocol, decode the data and read bytes
+		 * instead
+		 */
+		if (uri.startsWith(DataProtocolUtil.DATA_PROTOCOL)) {
+			try {
+				DataUrlInfo parseDataUrl = DataProtocolUtil.parseDataUrl(uri);
+
+				byte[] bytes = null;
+				if (Objects.equals(parseDataUrl.getEncoding(), "base64")) { //$NON-NLS-1$
+					bytes = Base64.getDecoder().decode(parseDataUrl.getData());
+				} else {
+					/* The case of no encoding, the data is a string on the URL */
+					bytes = parseDataUrl.getData().getBytes(StandardCharsets.UTF_8); /* Charset of the SVG file */
+				}
+				if (this.objectType == TYPE_SVG_OBJECT) {
+					try {
+						String decodedImg = java.net.URLDecoder.decode(new String(bytes), StandardCharsets.UTF_8);
+						bytes = decodedImg.getBytes(StandardCharsets.UTF_8);
+					} catch (IllegalArgumentException iae) {
+						// do nothing
+					}
+				}
+
+				if (bytes != null) {
+					readImage(bytes);
+				} else {
+					status = RESOURCE_UNREACHABLE;
+				}
+			} catch (Exception e) {
+				status = RESOURCE_UNREACHABLE;
+			}
+		} else {
+			readImage(new URL(uri));
+		}
 	}
 
 	private void readImage(URL url) throws IOException {
@@ -178,25 +269,23 @@ public class ImageReader {
 		if (isOutputSupported()) {
 			buffer = getImageByteArray(in);
 			status = OBJECT_LOADED_SUCCESSFULLY;
-		} else {
-			if (objectType == TYPE_SVG_OBJECT) {
-				try {
-					buffer = SvgFile.transSvgToArray(in);
-				} catch (Exception e) {
-					buffer = null;
-					status = UNSUPPORTED_OBJECTS;
-					return;
-				}
-				objectType = TYPE_CONVERTED_SVG_OBJECT;
-				status = OBJECT_LOADED_SUCCESSFULLY;
-			} else {
+		} else if (objectType == TYPE_SVG_OBJECT) {
+			try {
+				buffer = SvgFile.transSvgToArray(in);
+			} catch (Exception e) {
 				buffer = null;
 				status = UNSUPPORTED_OBJECTS;
+				return;
 			}
+			objectType = TYPE_CONVERTED_SVG_OBJECT;
+			status = OBJECT_LOADED_SUCCESSFULLY;
+		} else {
+			buffer = null;
+			status = UNSUPPORTED_OBJECTS;
 		}
 	}
 
-	private void readImage(byte[] data) throws IOException {
+	private void readImage(byte[] data) {
 		if (data == null || data.length == 0) {
 			buffer = null;
 			status = RESOURCE_UNREACHABLE;
@@ -205,27 +294,40 @@ public class ImageReader {
 		if (isOutputSupported()) {
 			buffer = data;
 			status = OBJECT_LOADED_SUCCESSFULLY;
-		} else {
-			if (objectType == TYPE_SVG_OBJECT) {
-				InputStream in = null;
-				try {
-					in = new ByteArrayInputStream(data);
-					buffer = SvgFile.transSvgToArray(in);
-				} catch (Exception e) {
-					buffer = null;
-					status = UNSUPPORTED_OBJECTS;
-					return;
-				} finally {
-					if (in != null) {
-						in.close();
-					}
-				}
-				objectType = TYPE_CONVERTED_SVG_OBJECT;
-				status = OBJECT_LOADED_SUCCESSFULLY;
-			} else {
+		} else if (objectType == TYPE_SVG_OBJECT) {
+			try (InputStream in = new ByteArrayInputStream(data)) {
+				buffer = SvgFile.transSvgToArray(in);
+			} catch (Exception e) {
 				buffer = null;
 				status = UNSUPPORTED_OBJECTS;
+				return;
+			}
+			objectType = TYPE_CONVERTED_SVG_OBJECT;
+			status = OBJECT_LOADED_SUCCESSFULLY;
+		} else {
+			buffer = null;
+			status = UNSUPPORTED_OBJECTS;
+		}
+	}
+
+	/**
+	 * Check the URL to be valid and fall back try it like file-URL
+	 */
+	private String verifyURI(String uri) {
+		if (uri != null && !uri.toLowerCase().startsWith(URL_PROTOCOL_TYPE_DATA)) {
+			String tmpUrl = uri.replaceAll(" ", URL_PROTOCOL_URL_ENCODED_SPACE);
+			try {
+				new URL(tmpUrl).toURI();
+			} catch (MalformedURLException | URISyntaxException excUrl) {
+				// invalid URI try it like "file:"
+				try {
+					tmpUrl = URL_PROTOCOL_TYPE_FILE + "///" + uri;
+					new URL(tmpUrl).toURI();
+					uri = tmpUrl;
+				} catch (MalformedURLException | URISyntaxException excFile) {
+				}
 			}
 		}
+		return uri;
 	}
 }

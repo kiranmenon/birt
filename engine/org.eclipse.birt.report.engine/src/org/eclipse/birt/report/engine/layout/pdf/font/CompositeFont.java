@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2007,2008 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2007, 2008 Actuate Corporation.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -14,11 +17,11 @@ package org.eclipse.birt.report.engine.layout.pdf.font;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-import com.lowagie.text.Font;
-import com.lowagie.text.pdf.BaseFont;
+import org.openpdf.text.Font;
+import org.openpdf.text.pdf.BaseFont;
 
 /**
- * 
+ *
  * The composite font is defined by multiple physical fonts.
  * <p>
  * Each font can be used to display different character. The physical fonts are
@@ -62,6 +65,13 @@ public class CompositeFont {
 	 */
 	CharSegment[] fullIndex;
 
+	/**
+	 * Constructor
+	 *
+	 * @param manager  font mapping manager
+	 * @param config   composite font configuration
+	 * @param sequence font sequence
+	 */
 	public CompositeFont(FontMappingManager manager, CompositeFontConfig config, String[] sequence) {
 		FontMappingManager parentManager = manager.getParent();
 		if (parentManager != null) {
@@ -70,17 +80,17 @@ public class CompositeFont {
 		this.config = config;
 		this.specialCharacters = config.getSpecialCharacters();
 		// create the fonts follows the sequence
-		LinkedHashSet fonts = new LinkedHashSet();
+		LinkedHashSet<String> fonts = new LinkedHashSet<String>();
 		if (sequence != null) {
 			for (int i = 0; i < sequence.length; i++) {
-				Collection catalogFonts = config.getFontByCatalog(sequence[i]);
+				Collection<String> catalogFonts = config.getFontByCatalog(sequence[i]);
 				if (catalogFonts != null) {
 					fonts.addAll(catalogFonts);
 				}
 			}
 		}
 		fonts.addAll(config.getAllFonts());
-		usedFonts = (String[]) fonts.toArray(new String[] {});
+		usedFonts = fonts.toArray(new String[] {});
 
 		fullIndexed = true;
 		fontsIndex = new CharSegment[usedFonts.length][];
@@ -100,10 +110,20 @@ public class CompositeFont {
 		}
 	}
 
+	/**
+	 * Get the font name
+	 *
+	 * @return font name
+	 */
 	public String getFontName() {
 		return config.fontName;
 	}
 
+	/**
+	 * Get the default font name
+	 *
+	 * @return default font name
+	 */
 	public String getDefaultFont() {
 		if (config.defaultFont != null) {
 			return config.defaultFont;
@@ -114,6 +134,12 @@ public class CompositeFont {
 		return null;
 	}
 
+	/**
+	 * Get the used font based on font specific character
+	 *
+	 * @param ch font specific character
+	 * @return font name
+	 */
 	public String getUsedFont(char ch) {
 		String usedFont = findUsedFont(ch);
 		if (usedFont != null) {
@@ -141,11 +167,9 @@ public class CompositeFont {
 					if (CharSegment.search(fontsIndex[i], ch) != -1) {
 						return usedFonts[i];
 					}
-				} else {
-					if (baseFonts[i] != null) {
-						if (baseFonts[i].charExists(ch)) {
-							return usedFonts[i];
-						}
+				} else if (baseFonts[i] != null) {
+					if (baseFonts[i].charExists(ch)) {
+						return usedFonts[i];
 					}
 				}
 			}

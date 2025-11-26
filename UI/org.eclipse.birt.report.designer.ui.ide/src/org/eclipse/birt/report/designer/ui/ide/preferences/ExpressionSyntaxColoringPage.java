@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2012, 2014 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation - initial API and implementation
@@ -90,13 +93,19 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.ibm.icu.text.Collator;
 
+/**
+ * Class to represents the syntax coloring page
+ *
+ * @since 3.3
+ *
+ */
 public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPage implements IWorkbenchPreferencePage {
 
 	private Button fBold;
 	private Label fForegroundLabel;
 	private Label fBackgroundLabel;
 	private Button fClearStyle;
-	private Map fContextToStyleMap;
+	private Map<String, String> fContextToStyleMap;
 	private Color fDefaultForeground = null;
 	private Color fDefaultBackground = null;
 	private IDocument fDocument;
@@ -105,9 +114,9 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	private Button fItalic;
 	private OverlayPreferenceStore fOverlayStore;
 	private Button fStrike;
-	private Collection fStylePreferenceKeys;
+	private Collection<String> fStylePreferenceKeys;
 	private StructuredViewer fStylesViewer = null;
-	private Map fStyleToDescriptionMap;
+	private Map<String, String> fStyleToDescriptionMap;
 	private StyledText fText;
 	private Button fUnderline;
 
@@ -163,8 +172,9 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	 * Color the text in the sample area according to the current preferences
 	 */
 	void applyStyles() {
-		if (fText == null || fText.isDisposed())
+		if (fText == null || fText.isDisposed()) {
 			return;
+		}
 
 		try {
 			ITypedRegion[] regions = TextUtilities.computePartitioning(fDocument,
@@ -172,12 +182,14 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 			if (regions.length > 0) {
 				for (int i = 0; i < regions.length; i++) {
 					ITypedRegion region = regions[i];
-					String namedStyle = (String) fContextToStyleMap.get(region.getType());
-					if (namedStyle == null)
+					String namedStyle = fContextToStyleMap.get(region.getType());
+					if (namedStyle == null) {
 						continue;
+					}
 					TextAttribute attribute = getAttributeFor(namedStyle);
-					if (attribute == null)
+					if (attribute == null) {
 						continue;
+					}
 					int fontStyle = attribute.getStyle() & (SWT.ITALIC | SWT.BOLD | SWT.NORMAL);
 					StyleRange style = new StyleRange(region.getOffset(), region.getLength(), attribute.getForeground(),
 							attribute.getBackground(), fontStyle);
@@ -219,6 +231,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		return composite;
 	}
 
+	@Override
 	protected Control createContents(final Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -231,6 +244,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		link.setText(Messages.getString("ExpressionSyntaxColoringPage.Link.ColorAndFont")); //$NON-NLS-1$
 		link.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null);
 			}
@@ -256,7 +270,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		fStylesViewer = createStylesViewer(styleEditor);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gridData.horizontalIndent = 0;
-		Iterator iterator = fStyleToDescriptionMap.values().iterator();
+		Iterator<String> iterator = fStyleToDescriptionMap.values().iterator();
 		while (iterator.hasNext()) {
 			gridData.widthHint = Math.max(gridData.widthHint,
 					convertWidthInCharsToPixels(iterator.next().toString().length()));
@@ -286,6 +300,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		fForegroundColorEditor.setEnabled(false);
 		fForegroundColorEditor.getButton().getAccessible().addAccessibleListener(new AccessibleAdapter() {
 
+			@Override
 			public void getName(final AccessibleEvent e) {
 				e.result = Messages.getString("ExpressionSyntaxColoringPage.Accessible.Name.Foreground"); //$NON-NLS-1$
 			}
@@ -303,6 +318,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		fBackgroundColorEditor.setEnabled(false);
 		fBackgroundColorEditor.getButton().getAccessible().addAccessibleListener(new AccessibleAdapter() {
 
+			@Override
 			public void getName(final AccessibleEvent e) {
 				e.result = Messages.getString("ExpressionSyntaxColoringPage.Accessible.Name.Background"); //$NON-NLS-1$
 			}
@@ -372,19 +388,21 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fStylesViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (!event.getSelection().isEmpty()) {
 					Object o = ((IStructuredSelection) event.getSelection()).getFirstElement();
 					String namedStyle = o.toString();
 					activate(namedStyle);
-					if (namedStyle == null)
-						return;
+					if (namedStyle == null) {
+					}
 				}
 			}
 		});
 
 		fForegroundColorEditor.addListener(new IPropertyChangeListener() {
 
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty().equals(ColorSelector.PROP_COLORCHANGE)) {
 					Object o = ((IStructuredSelection) fStylesViewer.getSelection()).getFirstElement();
@@ -410,6 +428,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fBackgroundColorEditor.addListener(new IPropertyChangeListener() {
 
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty().equals(ColorSelector.PROP_COLORCHANGE)) {
 					Object o = ((IStructuredSelection) fStylesViewer.getSelection()).getFirstElement();
@@ -436,6 +455,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fBold.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				super.widgetSelected(e);
 				// get current (newly old) style
@@ -459,6 +479,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fItalic.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				super.widgetSelected(e);
 				// get current (newly old) style
@@ -482,6 +503,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fStrike.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				super.widgetSelected(e);
 				// get current (newly old) style
@@ -505,6 +527,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fUnderline.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				super.widgetSelected(e);
 				// get current (newly old) style
@@ -528,9 +551,11 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 		fClearStyle.addSelectionListener(new SelectionAdapter() {
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (fStylesViewer.getSelection().isEmpty())
+				if (fStylesViewer.getSelection().isEmpty()) {
 					return;
+				}
 				String namedStyle = ((IStructuredSelection) fStylesViewer.getSelection()).getFirstElement().toString();
 				getOverlayStore().setToDefault(namedStyle);
 				applyStyles();
@@ -544,8 +569,8 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 	private String loadPreviewContentFromFile() {
 		String line;
-		String separator = System.getProperty("line.separator"); //$NON-NLS-1$
-		StringBuffer buffer = new StringBuffer(512);
+		String separator = System.lineSeparator();
+		StringBuilder buffer = new StringBuilder(512);
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(
@@ -578,11 +603,12 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.wst.sse.ui.internal.preferences.ui.AbstractSyntaxColoringPage
 	 * #getSourcePreview()
 	 */
+	@Override
 	protected ISourceViewer getSourcePreviewViewer() {
 		return fPreviewViewer;
 	}
@@ -595,11 +621,11 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	 * Set up all the style preference keys in the overlay store
 	 */
 	private OverlayKey[] createOverlayStoreKeys() {
-		List overlayKeys = new ArrayList();
+		List<OverlayKey> overlayKeys = new ArrayList<OverlayKey>();
 
-		Iterator i = getStylePreferenceKeys().iterator();
+		Iterator<String> i = getStylePreferenceKeys().iterator();
 		while (i.hasNext()) {
-			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, (String) i.next()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, i.next()));
 		}
 
 		OverlayPreferenceStore.OverlayKey[] keys = new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -610,7 +636,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	/**
 	 * Creates the List viewer where we see the various syntax element display
 	 * names--would it ever be a Tree like JDT's?
-	 * 
+	 *
 	 * @param parent
 	 * @return
 	 */
@@ -619,40 +645,49 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		stylesViewer.setComparator(new ViewerComparator(Collator.getInstance()));
 		stylesViewer.setLabelProvider(new LabelProvider() {
 
+			@Override
 			public String getText(Object element) {
 				Object description = fStyleToDescriptionMap.get(element);
-				if (description != null)
+				if (description != null) {
 					return description.toString();
+				}
 				return super.getText(element);
 			}
 		});
 		stylesViewer.setContentProvider(new ITreeContentProvider() {
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public Object[] getChildren(Object parentElement) {
 				return getStylePreferenceKeys().toArray();
 			}
 
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return getChildren(inputElement);
 			}
 
+			@Override
 			public Object getParent(Object element) {
 				return getStylePreferenceKeys();
 			}
 
+			@Override
 			public boolean hasChildren(Object element) {
 				return false;
 			}
 
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 		});
 		return stylesViewer;
 	}
 
+	@Override
 	public void dispose() {
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();
@@ -674,24 +709,28 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 				int fontModifier = SWT.NORMAL;
 
 				if (stylePrefs.length > 2) {
-					boolean on = Boolean.valueOf(stylePrefs[2]).booleanValue();
-					if (on)
+					boolean on = Boolean.parseBoolean(stylePrefs[2]);
+					if (on) {
 						fontModifier = fontModifier | SWT.BOLD;
+					}
 				}
 				if (stylePrefs.length > 3) {
-					boolean on = Boolean.valueOf(stylePrefs[3]).booleanValue();
-					if (on)
+					boolean on = Boolean.parseBoolean(stylePrefs[3]);
+					if (on) {
 						fontModifier = fontModifier | SWT.ITALIC;
+					}
 				}
 				if (stylePrefs.length > 4) {
-					boolean on = Boolean.valueOf(stylePrefs[4]).booleanValue();
-					if (on)
+					boolean on = Boolean.parseBoolean(stylePrefs[4]);
+					if (on) {
 						fontModifier = fontModifier | TextAttribute.STRIKETHROUGH;
+					}
 				}
 				if (stylePrefs.length > 5) {
-					boolean on = Boolean.valueOf(stylePrefs[5]).booleanValue();
-					if (on)
+					boolean on = Boolean.parseBoolean(stylePrefs[5]);
+					if (on) {
 						fontModifier = fontModifier | TextAttribute.UNDERLINE;
+					}
 				}
 
 				ta = new TextAttribute((foreground != null) ? ColorManager.getColor(foreground) : null,
@@ -703,14 +742,15 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 
 	private String getNamedStyleAtOffset(int offset) {
 		// ensure the offset is clean
-		if (offset >= fDocument.getLength())
+		if (offset >= fDocument.getLength()) {
 			return getNamedStyleAtOffset(fDocument.getLength() - 1);
-		else if (offset < 0)
+		} else if (offset < 0) {
 			return getNamedStyleAtOffset(0);
+		}
 		try {
 			String regionContext = fDocument.getPartition(offset).getType();
 
-			String namedStyle = (String) fContextToStyleMap.get(regionContext);
+			String namedStyle = fContextToStyleMap.get(regionContext);
 			if (namedStyle != null) {
 				return namedStyle;
 			}
@@ -723,13 +763,15 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		return fOverlayStore;
 	}
 
-	private Collection getStylePreferenceKeys() {
+	private Collection<String> getStylePreferenceKeys() {
 		if (fStylePreferenceKeys == null) {
-			List styles = new ArrayList();
+			List<String> styles = new ArrayList<String>();
 			styles.add(ReportPlugin.EXPRESSION_CONTENT_COLOR_PREFERENCE);
 			styles.add(ReportPlugin.EXPRESSION_COMMENT_COLOR_PREFERENCE);
 			styles.add(ReportPlugin.EXPRESSION_KEYWORD_COLOR_PREFERENCE);
 			styles.add(ReportPlugin.EXPRESSION_STRING_COLOR_PREFERENCE);
+			styles.add(ReportPlugin.EXPRESSION_METHOD_COLOR_PREFERENCE);
+			styles.add(ReportPlugin.EXPRESSION_OBJECT_COLOR_PREFERENCE);
 			fStylePreferenceKeys = styles;
 		}
 		return fStylePreferenceKeys;
@@ -738,6 +780,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	private KeyListener getTextKeyListener() {
 		return new KeyListener() {
 
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.widget instanceof StyledText) {
 					int x = ((StyledText) e.widget).getCaretOffset();
@@ -745,6 +788,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 				}
 			}
 
+			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.widget instanceof StyledText) {
 					int x = ((StyledText) e.widget).getCaretOffset();
@@ -757,12 +801,15 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	private MouseListener getTextMouseListener() {
 		return new MouseListener() {
 
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseDown(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseUp(MouseEvent e) {
 				if (e.widget instanceof StyledText) {
 					int x = ((StyledText) e.widget).getCaretOffset();
@@ -775,6 +822,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	private SelectionListener getTextSelectionListener() {
 		return new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				selectColorAtOffset(e.x);
 				if (e.widget instanceof StyledText) {
@@ -782,6 +830,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 				}
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectColorAtOffset(e.x);
 				if (e.widget instanceof StyledText) {
@@ -797,20 +846,23 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 			/**
 			 * @see org.eclipse.swt.events.TraverseListener#keyTraversed(TraverseEvent)
 			 */
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.widget instanceof StyledText) {
-					if ((e.detail == SWT.TRAVERSE_TAB_NEXT) || (e.detail == SWT.TRAVERSE_TAB_PREVIOUS))
+					if ((e.detail == SWT.TRAVERSE_TAB_NEXT) || (e.detail == SWT.TRAVERSE_TAB_PREVIOUS)) {
 						e.doit = true;
+					}
 				}
 			}
 		};
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		setDescription(Messages.getString("ExpressionSyntaxColoringPage.Decscription")); //$NON-NLS-1$
 
-		fStyleToDescriptionMap = new HashMap();
-		fContextToStyleMap = new HashMap();
+		fStyleToDescriptionMap = new HashMap<String, String>();
+		fContextToStyleMap = new HashMap<String, String>();
 
 		initStyleToDescriptionMap();
 		initRegionContextToStyleMap();
@@ -826,7 +878,8 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		fContextToStyleMap.put(JSPartitionScanner.JS_COMMENT, ReportPlugin.EXPRESSION_COMMENT_COLOR_PREFERENCE);
 		fContextToStyleMap.put(JSPartitionScanner.JS_KEYWORD, ReportPlugin.EXPRESSION_KEYWORD_COLOR_PREFERENCE);
 		fContextToStyleMap.put(JSPartitionScanner.JS_STRING, ReportPlugin.EXPRESSION_STRING_COLOR_PREFERENCE);
-
+		fContextToStyleMap.put(JSPartitionScanner.JS_METHOD, ReportPlugin.EXPRESSION_METHOD_COLOR_PREFERENCE);
+		fContextToStyleMap.put(JSPartitionScanner.JS_OBJECT, ReportPlugin.EXPRESSION_OBJECT_COLOR_PREFERENCE);
 	}
 
 	private void initStyleToDescriptionMap() {
@@ -838,8 +891,13 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 				Messages.getString("ExpressionSyntaxColoringPage.Element.Keyword")); //$NON-NLS-1$
 		fStyleToDescriptionMap.put(ReportPlugin.EXPRESSION_STRING_COLOR_PREFERENCE,
 				Messages.getString("ExpressionSyntaxColoringPage.Element.String")); //$NON-NLS-1$
+		fStyleToDescriptionMap.put(ReportPlugin.EXPRESSION_METHOD_COLOR_PREFERENCE,
+				Messages.getString("ExpressionSyntaxColoringPage.Element.Method")); //$NON-NLS-1$
+		fStyleToDescriptionMap.put(ReportPlugin.EXPRESSION_OBJECT_COLOR_PREFERENCE,
+				Messages.getString("ExpressionSyntaxColoringPage.Element.Object")); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void performDefaults() {
 		super.performDefaults();
 		getOverlayStore().loadDefaults();
@@ -849,6 +907,7 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 		fText.redraw();
 	}
 
+	@Override
 	public boolean performOk() {
 		getOverlayStore().propagate();
 		if (preference != null) {
@@ -876,14 +935,17 @@ public final class ExpressionSyntaxColoringPage extends AbstractSyntaxColoringPa
 	 * Specifically set the reporting name of a control for accessibility
 	 */
 	private void setAccessible(Control control, String name) {
-		if (control == null)
+		if (control == null) {
 			return;
+		}
 		final String n = name;
 		control.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 
+			@Override
 			public void getName(AccessibleEvent e) {
-				if (e.childID == ACC.CHILDID_SELF)
+				if (e.childID == ACC.CHILDID_SELF) {
 					e.result = n;
+				}
 			}
 		});
 	}

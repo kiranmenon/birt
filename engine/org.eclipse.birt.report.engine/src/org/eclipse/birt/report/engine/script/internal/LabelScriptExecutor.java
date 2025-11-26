@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -28,8 +31,9 @@ public class LabelScriptExecutor extends ScriptExecutor {
 		try {
 			ILabel label = new Label(labelHandle);
 			ILabelEventHandler eh = getEventHandler(labelHandle, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onPrepare(label, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e);
 		}
@@ -42,11 +46,13 @@ public class LabelScriptExecutor extends ScriptExecutor {
 		}
 		try {
 			ILabelInstance label = new LabelInstance(content, context, RunningState.CREATE);
-			if (handleScript(label, labelDesign.getOnCreate(), context).didRun())
+			if (handleScript(label, labelDesign.getOnCreate(), context).didRun()) {
 				return;
+			}
 			ILabelEventHandler eh = getEventHandler(labelDesign, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onCreate(label, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e, labelDesign.getHandle());
 		}
@@ -59,11 +65,13 @@ public class LabelScriptExecutor extends ScriptExecutor {
 		}
 		try {
 			ILabelInstance label = new LabelInstance(content, context, RunningState.RENDER);
-			if (handleScript(label, labelDesign.getOnRender(), context).didRun())
+			if (handleScript(label, labelDesign.getOnRender(), context).didRun()) {
 				return;
+			}
 			ILabelEventHandler eh = getEventHandler(labelDesign, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onRender(label, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e, labelDesign.getHandle());
 		}
@@ -76,12 +84,14 @@ public class LabelScriptExecutor extends ScriptExecutor {
 		}
 		try {
 			ILabelInstance label = new LabelInstance(content, context, RunningState.PAGEBREAK);
-			if (handleScript(label, labelDesign.getOnPageBreak(), context).didRun())
+			if (handleScript(label, labelDesign.getOnPageBreak(), context).didRun()) {
 				return;
+			}
 
 			ILabelEventHandler eh = getEventHandler(labelDesign, context);
-			if (eh != null)
+			if (eh != null) {
 				eh.onPageBreak(label, context.getReportContext());
+			}
 		} catch (Exception e) {
 			addException(context, e, labelDesign.getHandle());
 		}

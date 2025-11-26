@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -18,19 +21,19 @@ package org.eclipse.birt.report.designer.internal.ui.script;
 public interface JSObjectMetaData {
 
 	/**
-	 * 
+	 *
 	 */
 	int VISIBILITY_PUBLIC = 0;
 	/**
-	 * 
+	 *
 	 */
 	int VISIBILITY_PROTECTED = 1;
 	/**
-	 * 
+	 *
 	 */
 	int VISIBILITY_PRIVATE = 2;
 	/**
-	 * 
+	 *
 	 */
 	int VISIBILITY_STATIC = 3;
 
@@ -41,41 +44,43 @@ public interface JSObjectMetaData {
 
 		/**
 		 * Get method's name.
-		 * 
-		 * @return
+		 *
+		 * @return the method name
 		 */
 		String getName();
 
 		/**
 		 * Get method's display text.
-		 * 
-		 * @return
+		 *
+		 * @return the method display text
 		 */
 		String getDisplayText();
 
 		/**
 		 * Get method's description.
-		 * 
-		 * @return
+		 *
+		 * @return the method description
 		 */
 		String getDescription();
 
 		/**
 		 * Get method's visibility.
-		 * 
-		 * @return
+		 *
+		 * @return the method visibility
 		 */
 		int getVisibility();
 
 		/**
 		 * Get method's return type.
-		 * 
-		 * @return
+		 *
+		 * @return the method return type
 		 */
 		JSObjectMetaData getReturn();
 
 		/**
 		 * Gets the arguments info.
+		 *
+		 * @return the argument info
 		 */
 		JSObjectMetaData[] getArguments();
 	}
@@ -87,74 +92,79 @@ public interface JSObjectMetaData {
 
 		/**
 		 * Get field's name.
-		 * 
-		 * @return
+		 *
+		 * @return the field name
 		 */
 		String getName();
 
 		/**
 		 * Get field's display text.
-		 * 
-		 * @return
+		 *
+		 * @return the field display text
 		 */
 		String getDisplayText();
 
 		/**
 		 * Get field's description.
-		 * 
-		 * @return
+		 *
+		 * @return the field description
 		 */
 		String getDescription();
 
 		/**
 		 * Get field's visibility.
-		 * 
-		 * @return
+		 *
+		 * @return the field visibility
 		 */
 		int getVisibility();
 
 		/**
 		 * Get field's type.
-		 * 
-		 * @return
+		 *
+		 * @return the field type
 		 */
 		JSObjectMetaData getType();
 	}
 
 	/**
 	 * Get this object's name.
-	 * 
-	 * @return
+	 *
+	 * @return the object name
 	 */
 	String getName();
 
 	/**
 	 * Get this object's methods.
-	 * 
-	 * @return
+	 *
+	 * @return the object method
 	 */
 	JSMethod[] getMethods();
 
 	/**
 	 * Get this object's fields.
-	 * 
-	 * @return
+	 *
+	 * @return the object fields
 	 */
 	JSField[] getFields();
 
 	/**
 	 * Get description for this object.
-	 * 
-	 * @return
+	 *
+	 * @return the objet description
 	 */
 	String getDescription();
 
 	/**
 	 * Get this object's visibility.
-	 * 
-	 * @return
+	 *
+	 * @return the object visibility
 	 */
 	int getVisibility();
 
+	/**
+	 * Get the object's component type
+	 *
+	 * @return the object's component type
+	 */
 	JSObjectMetaData getComponentType();
 }

@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -28,25 +31,45 @@ import org.eclipse.birt.report.engine.nLayout.LayoutContext;
 
 import com.ibm.icu.util.ULocale;
 
+/**
+ * Definition of the root area
+ *
+ * @since 3.3
+ *
+ */
 public class RootArea extends BlockContainerArea {
 
 	protected transient LayoutEmitterAdapter emitter;
 
 	protected PageArea page;
 
+	/**
+	 * Constructor context based
+	 *
+	 * @param context
+	 * @param content
+	 * @param emitter
+	 */
 	public RootArea(LayoutContext context, IContent content, LayoutEmitterAdapter emitter) {
 		super(null, context, content);
 		this.emitter = emitter;
 	}
 
+	/**
+	 * Constructor based on root area
+	 *
+	 * @param area
+	 */
 	public RootArea(RootArea area) {
 		super(area);
 	}
 
+	@Override
 	public int getMaxAvaHeight() {
 		return context.getMaxBP();
 	}
 
+	@Override
 	public boolean autoPageBreak() throws BirtException {
 		int height = context.getMaxBP();
 		SplitResult result = split(height, false);
@@ -70,10 +93,12 @@ public class RootArea extends BlockContainerArea {
 		return true;
 	}
 
+	@Override
 	public RootArea cloneArea() {
 		return new RootArea(this);
 	}
 
+	@Override
 	public void initialize() throws BirtException {
 		IPageContent pageContent = (IPageContent) content;
 
@@ -100,15 +125,13 @@ public class RootArea extends BlockContainerArea {
 					pageContent = createPageContent(pageContent);
 				}
 			}
+		} else if (context.isAutoPageBreak()) {
+			context.setPageNumber(context.getPageNumber() + 1);
+			pageContent = createPageContent(pageContent);
 		} else {
-			if (context.isAutoPageBreak()) {
-				context.setPageNumber(context.getPageNumber() + 1);
-				pageContent = createPageContent(pageContent);
-			} else {
-				long number = pageContent.getPageNumber();
-				if (number > 0) {
-					context.setPageNumber(number);
-				}
+			long number = pageContent.getPageNumber();
+			if (number > 0) {
+				context.setPageNumber(number);
 			}
 		}
 
@@ -126,28 +149,25 @@ public class RootArea extends BlockContainerArea {
 	protected IPageContent createPageContent(IPageContent htmlPageContent) {
 		if (context.getPageNumber() == htmlPageContent.getPageNumber()) {
 			return htmlPageContent;
-		} else {
-			if (context.getEngineTaskType() == IEngineTask.TASK_RUNANDRENDER) {
+		} else if (context.getEngineTaskType() == IEngineTask.TASK_RUNANDRENDER) {
 
-				IPageContent pageContent = (IPageContent) cloneContent((IContent) htmlPageContent.getParent(),
-						htmlPageContent, context.getPageNumber(), context.getTotalPage());
-				pageContent.setPageNumber(context.getPageNumber());
-				return pageContent;
-			} else {
-				IPageContent pageContent = htmlPageContent;
-				try {
-					pageContent = ReportExecutorUtil.executeMasterPage(
-							context.getHtmlLayoutContext().getReportExecutor(), context.getPageNumber(),
-							(MasterPageDesign) pageContent.getGenerateBy());
-					HTMLLayoutContext htmlContext = context.getHtmlLayoutContext();
-					if (htmlContext != null && htmlContext.needLayoutPageContent()) {
-						htmlContext.getPageLM().layoutPageContent(pageContent);
-					}
-				} catch (BirtException e) {
-					logger.log(Level.WARNING, e.getMessage(), e);
+			IPageContent pageContent = (IPageContent) cloneContent((IContent) htmlPageContent.getParent(),
+					htmlPageContent, context.getPageNumber(), context.getTotalPage());
+			pageContent.setPageNumber(context.getPageNumber());
+			return pageContent;
+		} else {
+			IPageContent pageContent = htmlPageContent;
+			try {
+				pageContent = ReportExecutorUtil.executeMasterPage(context.getHtmlLayoutContext().getReportExecutor(),
+						context.getPageNumber(), (MasterPageDesign) pageContent.getGenerateBy());
+				HTMLLayoutContext htmlContext = context.getHtmlLayoutContext();
+				if (htmlContext != null && htmlContext.needLayoutPageContent()) {
+					htmlContext.getPageLM().layoutPageContent(pageContent);
 				}
-				return pageContent;
+			} catch (BirtException e) {
+				logger.log(Level.WARNING, e.getMessage(), e);
 			}
+			return pageContent;
 		}
 	}
 
@@ -165,10 +185,11 @@ public class RootArea extends BlockContainerArea {
 				} else {
 					String pattern = format.getNumberPattern();
 					String locale = format.getNumberLocale();
-					if (locale == null)
+					if (locale == null) {
 						nf = new NumberFormatter(pattern);
-					else
+					} else {
 						nf = new NumberFormatter(pattern, new ULocale(locale));
+					}
 				}
 				autoText.setText(nf.format(pageNumber));
 			}
@@ -183,9 +204,15 @@ public class RootArea extends BlockContainerArea {
 		return newContent;
 	}
 
+	@Override
 	public void close() throws BirtException {
 		page.setBody(this);
 		page.close();
 		finished = true;
 	}
+
+	public String getTagType() {
+		return null;
+	}
+
 }

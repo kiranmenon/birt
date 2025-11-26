@@ -1,9 +1,12 @@
 /*******************************************************************************
 * Copyright (c) 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -15,9 +18,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import junit.framework.TestCase;
-
 import com.ibm.icu.util.ULocale;
+
+import junit.framework.TestCase;
 
 public class ReportParameterConverterTest extends TestCase {
 
@@ -34,9 +37,9 @@ public class ReportParameterConverterTest extends TestCase {
 		String strTime = converter.format(time);
 		String strDate = converter.format(date);
 
-		assertEquals("9/13/1998, 8:01:44 PM", strDateTime);
+		assertEquals("9/13/1998, 8:01:44 PM", strDateTime.replace("\u202f", " "));
 		assertEquals("9/13/1998", strDate);
-		assertEquals("8:01:44 PM", strTime);
+		assertEquals("8:01:44 PM", strTime.replace("\u202f", " "));
 
 		Date newDateTime = (java.util.Date) converter.parse(strDateTime, IScalarParameterDefn.TYPE_DATE_TIME);
 		java.sql.Date newDate = (java.sql.Date) converter.parse(strDate, IScalarParameterDefn.TYPE_DATE);

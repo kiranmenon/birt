@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004,2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -31,6 +34,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.css.engine.BIRTPropertyManagerFactory;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.ir.AutoTextItemDesign;
 import org.eclipse.birt.report.engine.ir.BandDesign;
 import org.eclipse.birt.report.engine.ir.CellDesign;
@@ -67,10 +71,17 @@ import org.w3c.dom.Element;
 
 /**
  * visitor used to write the IR.
- * 
+ *
  */
 public class ReportDesignWriter {
 
+	/**
+	 * Write the report design
+	 *
+	 * @param out    output stream of report design
+	 * @param report report for output
+	 * @throws Exception
+	 */
 	public void write(OutputStream out, Report report) throws Exception {
 		Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
@@ -92,7 +103,7 @@ public class ReportDesignWriter {
 
 		/**
 		 * constructor.
-		 * 
+		 *
 		 * @param writer
 		 */
 		ReportDumpVisitor(Document document) {
@@ -101,7 +112,7 @@ public class ReportDesignWriter {
 
 		/**
 		 * report contains
-		 * 
+		 *
 		 * @param report
 		 */
 		public void createDocument(Report report) {
@@ -122,7 +133,7 @@ public class ReportDesignWriter {
 			}
 		}
 
-		protected Stack<Element> elements = new Stack<Element>();
+		protected Stack<Element> elements = new Stack<>();
 
 		protected void pushTag(String tag) {
 			elements.push(element);
@@ -136,7 +147,7 @@ public class ReportDesignWriter {
 		}
 
 		protected void popTag() {
-			element = (Element) elements.pop();
+			element = elements.pop();
 		}
 
 		private void outputMap(String name, Map<?, ?> map) {
@@ -144,7 +155,7 @@ public class ReportDesignWriter {
 				return;
 			}
 			pushTag(name);
-			ArrayList<String> keys = new ArrayList<String>(map.size());
+			ArrayList<String> keys = new ArrayList<>(map.size());
 			keys.addAll((Collection<String>) map.keySet());
 			Collections.sort(keys);
 			for (String key : keys) {
@@ -212,7 +223,7 @@ public class ReportDesignWriter {
 
 		private void outputStyle(String name, IStyle style) {
 			pushTag(name);
-			for (int i = 0; i < IStyle.NUMBER_OF_STYLE; i++) {
+			for (int i = 0; i < StyleConstants.NUMBER_OF_STYLE; i++) {
 				Object v = style.getProperty(i);
 				if (v != null) {
 					attribute(getStyleName(i), v.toString());
@@ -271,15 +282,7 @@ public class ReportDesignWriter {
 	}
 
 	private boolean isGetMethod(String name) {
-		if (name.startsWith("get")) {
-			return true;
-		}
-
-		if (name.startsWith("is")) {
-			return true;
-		}
-
-		if (name.startsWith("need")) {
+		if (name.startsWith("get") || name.startsWith("is") || name.startsWith("need")) {
 			return true;
 		}
 
@@ -311,7 +314,7 @@ public class ReportDesignWriter {
 		return sb.toString();
 	}
 
-	static HashMap<Class<?>, String> ELEMENT_NAMES = new HashMap<Class<?>, String>();
+	static HashMap<Class<?>, String> ELEMENT_NAMES = new HashMap<>();
 	static {
 		ELEMENT_NAMES.put(PageSequenceDesign.class, "page-sequence");
 		ELEMENT_NAMES.put(ColumnDesign.class, "column");
@@ -369,7 +372,7 @@ public class ReportDesignWriter {
 		return ELEMENT_NAMES.get(t);
 	}
 
-	static HashMap<Class<?>, String[]> IGNORE_METHODS = new HashMap<Class<?>, String[]>();
+	static HashMap<Class<?>, String[]> IGNORE_METHODS = new HashMap<>();
 	static {
 		IGNORE_METHODS.put(Report.class, new String[] { "getContentCount" });
 		IGNORE_METHODS.put(PageSetupDesign.class, new String[] { "getMasterPageCount", "getPageSequenceCount" });
@@ -424,7 +427,7 @@ public class ReportDesignWriter {
 		return false;
 	}
 
-	static HashMap<String, String> DEFAULT_VALUES = new HashMap<String, String>();
+	static HashMap<String, String> DEFAULT_VALUES = new HashMap<>();
 	{
 		DEFAULT_VALUES.put("simple-master-page.is-floating-footer", "false");
 		DEFAULT_VALUES.put("simple-master-page.is-show-footer-on-last", "true");
@@ -467,8 +470,9 @@ public class ReportDesignWriter {
 				|| returnType == Double.TYPE || returnType == String.class || returnType == Boolean.TYPE
 				|| returnType == Short.class || returnType == Character.class || returnType == Byte.class
 				|| returnType == Integer.class || returnType == Long.class || returnType == Float.class
-				|| returnType == Double.class || returnType == Boolean.class)
+				|| returnType == Double.class || returnType == Boolean.class) {
 			return true;
+		}
 
 		return false;
 	}
@@ -481,13 +485,7 @@ public class ReportDesignWriter {
 	}
 
 	private boolean canOutput(Object value) {
-		if (value == null) {
-			return true;
-		}
-		if (isJavaPrimitiveType(value)) {
-			return true;
-		}
-		if (isBirtPrimitiveType(value)) {
+		if ((value == null) || isJavaPrimitiveType(value) || isBirtPrimitiveType(value)) {
 			return true;
 		}
 		Class<?> returnType = value.getClass();
@@ -528,14 +526,9 @@ public class ReportDesignWriter {
 	}
 
 	private Method[] sortMethods(Method[] methods) {
-		ArrayList<Method> list = new ArrayList<Method>(methods.length);
+		ArrayList<Method> list = new ArrayList<>(methods.length);
 		Collections.addAll(list, methods);
-		Collections.sort(list, new Comparator<Method>() {
-
-			public int compare(Method o1, Method o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
+		Collections.sort(list, Comparator.comparing(Method::getName));
 		return list.toArray(new Method[methods.length]);
 	}
 }

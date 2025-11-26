@@ -1,9 +1,9 @@
 <%-----------------------------------------------------------------------------
-	Copyright (c) 2004-2008 Actuate Corporation and others.
+	Copyright (c) 2004-2008, 2025 Actuate Corporation and others.
 	All rights reserved. This program and the accompanying materials 
-	are made available under the terms of the Eclipse Public License v1.0
+	are made available under the terms of the Eclipse Public License v2.0
 	which accompanies this distribution, and is available at
-	http://www.eclipse.org/legal/epl-v10.html
+	http://www.eclipse.org/legal/epl-2.0.html
 	
 	Contributors:
 		Actuate Corporation - Initial implementation.
@@ -115,7 +115,8 @@
 		<script src="birt/ajax/ui/dialog/BirtParameterDialog.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/dialog/AbstractExceptionDialog.js" type="text/javascript"></script>
 		<script src="birt/ajax/ui/dialog/BirtExceptionDialog.js" type="text/javascript"></script>
-		
+		<script src="birt/ajax/ui/dialog/BirtMessageDialog.js" type="text/javascript"></script>
+
 		<script src="birt/ajax/utility/BirtPosition.js" type="text/javascript"></script>
 
 		<script src="birt/ajax/core/BirtCommunicationManager.js" type="text/javascript"></script>
@@ -174,7 +175,8 @@
 
 		var birtParameterDialog = new BirtParameterDialog( 'parameterDialog', 'run' );
 		var birtExceptionDialog = new BirtExceptionDialog( 'exceptionDialog' );
-		
+		var birtMessageDialog = new BirtMessageDialog( 'messageDialog' );
+	
 		function init()
 		{
 			soapURL = birtUtility.initSessionId( soapURL );

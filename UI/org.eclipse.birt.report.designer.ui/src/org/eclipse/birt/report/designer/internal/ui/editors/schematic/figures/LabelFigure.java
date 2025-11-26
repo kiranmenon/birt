@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -18,6 +21,7 @@ import org.eclipse.birt.report.designer.internal.ui.layout.ReportItemConstraint;
 import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FigureUtilities;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.StackLayout;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -26,14 +30,15 @@ import org.eclipse.draw2d.text.FlowBox;
 import org.eclipse.draw2d.text.FlowFigure;
 import org.eclipse.draw2d.text.FlowPage;
 import org.eclipse.draw2d.text.ParagraphTextLayout;
+import org.eclipse.draw2d.text.TextFragmentBox;
 import org.eclipse.swt.graphics.Font;
 
 import com.ibm.icu.text.BreakIterator;
 
 /**
  * A Figure with an embedded TextFlow within a FlowPage that contains text.
- * 
- * 
+ *
+ *
  */
 public class LabelFigure extends ReportElementFigure {
 
@@ -58,7 +63,9 @@ public class LabelFigure extends ReportElementFigure {
 	}
 
 	/**
-	 * @return
+	 * Get the display of the label figure
+	 *
+	 * @return the label figure
 	 */
 	public String getDisplay() {
 		return display;
@@ -67,7 +74,7 @@ public class LabelFigure extends ReportElementFigure {
 	/**
 	 * Creates a new LabelFigure with a MarginBorder that is the given size and a
 	 * FlowPage containing a TextFlow with the style WORD_WRAP_HARD.
-	 * 
+	 *
 	 * @param borderSize the size of the MarginBorder
 	 */
 	public LabelFigure(int borderSize) {
@@ -75,18 +82,16 @@ public class LabelFigure extends ReportElementFigure {
 
 		label = new TextFlow() {
 
+			@Override
 			public void postValidate() {
 				if (DesignChoiceConstants.DISPLAY_BLOCK.equals(display)
 						|| DesignChoiceConstants.DISPLAY_INLINE.equals(display)) {
-					List list = getFragments();
-					FlowBox box;
+					List<? extends TextFragmentBox> listBox = getFragments();
 
 					int left = Integer.MAX_VALUE, top = left;
 					int bottom = Integer.MIN_VALUE;
 
-					for (int i = 0; i < list.size(); i++) {
-						box = (FlowBox) list.get(i);
-
+					for (FlowBox box : listBox) {
 						left = Math.min(left, box.getX());
 						top = Math.min(top, box.getBaseline() - box.getAscent());
 						bottom = Math.max(bottom, box.getBaseline() + box.getDescent());
@@ -106,9 +111,9 @@ public class LabelFigure extends ReportElementFigure {
 						child.setBounds(new Rectangle(rect.x, rect.y, width, rect.height));
 					}
 
-					list = getChildren();
-					for (int i = 0; i < list.size(); i++) {
-						((FlowFigure) list.get(i)).postValidate();
+					List<? extends IFigure> listFigure = getChildren();
+					for (IFigure flowFigure : listFigure) {
+						((FlowFigure) flowFigure).postValidate();
 					}
 				} else {
 					super.postValidate();
@@ -129,7 +134,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.draw2d.IFigure#getPreferredSize(int, int)
 	 */
 	private Dimension getPreferredSize(int wHint, int hHint, boolean isFix, boolean forceWidth, boolean forceHeight) {
@@ -162,17 +167,19 @@ public class LabelFigure extends ReportElementFigure {
 		return new Dimension(Math.max(dim.width, rx), Math.max(dim.height, ry));
 	}
 
+	@Override
 	public Dimension getPreferredSize(int wHint, int hHint) {
 		return getPreferredSize(wHint, hHint, false, false, false);
 	}
 
+	@Override
 	public Dimension getMinimumSize(int wHint, int hHint) {
 		return getMinimumSize(wHint, hHint, false, false, false);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.draw2d.Figure#getMinimumSize(int, int)
 	 */
 	private Dimension getMinimumSize(int wHint, int hHint, boolean isFix, boolean forceWidth, boolean forceHeight) {
@@ -206,9 +213,8 @@ public class LabelFigure extends ReportElementFigure {
 			dim = super.getMinimumSize(tempHint <= 0 ? -1 : tempHint, hHint);
 
 			return new Dimension(Math.max(dim.width, rx), Math.max(dim.height, ry));
-		} else {
-			dim = super.getMinimumSize(rx == 0 ? -1 : rx, hHint);
 		}
+		dim = super.getMinimumSize(rx == 0 ? -1 : rx, hHint);
 
 		if (dim.width < wHint) {
 			return new Dimension(Math.max(dim.width, rx), Math.max(dim.height, ry));
@@ -232,7 +238,7 @@ public class LabelFigure extends ReportElementFigure {
 					&& DesignChoiceConstants.UNITS_PERCENTAGE.equals(constraint.getUnits())) {
 				// compute real percentag recommend size
 				rx = (int) constraint.getMeasure() * wHint / 100;
-				;
+
 			}
 		}
 
@@ -291,7 +297,7 @@ public class LabelFigure extends ReportElementFigure {
 	/**
 	 * Since Eclipse TextFlow figure ignore the trailing /r/n for calculating the
 	 * client size, we must append the extra size ourselves.
-	 * 
+	 *
 	 * @return dimension for the client area used by the editor.
 	 */
 	public Rectangle getEditorArea() {
@@ -320,7 +326,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the recommended size.
-	 * 
+	 *
 	 * @param recommendSize
 	 */
 	public void setRecommendSize(Dimension recommendSize) {
@@ -329,8 +335,8 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Gets the recommended size.
-	 * 
-	 * @return
+	 *
+	 * @return the recommended size.
 	 */
 	public Dimension getRecommendSize() {
 		return recommendSize;
@@ -338,7 +344,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the display property of the Label.
-	 * 
+	 *
 	 * @param display the display property. this should be one of the following:
 	 *                DesignChoiceConstants.DISPLAY_BLOCK |
 	 *                DesignChoiceConstants.DISPLAY_INLINE |
@@ -355,7 +361,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Returns the text inside the TextFlow.
-	 * 
+	 *
 	 * @return the text flow inside the text.
 	 */
 	public String getText() {
@@ -364,7 +370,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the text of the TextFlow to the given value.
-	 * 
+	 *
 	 * @param newText the new text value.
 	 */
 	public void setText(String newText) {
@@ -377,7 +383,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the over-line style of the text.
-	 * 
+	 *
 	 * @param textOverline The textOverline to set.
 	 */
 	public void setTextOverline(String textOverline) {
@@ -386,7 +392,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the line-through style of the text.
-	 * 
+	 *
 	 * @param textLineThrough The textLineThrough to set.
 	 */
 	public void setTextLineThrough(String textLineThrough) {
@@ -395,7 +401,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the underline style of the text.
-	 * 
+	 *
 	 * @param textUnderline The textUnderline to set.
 	 */
 	public void setTextUnderline(String textUnderline) {
@@ -404,7 +410,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the horizontal text alignment style.
-	 * 
+	 *
 	 * @param textAlign The textAlign to set.
 	 */
 	public void setTextAlign(String textAlign) {
@@ -413,7 +419,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Gets the horizontal text alignment style.
-	 * 
+	 *
 	 * @return The textAlign.
 	 */
 	public String getTextAlign() {
@@ -422,7 +428,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the vertical text alignment style.
-	 * 
+	 *
 	 * @param verticalAlign The verticalAlign to set.
 	 */
 	public void setVerticalAlign(String verticalAlign) {
@@ -431,7 +437,7 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the toolTip text for this figure.
-	 * 
+	 *
 	 * @param toolTip
 	 */
 	public void setToolTipText(String toolTip) {
@@ -444,9 +450,10 @@ public class LabelFigure extends ReportElementFigure {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.eclipse.draw2d.Figure#setFont(org.eclipse.swt.graphics.Font)
 	 */
+	@Override
 	public void setFont(Font f) {
 		super.setFont(f);
 		label.setFont(f);
@@ -461,9 +468,9 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Gets the direction property of the Label.
-	 * 
+	 *
 	 * @return the Label direction.
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	public String getDirection() {
@@ -472,11 +479,11 @@ public class LabelFigure extends ReportElementFigure {
 
 	/**
 	 * Sets the direction property of the Label.
-	 * 
+	 *
 	 * @param direction the direction property. this should be one of the following:
 	 *                  DesignChoiceConstants.BIDI_DIRECTION_LTR |
 	 *                  DesignChoiceConstants.BIDI_DIRECTION_RTL
-	 * 
+	 *
 	 * @author bidi_hcg
 	 */
 	public void setDirection(String direction) {
@@ -489,24 +496,19 @@ public class LabelFigure extends ReportElementFigure {
 		int height = 0;
 		if (recommendSize.width > 0) {
 			width = recommendSize.width;
+		} else if (recommendSize.height > 0) {
+			width = getPreferredSize(w, recommendSize.height, true, false, true).width;
 		} else {
-			if (recommendSize.height > 0) {
-				width = getPreferredSize(w, recommendSize.height, true, false, true).width;
-			} else {
-				width = getPreferredSize(w, h, true, false, false).width;
-			}
+			width = getPreferredSize(w, h, true, false, false).width;
 		}
 
 		if (recommendSize.height > 0) {
 			height = recommendSize.height;
+		} else if (recommendSize.width > 0) {
+			int maxWidth = calcMaxSegment();
+			height = getPreferredSize(Math.max(maxWidth, recommendSize.width), h, true, true, false).height;
 		} else {
-
-			if (recommendSize.width > 0) {
-				int maxWidth = calcMaxSegment();
-				height = getPreferredSize(Math.max(maxWidth, recommendSize.width), h, true, true, false).height;
-			} else {
-				height = getPreferredSize(w, h, true, false, false).height;
-			}
+			height = getPreferredSize(w, h, true, false, false).height;
 		}
 
 		return new Dimension(width, height);
@@ -518,32 +520,38 @@ public class LabelFigure extends ReportElementFigure {
 		int height = 0;
 		if (recommendSize.width > 0) {
 			width = recommendSize.width;
+		} else if (recommendSize.height > 0) {
+			width = getMinimumSize(w, recommendSize.height, true, false, true).width;
 		} else {
-			if (recommendSize.height > 0) {
-				width = getMinimumSize(w, recommendSize.height, true, false, true).width;
-			} else {
-				width = getMinimumSize(w, h, true, false, false).width;
-			}
+			width = getMinimumSize(w, h, true, false, false).width;
 		}
 
 		if (recommendSize.height > 0) {
 			height = recommendSize.height;
+		} else if (recommendSize.width > 0) {
+			int maxWidth = calcMaxSegment();
+			height = getMinimumSize(Math.max(maxWidth, recommendSize.width), h, true, true, false).height;
 		} else {
-			if (recommendSize.width > 0) {
-				int maxWidth = calcMaxSegment();
-				height = getMinimumSize(Math.max(maxWidth, recommendSize.width), h, true, true, false).height;
-			} else {
-				height = getMinimumSize(w, h, true, false, false).height;
-			}
+			height = getMinimumSize(w, h, true, false, false).height;
 		}
 
 		return new Dimension(width, height);
 	}
 
+	/**
+	 * Is the fixed layout in use
+	 *
+	 * @return is fixed layout in use
+	 */
 	public boolean isFixLayout() {
 		return isFixLayout;
 	}
 
+	/**
+	 * Set the fixed layout
+	 *
+	 * @param isFixLayout fixed layout is used
+	 */
 	public void setFixLayout(boolean isFixLayout) {
 		this.isFixLayout = isFixLayout;
 	}

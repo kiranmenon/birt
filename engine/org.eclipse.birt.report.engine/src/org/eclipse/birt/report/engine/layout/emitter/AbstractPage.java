@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c)2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -16,34 +19,51 @@ import java.util.Map;
 
 import org.eclipse.birt.report.engine.layout.PDFConstants;
 import org.eclipse.birt.report.engine.layout.pdf.font.FontInfo;
-import org.eclipse.birt.report.engine.nLayout.area.style.BorderInfo;
+import org.eclipse.birt.report.engine.nLayout.area.style.AreaConstants;
 import org.eclipse.birt.report.engine.nLayout.area.style.TextStyle;
 
+/**
+ * Class to define abstract page
+ *
+ * @since 3.3
+ *
+ */
 public abstract class AbstractPage implements IPage {
 	protected float pageWidth, pageHeight;
 
+	/**
+	 * Constructor
+	 *
+	 * @param pageWidth  page width
+	 * @param pageHeight page height
+	 */
 	public AbstractPage(int pageWidth, int pageHeight) {
 		this.pageWidth = convertToPoint(pageWidth);
 		this.pageHeight = convertToPoint(pageHeight);
 	}
 
+	@Override
 	public void startClip(int startX, int startY, int width, int height) {
 		saveState();
 		clip(convertToPoint(startX), convertToPoint(startY), convertToPoint(width), convertToPoint(height));
 	}
 
+	@Override
 	public void endClip() {
 		clipEnd();
 		restoreState();
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void drawBackgroundColor(Color color, int x, int y, int width, int height) {
 		drawBackgroundColor(color, convertToPoint(x), convertToPoint(y), convertToPoint(width), convertToPoint(height));
 	}
 
+	@Override
 	public void drawBackgroundImage(int x, int y, int width, int height, int imageWidth, int imageHeight, int repeat,
 			String imageUrl, byte[] imageData, int absPosX, int absPosY) throws Exception {
 		if (imageData == null || imageData.length == 0) {
@@ -54,6 +74,7 @@ public abstract class AbstractPage implements IPage {
 				convertToPoint(absPosX), convertToPoint(absPosY));
 	}
 
+	@Override
 	public void drawImage(String imageId, byte[] imageData, String extension, int imageX, int imageY, int height,
 			int width, String helpText, Map params) throws Exception {
 		drawImage(imageId, imageData, extension, convertToPoint(imageX), convertToPoint(imageY), convertToPoint(height),
@@ -63,17 +84,21 @@ public abstract class AbstractPage implements IPage {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public void drawImage(String uri, String extension, int imageX, int imageY, int height, int width, String helpText,
 			Map params) throws Exception {
 		drawImage(uri, extension, convertToPoint(imageX), convertToPoint(imageY), convertToPoint(height),
 				convertToPoint(width), helpText, params);
 	}
 
+	@Override
 	public void drawLine(int startX, int startY, int endX, int endY, int width, Color color, int lineStyle) {
 		drawLine(convertToPoint(startX), convertToPoint(startY), convertToPoint(endX), convertToPoint(endY),
 				convertToPoint(width), color, lineStyle);
 	}
 
+	@Override
 	public void drawText(String text, int textX, int textY, int textWidth, int textHeight, TextStyle textStyle) {
 		float x = convertToPoint(textX);
 		float y = convertToPoint(textY);
@@ -95,6 +120,7 @@ public abstract class AbstractPage implements IPage {
 		}
 	}
 
+	@Override
 	public void showHelpText(String text, int textX, int textY, int width, int height) {
 		showHelpText(text, convertToPoint(textX), convertToPoint(textY), convertToPoint(width), convertToPoint(height));
 	}
@@ -102,7 +128,7 @@ public abstract class AbstractPage implements IPage {
 	protected void drawDecorationLine(float textX, float textY, float width, float lineWidth, float verticalOffset,
 			Color color) {
 		textY = textY + verticalOffset;
-		drawLine(textX, textY, textX + width, textY, lineWidth, color, BorderInfo.BORDER_STYLE_SOLID); // $NON-NLS-1$
+		drawLine(textX, textY, textX + width, textY, lineWidth, color, AreaConstants.BORDER_STYLE_SOLID); // $NON-NLS-1$
 	}
 
 	protected abstract void clip(float startX, float startY, float width, float height);

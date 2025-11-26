@@ -1,9 +1,12 @@
 /***********************************************************************
  * Copyright (c) 2004 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  * Actuate Corporation - initial API and implementation
@@ -35,6 +38,7 @@ public class PDFTemplateLM extends PDFLeafItemLM {
 
 	}
 
+	@Override
 	public boolean layoutChildren() {
 		IAutoTextContent autoText = (IAutoTextContent) content;
 		ContainerArea templateContainer = (ContainerArea) AreaFactory.createInlineContainer(autoText, true, true);
@@ -76,15 +80,16 @@ public class PDFTemplateLM extends PDFLeafItemLM {
 			String originalPageNumber = autoText.getText();
 			DataFormatValue format = autoText.getComputedStyle().getDataFormat();
 			NumberFormatter nf = null;
-			if (format == null)
+			if (format == null) {
 				nf = new NumberFormatter();
-			else {
+			} else {
 				String pattern = format.getNumberPattern();
 				String locale = format.getNumberLocale();
-				if (locale == null)
+				if (locale == null) {
 					nf = new NumberFormatter(pattern);
-				else
+				} else {
 					nf = new NumberFormatter(pattern, new ULocale(locale));
+				}
 			}
 			autoText.setText(nf.format(Integer.parseInt(originalPageNumber)));
 		}
@@ -92,7 +97,7 @@ public class PDFTemplateLM extends PDFLeafItemLM {
 
 	/**
 	 * create template area by autoText content
-	 * 
+	 *
 	 * @param autoText         the autoText content
 	 * @param contentDimension content dimension
 	 * @return

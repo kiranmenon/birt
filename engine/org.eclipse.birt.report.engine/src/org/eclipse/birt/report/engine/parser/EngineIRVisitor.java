@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2009, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -26,8 +29,10 @@ import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.content.IStyle;
 import org.eclipse.birt.report.engine.css.dom.StyleDeclaration;
 import org.eclipse.birt.report.engine.css.engine.CSSEngine;
+import org.eclipse.birt.report.engine.css.engine.StyleConstants;
 import org.eclipse.birt.report.engine.css.engine.value.DataFormatValue;
 import org.eclipse.birt.report.engine.css.engine.value.birt.BIRTConstants;
+import org.eclipse.birt.report.engine.css.engine.value.css.CSSConstants;
 import org.eclipse.birt.report.engine.ir.ActionDesign;
 import org.eclipse.birt.report.engine.ir.AutoTextItemDesign;
 import org.eclipse.birt.report.engine.ir.BandDesign;
@@ -37,7 +42,6 @@ import org.eclipse.birt.report.engine.ir.DataItemDesign;
 import org.eclipse.birt.report.engine.ir.DimensionType;
 import org.eclipse.birt.report.engine.ir.DrillThroughActionDesign;
 import org.eclipse.birt.report.engine.ir.DynamicTextItemDesign;
-import org.eclipse.birt.report.engine.ir.EngineIRConstants;
 import org.eclipse.birt.report.engine.ir.Expression;
 import org.eclipse.birt.report.engine.ir.ExtendedItemDesign;
 import org.eclipse.birt.report.engine.ir.FreeFormItemDesign;
@@ -130,13 +134,16 @@ import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.metadata.IElementPropertyDefn;
 import org.eclipse.birt.report.model.api.metadata.IPropertyType;
 import org.eclipse.birt.report.model.core.Module;
-import org.eclipse.birt.report.model.elements.Style;
 import org.eclipse.birt.report.model.elements.interfaces.ICellModel;
 import org.eclipse.birt.report.model.elements.interfaces.IGroupElementModel;
+import org.eclipse.birt.report.model.elements.interfaces.IImageItemModel;
+import org.eclipse.birt.report.model.elements.interfaces.IInternalReportDesignModel;
+import org.eclipse.birt.report.model.elements.interfaces.IInternalReportItemModel;
 import org.eclipse.birt.report.model.elements.interfaces.IMasterPageModel;
-import org.eclipse.birt.report.model.elements.interfaces.IReportDesignModel;
-import org.eclipse.birt.report.model.elements.interfaces.IReportItemModel;
+import org.eclipse.birt.report.model.elements.interfaces.IStyleModel;
 import org.eclipse.birt.report.model.elements.interfaces.ITableRowModel;
+import org.eclipse.birt.report.model.elements.interfaces.ITextDataItemModel;
+import org.eclipse.birt.report.model.elements.interfaces.IVariableElementModel;
 import org.eclipse.core.runtime.Assert;
 
 import com.ibm.icu.util.ULocale;
@@ -156,11 +163,11 @@ import com.ibm.icu.util.ULocale;
  * <li>Merging properties: DE stores custom and default properties separately.
  * In FPE, they are merged.</li>
  * <p>
- * 
+ *
  * This class visits the Design Engine's IR to create a new IR for FPE. It is
  * usually used in the "Design Adaptation" phase of report generation, which is
  * also the first step in report generation after DE loads the report in.
- * 
+ *
  * <p>
  * special consideration in styles
  * <p>
@@ -172,7 +179,7 @@ import com.ibm.icu.util.ULocale;
  * remove the text-decoration from the container's styles.
  * <li>BIRT doesn't define the body style, it uses a predefined style "report"
  * as the default style.
- * 
+ *
  */
 public class EngineIRVisitor extends DesignVisitor {
 	/**
@@ -246,9 +253,9 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * constructor
-	 * 
+	 *
 	 * @param handle the entry point to the DE report design IR
-	 * 
+	 *
 	 */
 	public EngineIRVisitor(ReportDesignHandle handle) {
 		super();
@@ -257,7 +264,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * translate the DE's IR to FPE's IR.
-	 * 
+	 *
 	 * @return FPE's IR.
 	 */
 	public Report translate() {
@@ -280,11 +287,12 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.model.api.DesignVisitor#visitReportDesign(org.eclipse
 	 * .birt.report.model.api.ReportDesignHandle)
 	 */
+	@Override
 	public void visitReportDesign(ReportDesignHandle handle) {
 
 		Map<String, Expression> userProperties = createUserProperties(handle);
@@ -297,8 +305,9 @@ public class EngineIRVisitor extends DesignVisitor {
 		// CODE MODULES
 
 		ULocale locale = handle.getLocale();
-		if (locale != null)
+		if (locale != null) {
 			report.setLocale(locale.toString());
+		}
 
 		// Sets the report default style
 		createReportDefaultStyles(handle);
@@ -318,7 +327,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		for (VariableElementHandle varElement : varElements) {
 			String scope = varElement.getType();
 			String name = varElement.getVariableName();
-			ExpressionHandle exprHandle = varElement.getExpressionProperty(VariableElementHandle.VALUE_PROP);
+			ExpressionHandle exprHandle = varElement.getExpressionProperty(IVariableElementModel.VALUE_PROP);
 			Expression defaultValue = createExpression(exprHandle);
 			PageVariableDesign pv = new PageVariableDesign(name, scope);
 			pv.setDefaultValue(defaultValue);
@@ -328,7 +337,8 @@ public class EngineIRVisitor extends DesignVisitor {
 		String onPageEnd = handle.getOnPageEnd();
 		Expression.Script onPageEndScript = createScript(onPageEnd);
 		if (onPageEndScript != null) {
-			String scriptId = ModuleUtil.getScriptUID(handle.getPropertyHandle(IReportDesignModel.ON_PAGE_END_METHOD));
+			String scriptId = ModuleUtil
+					.getScriptUID(handle.getPropertyHandle(IInternalReportDesignModel.ON_PAGE_END_METHOD));
 			onPageEndScript.setFileName(scriptId);
 			report.setOnPageEnd(onPageEndScript);
 		}
@@ -336,7 +346,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		Expression.Script onPageStartScript = createScript(onPageStart);
 		if (onPageStartScript != null) {
 			String scriptId = ModuleUtil
-					.getScriptUID(handle.getPropertyHandle(IReportDesignModel.ON_PAGE_START_METHOD));
+					.getScriptUID(handle.getPropertyHandle(IInternalReportDesignModel.ON_PAGE_START_METHOD));
 			onPageStartScript.setFileName(scriptId);
 			report.setOnPageStart(onPageStartScript);
 		}
@@ -403,15 +413,16 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * setup the user properties expression map
-	 * 
+	 *
 	 * @param userProperties   user defined named expressions in design file
 	 * @param namedExpressions the data structure that hold named expressions
 	 */
 	private Map<String, Expression> createUserProperties(DesignElementHandle handle) {
-		List propDefns = handle.getUserProperties();
-		if (propDefns == null || propDefns.isEmpty())
+		List<?> propDefns = handle.getUserProperties();
+		if (propDefns == null || propDefns.isEmpty()) {
 			return null;
-		Map<String, Expression> propExprs = new HashMap<String, Expression>(propDefns.size());
+		}
+		Map<String, Expression> propExprs = new HashMap<>(propDefns.size());
 		for (int i = 0; i < propDefns.size(); i++) {
 			UserPropertyDefn userDef = (UserPropertyDefn) propDefns.get(i);
 			Expression expr = org.eclipse.birt.report.engine.util.ExpressionUtil.createUserProperty(handle, userDef);
@@ -424,7 +435,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * setup the master page object from the base master page handle.
-	 * 
+	 *
 	 * @param page   page object
 	 * @param handle page handle
 	 */
@@ -474,11 +485,13 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	protected void visitDesignElement(DesignElementHandle obj) {
 		// any unsupported element
 		currentElement = null;
 	}
 
+	@Override
 	public void visitGraphicMasterPage(GraphicMasterPageHandle handle) {
 		GraphicMasterPageDesign page = new GraphicMasterPageDesign();
 
@@ -509,6 +522,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		currentElementId = -1;
 	}
 
+	@Override
 	public void visitSimpleMasterPage(SimpleMasterPageHandle handle) {
 		SimpleMasterPageDesign page = new SimpleMasterPageDesign();
 
@@ -539,6 +553,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(page);
 	}
 
+	@Override
 	public void visitList(ListHandle handle) {
 		// Create ListItem
 		ListItemDesign listItem = new ListItemDesign();
@@ -548,7 +563,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle headerSlot = handle.getHeader();
 		if (headerSlot.getCount() > 0) {
 			ListBandDesign header = createListBand(headerSlot);
-			header.setBandType(ListBandDesign.BAND_HEADER);
+			header.setBandType(BandDesign.BAND_HEADER);
 			listItem.setHeader(header);
 		}
 		listItem.setRepeatHeader(handle.repeatHeader());
@@ -568,7 +583,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle detailSlot = handle.getDetail();
 		if (detailSlot.getCount() > 0) {
 			ListBandDesign detail = createListBand(detailSlot);
-			detail.setBandType(ListBandDesign.BAND_DETAIL);
+			detail.setBandType(BandDesign.BAND_DETAIL);
 			listItem.setDetail(detail);
 		}
 
@@ -576,13 +591,14 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle footerSlot = handle.getFooter();
 		if (footerSlot.getCount() > 0) {
 			ListBandDesign footer = createListBand(footerSlot);
-			footer.setBandType(ListBandDesign.BAND_FOOTER);
+			footer.setBandType(BandDesign.BAND_FOOTER);
 			listItem.setFooter(footer);
 		}
 
 		setCurrentElement(listItem);
 	}
 
+	@Override
 	public void visitFreeForm(FreeFormHandle handle) {
 		// Create Free form element
 		FreeFormItemDesign container = new FreeFormItemDesign();
@@ -600,15 +616,16 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(container);
 	}
 
+	@Override
 	public void visitTextDataItem(TextDataHandle handle) {
 		DynamicTextItemDesign dynamicTextItem = new DynamicTextItemDesign();
 
 		setupReportItem(dynamicTextItem, handle);
 
-		ExpressionHandle valueExprHandle = handle.getExpressionProperty(TextDataHandle.VALUE_EXPR_PROP);
+		ExpressionHandle valueExprHandle = handle.getExpressionProperty(ITextDataItemModel.VALUE_EXPR_PROP);
 		Expression valueExpr = createExpression(valueExprHandle);
 		String contentType = handle.getContentType();
-		;
+
 		dynamicTextItem.setContent(valueExpr);
 		dynamicTextItem.setContentType(contentType);
 		dynamicTextItem.setJTidy(handle.isJTidy());
@@ -618,6 +635,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(dynamicTextItem);
 	}
 
+	@Override
 	public void visitLabel(LabelHandle handle) {
 		// Create Label Item
 		LabelItemDesign labelItem = new LabelItemDesign();
@@ -640,6 +658,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(labelItem);
 	}
 
+	@Override
 	public void visitAutoText(AutoTextHandle handle) {
 		AutoTextItemDesign autoTextItem = new AutoTextItemDesign();
 		setupReportItem(autoTextItem, handle);
@@ -649,6 +668,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(autoTextItem);
 	}
 
+	@Override
 	public void visitDataItem(DataItemHandle handle) {
 		// Create data item
 		DataItemDesign data = new DataItemDesign();
@@ -676,6 +696,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(data);
 	}
 
+	@Override
 	public void visitGrid(GridHandle handle) {
 		// Create Grid Item
 		GridItemDesign grid = new GridItemDesign();
@@ -722,6 +743,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(grid);
 	}
 
+	@Override
 	public void visitImage(ImageHandle handle) {
 		// Create Image Item
 		ImageItemDesign image = new ImageItemDesign();
@@ -745,21 +767,21 @@ public class EngineIRVisitor extends DesignVisitor {
 		// Handle Image Source
 		String imageSrc = handle.getSource();
 
-		if (EngineIRConstants.IMAGE_REF_TYPE_URL.equals(imageSrc)) {
-			ExpressionHandle urlExpr = handle.getExpressionProperty(ImageHandle.URI_PROP);
+		if (DesignChoiceConstants.IMAGE_REF_TYPE_URL.equals(imageSrc)) {
+			ExpressionHandle urlExpr = handle.getExpressionProperty(IImageItemModel.URI_PROP);
 			image.setImageUri(createExpression(urlExpr));
-		} else if (EngineIRConstants.IMAGE_REF_TYPE_EXPR.equals(imageSrc)) {
-			ExpressionHandle valueExpr = handle.getExpressionProperty(ImageHandle.VALUE_EXPR_PROP);
-			ExpressionHandle typeExpr = handle.getExpressionProperty(ImageHandle.TYPE_EXPR_PROP);
+		} else if (DesignChoiceConstants.IMAGE_REF_TYPE_EXPR.equals(imageSrc)) {
+			ExpressionHandle valueExpr = handle.getExpressionProperty(IImageItemModel.VALUE_EXPR_PROP);
+			ExpressionHandle typeExpr = handle.getExpressionProperty(IImageItemModel.TYPE_EXPR_PROP);
 			image.setImageExpression(createExpression(valueExpr), createExpression(typeExpr));
-		} else if (EngineIRConstants.IMAGE_REF_TYPE_EMBED.equals(imageSrc)) {
+		} else if (DesignChoiceConstants.IMAGE_REF_TYPE_EMBED.equals(imageSrc)) {
 			String imageName = handle.getImageName();
 			// FIXME: MODEL doesn't support the expression image name
 			// ExpressionHandle nameExpr = handle
 			// .getExpressionProperty( ImageHandle.IMAGE_NAME_PROP );
 			image.setImageName(Expression.newConstant(imageName));
-		} else if (EngineIRConstants.IMAGE_REF_TYPE_FILE.equals(imageSrc)) {
-			ExpressionHandle fileExpr = handle.getExpressionProperty(ImageHandle.URI_PROP);
+		} else if (DesignChoiceConstants.IMAGE_REF_TYPE_FILE.equals(imageSrc)) {
+			ExpressionHandle fileExpr = handle.getExpressionProperty(IImageItemModel.URI_PROP);
 			image.setImageFile(createExpression(fileExpr));
 		} else {
 			assert false;
@@ -769,11 +791,12 @@ public class EngineIRVisitor extends DesignVisitor {
 	}
 
 	private void handleAltText(ReportItemHandle handle, ReportItemDesign design) {
-		ExpressionHandle altTextExpr = handle.getExpressionProperty(IReportItemModel.ALTTEXT_PROP);
+		ExpressionHandle altTextExpr = handle.getExpressionProperty(IInternalReportItemModel.ALTTEXT_PROP);
 		design.setAltText(createExpression(altTextExpr));
 		design.setAltTextKey(handle.getAltTextKey());
 	}
 
+	@Override
 	public void visitTable(TableHandle handle) {
 		// Create Table Item
 		TableItemDesign table = new TableItemDesign();
@@ -811,7 +834,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle headerSlot = handle.getHeader();
 		if (headerSlot.getCount() > 0) {
 			TableBandDesign header = createTableBand(headerSlot);
-			header.setBandType(TableBandDesign.BAND_HEADER);
+			header.setBandType(BandDesign.BAND_HEADER);
 			table.setHeader(header);
 		}
 
@@ -830,7 +853,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle detailSlot = handle.getDetail();
 		if (detailSlot.getCount() > 0) {
 			TableBandDesign detail = createTableBand(detailSlot);
-			detail.setBandType(TableBandDesign.BAND_DETAIL);
+			detail.setBandType(BandDesign.BAND_DETAIL);
 			table.setDetail(detail);
 		}
 
@@ -838,7 +861,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle footerSlot = handle.getFooter();
 		if (footerSlot.getCount() > 0) {
 			TableBandDesign footer = createTableBand(footerSlot);
-			footer.setBandType(TableBandDesign.BAND_FOOTER);
+			footer.setBandType(BandDesign.BAND_FOOTER);
 			table.setFooter(footer);
 		}
 
@@ -1020,7 +1043,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		if (columnBindingName == null) {
 			return null;
 		}
-		Iterator iterator = tableHandle.columnBindingsIterator();
+		Iterator<?> iterator = tableHandle.columnBindingsIterator();
 		while (iterator.hasNext()) {
 			ComputedColumnHandle columnBinding = (ComputedColumnHandle) iterator.next();
 			if (columnBindingName.equals(columnBinding.getName())) {
@@ -1082,6 +1105,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitColumn(ColumnHandle handle) {
 		// Create a Column, mostly used in Table or Grid
 		ColumnDesign col = new ColumnDesign();
@@ -1116,6 +1140,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(col);
 	}
 
+	@Override
 	public void visitRow(RowHandle handle) {
 		// Create a Row, mostly used in Table and Grid Item
 		RowDesign row = new RowDesign();
@@ -1126,7 +1151,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		row.setHeight(height);
 
 		// Book mark
-		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(RowHandle.BOOKMARK_PROP);
+		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(ITableRowModel.BOOKMARK_PROP);
 		row.setBookmark(createExpression(bookmarkExpr));
 
 		// Visibility
@@ -1169,34 +1194,11 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(row);
 	}
 
-	private boolean isContainer(ReportElementHandle handle) {
-		if (handle instanceof TextItemHandle) {
-			return false;
-		}
-		if (handle instanceof DataItemHandle) {
-			return false;
-		}
-		if (handle instanceof LabelHandle) {
-			return false;
-		}
-		if (handle instanceof TextDataHandle) {
-			return false;
-		}
-		if (handle instanceof ExtendedItemHandle) {
-			return false;
-		}
-		if (handle instanceof ImageHandle) {
-			return false;
-		}
-		return true;
-
-	}
-
 	/**
 	 * Sets up cell element's style attribute.
-	 * 
-	 * @param cell   engine's styled cell element.
-	 * @param handle DE's styled cell element.
+	 *
+	 * @param design engine's styled element
+	 * @param handle element handle
 	 */
 	protected void setupStyledElement(StyledElementDesign design, ReportElementHandle handle) {
 		// Styled element is a report element
@@ -1208,6 +1210,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitCell(CellHandle handle) {
 		// Create a Cell
 		CellDesign cell = new CellDesign();
@@ -1262,8 +1265,8 @@ public class EngineIRVisitor extends DesignVisitor {
 		int diagonalNumber = handle.getDiagonalNumber();
 		if (diagonalNumber > 0) {
 			// The default diagonalNumber value from Model is 0.
-			cell.setDiagonalNumber(diagonalNumber);
 			cell.setDiagonalStyle(handle.getDiagonalStyle());
+			cell.setDiagonalNumber(diagonalNumber);
 			cell.setDiagonalWidth(createDimension(handle.getDiagonalThickness(), true));
 			ColorHandle colorHandle = handle.getDiagonalColor();
 			if (colorHandle != null) {
@@ -1273,8 +1276,8 @@ public class EngineIRVisitor extends DesignVisitor {
 		int antidiagonalNumber = handle.getAntidiagonalNumber();
 		if (antidiagonalNumber > 0) {
 			// The default antidiagonalNumber value from Model is 0.
-			cell.setAntidiagonalNumber(antidiagonalNumber);
 			cell.setAntidiagonalStyle(handle.getAntidiagonalStyle());
+			cell.setAntidiagonalNumber(antidiagonalNumber);
 			cell.setAntidiagonalWidth(createDimension(handle.getAntidiagonalThickness(), true));
 			ColorHandle colorHandle = handle.getAntidiagonalColor();
 			if (colorHandle != null) {
@@ -1286,9 +1289,9 @@ public class EngineIRVisitor extends DesignVisitor {
 	}
 
 	private void setupAuralInfomation(CellDesign cell, CellHandle handle) {
-		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(CellHandle.BOOKMARK_PROP);
+		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(ICellModel.BOOKMARK_PROP);
 		cell.setBookmark(createExpression(bookmarkExpr));
-		ExpressionHandle headersExpr = handle.getExpressionProperty(CellHandle.HEADERS_PROP);
+		ExpressionHandle headersExpr = handle.getExpressionProperty(ICellModel.HEADERS_PROP);
 		cell.setHeaders(createExpression(headersExpr));
 		String scope = handle.getScope();
 		if (scope != null) {
@@ -1303,7 +1306,7 @@ public class EngineIRVisitor extends DesignVisitor {
 			if (groupHandle instanceof TableGroupHandle) {
 				SlotHandle slot = rowHandle.getContainerSlotHandle();
 				if (slot != null) {
-					if (slot.getSlotID() == GroupHandle.HEADER_SLOT) {
+					if (slot.getSlotID() == IGroupElementModel.HEADER_SLOT) {
 						return true;
 					}
 				}
@@ -1314,7 +1317,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create a list band using the items in slot.
-	 * 
+	 *
 	 * @param elements items in DE's IR
 	 * @return ListBand.
 	 */
@@ -1335,10 +1338,10 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create a list group using the DE's ListGroup.
-	 * 
+	 *
 	 * @param handle De's list group
-	 * @return engine's list group
 	 */
+	@Override
 	public void visitListGroup(ListGroupHandle handle) {
 		ListGroupDesign listGroup = new ListGroupDesign();
 
@@ -1347,7 +1350,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle headerSlot = handle.getHeader();
 		if (headerSlot.getCount() > 0) {
 			ListBandDesign header = createListBand(headerSlot);
-			header.setBandType(ListBandDesign.GROUP_HEADER);
+			header.setBandType(BandDesign.GROUP_HEADER);
 			header.setGroup(listGroup);
 			listGroup.setHeader(header);
 			listGroup.setHeaderRepeat(handle.repeatHeader());
@@ -1363,7 +1366,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle footerSlot = handle.getFooter();
 		if (footerSlot.getCount() > 0) {
 			ListBandDesign footer = createListBand(footerSlot);
-			footer.setBandType(ListBandDesign.GROUP_FOOTER);
+			footer.setBandType(BandDesign.GROUP_FOOTER);
 			footer.setGroup(listGroup);
 			listGroup.setFooter(footer);
 		}
@@ -1375,10 +1378,10 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create a table group using the DE's TableGroup.
-	 * 
+	 *
 	 * @param handle De's table group
-	 * @return engine's table group
 	 */
+	@Override
 	public void visitTableGroup(TableGroupHandle handle) {
 		TableGroupDesign tableGroup = new TableGroupDesign();
 
@@ -1387,7 +1390,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle headerSlot = handle.getHeader();
 		if (headerSlot.getCount() > 0) {
 			TableBandDesign header = createTableBand(handle.getHeader());
-			header.setBandType(TableBandDesign.GROUP_HEADER);
+			header.setBandType(BandDesign.GROUP_HEADER);
 			header.setGroup(tableGroup);
 			tableGroup.setHeader(header);
 			tableGroup.setHeaderRepeat(handle.repeatHeader());
@@ -1403,7 +1406,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		SlotHandle footerSlot = handle.getFooter();
 		if (footerSlot.getCount() > 0) {
 			TableBandDesign footer = createTableBand(handle.getFooter());
-			footer.setBandType(TableBandDesign.GROUP_FOOTER);
+			footer.setBandType(BandDesign.GROUP_FOOTER);
 			footer.setGroup(tableGroup);
 			tableGroup.setFooter(footer);
 		}
@@ -1413,6 +1416,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		setCurrentElement(tableGroup);
 	}
 
+	@Override
 	public void visitTextItem(TextItemHandle handle) {
 		// Create Text Item
 		TextItemDesign textItem = new TextItemDesign();
@@ -1432,11 +1436,12 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * org.eclipse.birt.report.model.api.DesignVisitor#visitExtendedItem(org.eclipse
 	 * .birt.report.model.api.ExtendedItemHandle)
 	 */
+	@Override
 	protected void visitExtendedItem(ExtendedItemHandle obj) {
 		ExtendedItemDesign extendedItem = new ExtendedItemDesign();
 		setupReportItem(extendedItem, obj);
@@ -1448,22 +1453,23 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * process extended item's children.
-	 * 
+	 *
 	 * @param extendedItem
 	 * @param extendedHandle
 	 */
 	private void handleExtendedItemChildren(ExtendedItemDesign extendedItem, ExtendedItemHandle extendedHandle) {
-		if (extendedHandle == null)
+		if (extendedHandle == null) {
 			return;
+		}
 
-		Iterator propIter = extendedHandle.getPropertyIterator();
+		Iterator<?> propIter = extendedHandle.getPropertyIterator();
 		while (propIter.hasNext()) {
 			PropertyHandle propHandle = (PropertyHandle) propIter.next();
 			IElementPropertyDefn property = propHandle.getPropertyDefn();
 			if (property.getTypeCode() == IPropertyType.ELEMENT_TYPE) {
 				Object children = propHandle.getValue();
 				if (children instanceof List) {
-					List tempList = (List) children;
+					List<?> tempList = (List<?>) children;
 					for (int i = 0; tempList != null && i < tempList.size(); i++) {
 						Object tempObj = tempList.get(i);
 						if (tempObj instanceof ReportItemHandle) {
@@ -1479,6 +1485,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 	}
 
+	@Override
 	public void visitTemplateReportItem(TemplateReportItemHandle obj) {
 		TemplateDesign template = new TemplateDesign();
 		setupTemplateReportElement(template, obj);
@@ -1508,9 +1515,8 @@ public class EngineIRVisitor extends DesignVisitor {
 			group.setTOC(createExpression(tocExpr));
 		}
 		// bookmark
-		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(GroupHandle.BOOKMARK_PROP);
+		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(IGroupElementModel.BOOKMARK_PROP);
 		group.setBookmark(createExpression(bookmarkExpr));
-		;
 
 		// set up OnCreate, OnRender, OnPageBreak
 		String onCreate = handle.getOnCreate();
@@ -1544,7 +1550,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create a table band using the items in slot.
-	 * 
+	 *
 	 * @param elements items in DE's IR
 	 * @return TableBand.
 	 */
@@ -1565,12 +1571,12 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * Creates the property visibility
-	 * 
+	 *
 	 * @param visibilityRulesIterator the handle's rules iterator
 	 * @return null only if the iterator is null or it contains no rules, otherwise
 	 *         VisibilityDesign
 	 */
-	protected VisibilityDesign createVisibility(Iterator visibilityRulesIterator) {
+	protected VisibilityDesign createVisibility(Iterator<?> visibilityRulesIterator) {
 		if (visibilityRulesIterator != null) {
 			if (visibilityRulesIterator.hasNext()) {
 				VisibilityDesign visibility = new VisibilityDesign();
@@ -1586,7 +1592,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * Creates the visibility rule( i.e. the hide)
-	 * 
+	 *
 	 * @param handle the DE's handle
 	 * @return the created visibility rule
 	 */
@@ -1605,7 +1611,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * setup the attribute of report item
-	 * 
+	 *
 	 * @param item   Engine's Report Item
 	 * @param handle DE's report item.
 	 */
@@ -1630,13 +1636,13 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 
 		// setup book mark
-		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(ReportItemHandle.BOOKMARK_PROP);
+		ExpressionHandle bookmarkExpr = handle.getExpressionProperty(IInternalReportItemModel.BOOKMARK_PROP);
 		item.setBookmark(createExpression(bookmarkExpr));
 
 		String onCreate = handle.getOnCreate();
 		Expression.Script onCreateScript = createScript(onCreate);
 		if (onCreateScript != null) {
-			String id = ModuleUtil.getScriptUID(handle.getPropertyHandle(IReportItemModel.ON_CREATE_METHOD));
+			String id = ModuleUtil.getScriptUID(handle.getPropertyHandle(IInternalReportItemModel.ON_CREATE_METHOD));
 			onCreateScript.setFileName(id);
 			item.setOnCreate(onCreateScript);
 		}
@@ -1644,7 +1650,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		String onRender = handle.getOnRender();
 		Expression.Script onRenderScript = createScript(onRender);
 		if (onRenderScript != null) {
-			String id = ModuleUtil.getScriptUID(handle.getPropertyHandle(IReportItemModel.ON_RENDER_METHOD));
+			String id = ModuleUtil.getScriptUID(handle.getPropertyHandle(IInternalReportItemModel.ON_RENDER_METHOD));
 			onRenderScript.setFileName(id);
 			item.setOnRender(onRenderScript);
 		}
@@ -1652,13 +1658,14 @@ public class EngineIRVisitor extends DesignVisitor {
 		String onPageBreak = handle.getOnPageBreak();
 		Expression.Script onPageBreakScript = createScript(onPageBreak);
 		if (onPageBreakScript != null) {
-			String id = ModuleUtil.getScriptUID(handle.getPropertyHandle(IReportItemModel.ON_PAGE_BREAK_METHOD));
+			String id = ModuleUtil
+					.getScriptUID(handle.getPropertyHandle(IInternalReportItemModel.ON_PAGE_BREAK_METHOD));
 			onPageBreakScript.setFileName(id);
 			item.setOnPageBreak(onPageBreakScript);
 		}
 
 		// Sets up the visibility
-		Iterator visibilityIter = handle.visibilityRulesIterator();
+		Iterator<?> visibilityIter = handle.visibilityRulesIterator();
 		VisibilityDesign visibility = createVisibility(visibilityIter);
 		item.setVisibility(visibility);
 
@@ -1674,7 +1681,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * setup report element attribute
-	 * 
+	 *
 	 * @param elem   engine's report element
 	 * @param handle DE's report element
 	 */
@@ -1697,7 +1704,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * setup template report element attribute
-	 * 
+	 *
 	 * @param elem   engine's template report element
 	 * @param handle DE's report element
 	 */
@@ -1705,14 +1712,14 @@ public class EngineIRVisitor extends DesignVisitor {
 		setupReportElement(element, handle);
 
 		// Sets up the visibility
-		Iterator visibilityIter = handle.visibilityRulesIterator();
+		Iterator<?> visibilityIter = handle.visibilityRulesIterator();
 		VisibilityDesign visibility = createVisibility(visibilityIter);
 		element.setVisibility(visibility);
 	}
 
 	/**
 	 * create a Action.
-	 * 
+	 *
 	 * @param handle action in DE
 	 * @return action in Engine.
 	 */
@@ -1721,14 +1728,14 @@ public class EngineIRVisitor extends DesignVisitor {
 		String linkType = handle.getLinkType();
 		action.setTooltip(handle.getToolTip());
 
-		if (EngineIRConstants.ACTION_LINK_TYPE_HYPERLINK.equals(linkType)) {
+		if (DesignChoiceConstants.ACTION_LINK_TYPE_HYPERLINK.equals(linkType)) {
 			ExpressionHandle urlExpr = handle.getExpressionProperty(Action.URI_MEMBER);
 			action.setHyperlink(createExpression(urlExpr));
 			action.setTargetWindow(handle.getTargetWindow());
-		} else if (EngineIRConstants.ACTION_LINK_TYPE_BOOKMARK_LINK.equals(linkType)) {
+		} else if (DesignChoiceConstants.ACTION_LINK_TYPE_BOOKMARK_LINK.equals(linkType)) {
 			ExpressionHandle bookmarkExpr = handle.getExpressionProperty(Action.TARGET_BOOKMARK_MEMBER);
 			action.setBookmark(createExpression(bookmarkExpr));
-		} else if (EngineIRConstants.ACTION_LINK_TYPE_DRILL_THROUGH.equals(linkType)) {
+		} else if (DesignChoiceConstants.ACTION_LINK_TYPE_DRILL_THROUGH.equals(linkType)) {
 			action.setTargetWindow(handle.getTargetWindow());
 			DrillThroughActionDesign drillThrough = new DrillThroughActionDesign();
 			action.setDrillThrough(drillThrough);
@@ -1746,8 +1753,8 @@ public class EngineIRVisitor extends DesignVisitor {
 
 			drillThrough.setBookmarkType(
 					!DesignChoiceConstants.ACTION_BOOKMARK_TYPE_TOC.equals(handle.getTargetBookmarkType()));
-			Map<String, List<Expression>> params = new HashMap<String, List<Expression>>();
-			Iterator paramIte = handle.paramBindingsIterator();
+			Map<String, List<Expression>> params = new HashMap<>();
+			Iterator<?> paramIte = handle.paramBindingsIterator();
 			while (paramIte.hasNext()) {
 				ParamBindingHandle member = (ParamBindingHandle) paramIte.next();
 				String name = member.getParamName();
@@ -1779,7 +1786,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create a highlight rule from a structure handle.
-	 * 
+	 *
 	 * @param ruleHandle rule in the MODEL.
 	 * @return rule design, null if exist any error.
 	 */
@@ -1805,7 +1812,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create highlight defined in the handle.
-	 * 
+	 *
 	 * @param item styled item.
 	 */
 	protected void setupHighlight(StyledElementDesign item, Expression defaultExpr) {
@@ -1814,7 +1821,7 @@ public class EngineIRVisitor extends DesignVisitor {
 			return;
 		}
 		// highlight Rules
-		Iterator iter = handle.highlightRulesIterator();
+		Iterator<?> iter = handle.highlightRulesIterator();
 
 		if (iter == null) {
 			return;
@@ -1837,7 +1844,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * setup a Map.
-	 * 
+	 *
 	 * @param item styled item;
 	 */
 	protected void setupMap(StyledElementDesign item, Expression defaultExpr) {
@@ -1845,7 +1852,7 @@ public class EngineIRVisitor extends DesignVisitor {
 		if (handle == null) {
 			return;
 		}
-		Iterator iter = handle.mapRulesIterator();
+		Iterator<?> iter = handle.mapRulesIterator();
 		if (iter == null) {
 			return;
 		}
@@ -1867,8 +1874,9 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * create a map rule.
-	 * 
-	 * @param obj map rule in DE.
+	 *
+	 * @param handle      map rule in DE.
+	 * @param defaultExpr map rule in DE.
 	 * @return map rule in ENGINE.
 	 */
 	protected MapRuleDesign createMapRule(MapRuleHandle handle, Expression defaultExpr) {
@@ -1907,7 +1915,7 @@ public class EngineIRVisitor extends DesignVisitor {
 	/**
 	 * Checks if a given style is in report's style list, if not, assign a unique
 	 * name to it and then add it to the style list.
-	 * 
+	 *
 	 * @param style The <code>StyleDeclaration</code> object.
 	 * @return the name of the style.
 	 */
@@ -1917,8 +1925,8 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 
 		// Check if the style is already in report's style list
-		Map styles = report.getStyles();
-		Iterator iter = styles.entrySet().iterator();
+		Map<?, ?> styles = report.getStyles();
+		Iterator<?> iter = styles.entrySet().iterator();
 		while (iter.hasNext()) {
 			Map.Entry entry = (Map.Entry) iter.next();
 			// Cast the type mandatorily
@@ -1975,89 +1983,88 @@ public class EngineIRVisitor extends DesignVisitor {
 		if (pageBreak == null) {
 			return null;
 		}
-		if (DesignChoiceConstants.PAGE_BREAK_AFTER_ALWAYS.equals(pageBreak)) {
-			return IStyle.CSS_ALWAYS_VALUE;
-		}
-		if (DesignChoiceConstants.PAGE_BREAK_AFTER_ALWAYS_EXCLUDING_LAST.equals(pageBreak)) {
-			return IStyle.CSS_ALWAYS_VALUE;
+		if (DesignChoiceConstants.PAGE_BREAK_AFTER_ALWAYS.equals(pageBreak) || DesignChoiceConstants.PAGE_BREAK_AFTER_ALWAYS_EXCLUDING_LAST.equals(pageBreak)) {
+			return CSSConstants.CSS_ALWAYS_VALUE;
 		}
 		if (DesignChoiceConstants.PAGE_BREAK_AFTER_AUTO.equals(pageBreak)) {
-			return IStyle.CSS_AUTO_VALUE;
+			return CSSConstants.CSS_AUTO_VALUE;
 		}
 		if (DesignChoiceConstants.PAGE_BREAK_AFTER_AVOID.equals(pageBreak)) {
-			return IStyle.CSS_AVOID_VALUE;
+			return CSSConstants.CSS_AVOID_VALUE;
 		}
 		if (DesignChoiceConstants.PAGE_BREAK_BEFORE_ALWAYS.equals(pageBreak)) {
-			return IStyle.CSS_ALWAYS_VALUE;
+			return CSSConstants.CSS_ALWAYS_VALUE;
 		}
 		if (DesignChoiceConstants.PAGE_BREAK_BEFORE_ALWAYS_EXCLUDING_FIRST.equals(pageBreak)) {
-			return IStyle.CSS_ALWAYS_VALUE;
+			return CSSConstants.CSS_ALWAYS_VALUE;
 		}
 		if (DesignChoiceConstants.PAGE_BREAK_BEFORE_AUTO.equals(pageBreak)) {
-			return IStyle.CSS_AUTO_VALUE;
+			return CSSConstants.CSS_AUTO_VALUE;
 		}
 		if (DesignChoiceConstants.PAGE_BREAK_BEFORE_AVOID.equals(pageBreak)) {
-			return IStyle.CSS_AVOID_VALUE;
+			return CSSConstants.CSS_AVOID_VALUE;
 		}
-		return IStyle.CSS_AUTO_VALUE;
+		return CSSConstants.CSS_AUTO_VALUE;
 	}
 
 	protected StyleDeclaration createColumnStyle(ReportElementHandle handle) {
 		StyleDeclaration style = new StyleDeclaration(cssEngine);
 
-		String pageBreakAfter = getElementProperty(handle, StyleHandle.PAGE_BREAK_AFTER_PROP);
+		String pageBreakAfter = getElementProperty(handle, IStyleModel.PAGE_BREAK_AFTER_PROP);
 		style.setPageBreakAfter(decodePageBreak(pageBreakAfter));
-		String pageBreakBefore = getElementProperty(handle, StyleHandle.PAGE_BREAK_BEFORE_PROP);
+		String pageBreakBefore = getElementProperty(handle, IStyleModel.PAGE_BREAK_BEFORE_PROP);
 		style.setPageBreakBefore(decodePageBreak(pageBreakBefore));
 
-		String display = getElementProperty(handle, StyleHandle.DISPLAY_PROP);
+		String display = getElementProperty(handle, IStyleModel.DISPLAY_PROP);
 		style.setDisplay(display);
 		return style;
 
 	}
 
 	private void createDataFormat(DesignElementHandle handle, StyleDeclaration style) {
-		if (handle == null)
+		if (handle == null) {
 			return;
+		}
 
 		Set<String> propertyNames = StyleUtil.customName2Index.keySet();
 		for (String propertyName : propertyNames) {
 			if (BIRTConstants.BIRT_STYLE_DATA_FORMAT.equalsIgnoreCase(propertyName)) {
 				DataFormatValue formatSet = new DataFormatValue();
 				boolean formatSetValid = false;
-				FormatValue modelValue = (FormatValue) handle.getProperty(StyleHandle.STRING_FORMAT_PROP);
+				FormatValue modelValue = (FormatValue) handle.getProperty(IStyleModel.STRING_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setStringFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.NUMBER_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.NUMBER_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setNumberFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.DATE_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.DATE_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setDateFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.TIME_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.TIME_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setTimeFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.DATE_TIME_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.DATE_TIME_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setDateTimeFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
 
-				if (formatSetValid)
+				if (formatSetValid) {
 					style.setProperty(StyleUtil.customName2Index.get(propertyName), formatSet);
+				}
 			}
 		}
 	}
@@ -2067,20 +2074,20 @@ public class EngineIRVisitor extends DesignVisitor {
 		StyleDeclaration style = new StyleDeclaration(cssEngine);
 		Set<String> styles = StyleUtil.styleName2Index.keySet();
 		for (String propertyName : styles) {
-			populateElementProperty(handle, design, style, propertyName);
+			populateElementProperty(handle, style, propertyName);
 		}
 		createDataFormat(handle, style);
 		return style;
 	}
 
-	private void populateElementProperty(ReportElementHandle handle, StyledElementDesign design, StyleDeclaration style,
+	private void populateElementProperty(ReportElementHandle handle, StyleDeclaration style,
 			String propertyName) {
 		boolean isColorProperty = StyleUtil.colorProperties.contains(propertyName);
 		String elementProperty = getElementProperty(handle, propertyName, isColorProperty);
-		populateStyle(design, style, propertyName, elementProperty);
+		populateStyle(style, propertyName, elementProperty);
 	}
 
-	private void populateStyle(StyledElementDesign design, IStyle style, String propertyName, String elementProperty) {
+	private void populateStyle(IStyle style, String propertyName, String elementProperty) {
 		int propertyIndex = StyleUtil.styleName2Index.get(propertyName);
 		// TODO need support the expression style
 		// if ( elementProperty.isExpression( ) )
@@ -2098,21 +2105,23 @@ public class EngineIRVisitor extends DesignVisitor {
 		MemberHandle prop = handle.getMember(name);
 		if (prop != null) {
 			Object value = prop.getContext().getLocalValue(module);
-			if (value != null)
+			if (value != null) {
 				return prop.getStringValue();
+			}
 
 			// for highlight rule, reutrn the referred style local value
 			if (handle instanceof HighlightRuleHandle) {
 				StyleHandle styleHandle = ((HighlightRuleHandle) handle).getStyle();
-				if (styleHandle == null)
+				if (styleHandle == null) {
 					return null;
+				}
 				FactoryPropertyHandle propHandle = styleHandle.getFactoryPropertyHandle(name);
-				if (propHandle == null)
+				if (propHandle == null) {
 					return null;
+				}
 				return propHandle.getStringValue();
-			} else {
-				return null;
 			}
+			return null;
 		}
 		return null;
 	}
@@ -2126,47 +2135,49 @@ public class EngineIRVisitor extends DesignVisitor {
 	}
 
 	private void createDataFormat(StructureHandle handle, IStyle style) {
-		if (handle == null)
+		if (handle == null) {
 			return;
+		}
 
 		Set<String> propertyNames = StyleUtil.customName2Index.keySet();
 		for (String propertyName : propertyNames) {
 			if (BIRTConstants.BIRT_STYLE_DATA_FORMAT.equalsIgnoreCase(propertyName)) {
 				DataFormatValue formatSet = new DataFormatValue();
 				boolean formatSetValid = false;
-				FormatValue modelValue = (FormatValue) handle.getProperty(StyleHandle.STRING_FORMAT_PROP);
+				FormatValue modelValue = (FormatValue) handle.getProperty(IStyleModel.STRING_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setStringFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.NUMBER_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.NUMBER_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setNumberFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.DATE_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.DATE_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setDateFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.TIME_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.TIME_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setTimeFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
-				modelValue = (FormatValue) handle.getProperty(StyleHandle.DATE_TIME_FORMAT_PROP);
+				modelValue = (FormatValue) handle.getProperty(IStyleModel.DATE_TIME_FORMAT_PROP);
 				if (modelValue != null) {
 					ULocale locale = modelValue.getLocale();
 					formatSet.setDateTimeFormat(modelValue.getPattern(), locale == null ? null : locale.toString());
 					formatSetValid = true;
 				}
 
-				if (formatSetValid)
+				if (formatSetValid) {
 					style.setProperty(StyleUtil.customName2Index.get(propertyName), formatSet);
+				}
 			}
 		}
 	}
@@ -2175,7 +2186,7 @@ public class EngineIRVisitor extends DesignVisitor {
 			String propertyName) {
 		Module module = design.getHandle().getModule();
 		String property = getMemberProperty(module, highlight, propertyName);
-		populateStyle(design, style, propertyName, property);
+		populateStyle(style, propertyName, property);
 	}
 
 	protected DimensionType createDimension(DimensionHandle handle, boolean useDefault) {
@@ -2250,72 +2261,74 @@ public class EngineIRVisitor extends DesignVisitor {
 		inheritableReportStyle = new StyleDeclaration(cssEngine);
 
 		// Background
-		addReportDefaultPropertyValue(Style.BACKGROUND_COLOR_PROP, handle, true);
-		addReportDefaultPropertyValue(Style.BACKGROUND_IMAGE_PROP, handle);
-		addReportDefaultPropertyValue(Style.BACKGROUND_POSITION_X_PROP, handle);
-		addReportDefaultPropertyValue(Style.BACKGROUND_POSITION_Y_PROP, handle);
-		addReportDefaultPropertyValue(Style.BACKGROUND_REPEAT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BACKGROUND_COLOR_PROP, handle, true);
+		addReportDefaultPropertyValue(IStyleModel.BACKGROUND_IMAGE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BACKGROUND_POSITION_X_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BACKGROUND_POSITION_Y_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BACKGROUND_REPEAT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BACKGROUND_IMAGE_TYPE_PROP, handle);
 
 		// bidi_hcg: Bidi related.
-		addReportDefaultPropertyValue(Style.TEXT_DIRECTION_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_DIRECTION_PROP, handle);
 
 		// Text related
-		addReportDefaultPropertyValue(Style.TEXT_ALIGN_PROP, handle);
-		addReportDefaultPropertyValue(Style.TEXT_INDENT_PROP, handle);
-		addReportDefaultPropertyValue(Style.LETTER_SPACING_PROP, handle);
-		addReportDefaultPropertyValue(Style.LINE_HEIGHT_PROP, handle);
-		addReportDefaultPropertyValue(Style.ORPHANS_PROP, handle);
-		addReportDefaultPropertyValue(Style.TEXT_TRANSFORM_PROP, handle);
-		addReportDefaultPropertyValue(Style.VERTICAL_ALIGN_PROP, handle);
-		addReportDefaultPropertyValue(Style.WHITE_SPACE_PROP, handle);
-		addReportDefaultPropertyValue(Style.WIDOWS_PROP, handle);
-		addReportDefaultPropertyValue(Style.WORD_SPACING_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_ALIGN_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_INDENT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.LETTER_SPACING_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.LINE_HEIGHT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.ORPHANS_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_TRANSFORM_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.VERTICAL_ALIGN_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.WHITE_SPACE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.WIDOWS_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.WORD_SPACING_PROP, handle);
 
 		// Section properties
-		addReportDefaultPropertyValue(Style.DISPLAY_PROP, handle);
-		addReportDefaultPropertyValue(Style.MASTER_PAGE_PROP, handle);
-		addReportDefaultPropertyValue(Style.PAGE_BREAK_AFTER_PROP, handle);
-		addReportDefaultPropertyValue(Style.PAGE_BREAK_BEFORE_PROP, handle);
-		addReportDefaultPropertyValue(Style.PAGE_BREAK_INSIDE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.DISPLAY_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.MASTER_PAGE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PAGE_BREAK_AFTER_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PAGE_BREAK_BEFORE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PAGE_BREAK_INSIDE_PROP, handle);
 
 		// Font related
-		addReportDefaultPropertyValue(Style.FONT_FAMILY_PROP, handle);
-		addReportDefaultPropertyValue(Style.COLOR_PROP, handle, true);
-		addReportDefaultPropertyValue(Style.FONT_SIZE_PROP, handle);
-		addReportDefaultPropertyValue(Style.FONT_STYLE_PROP, handle);
-		addReportDefaultPropertyValue(Style.FONT_WEIGHT_PROP, handle);
-		addReportDefaultPropertyValue(Style.FONT_VARIANT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.FONT_FAMILY_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.COLOR_PROP, handle, true);
+		addReportDefaultPropertyValue(IStyleModel.FONT_SIZE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.FONT_STYLE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.FONT_WEIGHT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.FONT_VARIANT_PROP, handle);
 
 		// Text decoration
-		addReportDefaultPropertyValue(Style.TEXT_LINE_THROUGH_PROP, handle);
-		addReportDefaultPropertyValue(Style.TEXT_OVERLINE_PROP, handle);
-		addReportDefaultPropertyValue(Style.TEXT_UNDERLINE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_LINE_THROUGH_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_HYPERLINK_STYLE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_OVERLINE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.TEXT_UNDERLINE_PROP, handle);
 
 		// Border
-		addReportDefaultPropertyValue(Style.BORDER_BOTTOM_COLOR_PROP, handle, true);
-		addReportDefaultPropertyValue(Style.BORDER_BOTTOM_STYLE_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_BOTTOM_WIDTH_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_LEFT_COLOR_PROP, handle, true);
-		addReportDefaultPropertyValue(Style.BORDER_LEFT_STYLE_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_LEFT_WIDTH_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_RIGHT_COLOR_PROP, handle, true);
-		addReportDefaultPropertyValue(Style.BORDER_RIGHT_STYLE_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_RIGHT_WIDTH_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_TOP_COLOR_PROP, handle, true);
-		addReportDefaultPropertyValue(Style.BORDER_TOP_STYLE_PROP, handle);
-		addReportDefaultPropertyValue(Style.BORDER_TOP_WIDTH_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_BOTTOM_COLOR_PROP, handle, true);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_BOTTOM_STYLE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_BOTTOM_WIDTH_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_LEFT_COLOR_PROP, handle, true);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_LEFT_STYLE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_LEFT_WIDTH_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_RIGHT_COLOR_PROP, handle, true);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_RIGHT_STYLE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_RIGHT_WIDTH_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_TOP_COLOR_PROP, handle, true);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_TOP_STYLE_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.BORDER_TOP_WIDTH_PROP, handle);
 
 		// Margin
-		addReportDefaultPropertyValue(Style.MARGIN_TOP_PROP, handle);
-		addReportDefaultPropertyValue(Style.MARGIN_LEFT_PROP, handle);
-		addReportDefaultPropertyValue(Style.MARGIN_BOTTOM_PROP, handle);
-		addReportDefaultPropertyValue(Style.MARGIN_RIGHT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.MARGIN_TOP_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.MARGIN_LEFT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.MARGIN_BOTTOM_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.MARGIN_RIGHT_PROP, handle);
 
 		// Padding
-		addReportDefaultPropertyValue(Style.PADDING_TOP_PROP, handle);
-		addReportDefaultPropertyValue(Style.PADDING_LEFT_PROP, handle);
-		addReportDefaultPropertyValue(Style.PADDING_BOTTOM_PROP, handle);
-		addReportDefaultPropertyValue(Style.PADDING_RIGHT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PADDING_TOP_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PADDING_LEFT_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PADDING_BOTTOM_PROP, handle);
+		addReportDefaultPropertyValue(IStyleModel.PADDING_RIGHT_PROP, handle);
 
 		// Format
 		/*
@@ -2333,7 +2346,7 @@ public class EngineIRVisitor extends DesignVisitor {
 
 	/**
 	 * Creates the body style for master page.
-	 * 
+	 *
 	 * @param design the master page design
 	 * @return the content style
 	 */
@@ -2345,13 +2358,16 @@ public class EngineIRVisitor extends DesignVisitor {
 		}
 
 		StyleDeclaration contentStyle = new StyleDeclaration(cssEngine);
-		contentStyle.setProperty(IStyle.STYLE_BACKGROUND_COLOR, style.getProperty(IStyle.STYLE_BACKGROUND_COLOR));
-		contentStyle.setProperty(IStyle.STYLE_BACKGROUND_IMAGE, style.getProperty(IStyle.STYLE_BACKGROUND_IMAGE));
-		contentStyle.setProperty(IStyle.STYLE_BACKGROUND_POSITION_Y,
-				style.getProperty(IStyle.STYLE_BACKGROUND_POSITION_Y));
-		contentStyle.setProperty(IStyle.STYLE_BACKGROUND_POSITION_X,
-				style.getProperty(IStyle.STYLE_BACKGROUND_POSITION_X));
-		contentStyle.setProperty(IStyle.STYLE_BACKGROUND_REPEAT, style.getProperty(IStyle.STYLE_BACKGROUND_REPEAT));
+		contentStyle.setProperty(StyleConstants.STYLE_BACKGROUND_COLOR,
+				style.getProperty(StyleConstants.STYLE_BACKGROUND_COLOR));
+		contentStyle.setProperty(StyleConstants.STYLE_BACKGROUND_IMAGE,
+				style.getProperty(StyleConstants.STYLE_BACKGROUND_IMAGE));
+		contentStyle.setProperty(StyleConstants.STYLE_BACKGROUND_POSITION_Y,
+				style.getProperty(StyleConstants.STYLE_BACKGROUND_POSITION_Y));
+		contentStyle.setProperty(StyleConstants.STYLE_BACKGROUND_POSITION_X,
+				style.getProperty(StyleConstants.STYLE_BACKGROUND_POSITION_X));
+		contentStyle.setProperty(StyleConstants.STYLE_BACKGROUND_REPEAT,
+				style.getProperty(StyleConstants.STYLE_BACKGROUND_REPEAT));
 
 		String bodyStyleName = assignStyleName(contentStyle);
 		return bodyStyleName;
@@ -2367,7 +2383,7 @@ public class EngineIRVisitor extends DesignVisitor {
 	}
 
 	private List<Expression> createExpression(ExpressionListHandle exprHandles) {
-		List<Expression> listExprs = new ArrayList<Expression>();
+		List<Expression> listExprs = new ArrayList<>();
 		List<org.eclipse.birt.report.model.api.Expression> exprs = exprHandles.getListValue();
 		if (exprs != null) {
 			for (org.eclipse.birt.report.model.api.Expression expr : exprs) {
@@ -2387,13 +2403,12 @@ public class EngineIRVisitor extends DesignVisitor {
 			if (ExpressionType.CONSTANT.equals(type)) {
 				String text = expr.getStringExpression();
 				return Expression.newConstant(-1, text);
-			} else {
-				String text = expr.getStringExpression();
-				if (text != null) {
-					text = text.trim();
-					if (text.length() > 0) {
-						return Expression.newScript(type, text);
-					}
+			}
+			String text = expr.getStringExpression();
+			if (text != null) {
+				text = text.trim();
+				if (text.length() > 0) {
+					return Expression.newScript(type, text);
 				}
 			}
 		}
@@ -2408,13 +2423,12 @@ public class EngineIRVisitor extends DesignVisitor {
 					// String valueType = expressionHandle.getValue( );
 					String text = expressionHandle.getStringExpression();
 					return Expression.newConstant(-1, text);
-				} else {
-					String text = expressionHandle.getStringExpression();
-					if (text != null) {
-						text = text.trim();
-						if (text.length() > 0) {
-							return Expression.newScript(type, text);
-						}
+				}
+				String text = expressionHandle.getStringExpression();
+				if (text != null) {
+					text = text.trim();
+					if (text.length() > 0) {
+						return Expression.newScript(type, text);
 					}
 				}
 			}

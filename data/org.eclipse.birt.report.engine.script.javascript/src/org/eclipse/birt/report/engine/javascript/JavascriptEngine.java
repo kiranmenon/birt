@@ -1,9 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 Actuate Corporation.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * Copyright (c) 2004, 2007, 2024 Actuate Corporation and others
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  *
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
@@ -11,8 +14,6 @@
 
 package org.eclipse.birt.report.engine.javascript;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -31,7 +32,6 @@ import org.eclipse.birt.core.script.JavascriptEvalUtil;
 import org.eclipse.birt.core.script.ScriptContext;
 import org.eclipse.birt.core.script.functionservice.IScriptFunctionContext;
 import org.eclipse.birt.data.engine.api.IDataScriptEngine;
-import org.eclipse.birt.report.model.core.JavaScriptExecutionStatus;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ImporterTopLevel;
 import org.mozilla.javascript.LazilyLoadedCtor;
@@ -46,7 +46,7 @@ import com.ibm.icu.util.ULocale;
 
 /**
  * Wraps around the Rhino Script context
- * 
+ *
  */
 public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 
@@ -66,7 +66,9 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 
 	protected ScriptableObject root;
 
-	private Map<String, Object> propertyMap = new HashMap<String, Object>();
+	protected JavascriptVersion version;
+
+	private Map<String, Object> propertyMap = new HashMap<>();
 
 	private JavascriptEngineFactory factory;
 
@@ -75,16 +77,25 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 			Context context = Context.enter();
 			cachedScript = context.compileString("function writeStatus(msg) { _statusHandle.showStatus(msg); }",
 					"<inline>", 1, null);
-			context.exit();
+			Context.exit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param factory factory object for the JavaScript engine
+	 * @param root    scriptable object
+	 * @throws BirtException
+	 */
 	public JavascriptEngine(JavascriptEngineFactory factory, ScriptableObject root) throws BirtException {
 		this.factory = factory;
 		try {
 			this.context = Context.enter();
+			this.version = new JavascriptVersion();
+			this.context.setLanguageVersion(this.version.getECMAScriptVersion());
 			this.global = new ImporterTopLevel();
 			this.root = root;
 			if (root != null) {
@@ -102,6 +113,7 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 					global) == org.mozilla.javascript.UniqueTag.NOT_FOUND) {
 				IScriptFunctionContext functionContext = new IScriptFunctionContext() {
 
+					@Override
 					public Object findProperty(String name) {
 						return propertyMap.get(name);
 					}
@@ -126,7 +138,8 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 			/**
 			 * wrapper an java object to javascript object.
 			 */
-			public Object wrap(Context cx, Scriptable scope, Object obj, Class staticType) {
+			@Override
+			public Object wrap(Context cx, Scriptable scope, Object obj, Class<?> staticType) {
 				Object object = coreWrapper.wrap(cx, scope, obj, staticType);
 				if (object != obj) {
 					return object;
@@ -138,15 +151,18 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 		new CoreJavaScriptInitializer().initialize(context, global);
 	}
 
+	@Override
 	public void setTimeZone(TimeZone zone) {
 		propertyMap.put(IScriptFunctionContext.TIMEZONE, zone);
 	}
 
+	@Override
 	public void setLocale(Locale locale) {
 		context.setLocale(locale);
 		propertyMap.put(IScriptFunctionContext.LOCALE, ULocale.forLocale(locale));
 	}
 
+	@Override
 	public String getScriptLanguage() {
 		return JavascriptEngineFactory.SCRIPT_JAVASCRIPT;
 	}
@@ -154,6 +170,7 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 	/**
 	 * exit the scripting context
 	 */
+	@Override
 	public void close() {
 		if (root != null) {
 			factory.releaseRootScope(root);
@@ -185,18 +202,16 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 		return jsScope;
 	}
 
+	@Override
 	public JavascriptEngineFactory getFactory() {
 		return factory;
 	}
 
+	@SuppressWarnings("unused")
+	@Override
 	public CompiledJavascript compile(ScriptContext scriptContext, final String id, final int lineNumber,
 			final String script) throws BirtException {
-		Script scriptObject = AccessController.doPrivileged(new PrivilegedAction<Script>() {
-
-			public Script run() {
-				return context.compileString(script, id, lineNumber, ScriptUtil.getSecurityDomain(id));
-			}
-		});
+		Script scriptObject = context.compileString(script, id, lineNumber, ScriptUtil.getSecurityDomain(id));
 		return new CompiledJavascript(id, lineNumber, script, scriptObject);
 	}
 
@@ -227,12 +242,12 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 		return jsContext;
 	}
 
+	@Override
 	public Object evaluate(ScriptContext scriptContext, ICompiledScript compiledScript) throws BirtException {
 		assert (compiledScript instanceof CompiledJavascript);
 		// String source = ( (CompiledJavascript) compiledScript )
 		// .getScriptText( );
 		try {
-			JavaScriptExecutionStatus.setExeucting(true);
 			Script script = ((CompiledJavascript) compiledScript).getCompiledScript();
 			Object value = script.exec(context, getJSScope(scriptContext));
 			return jsToJava(value);
@@ -242,8 +257,6 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 			// ResourceConstants.JAVASCRIPT_COMMON_ERROR,
 			// new Object[]{source, e.getMessage( )}, e );
 			throw new CoreException(ResourceConstants.INVALID_EXPRESSION, e.getMessage(), e);
-		} finally {
-			JavaScriptExecutionStatus.remove();
 		}
 	}
 
@@ -253,7 +266,7 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 
 	/**
 	 * converts a JS object to a Java object
-	 * 
+	 *
 	 * @param jsValue javascript object
 	 * @return Java object
 	 */
@@ -261,6 +274,7 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 		return JavascriptEvalUtil.convertJavascriptValue(jsValue);
 	}
 
+	@Override
 	public void setApplicationClassLoader(final ClassLoader appLoader) {
 		if (appLoader == null) {
 			return;
@@ -269,12 +283,7 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 		try {
 			appLoader.loadClass("org.mozilla.javascript.Context");
 		} catch (ClassNotFoundException e) {
-			loader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
-
-				public ClassLoader run() {
-					return new RhinoClassLoaderDecoration(appLoader, JavascriptEngine.class.getClassLoader());
-				}
-			});
+			loader = new RhinoClassLoaderDecoration(appLoader, JavascriptEngine.class.getClassLoader());
 		}
 		context.setApplicationClassLoader(loader);
 	}
@@ -289,6 +298,7 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 			this.rhinoClassLoader = rhinoClassLoader;
 		}
 
+		@Override
 		public Class<?> loadClass(String name) throws ClassNotFoundException {
 			try {
 				return applicationClassLoader.loadClass(name);
@@ -298,10 +308,12 @@ public class JavascriptEngine implements IScriptEngine, IDataScriptEngine {
 		}
 	}
 
+	@Override
 	public Context getJSContext(ScriptContext scriptContext) {
 		return context;
 	}
 
+	@Override
 	public Scriptable getJSScope(ScriptContext scriptContext) {
 		JavascriptContext jsContext = (JavascriptContext) scriptContext
 				.getScriptContext(JavascriptEngineFactory.SCRIPT_JAVASCRIPT);

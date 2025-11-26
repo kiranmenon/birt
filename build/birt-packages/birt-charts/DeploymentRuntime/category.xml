@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+ *******************************************************************************
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ * 
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * https://www.eclipse.org/legal/epl-2.0/.
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *   See git history
+ *******************************************************************************
+-->
 <site>
    <feature id="org.eclipse.birt.chart">
       <category name="ChartEngine"/>
@@ -9,13 +23,7 @@
    <bundle id="org.apache.commons.logging">
       <category name="ChartEngine"/>
    </bundle>
-   <bundle id="org.apache.xerces">
-      <category name="ChartEngine"/>
-   </bundle>
    <bundle id="org.apache.xml.resolver">
-      <category name="ChartEngine"/>
-   </bundle>
-   <bundle id="org.apache.xml.serializer">
       <category name="ChartEngine"/>
    </bundle>
    <bundle id="org.eclipse.emf.common">
@@ -25,9 +33,6 @@
       <category name="ChartEngine"/>
    </bundle>
    <bundle id="org.eclipse.emf.ecore">
-      <category name="ChartEngine"/>
-   </bundle>
-   <bundle id="org.w3c.dom.events">
       <category name="ChartEngine"/>
    </bundle>
    <category-def name="ChartEngine" label="BIRT Chart Engine"/>
